@@ -1,5 +1,5 @@
 ## 📦 Repository Structure
-
+```
 Phoenix/
 ├── Frontend/ # React + TypeScript + TailwindCSS (Vite)
 │ ├── public/ # 정적 파일
@@ -76,3 +76,4 @@ Phoenix/
 ├── README.md
 ├── docker-compose.yml # 개발용 Docker
 └── package.json # 모노레포 루트 패키지
+```

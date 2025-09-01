@@ -3,7 +3,7 @@
 Final Project
 
 ### 폴더 구조
-
+```
 Phoenix/
 ├── 📁 Frontend/ # React + TypeScript + TailwindCSS
 │ ├── 📁 public/ # 정적 파일들
@@ -86,3 +86,4 @@ Phoenix/
 ├── README.md
 ├── docker-compose.yml # 개발 환경 Docker
 └── package.json # 루트 패키지 (모노레포)
+```

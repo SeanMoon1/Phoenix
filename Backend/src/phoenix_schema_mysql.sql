@@ -1,23 +1,20 @@
 -- Phoenix Disaster Training System Database Schema (MySQL Compatible Version)
 -- 생성일: 2025년 9월 1일
--- 설명: 재난 대응 훈련 시스템을 위한 데이터베이스 스키마 (팀 중심 MVP 버전)
+-- 설명: 재난 대응 훈련 시스템을 위한 데이터베이스 스키마 (단일 팀 중심 MVP 버전)
 
--- 1. 팀 정보 테이블 (핵심 운영 단위)
+-- 1. 팀 정보 테이블 (단일 팀 구조)
 CREATE TABLE team (
     team_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '팀 ID',
     team_code VARCHAR(50) NOT NULL UNIQUE COMMENT '팀 코드 (예: TEAM001, TEAM002)',
     team_name VARCHAR(100) NOT NULL COMMENT '팀명',
     description TEXT COMMENT '팀 설명',
-    parent_team_id BIGINT COMMENT '상위 팀 ID (계층 구조)',
-    team_level INT NOT NULL DEFAULT 1 COMMENT '팀 레벨 (1: 최상위, 2: 중간, 3: 하위)',
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT '상태',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
     created_by BIGINT COMMENT '생성자 ID',
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     updated_by BIGINT COMMENT '수정자 ID',
     deleted_at DATETIME NULL COMMENT '삭제일시',
-    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
-    FOREIGN KEY (parent_team_id) REFERENCES team(team_id)
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)'
 );
 
 -- 2. 권한 레벨 정의 테이블 (단순화된 3단계)
@@ -68,11 +65,8 @@ CREATE TABLE user (
     password VARCHAR(255) NOT NULL COMMENT '비밀번호',
     name VARCHAR(100) NOT NULL COMMENT '사용자명',
     email VARCHAR(200) NOT NULL COMMENT '이메일',
-    phone VARCHAR(20) NOT NULL COMMENT '연락처',
-    employee_number VARCHAR(50) NOT NULL COMMENT '사원번호',
     use_yn CHAR(1) NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
-    created_by BIGINT NOT NULL COMMENT '생성자 ID',
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     updated_by BIGINT COMMENT '수정자 ID',
     deleted_at DATETIME NULL COMMENT '삭제일시',
@@ -80,7 +74,8 @@ CREATE TABLE user (
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     UNIQUE KEY uk_team_user_code (team_id, user_code),
     UNIQUE KEY uk_team_user_login (team_id, login_id),
-    UNIQUE KEY uk_team_employee_number (team_id, employee_number)
+    UNIQUE KEY uk_team_email (team_id, email),
+    UNIQUE KEY uk_team_name (team_id, name)
 );
 
 -- 5. 코드 테이블
@@ -318,11 +313,48 @@ FROM admin a
 JOIN admin_level al ON a.admin_level_id = al.level_id
 WHERE a.use_yn = 'Y' AND a.is_active = 1;
 
+-- 16. 팀별 데이터 접근 제어 뷰
+CREATE VIEW v_team_data_access AS
+SELECT 
+    t.team_id,
+    t.team_name,
+    t.team_code,
+    COUNT(DISTINCT u.user_id) as user_count,
+    COUNT(DISTINCT s.scenario_id) as scenario_count,
+    COUNT(DISTINCT ts.session_id) as session_count
+FROM team t
+LEFT JOIN user u ON t.team_id = u.team_id AND u.is_active = 1
+LEFT JOIN scenario s ON t.team_id = s.team_id AND s.is_active = 1
+LEFT JOIN training_session ts ON t.team_id = ts.team_id AND ts.is_active = 1
+WHERE t.is_active = 1
+GROUP BY t.team_id, t.team_name, t.team_code;
+
+-- 17. 사용자별 권한 요약 뷰
+CREATE VIEW v_user_permission_summary AS
+SELECT 
+    u.user_id,
+    u.name as user_name,
+    u.team_id,
+    t.team_name,
+    CASE 
+        WHEN a.admin_id IS NOT NULL THEN 'ADMIN'
+        ELSE 'USER'
+    END as user_type,
+    COALESCE(al.level_code, 'GENERAL_USER') as admin_level,
+    u.is_active,
+    u.use_yn
+FROM user u
+JOIN team t ON u.team_id = t.team_id
+LEFT JOIN admin a ON u.user_id = a.admin_id AND a.use_yn = 'Y' AND a.is_active = 1
+LEFT JOIN admin_level al ON a.admin_level_id = al.level_id
+WHERE u.is_active = 1 AND t.is_active = 1;
+
 -- 인덱스 생성
 CREATE INDEX idx_team_code ON team(team_code);
 CREATE INDEX idx_user_team ON user(team_id);
 CREATE INDEX idx_user_code ON user(user_code);
-CREATE INDEX idx_user_employee_number ON user(employee_number);
+CREATE INDEX idx_user_email ON user(email);
+CREATE INDEX idx_user_name ON user(name);
 CREATE INDEX idx_admin_team ON admin(team_id);
 CREATE INDEX idx_admin_level ON admin(admin_level_id);
 CREATE INDEX idx_scenario_team ON scenario(team_id);
@@ -357,7 +389,7 @@ INSERT INTO code (code_class, code_name, code_value, code_desc, code_order, crea
 ('EVENT_TYPE', '선택형', 'CHOICE', '선택형 이벤트', 1, 1),
 ('EVENT_TYPE', '순차형', 'SEQUENTIAL', '순차형 이벤트', 2, 1);
 
--- 권한 제어를 위한 저장 프로시저 예시 (팀 중심)
+-- 권한 제어를 위한 저장 프로시저 예시 (팀 중심, MySQL 호환)
 DELIMITER //
 CREATE PROCEDURE GetUserResultsByAdmin(
     IN p_admin_id BIGINT,
@@ -378,7 +410,7 @@ BEGIN
     FROM v_admin_access_control 
     WHERE admin_id = p_admin_id;
     
-    -- 권한 검증
+    -- 권한 검증 (MySQL 호환 방식)
     IF v_can_view_results = 0 THEN
         SET v_error_msg = '결과 조회 권한이 없습니다.';
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
@@ -391,7 +423,7 @@ BEGIN
     END IF;
     
     -- 결과 조회 (팀별)
-    SELECT tr.*, tp.team_id, u.name as user_name, u.employee_number, t.team_name
+    SELECT tr.*, tp.team_id, u.name as user_name, t.team_name
     FROM training_result tr
     JOIN training_participant tp ON tr.participant_id = tp.participant_id
     JOIN user u ON tr.user_id = u.user_id
@@ -402,7 +434,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- 권한 검증을 위한 트리거 예시
+-- 권한 검증을 위한 트리거 예시 (MySQL 호환)
 DELIMITER //
 CREATE TRIGGER tr_admin_team_check
 BEFORE INSERT ON admin
@@ -418,6 +450,158 @@ BEGIN
     IF v_team_exists = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '존재하지 않는 팀입니다.';
     END IF;
+END //
+DELIMITER ;
+
+-- 팀별 데이터 접근 제어를 위한 저장 프로시저
+DELIMITER //
+CREATE PROCEDURE GetTeamDataByAdmin(
+    IN p_admin_id BIGINT,
+    IN p_target_team_id BIGINT,
+    IN p_data_type VARCHAR(50)
+)
+BEGIN
+    DECLARE v_admin_team_id BIGINT;
+    DECLARE v_can_access TINYINT(1) DEFAULT 0;
+    DECLARE v_error_msg VARCHAR(500);
+    
+    -- 관리자 팀 정보 조회
+    SELECT team_id INTO v_admin_team_id
+    FROM admin 
+    WHERE admin_id = p_admin_id AND use_yn = 'Y' AND is_active = 1;
+    
+    -- 팀별 접근 권한 검증
+    IF v_admin_team_id != p_target_team_id THEN
+        SET v_error_msg = '다른 팀 데이터에 접근할 수 없습니다.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
+    END IF;
+    
+    -- 데이터 타입별 조회
+    CASE p_data_type
+        WHEN 'USERS' THEN
+            SELECT u.*, t.team_name
+            FROM user u
+            JOIN team t ON u.team_id = t.team_id
+            WHERE u.team_id = p_target_team_id AND u.is_active = 1;
+        WHEN 'SCENARIOS' THEN
+            SELECT s.*, t.team_name
+            FROM scenario s
+            JOIN team t ON s.team_id = t.team_id
+            WHERE s.team_id = p_target_team_id AND s.is_active = 1;
+        WHEN 'TRAINING_RESULTS' THEN
+            SELECT tr.*, u.name as user_name, t.team_name
+            FROM training_result tr
+            JOIN training_participant tp ON tr.participant_id = tp.participant_id
+            JOIN user u ON tr.user_id = u.user_id
+            JOIN team t ON tp.team_id = t.team_id
+            WHERE tp.team_id = p_target_team_id AND tr.is_active = 1;
+        ELSE
+            SET v_error_msg = '지원하지 않는 데이터 타입입니다.';
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
+    END CASE;
+    
+END //
+DELIMITER ;
+
+-- MySQL 권한 검증을 위한 함수
+DELIMITER //
+CREATE FUNCTION CheckUserPermission(
+    p_user_id BIGINT,
+    p_required_permission VARCHAR(50)
+) RETURNS TINYINT(1)
+READS SQL DATA
+DETERMINISTIC
+BEGIN
+    DECLARE v_has_permission TINYINT(1) DEFAULT 0;
+    DECLARE v_admin_level VARCHAR(20);
+    
+    -- 사용자가 관리자인지 확인
+    SELECT level_code INTO v_admin_level
+    FROM admin a
+    JOIN admin_level al ON a.admin_level_id = al.level_id
+    WHERE a.admin_id = p_user_id AND a.use_yn = 'Y' AND a.is_active = 1;
+    
+    -- 권한 레벨에 따른 권한 확인
+    CASE p_required_permission
+        WHEN 'MANAGE_TEAM' THEN
+            IF v_admin_level = 'TEAM_ADMIN' THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'MANAGE_USERS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'MANAGE_SCENARIOS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'APPROVE_SCENARIOS' THEN
+            IF v_admin_level = 'TEAM_ADMIN' THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'VIEW_RESULTS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        ELSE
+            SET v_has_permission = 0;
+    END CASE;
+    
+    RETURN v_has_permission;
+END //
+DELIMITER ;
+
+-- 팀별 데이터 격리를 위한 저장 프로시저
+DELIMITER //
+CREATE PROCEDURE GetTeamIsolatedData(
+    IN p_admin_id BIGINT,
+    IN p_data_type VARCHAR(50)
+)
+BEGIN
+    DECLARE v_admin_team_id BIGINT;
+    DECLARE v_error_msg VARCHAR(500);
+    
+    -- 관리자 팀 정보 조회
+    SELECT team_id INTO v_admin_team_id
+    FROM admin 
+    WHERE admin_id = p_admin_id AND use_yn = 'Y' AND is_active = 1;
+    
+    IF v_admin_team_id IS NULL THEN
+        SET v_error_msg = '유효하지 않은 관리자입니다.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
+    END IF;
+    
+    -- 데이터 타입별 조회 (자신의 팀 데이터만)
+    CASE p_data_type
+        WHEN 'USERS' THEN
+            SELECT u.*, t.team_name
+            FROM user u
+            JOIN team t ON u.team_id = t.team_id
+            WHERE u.team_id = v_admin_team_id AND u.is_active = 1;
+        WHEN 'SCENARIOS' THEN
+            SELECT s.*, t.team_name
+            FROM scenario s
+            JOIN team t ON s.team_id = t.team_id
+            WHERE s.team_id = v_admin_team_id AND s.is_active = 1;
+        WHEN 'TRAINING_SESSIONS' THEN
+            SELECT ts.*, t.team_name, s.title as scenario_title
+            FROM training_session ts
+            JOIN team t ON ts.team_id = t.team_id
+            JOIN scenario s ON ts.scenario_id = s.scenario_id
+            WHERE ts.team_id = v_admin_team_id AND ts.is_active = 1;
+        WHEN 'TRAINING_RESULTS' THEN
+            SELECT tr.*, u.name as user_name, t.team_name, s.title as scenario_title
+            FROM training_result tr
+            JOIN training_participant tp ON tr.participant_id = tp.participant_id
+            JOIN user u ON tr.user_id = u.user_id
+            JOIN team t ON tp.team_id = t.team_id
+            JOIN scenario s ON tr.scenario_id = s.scenario_id
+            WHERE tp.team_id = v_admin_team_id AND tr.is_active = 1;
+        ELSE
+            SET v_error_msg = '지원하지 않는 데이터 타입입니다.';
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
+    END CASE;
+    
 END //
 DELIMITER ;
 
@@ -454,7 +638,6 @@ GROUP BY t.team_id, t.team_name;
 -- 4. 개인 훈련 결과 통계 (팀 중심)
 SELECT 
     u.name as user_name,
-    u.employee_number,
     t.team_name,
     COUNT(tr.result_id) as total_trainings,
     AVG(tr.total_score) as avg_score,
@@ -464,5 +647,19 @@ FROM user u
 JOIN team t ON u.team_id = t.team_id
 LEFT JOIN training_result tr ON u.user_id = tr.user_id AND tr.is_active = 1
 WHERE u.is_active = 1 AND t.is_active = 1
-GROUP BY u.user_id, u.name, u.employee_number, t.team_name
+GROUP BY u.user_id, u.name, t.team_name
 ORDER BY avg_score DESC;
+
+-- 5. 권한 검증 예시
+-- 특정 사용자가 팀 관리 권한이 있는지 확인
+SELECT 
+    u.name,
+    CheckUserPermission(u.user_id, 'MANAGE_TEAM') as can_manage_team,
+    CheckUserPermission(u.user_id, 'MANAGE_USERS') as can_manage_users
+FROM user u
+WHERE u.user_id = 1;
+
+-- 6. 팀별 데이터 접근 제어 테스트
+-- CALL GetTeamIsolatedData(1, 'USERS');
+-- CALL GetTeamIsolatedData(1, 'SCENARIOS');
+-- CALL GetTeamIsolatedData(1, 'TRAINING_RESULTS');

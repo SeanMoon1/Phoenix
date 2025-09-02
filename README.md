@@ -3,6 +3,7 @@
 Final Project
 
 ### 폴더 구조
+
 ```
 Phoenix/
 ├── 📁 Frontend/ # React + TypeScript + TailwindCSS
@@ -66,7 +67,7 @@ Phoenix/
 │ ├── 📁 migrations/ # 데이터베이스 마이그레이션
 │ ├── 📁 seeds/ # 초기 데이터
 │ ├── 📁 backups/ # 백업 파일
-│ └── 📁 phoenix_schema_mysql.sql # 현재 스키마
+│ └──  phoenix_schema_mysql.sql # 현재 스키마
 │
 ├── 📁 Docs/ # 문서
 │ ├── 📁 api/ # API 문서
@@ -77,9 +78,6 @@ Phoenix/
 │ ├── 📁 setup/ # 개발 환경 설정
 │ ├── 📁 build/ # 빌드 스크립트
 │ └── 📁 deploy/ # 배포 스크립트
-│
-├── 📁 .github/ # GitHub Actions
-│ └── 📁 workflows/ # CI/CD 워크플로우
 │
 ├── 📁 .vscode/ # VS Code 설정
 ├── .gitignore

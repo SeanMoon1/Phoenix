@@ -66,6 +66,16 @@ CREATE TABLE user (
     name VARCHAR(100) NOT NULL COMMENT '사용자명',
     email VARCHAR(200) NOT NULL COMMENT '이메일',
     use_yn CHAR(1) NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
+    -- 레벨업 시스템 관련 필드 추가
+    user_level INT NOT NULL DEFAULT 1 COMMENT '사용자 레벨 (1-100)',
+    user_exp BIGINT NOT NULL DEFAULT 0 COMMENT '사용자 경험치',
+    total_score BIGINT NOT NULL DEFAULT 0 COMMENT '총점',
+    completed_scenarios INT NOT NULL DEFAULT 0 COMMENT '완료한 시나리오 수',
+    current_tier VARCHAR(20) NOT NULL DEFAULT '초급자' COMMENT '현재 등급 (초급자, 중급자, 고급자, 전문가, 마스터)',
+    level_progress DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '현재 레벨에서의 진행도 (0-100%)',
+    next_level_exp BIGINT NOT NULL DEFAULT 100 COMMENT '다음 레벨까지 필요한 경험치',
+    -- 시나리오별 통계 (JSON 형태로 저장)
+    scenario_stats JSON COMMENT '시나리오별 통계 (완료 수, 총점, 최고점수)',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     updated_by BIGINT COMMENT '수정자 ID',
@@ -313,6 +323,92 @@ FROM admin a
 JOIN admin_level al ON a.admin_level_id = al.level_id
 WHERE a.use_yn = 'Y' AND a.is_active = 1;
 
+-- 16. 사용자 진행 상황 테이블 (레벨업 시스템)
+CREATE TABLE user_progress (
+    progress_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '진행 상황 ID',
+    user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    user_level INT NOT NULL DEFAULT 1 COMMENT '사용자 레벨',
+    user_exp BIGINT NOT NULL DEFAULT 0 COMMENT '사용자 경험치',
+    total_score BIGINT NOT NULL DEFAULT 0 COMMENT '총점',
+    completed_scenarios INT NOT NULL DEFAULT 0 COMMENT '완료한 시나리오 수',
+    current_streak INT NOT NULL DEFAULT 0 COMMENT '연속 완료 횟수',
+    longest_streak INT NOT NULL DEFAULT 0 COMMENT '최장 연속 완료 횟수',
+    last_completed_at DATETIME COMMENT '마지막 완료일시',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    updated_by BIGINT COMMENT '수정자 ID',
+    deleted_at DATETIME NULL COMMENT '삭제일시',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    UNIQUE KEY uk_user_progress (user_id)
+);
+
+-- 17. 성취 시스템 테이블
+CREATE TABLE achievement (
+    achievement_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '성취 ID',
+    user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    achievement_name VARCHAR(100) NOT NULL COMMENT '성취명',
+    achievement_description TEXT COMMENT '성취 설명',
+    achievement_type VARCHAR(50) NOT NULL COMMENT '성취 유형',
+    progress DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '달성도 (0-100)',
+    is_completed TINYINT(1) NOT NULL DEFAULT 0 COMMENT '완료 여부 (1: 완료, 0: 미완료)',
+    unlocked_at DATETIME COMMENT '달성일시',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    updated_by BIGINT COMMENT '수정자 ID',
+    deleted_at DATETIME NULL COMMENT '삭제일시',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    UNIQUE KEY uk_user_achievement (user_id, achievement_type)
+);
+
+-- 18. 시나리오별 사용자 통계 테이블
+CREATE TABLE user_scenario_stats (
+    stats_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '통계 ID',
+    user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    scenario_type VARCHAR(50) NOT NULL COMMENT '시나리오 유형',
+    completed_count INT NOT NULL DEFAULT 0 COMMENT '완료 횟수',
+    total_score BIGINT NOT NULL DEFAULT 0 COMMENT '총점',
+    best_score INT NOT NULL DEFAULT 0 COMMENT '최고점수',
+    average_score DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '평균점수',
+    total_time_spent INT NOT NULL DEFAULT 0 COMMENT '총 소요시간 (초)',
+    last_completed_at DATETIME COMMENT '마지막 완료일시',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    updated_by BIGINT COMMENT '수정자 ID',
+    deleted_at DATETIME NULL COMMENT '삭제일시',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    UNIQUE KEY uk_user_scenario_stats (user_id, scenario_type)
+);
+
+-- 19. 레벨업 히스토리 테이블
+CREATE TABLE user_level_history (
+    history_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '히스토리 ID',
+    user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    old_level INT NOT NULL COMMENT '이전 레벨',
+    new_level INT NOT NULL COMMENT '새로운 레벨',
+    exp_gained BIGINT NOT NULL COMMENT '획득한 경험치',
+    level_up_reason VARCHAR(200) COMMENT '레벨업 사유',
+    scenario_id BIGINT COMMENT '관련 시나리오 ID',
+    completed_at DATETIME NOT NULL COMMENT '완료일시',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    updated_by BIGINT COMMENT '수정자 ID',
+    deleted_at DATETIME NULL COMMENT '삭제일시',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id)
+);
+
 -- 16. 팀별 데이터 접근 제어 뷰
 CREATE VIEW v_team_data_access AS
 SELECT 
@@ -355,6 +451,17 @@ CREATE INDEX idx_user_team ON user(team_id);
 CREATE INDEX idx_user_code ON user(user_code);
 CREATE INDEX idx_user_email ON user(email);
 CREATE INDEX idx_user_name ON user(name);
+CREATE INDEX idx_user_level ON user(user_level);
+CREATE INDEX idx_user_exp ON user(user_exp);
+CREATE INDEX idx_user_tier ON user(current_tier);
+CREATE INDEX idx_user_progress_user ON user_progress(user_id);
+CREATE INDEX idx_user_progress_team ON user_progress(team_id);
+CREATE INDEX idx_achievement_user ON achievement(user_id);
+CREATE INDEX idx_achievement_type ON achievement(achievement_type);
+CREATE INDEX idx_scenario_stats_user ON user_scenario_stats(user_id);
+CREATE INDEX idx_scenario_stats_type ON user_scenario_stats(scenario_type);
+CREATE INDEX idx_level_history_user ON user_level_history(user_id);
+CREATE INDEX idx_level_history_level ON user_level_history(new_level);
 CREATE INDEX idx_admin_team ON admin(team_id);
 CREATE INDEX idx_admin_level ON admin(admin_level_id);
 CREATE INDEX idx_scenario_team ON scenario(team_id);

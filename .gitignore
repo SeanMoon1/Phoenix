@@ -1,3 +1,5 @@
 # Generated scenario data
 Scripts/data/*.sql
-Scripts/data/*.json
+
+# Allow JSON scenario files for version control
+# Scripts/data/*.json

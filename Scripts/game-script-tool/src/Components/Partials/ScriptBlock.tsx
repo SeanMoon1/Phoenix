@@ -4,19 +4,6 @@ import styled from "styled-components";
 import { APPROVAL_STATUS_INFO } from "../ScriptInput/constants";
 import { ScriptBlock as ScriptBlockType, ApprovalStatus } from "../../types";
 
-<<<<<<< HEAD
-=======
-const Anchor = styled.a`
-  color: inherit;
-  text-decoration: none;
-`;
-
-const Red = styled(Anchor)`
-  color: red;
-  font-weight: bolder;
-`;
-
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
 const Container = styled.div`
   background-color: #efefef;
   padding: 10px;
@@ -147,21 +134,10 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
     }
   };
 
-<<<<<<< HEAD
   const getStatusInfo = (status: ApprovalStatus) => {
     return (
       APPROVAL_STATUS_INFO[status] || APPROVAL_STATUS_INFO[ApprovalStatus.DRAFT]
     );
-=======
-  const getTimeEmoji = (time: number): string => {
-    if (time <= 30) return "⚡";
-    if (time <= 60) return "⏱️";
-    return "⏰";
-  };
-
-  const getStatusInfo = (status: ApprovalStatus) => {
-    return APPROVAL_STATUS_INFO[status] || APPROVAL_STATUS_INFO[ApprovalStatus.DRAFT];
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
   };
 
   const statusInfo = getStatusInfo(block.approvalStatus);
@@ -186,33 +162,19 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
       <SceneID onClick={() => modifyBlock(block.sceneId)}>
         Scene {block.sceneId}
         <small>
-<<<<<<< HEAD
           (순서: {block.order}, 작성:{" "}
           {new Date(block.createdAt).toLocaleDateString()})
-=======
-          (순서: {block.order}, 작성: {new Date(block.createdAt).toLocaleDateString()})
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
         </small>
       </SceneID>
 
       <DisasterInfo>
         <InfoItem>
-<<<<<<< HEAD
           {getDisasterEmoji(block.disasterType || "unknown")}{" "}
           {block.disasterType || "재난 유형"}
         </InfoItem>
         <InfoItem>
           {getDifficultyEmoji(block.difficulty || "medium")}{" "}
           {block.difficulty || "난이도"}
-=======
-          {getDisasterEmoji(block.disasterType || "unknown")} {block.disasterType || "재난 유형"}
-        </InfoItem>
-        <InfoItem>
-          {getDifficultyEmoji(block.difficulty || "medium")} {block.difficulty || "난이도"}
-        </InfoItem>
-        <InfoItem>
-          {getTimeEmoji(block.timeLimit || 60)} {block.timeLimit || 60}초
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
         </InfoItem>
       </DisasterInfo>
 
@@ -220,7 +182,6 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
 
       {block.options && block.options.length > 0 && (
         <OptionGroup>
-<<<<<<< HEAD
           {block.options.map((option) => (
             <OptionItem key={option.answerId}>
               <div style={{ marginBottom: "5px" }}>
@@ -235,18 +196,6 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
               {option.points && (
                 <ScoreInfo>
                   <ScoreItem>🏃 신속성: {option.points.speed || 0}점</ScoreItem>
-=======
-          {block.options.map((option, index) => (
-            <OptionItem key={index}>
-              <Red href={`#${option.nextId}`}>
-                {option.answer} → {option.reaction}
-              </Red>
-              {option.points && (
-                <ScoreInfo>
-                  <ScoreItem>
-                    🏃 신속성: {option.points.speed || 0}점
-                  </ScoreItem>
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
                   <ScoreItem>
                     🎯 정확성: {option.points.accuracy || 0}점
                   </ScoreItem>
@@ -260,13 +209,9 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
       <div style={{ marginTop: "10px", textAlign: "right" }}>
         <button
           onClick={() => moveBlockBy(block.sceneId, -1)}
-<<<<<<< HEAD
           disabled={
             blockList.findIndex((b) => b.sceneId === block.sceneId) === 0
           }
-=======
-          disabled={blockList.findIndex((b) => b.sceneId === block.sceneId) === 0}
->>>>>>> 2127795130929de2c807aa8d40166645a36e70bd
         >
           ⬆️ 위로
         </button>

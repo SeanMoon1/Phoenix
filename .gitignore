@@ -1,0 +1,3 @@
+# Generated scenario data
+Scripts/data/*.sql
+Scripts/data/*.json

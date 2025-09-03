@@ -77,11 +77,50 @@ Phoenix/
 ├── 📁 Scripts/ # 유틸리티 스크립트
 │ ├── 📁 setup/ # 개발 환경 설정
 │ ├── 📁 build/ # 빌드 스크립트
-│ └── 📁 deploy/ # 배포 스크립트
+│ ├── 📁 deploy/ # 배포 스크립트
+│ ├── 📁 game-script-tool/ # 시나리오 생성 도구 (출처: 1000ship/game-script-tool)
+│ ├── 📁 scenario-generator/ # 시나리오 변환 스크립트
+│ └── 📁 data/ # 생성된 시나리오 데이터
 │
 ├── 📁 .vscode/ # VS Code 설정
 ├── .gitignore
 ├── README.md
 ├── docker-compose.yml # 개발 환경 Docker
 └── package.json # 루트 패키지 (모노레포)
+```
+
+## 🎯 시나리오 생성 도구
+
+### 게임 스크립트 도구
+
+- **출처**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
+- **라이선스**: 자유 사용 허가 (제작자: 1000ship)
+- **용도**: 재난 대응 훈련 시나리오 데이터 생성
+- **설명**: 게임 스크립트 형식의 시나리오를 Phoenix 시스템용 데이터로 변환하는 도구
+
+### 폴더 구조
+
+```
+Scripts/
+├── game-script-tool/          # 클론된 원본 도구
+├── scenario-generator/        # 시나리오 변환 스크립트
+└── data/                      # 생성된 시나리오 데이터
+```
+
+### 생성되는 시나리오 유형
+
+- 🔥 화재 재난 시나리오
+- 🌋 지진 재난 시나리오
+- 🚑 응급처치 상황 시나리오
+- 🌊 침수/홍수 시나리오
+- ⚡ 복합 재난 시나리오
+
+### 데이터 변환 프로세스
+
+```
+게임 스크립트 → JSON 형식 → MySQL INSERT 문 → Phoenix 데이터베이스
+```
+
+```
+
 ```

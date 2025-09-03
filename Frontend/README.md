@@ -1,69 +1,77 @@
-# React + TypeScript + Vite
+# 재난훈련ON (Phoenix)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을 향상시키는 혁신적인 훈련 플랫폼입니다.
 
-Currently, two official plugins are available:
+## 🚀 기술 스택
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Server State**: React Query
+- **Routing**: React Router v6
+- **Build Tool**: Vite
 
-## Expanding the ESLint configuration
+## 📁 프로젝트 구조
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/
+│   ├── layout/          # 레이아웃 컴포넌트
+│   └── ui/             # 재사용 가능한 UI 컴포넌트
+│       ├── AnimatedText.tsx    # 애니메이션 텍스트
+│       ├── AnimatedButton.tsx  # 애니메이션 버튼
+│       └── VimeoVideo.tsx      # Vimeo 비디오 플레이어
+├── hooks/               # 커스텀 훅
+│   └── useAnimation.ts  # 애니메이션 훅
+├── stores/              # 상태 관리 (Zustand)
+├── services/            # API 서비스
+├── types/               # TypeScript 타입 정의
+└── pages/               # 페이지 컴포넌트
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🎯 주요 기능
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **실시간 시나리오**: 다양한 재난 상황 시뮬레이션
+- **성과 분석**: 훈련 결과 분석 및 개선점 제시
+- **반복 훈련**: 필요에 따른 반복 훈련 지원
+- **팀워크 훈련**: 협력과 소통 능력 향상
+- **모바일 지원**: 언제 어디서나 접근 가능
+- **안전 보장**: 실제 위험 없이 안전한 훈련 환경
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 시작하기
+
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+
+# 빌드
+npm run build
+
+# 린트 검사
+npm run lint
 ```
+
+## 🎨 디자인 시스템
+
+- **Primary Colors**: Orange (#f97316) - Red (#ea580c)
+- **Typography**: System UI, Avenir, Helvetica
+- **Animations**: Fade, Slide, Scale 효과
+- **Responsive**: Mobile-first 접근법
+
+## 📱 반응형 디자인
+
+- 모바일 우선 설계
+- Tailwind CSS 유틸리티 클래스 활용
+- 부드러운 애니메이션과 전환 효과
+- 다크모드 지원
+
+## 🔧 최적화 완료
+
+- 사용하지 않는 컴포넌트 제거
+- 코드 중복 제거
+- 불필요한 스타일 정리
+- 컴포넌트 구조 단순화
+- 성능 향상을 위한 코드 정리

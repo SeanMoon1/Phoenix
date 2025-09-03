@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: 'class', // 다크모드 활성화
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -30,31 +30,55 @@ export default {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
-        }
+        },
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'bounce-gentle': 'bounceGentle 2s infinite',
+        'spin-slow': 'spin 3s linear infinite',
+        'spin-fast': 'spin 0.5s linear infinite',
+        'bounce-in': 'bounceIn 0.6s ease-out',
+        'fade-in-up': 'fadeInUp 0.8s ease-out',
+        'fade-in-down': 'fadeInDown 0.8s ease-out',
+        'slide-in-left': 'slideInLeft 0.8s ease-out',
+        'slide-in-right': 'slideInRight 0.8s ease-out',
+        typing: 'typing 2s steps(40, end)',
+        'blink-caret': 'blinkCaret 0.75s step-end infinite',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        bounceIn: {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '50%': { transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
+        fadeInUp: {
+          '0%': { transform: 'translateY(30px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        bounceGentle: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-5px)' },
-        }
+        fadeInDown: {
+          '0%': { transform: 'translateY(-30px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-30px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(30px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        typing: {
+          from: { width: '0' },
+          to: { width: '100%' },
+        },
+        blinkCaret: {
+          'from, to': { borderColor: 'transparent' },
+          '50%': { borderColor: 'currentColor' },
+        },
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'glow': '0 0 20px rgba(251, 115, 22, 0.3)',
-      }
+        soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        glow: '0 0 20px rgba(251, 115, 22, 0.3)',
+      },
     },
   },
   plugins: [],

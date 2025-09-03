@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- 배경 원 -->
+  <circle cx="60" cy="60" r="58" fill="#ffffff" stroke="#f97316" stroke-width="4"/>
+  
+  <!-- Phoenix 불사조 날개 -->
+  <path d="M30 40c-3 0-6 1-8 3-2 2-3 5-3 8 0 4 1 7 3 10 2 3 4 5 8 5s6-2 8-5c2-3 3-6 3-10 0-3-1-6-3-8-2-2-5-3-8-3z" 
+        fill="#f97316" 
+        stroke="#ea580c" 
+        stroke-width="2"/>
+  
+  <path d="M90 40c-3 0-6 1-8 3-2 2-3 5-3 8 0 4 1 7 3 10 2 3 4 5 8 5s6-2 8-5c2-3 3-6 3-10 0-3-1-6-3-8-2-2-5-3-8-3z" 
+        fill="#f97316" 
+        stroke="#ea580c" 
+        stroke-width="2"/>
+  
+  <!-- 중앙 불꽃 -->
+  <path d="M60 30c-4 0-8 2-10 5-2 3-3 6-3 10 0 5 1 8 3 11 2 3 5 5 10 5s8-2 10-5c2-3 3-6 3-11 0-4-1-7-3-10-2-3-6-5-10-5z" 
+        fill="#f97316" 
+        stroke="#ea580c" 
+        stroke-width="2"/>
+  
+  <!-- 불꽃 내부 하이라이트 -->
+  <path d="M60 38c-2 0-3 1-4 2-1 1-1 2-1 3 0 2 0 3 1 4 0 1 1 1 1 2 0 0 1 0 1 0s1 0 1 0c0-1 1-1 1-2 1-1 1-2 1-4 0-1 0-2-1-3-1-1-2-2-4-2z" 
+        fill="#ffffff" 
+        opacity="0.9"/>
+  
+  <!-- 안전 방패 -->
+  <path d="M60 70c-3 0-5-1-6-2-1-1-2-2-2-4 0-2 1-4 2-5 1-1 3-2 6-2s5 1 6 2c1 1 2 3 2 5 0 2-1 3-2 4-1 1-3 2-6 2z" 
+        fill="#64748b" 
+        stroke="#475569" 
+        stroke-width="2"/>
+  
+  <!-- 방패 중앙 체크마크 -->
+  <path d="M55 68l3 3 6-6" 
+        fill="none" 
+        stroke="#ffffff" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- 작은 장식 요소들 -->
+  <circle cx="45" cy="35" r="2" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="75" cy="35" r="2" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="40" cy="50" r="1.5" fill="#f59e0b" opacity="0.6"/>
+  <circle cx="80" cy="50" r="1.5" fill="#f59e0b" opacity="0.6"/>
+</svg>

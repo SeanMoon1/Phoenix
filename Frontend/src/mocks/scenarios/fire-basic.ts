@@ -1,18 +1,26 @@
-import type { UIScenarioStep } from "../../types/scenario";
+// src/mocks/scenarios/fire-basic.ts
+import type { ScenarioStep } from "../../types/scenario";
 
-export const fireBasicSteps = [
+export const fireBasicSteps: ScenarioStep[] = [
   {
-    id: "fire-1",
-    title: "🔥 화재 대응 훈련",
-    step: "1단계 / 5단계",
-    description: "건물 2층에서 화재가 발생했습니다. 어떻게 대응하시겠습니까?",
-    choices: ["즉시 대피한다", "소화기를 사용한다", "119에 신고한다"],
+    description: "건물 2층에서 화재 발생. 첫 대응은?",
+    choices: [
+      "엘리베이터로 이동",
+      "119 신고",
+      "소화전 호스 사용",
+      "계단으로 대피",
+    ],
+    correctIndex: 3,
   },
   {
-    id: "fire-2",
-    title: "🔥 화재 대응 훈련",
-    step: "2단계 / 5단계",
-    description: "대피 중 연기가 자욱합니다. 어떻게 하시겠습니까?",
-    choices: ["젖은 수건으로 입을 막는다", "창문을 연다", "엘리베이터를 탄다"],
+    description: "대피 중 복도에 연기가 가득하다. 올바른 행동은?",
+    choices: [
+      "창문을 활짝 연다",
+      "젖은 수건으로 입과 코를 막고 낮은 자세로 이동",
+      "엘리베이터 호출",
+      "제자리 대기",
+    ],
+    correctIndex: 1,
   },
-] satisfies readonly UIScenarioStep[];
+  // ... 나머지도 같은 형식
+];

@@ -82,7 +82,6 @@ Phoenix/
 │ ├── 📁 scenario-generator/ # 시나리오 변환 스크립트
 │ └── 📁 data/ # 생성된 시나리오 데이터
 │
-├── 📁 .vscode/ # VS Code 설정
 ├── .gitignore
 ├── README.md
 ├── docker-compose.yml # 개발 환경 Docker

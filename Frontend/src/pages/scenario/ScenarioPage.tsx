@@ -300,7 +300,7 @@ export default function ScenarioPage() {
             className="w-full bg-red-500 text-white px-8 py-4 text-xl shadow-md transition-colors hover:bg-orange-400 hover:cursor-pointer rounded-lg"
             onClick={() => handleChoice(idx)}
           >
-            {String.fromCharCode(65 + idx)}. {choice}
+            {choice}
           </button>
         ))}
       </section>

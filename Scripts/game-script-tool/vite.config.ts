@@ -17,7 +17,7 @@ export default defineConfig({
     sourcemap: true,
   },
   server: {
-    port: 3000, // Create React App과 동일한 포트
+    port: 5173, // Vite 기본 포트 사용
     open: true,
     host: true, // 네트워크 접근 허용
     // HMR 설정 개선
@@ -32,6 +32,6 @@ export default defineConfig({
   },
   // 개발 환경 최적화
   optimizeDeps: {
-    include: ["react", "react-dom", "recoil", "styled-components"],
+    include: ["react", "react-dom", "zustand", "styled-components"],
   },
 });

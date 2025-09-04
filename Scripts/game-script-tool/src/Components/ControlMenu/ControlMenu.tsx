@@ -59,46 +59,6 @@ const ControlMenu: React.FC = () => {
     openSceneForm();
   };
 
-  const onAddEndingBlockClick = () => {
-    const newEndingBlock = {
-      sceneId: `#ending-${Date.now()}`,
-      title: "훈련 완료",
-      content: "재난 대응 훈련이 완료되었습니다.",
-      sceneScript:
-        "훈련을 통해 배운 내용을 바탕으로 실제 상황에서도 신속하고 정확하게 대응할 수 있기를 바랍니다.",
-      approvalStatus: "DRAFT" as const,
-      createdAt: new Date().toISOString(),
-      createdBy: "시스템",
-      order: Date.now(),
-      disasterType: "training",
-      difficulty: "completed",
-      options: [
-        {
-          answerId: "answer1",
-          answer: "훈련 완료 확인",
-          reaction: "훈련이 성공적으로 완료되었습니다.",
-          nextId: "",
-          points: {
-            speed: 100,
-            accuracy: 100,
-          },
-        },
-      ],
-    };
-
-    // 기존 로직 유지 (하위 호환성)
-    const currentBlocks = JSON.parse(
-      localStorage.getItem("me.phoenix.game-script-tool") || "[]"
-    );
-    const updatedBlocks = [...currentBlocks, newEndingBlock];
-    localStorage.setItem(
-      "me.phoenix.game-script-tool",
-      JSON.stringify(updatedBlocks)
-    );
-
-    alert("훈련 완료 블록이 추가되었습니다!");
-  };
-
   const onImportClick = () => {
     // 기존 import 로직 유지
     const input = document.createElement("input");
@@ -133,7 +93,43 @@ const ControlMenu: React.FC = () => {
     const currentBlocks = JSON.parse(
       localStorage.getItem("me.phoenix.game-script-tool") || "[]"
     );
-    const dataStr = JSON.stringify(currentBlocks, null, 2);
+
+    // 완료 블록이 없는 경우 자동으로 추가
+    const hasEndingBlock = currentBlocks.some(
+      (block: any) => block.sceneId && block.sceneId.startsWith("#ending-")
+    );
+
+    let blocksToExport = currentBlocks;
+    if (!hasEndingBlock && currentBlocks.length > 0) {
+      const autoEndingBlock = {
+        sceneId: `#ending-${Date.now()}`,
+        title: "훈련 완료",
+        content: "재난 대응 훈련이 완료되었습니다.",
+        sceneScript:
+          "훈련을 통해 배운 내용을 바탕으로 실제 상황에서도 신속하고 정확하게 대응할 수 있기를 바랍니다.",
+        approvalStatus: "DRAFT" as const,
+        createdAt: new Date().toISOString(),
+        createdBy: "시스템",
+        order: Date.now(),
+        disasterType: "training",
+        difficulty: "completed",
+        options: [
+          {
+            answerId: "answer1",
+            answer: "훈련 완료 확인",
+            reaction: "훈련이 성공적으로 완료되었습니다.",
+            nextId: "",
+            points: {
+              speed: 100,
+              accuracy: 100,
+            },
+          },
+        ],
+      };
+      blocksToExport = [...currentBlocks, autoEndingBlock];
+    }
+
+    const dataStr = JSON.stringify(blocksToExport, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -156,15 +152,12 @@ const ControlMenu: React.FC = () => {
   return (
     <Container>
       <Button className="primary" onClick={onAddSceneBlockClick}>
-        ➕ Add Scene Block
+        ➕ 시나리오 생성
       </Button>
-      <Button className="warning" onClick={onAddEndingBlockClick}>
-        🏁 Add Ending Block
-      </Button>
-      <Button onClick={onImportClick}>📥 Import Script</Button>
-      <Button onClick={onExportClick}>📤 Export Script</Button>
+      <Button onClick={onImportClick}>📥 시나리오 가져오기</Button>
+      <Button onClick={onExportClick}>📤 시나리오 내보내기</Button>
       <Button className="danger" onClick={onClearClick}>
-        🗑️ Clear All
+        🗑️ 모든 시나리오 삭제
       </Button>
     </Container>
   );

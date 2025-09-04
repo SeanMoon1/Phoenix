@@ -19,7 +19,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 50
       },
       {
         "answerId": "answer2",
@@ -29,7 +30,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -53,7 +55,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 50
       },
       {
         "answerId": "answer2",
@@ -63,7 +66,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -87,7 +91,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -97,7 +102,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       },
       {
         "answerId": "answer3",
@@ -107,7 +113,8 @@
         "points": {
           "speed": 5,
           "accuracy": 5
-        }
+        },
+        "exp": 25
       }
     ]
   },
@@ -131,7 +138,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -141,7 +149,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -165,7 +174,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 50
       },
       {
         "answerId": "answer2",
@@ -175,7 +185,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -199,7 +210,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 50
       },
       {
         "answerId": "answer2",
@@ -209,7 +221,8 @@
         "points": {
           "speed": 5,
           "accuracy": 5
-        }
+        },
+        "exp": 25
       }
     ]
   },
@@ -233,7 +246,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -243,7 +257,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       },
       {
         "answerId": "answer3",
@@ -253,7 +268,8 @@
         "points": {
           "speed": 5,
           "accuracy": 5
-        }
+        },
+        "exp": 25
       }
     ]
   },
@@ -277,7 +293,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -287,7 +304,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer3",
@@ -297,7 +315,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -321,7 +340,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 100
       },
       {
         "answerId": "answer2",
@@ -331,7 +351,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -355,7 +376,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -365,7 +387,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -389,7 +412,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 100
       },
       {
         "answerId": "answer2",
@@ -399,7 +423,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -423,7 +448,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 125
       },
       {
         "answerId": "answer2",
@@ -433,7 +459,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -457,7 +484,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 75
       },
       {
         "answerId": "answer2",
@@ -467,7 +495,8 @@
         "points": {
           "speed": 0,
           "accuracy": 0
-        }
+        },
+        "exp": 0
       }
     ]
   },
@@ -491,7 +520,8 @@
         "points": {
           "speed": 10,
           "accuracy": 10
-        }
+        },
+        "exp": 50
       },
       {
         "answerId": "answer2",
@@ -501,7 +531,8 @@
         "points": {
           "speed": 5,
           "accuracy": 5
-        }
+        },
+        "exp": 25
       }
     ]
   }

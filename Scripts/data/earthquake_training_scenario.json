@@ -1,0 +1,555 @@
+[
+  {
+    "sceneId": "#1-1",
+    "title": "집안에서 지진 발생",
+    "content": "오후 2시, 집안에서 갑자기 땅이 흔들리기 시작했습니다. 지진이 발생했습니다.",
+    "sceneScript": "집안에서 지진이 발생했습니다! 땅이 흔들리고 있습니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 1,
+    "disasterType": "earthquake",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "탁자 아래로 들어가 탁자 다리를 꼭 잡기",
+        "reaction": "정답! 지진으로 흔들리는 동안은 탁자 아래로 들어가 몸을 보호하고 탁자 다리를 꼭 잡아야 합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 밖으로 뛰어나가기",
+        "reaction": "오답! 지진이 발생하면 먼저 안전한 곳으로 몸을 보호해야 합니다. 밖으로 나가면 떨어지는 물건에 맞을 수 있습니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "엘리베이터를 타고 내려가기",
+        "reaction": "오답! 지진 시 엘리베이터는 정전될 수 있고 위험합니다. 탁자 아래로 들어가 몸을 보호해야 합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-2",
+    "title": "집안 흔들림이 멈췄습니다",
+    "content": "집안에서의 흔들림이 멈췄습니다. 이제 무엇을 해야 할까요?",
+    "sceneScript": "흔들림이 멈췄습니다. 집안에서 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 2,
+    "disasterType": "earthquake",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "전기와 가스를 차단하고 문을 열어 출구를 확보한 후 밖으로 나가기",
+        "reaction": "정답! 흔들림이 멈추면 전기와 가스를 차단하고 문을 열어 출구를 확보한 후 밖으로 나가야 합니다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 밖으로 나가기",
+        "reaction": "부분 정답! 하지만 먼저 전기와 가스를 차단하고 출구를 확보해야 합니다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      },
+      {
+        "answerId": "answer3",
+        "answer": "집안을 정리하고 나가기",
+        "reaction": "오답! 지진 후에는 안전을 우선으로 해야 합니다. 집안 정리는 나중에 하고 먼저 대피해야 합니다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-3",
+    "title": "집밖으로 나왔습니다",
+    "content": "집밖으로 나왔습니다. 이제 어떻게 하시겠습니까?",
+    "sceneScript": "집밖으로 나왔습니다. 다음으로 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 3,
+    "disasterType": "earthquake",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "떨어지는 물건에 대비하여 가방이나 손으로 머리를 보호하며 건물과 거리를 두고 운동장이나 공원 등 넓은 공간으로 대피하기",
+        "reaction": "정답! 집밖에 있을 때는 떨어지는 물건에 대비하여 가방이나 손으로 머리를 보호하며 건물과 거리를 두고 운동장이나 공원 등 넓은 공간으로 대피해야 합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "차량을 타고 집으로 돌아가기",
+        "reaction": "오답! 지진 시 차량 이용은 금지입니다. 도로가 막힐 수 있고 위험합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "건물 근처에서 상황을 지켜보기",
+        "reaction": "오답! 건물 근처에 있으면 여진이나 건물 붕괴 위험이 있습니다. 안전한 곳으로 대피해야 합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-1",
+    "title": "학교에서 지진 발생",
+    "content": "학교 교실에서 지진이 발생했습니다. 수업 중인 상황입니다.",
+    "sceneScript": "학교 교실에서 지진이 발생했습니다. 수업 중인 상황에서 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 4,
+    "disasterType": "earthquake",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "책상 아래로 들어가 책상 다리를 꼭 잡기",
+        "reaction": "정답! 학교에 있을 때는 책상 아래로 들어가 책상 다리를 꼭 잡아야 합니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 교실 밖으로 나가기",
+        "reaction": "오답! 지진이 발생하면 먼저 안전한 곳으로 몸을 보호해야 합니다. 밖으로 나가면 떨어지는 물건에 맞을 수 있습니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "창문으로 뛰어내리기",
+        "reaction": "오답! 창문으로 뛰어내리면 다칠 수 있습니다. 책상 아래로 들어가 몸을 보호해야 합니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-2",
+    "title": "학교 흔들림이 멈췄습니다",
+    "content": "학교에서의 흔들림이 멈췄습니다. 이제 어떻게 하시겠습니까?",
+    "sceneScript": "흔들림이 멈췄습니다. 학교에서 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 5,
+    "disasterType": "earthquake",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "질서를 지키며 운동장으로 대피하기",
+        "reaction": "정답! 흔들림이 멈추면 질서를 지키며 운동장으로 대피해야 합니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "각자 알아서 집으로 돌아가기",
+        "reaction": "오답! 학교에서는 질서를 지키며 함께 운동장으로 대피해야 합니다. 각자 돌아가면 위험할 수 있습니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "교실에 그대로 있기",
+        "reaction": "오답! 흔들림이 멈추면 안전한 곳인 운동장으로 대피해야 합니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-1",
+    "title": "빌딩에서 지진 발생",
+    "content": "사무실 빌딩에서 지진이 발생했습니다. 10층 사무실에 있는 상황입니다.",
+    "sceneScript": "사무실 빌딩에서 지진이 발생했습니다. 10층 사무실에 있는 상황에서 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 6,
+    "disasterType": "earthquake",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "책상 아래로 들어가 책상 다리를 꼭 잡기",
+        "reaction": "정답! 빌딩에서 지진이 발생하면 책상 아래로 들어가 책상 다리를 꼭 잡아야 합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 계단으로 뛰어가기",
+        "reaction": "오답! 지진이 발생하면 먼저 안전한 곳으로 몸을 보호해야 합니다. 흔들리는 동안 계단으로 가면 위험합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "엘리베이터를 타고 내려가기",
+        "reaction": "오답! 지진 시 엘리베이터는 정전될 수 있고 위험합니다. 책상 아래로 들어가 몸을 보호해야 합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-2",
+    "title": "빌딩 흔들림이 멈췄습니다",
+    "content": "빌딩에서의 흔들림이 멈췄습니다. 이제 어떻게 하시겠습니까?",
+    "sceneScript": "흔들림이 멈췄습니다. 빌딩에서 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 7,
+    "disasterType": "earthquake",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "계단을 이용하여 신속하게 건물 밖으로 대피하기",
+        "reaction": "정답! 빌딩에서 흔들림이 멈추면 계단을 이용하여 신속하게 건물 밖으로 대피해야 합니다. 엘리베이터는 사용하면 안 됩니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 125
+      },
+      {
+        "answerId": "answer2",
+        "answer": "엘리베이터를 타고 내려가기",
+        "reaction": "오답! 지진 시 엘리베이터는 정전될 수 있고 위험합니다. 계단을 이용해야 합니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "창문으로 뛰어내리기",
+        "reaction": "오답! 창문으로 뛰어내리면 다칠 수 있습니다. 계단을 이용하여 안전하게 내려가야 합니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-1",
+    "title": "엘리베이터에서 지진 발생",
+    "content": "엘리베이터를 타고 있는 중에 지진이 발생했습니다.",
+    "sceneScript": "엘리베이터를 타고 있는 중에 지진이 발생했습니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 8,
+    "disasterType": "earthquake",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "모든 층의 버튼을 눌러 가장 먼저 열리는 층에서 내린 후 계단을 이용하기",
+        "reaction": "정답! 엘리베이터에 있을 때는 모든 층의 버튼을 눌러 가장 먼저 열리는 층에서 내린 후 계단을 이용해야 합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 150
+      },
+      {
+        "answerId": "answer2",
+        "answer": "엘리베이터 안에서 기다리기",
+        "reaction": "오답! 엘리베이터 안에서 기다리면 정전될 수 있고 위험합니다. 모든 층의 버튼을 눌러 내려야 합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "비상정지 버튼을 누르기",
+        "reaction": "부분 정답! 하지만 비상정지보다는 모든 층의 버튼을 눌러 내리는 것이 더 안전합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 50
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-2",
+    "title": "엘리베이터에서 내렸습니다",
+    "content": "엘리베이터에서 내렸습니다. 이제 어떻게 하시겠습니까?",
+    "sceneScript": "엘리베이터에서 내렸습니다. 다음으로 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 9,
+    "disasterType": "earthquake",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "계단을 이용하여 안전한 곳으로 대피하기",
+        "reaction": "정답! 엘리베이터에서 내린 후에는 계단을 이용하여 안전한 곳으로 대피해야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "다시 엘리베이터를 타기",
+        "reaction": "오답! 지진 시 엘리베이터는 위험합니다. 계단을 이용해야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "그 자리에서 기다리기",
+        "reaction": "오답! 안전한 곳으로 대피해야 합니다. 계단을 이용하여 밖으로 나가야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#5-1",
+    "title": "대피 장소에 도착했습니다",
+    "content": "운동장에 안전하게 도착했습니다. 이제 무엇을 해야 할까요?",
+    "sceneScript": "운동장에 안전하게 도착했습니다. 다음으로 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 10,
+    "disasterType": "earthquake",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "라디오나 공공기관의 안내 방송 등 올바른 정보에 따라 행동하기",
+        "reaction": "정답! 대피 장소에 도착한 후에는 라디오나 공공기관의 안내 방송 등 올바른 정보에 따라 행동해야 합니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 집으로 돌아가기",
+        "reaction": "오답! 지진 후에는 올바른 정보를 확인한 후 귀가 여부를 결정해야 합니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "주변 사람들과 이야기하기",
+        "reaction": "부분 정답! 하지만 먼저 라디오나 공공기관의 안내 방송을 들어야 합니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#5-2",
+    "title": "가족 상황 확인",
+    "content": "라디오에서 지진 상황을 안내하고 있습니다. 이제 무엇을 해야 할까요?",
+    "sceneScript": "라디오에서 지진 상황을 안내하고 있습니다. 다음으로 해야 할 일은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 11,
+    "disasterType": "earthquake",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "가족의 상황과 부상자를 살펴보고 즉시 구조 요청하기",
+        "reaction": "정답! 흔들림이 멈추면 함께 있는 가족끼리 부상이 없는지 확인하고, 부상자가 있으면 이웃과 서로 협력하여 응급처치하고 소방서(119) 등 구조구급기관에 신고해야 합니다.",
+        "nextId": "#5-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 집으로 돌아가기",
+        "reaction": "오답! 먼저 가족의 상황과 부상자를 확인해야 합니다.",
+        "nextId": "#5-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "상황을 더 지켜보기",
+        "reaction": "부분 정답! 하지만 가족의 상황과 부상자를 먼저 확인해야 합니다.",
+        "nextId": "#5-3",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#5-3",
+    "title": "지진 대응 훈련 완료",
+    "content": "지진 대응 훈련을 완료했습니다.",
+    "sceneScript": "축하합니다! 지진 대응 훈련을 완료했습니다.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 12,
+    "disasterType": "earthquake",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "훈련 내용을 복습하기",
+        "reaction": "정답! 훈련 내용을 복습하여 실제 상황에 대비해야 합니다.",
+        "nextId": "#END",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "훈련을 다시 시작하기",
+        "reaction": "좋은 선택! 반복 훈련으로 더욱 익숙해질 수 있습니다.",
+        "nextId": "#1-1",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  }
+]

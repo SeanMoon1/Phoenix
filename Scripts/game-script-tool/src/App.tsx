@@ -12,11 +12,14 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import ControlMenu from "./Components/ControlMenu/ControlMenu";
 import ScriptView from "./Components/ScriptView";
+import SceneIdSelector from "./Components/UI/SceneIdSelector";
+import NextSceneSelector from "./Components/UI/NextSceneSelector";
 import { useAppStateStore } from "./Stores/atom";
 import { useBlockListSelector } from "./Stores/selector";
 import type { User, ScriptBlock } from "./types";
 import { UserRole, ApprovalStatus } from "./types";
 import { loadBlockList, saveBlockList } from "./Utils/api";
+import { getNextAvailableSceneId } from "./utils/sceneIdGenerator";
 
 const Container = styled.div`
   @media (min-width: 800px) {
@@ -259,6 +262,9 @@ const App: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSceneId, setEditingSceneId] = useState<string | null>(null);
 
+  // 블록 리스트 상태 (Hooks 순서 문제 해결을 위해 최상단에서 호출)
+  const blockListState = useBlockListSelector();
+
   // 컴포넌트 마운트 시 로컬 스토리지에서 데이터 로드
   useEffect(() => {
     const savedBlockList = loadBlockList();
@@ -297,6 +303,20 @@ const App: React.FC = () => {
       }
     }
   }, [appState.modifySceneId, editingSceneId]);
+
+  // 새 시나리오 생성 시 자동으로 다음 사용 가능한 장면 ID 할당
+  useEffect(() => {
+    if (appState.isSceneFormOpened && !isEditMode && !formData.sceneId) {
+      const currentBlocks = loadBlockList();
+      const nextSceneId = getNextAvailableSceneId(
+        currentBlocks.map((block: ScriptBlock) => block.sceneId)
+      );
+      setFormData((prev) => ({
+        ...prev,
+        sceneId: nextSceneId,
+      }));
+    }
+  }, [appState.isSceneFormOpened, isEditMode, formData.sceneId]);
 
   // 사용자 역할을 관리자로 고정 (Admin Dashboard 전용)
   const currentUser: User = {
@@ -568,13 +588,16 @@ const App: React.FC = () => {
 
                 <FormField>
                   <label>장면 ID:</label>
-                  <input
-                    type="text"
-                    placeholder="#1-1 (예: #1-1, #2-3)"
+                  <SceneIdSelector
                     value={formData.sceneId}
-                    onChange={(e) =>
-                      handleInputChange("sceneId", e.target.value)
+                    onChange={(sceneId) =>
+                      handleInputChange("sceneId", sceneId)
                     }
+                    existingSceneIds={blockListState.blockList.map(
+                      (block: ScriptBlock) => block.sceneId
+                    )}
+                    allowNew={!isEditMode}
+                    placeholder="장면 ID를 선택하세요"
                     disabled={isEditMode} // 수정 모드에서는 장면 ID 변경 불가
                   />
                 </FormField>
@@ -638,13 +661,20 @@ const App: React.FC = () => {
                             )
                           }
                         />
-                        <input
-                          type="text"
-                          placeholder="다음 장면 ID (예: #1-2)"
+                        <NextSceneSelector
                           value={option.nextId}
-                          onChange={(e) =>
-                            handleOptionChange(index, "nextId", e.target.value)
+                          onChange={(nextId) =>
+                            handleOptionChange(index, "nextId", nextId)
                           }
+                          availableScenes={blockListState.blockList.map(
+                            (block: ScriptBlock) => ({
+                              sceneId: block.sceneId,
+                              title: block.title || block.sceneId,
+                            })
+                          )}
+                          currentSceneId={formData.sceneId}
+                          allowEnding={true}
+                          placeholder="다음 장면을 선택하세요"
                         />
                         {formData.options.length > 1 && (
                           <button

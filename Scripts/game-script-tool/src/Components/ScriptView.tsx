@@ -51,9 +51,15 @@ const ScriptView: React.FC = () => {
     openSceneForm(sceneId);
   };
 
+  // 완료 블록은 관리자에게 보이지 않도록 필터링
+  const visibleBlocks = blockList.filter(
+    (block: ScriptBlockType) =>
+      !block.sceneId || !block.sceneId.startsWith("#ending-")
+  );
+
   return (
     <Container>
-      {blockList.map((block: ScriptBlockType) => (
+      {visibleBlocks.map((block: ScriptBlockType) => (
         <ScriptBlock
           key={block.sceneId}
           block={block}

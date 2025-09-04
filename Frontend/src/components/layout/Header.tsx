@@ -12,21 +12,20 @@ const Header: React.FC = () => {
 
   // 각 드롭다운 상태 관리
   const [isMembersDropdownOpen, setIsMembersDropdownOpen] = useState(false);
-  const [isTrainingScenariosDropdownOpen, setIsTrainingScenariosDropdownOpen] =
-    useState(false);
-  const [isAnalysisDropdownOpen, setIsAnalysisDropdownOpen] = useState(false);
+  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
   const [isSupportDropdownOpen, setIsSupportDropdownOpen] = useState(false);
 
   // 모바일 서브메뉴 상태 관리
   const [mobileMembersOpen, setMobileMembersOpen] = useState(false);
   const [mobileTrainingOpen, setMobileTrainingOpen] = useState(false);
-  const [mobileAnalysisOpen, setMobileAnalysisOpen] = useState(false);
+  const [mobileAdminOpen, setMobileAdminOpen] = useState(false);
   const [mobileSupportOpen, setMobileSupportOpen] = useState(false);
 
   // 각 드롭다운 ref
   const membersDropdownRef = useRef<HTMLDivElement>(null);
-  const trainingScenariosDropdownRef = useRef<HTMLDivElement>(null);
-  const analysisDropdownRef = useRef<HTMLDivElement>(null);
+  const trainingDropdownRef = useRef<HTMLDivElement>(null);
+  const adminDropdownRef = useRef<HTMLDivElement>(null);
   const supportDropdownRef = useRef<HTMLDivElement>(null);
 
   // 다크모드 상태를 로컬스토리지와 동기화
@@ -71,8 +70,8 @@ const Header: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const refs = [
         membersDropdownRef,
-        trainingScenariosDropdownRef,
-        analysisDropdownRef,
+        trainingDropdownRef,
+        adminDropdownRef,
         supportDropdownRef,
       ];
       const isOutside = refs.every(
@@ -81,8 +80,8 @@ const Header: React.FC = () => {
 
       if (isOutside) {
         setIsMembersDropdownOpen(false);
-        setIsTrainingScenariosDropdownOpen(false);
-        setIsAnalysisDropdownOpen(false);
+        setIsTrainingDropdownOpen(false);
+        setIsAdminDropdownOpen(false);
         setIsSupportDropdownOpen(false);
       }
     };
@@ -117,7 +116,7 @@ const Header: React.FC = () => {
     if (isMobileMenuOpen) {
       setMobileMembersOpen(false);
       setMobileTrainingOpen(false);
-      setMobileAnalysisOpen(false);
+      setMobileAdminOpen(false);
       setMobileSupportOpen(false);
     }
   };
@@ -126,27 +125,24 @@ const Header: React.FC = () => {
   const toggleMembersDropdown = () => {
     console.log('회원 드롭다운 토글:', !isMembersDropdownOpen);
     setIsMembersDropdownOpen(!isMembersDropdownOpen);
-    setIsTrainingScenariosDropdownOpen(false);
-    setIsAnalysisDropdownOpen(false);
+    setIsTrainingDropdownOpen(false);
+    setIsAdminDropdownOpen(false);
     setIsSupportDropdownOpen(false);
   };
 
-  const toggleTrainingScenariosDropdown = () => {
-    console.log(
-      '훈련시나리오 드롭다운 토글:',
-      !isTrainingScenariosDropdownOpen
-    );
-    setIsTrainingScenariosDropdownOpen(!isTrainingScenariosDropdownOpen);
+  const toggleTrainingDropdown = () => {
+    console.log('훈련하기 드롭다운 토글:', !isTrainingDropdownOpen);
+    setIsTrainingDropdownOpen(!isTrainingDropdownOpen);
     setIsMembersDropdownOpen(false);
-    setIsAnalysisDropdownOpen(false);
+    setIsAdminDropdownOpen(false);
     setIsSupportDropdownOpen(false);
   };
 
-  const toggleAnalysisDropdown = () => {
-    console.log('결과분석 드롭다운 토글:', !isAnalysisDropdownOpen);
-    setIsAnalysisDropdownOpen(!isAnalysisDropdownOpen);
+  const toggleAdminDropdown = () => {
+    console.log('관리자 드롭다운 토글:', !isAdminDropdownOpen);
+    setIsAdminDropdownOpen(!isAdminDropdownOpen);
     setIsMembersDropdownOpen(false);
-    setIsTrainingScenariosDropdownOpen(false);
+    setIsTrainingDropdownOpen(false);
     setIsSupportDropdownOpen(false);
   };
 
@@ -154,14 +150,14 @@ const Header: React.FC = () => {
     console.log('고객지원 드롭다운 토글:', !isSupportDropdownOpen);
     setIsSupportDropdownOpen(!isSupportDropdownOpen);
     setIsMembersDropdownOpen(false);
-    setIsTrainingScenariosDropdownOpen(false);
-    setIsAnalysisDropdownOpen(false);
+    setIsTrainingDropdownOpen(false);
+    setIsAdminDropdownOpen(false);
   };
 
   // 모바일 서브메뉴 토글 함수들
   const toggleMobileMembers = () => setMobileMembersOpen(!mobileMembersOpen);
   const toggleMobileTraining = () => setMobileTrainingOpen(!mobileTrainingOpen);
-  const toggleMobileAnalysis = () => setMobileAnalysisOpen(!mobileAnalysisOpen);
+  const toggleMobileAdmin = () => setMobileAdminOpen(!mobileAdminOpen);
   const toggleMobileSupport = () => setMobileSupportOpen(!mobileSupportOpen);
 
   return (
@@ -233,20 +229,20 @@ const Header: React.FC = () => {
                 )}
               </div>
 
-              {/* 훈련시나리오 드롭다운 */}
-              <div className="relative" ref={trainingScenariosDropdownRef}>
+              {/* 훈련하기 드롭다운 */}
+              <div className="relative" ref={trainingDropdownRef}>
                 <button
-                  onClick={toggleTrainingScenariosDropdown}
+                  onClick={toggleTrainingDropdown}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                    isTrainingScenariosDropdownOpen
+                    isTrainingDropdownOpen
                       ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <span>훈련시나리오</span>
+                  <span>훈련하기</span>
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${
-                      isTrainingScenariosDropdownOpen ? 'rotate-180' : ''
+                      isTrainingDropdownOpen ? 'rotate-180' : ''
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -259,68 +255,92 @@ const Header: React.FC = () => {
                   </svg>
                 </button>
 
-                {/* 훈련시나리오 드롭다운 메뉴 */}
-                {isTrainingScenariosDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
-                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
-                      카테고리
+                {/* 훈련하기 드롭다운 메뉴 */}
+                {isTrainingDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
+                    <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                      상황별 행동 메뉴얼
                     </div>
                     <Link
                       to="/training/fire"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                      onClick={() => setIsTrainingScenariosDropdownOpen(false)}
+                      onClick={() => setIsTrainingDropdownOpen(false)}
                     >
                       화재 대응
                     </Link>
                     <Link
                       to="/training/earthquake"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                      onClick={() => setIsTrainingScenariosDropdownOpen(false)}
+                      onClick={() => setIsTrainingDropdownOpen(false)}
                     >
                       지진 대응
                     </Link>
                     <Link
                       to="/training/emergency"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                      onClick={() => setIsTrainingScenariosDropdownOpen(false)}
+                      onClick={() => setIsTrainingDropdownOpen(false)}
                     >
                       응급처치
                     </Link>
                     <Link
                       to="/training/flood"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                      onClick={() => setIsTrainingScenariosDropdownOpen(false)}
+                      onClick={() => setIsTrainingDropdownOpen(false)}
                     >
-                      침수/홍수 대응
+                      침수&홍수 대응
                     </Link>
-                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 mt-2">
+                    <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 mt-2">
                       훈련 진행
                     </div>
                     <Link
                       to="/training/progress"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                      onClick={() => setIsTrainingScenariosDropdownOpen(false)}
+                      onClick={() => setIsTrainingDropdownOpen(false)}
                     >
-                      훈련 시작
+                      훈련 진행
+                    </Link>
+                    <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 mt-2">
+                      결과 분석
+                    </div>
+                    <Link
+                      to="/analysis/guide"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                      onClick={() => setIsTrainingDropdownOpen(false)}
+                    >
+                      올바른 대응 방법 안내
+                    </Link>
+                    <Link
+                      to="/analysis/compare"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                      onClick={() => setIsTrainingDropdownOpen(false)}
+                    >
+                      내 선택 비교
+                    </Link>
+                    <Link
+                      to="/analysis/recommend"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                      onClick={() => setIsTrainingDropdownOpen(false)}
+                    >
+                      다음 훈련 추천
                     </Link>
                   </div>
                 )}
               </div>
 
-              {/* 결과분석 드롭다운 */}
-              <div className="relative" ref={analysisDropdownRef}>
+              {/* 관리자 드롭다운 */}
+              <div className="relative" ref={adminDropdownRef}>
                 <button
-                  onClick={toggleAnalysisDropdown}
+                  onClick={toggleAdminDropdown}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                    isAnalysisDropdownOpen
+                    isAdminDropdownOpen
                       ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <span>결과분석</span>
+                  <span>관리자</span>
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${
-                      isAnalysisDropdownOpen ? 'rotate-180' : ''
+                      isAdminDropdownOpen ? 'rotate-180' : ''
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -333,29 +353,29 @@ const Header: React.FC = () => {
                   </svg>
                 </button>
 
-                {/* 결과분석 드롭다운 메뉴 */}
-                {isAnalysisDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
+                {/* 관리자 드롭다운 메뉴 */}
+                {isAdminDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
                     <Link
-                      to="/analysis/guide"
-                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => setIsAnalysisDropdownOpen(false)}
+                      to="/admin"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 first:rounded-t-lg"
+                      onClick={() => setIsAdminDropdownOpen(false)}
                     >
-                      올바른 대응 방법 안내
+                      통계 대시보드
                     </Link>
                     <Link
-                      to="/analysis/compare"
-                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => setIsAnalysisDropdownOpen(false)}
+                      to="/admin/scenarios"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                      onClick={() => setIsAdminDropdownOpen(false)}
                     >
-                      내 선택 비교
+                      훈련 시나리오 관리
                     </Link>
                     <Link
-                      to="/analysis/recommend"
-                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => setIsAnalysisDropdownOpen(false)}
+                      to="/admin/users"
+                      className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 last:rounded-b-lg"
+                      onClick={() => setIsAdminDropdownOpen(false)}
                     >
-                      다음 훈련 추천
+                      사용자 관리
                     </Link>
                   </div>
                 )}
@@ -542,26 +562,27 @@ const Header: React.FC = () => {
                         className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        로그인
+                        로그인 (회원가입)
                       </Link>
                       <Link
                         to="/mypage"
                         className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        마이페이지
+                        마이페이지 (내 훈련 기록 / 점수&피드백 조회 / 개인정보
+                        수정)
                       </Link>
                     </div>
                   )}
                 </div>
 
-                {/* 훈련시나리오 섹션 */}
+                {/* 훈련하기 섹션 */}
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <button
                     onClick={toggleMobileTraining}
                     className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
                   >
-                    <span>훈련시나리오</span>
+                    <span>훈련하기</span>
                     <svg
                       className={`w-4 h-4 transition-transform duration-200 ${
                         mobileTrainingOpen ? 'rotate-180' : ''
@@ -577,11 +598,11 @@ const Header: React.FC = () => {
                     </svg>
                   </button>
 
-                  {/* 훈련시나리오 서브메뉴 */}
+                  {/* 훈련하기 서브메뉴 */}
                   {mobileTrainingOpen && (
                     <div className="ml-4 mt-2 space-y-1">
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        카테고리
+                      <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                        상황별 행동 메뉴얼
                       </div>
                       <Link
                         to="/training/fire"
@@ -592,7 +613,7 @@ const Header: React.FC = () => {
                       </Link>
                       <Link
                         to="/training/earthquake"
-                        className="block px-4 py-2 rounded-lg text-sm text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                        className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         지진 대응
@@ -609,9 +630,9 @@ const Header: React.FC = () => {
                         className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        침수/홍수 대응
+                        침수&홍수 대응
                       </Link>
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-2">
+                      <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mt-2">
                         훈련 진행
                       </div>
                       <Link
@@ -619,37 +640,11 @@ const Header: React.FC = () => {
                         className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        훈련 시작
+                        훈련 진행
                       </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* 결과분석 섹션 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                  <button
-                    onClick={toggleMobileAnalysis}
-                    className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
-                  >
-                    <span>결과분석</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        mobileAnalysisOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.400z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* 결과분석 서브메뉴 */}
-                  {mobileAnalysisOpen && (
-                    <div className="ml-4 mt-2 space-y-1">
+                      <div className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mt-2">
+                        결과 분석
+                      </div>
                       <Link
                         to="/analysis/guide"
                         className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
@@ -670,6 +665,56 @@ const Header: React.FC = () => {
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         다음 훈련 추천
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* 관리자 섹션 */}
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                  <button
+                    onClick={toggleMobileAdmin}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                  >
+                    <span>관리자</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        mobileAdminOpen ? 'rotate-180' : ''
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* 관리자 서브메뉴 */}
+                  {mobileAdminOpen && (
+                    <div className="ml-4 mt-2 space-y-1">
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        통계 대시보드
+                      </Link>
+                      <Link
+                        to="/admin/scenarios"
+                        className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        훈련 시나리오 관리
+                      </Link>
+                      <Link
+                        to="/admin/users"
+                        className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        사용자 관리
                       </Link>
                     </div>
                   )}

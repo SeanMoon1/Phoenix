@@ -49,6 +49,7 @@ test-results/
 !.env.example
 !*.env.example
 
+# 인증서/키
 *.pem
 *.key
 *.p12

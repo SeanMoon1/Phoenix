@@ -1,0 +1,508 @@
+[
+  {
+    "sceneId": "#1-1",
+    "title": "화재 경보가 울렸습니다",
+    "content": "새벽 3시, 당신이 자고 있는 사이, 아파트에서 화재 경보가 울렸습니다.",
+    "sceneScript": "화재 경보 소리가 들립니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 1,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "주변 사람에게 \"불이야!\"라고 소리치고 119에 신고하기",
+        "reaction": "정답! 화재 발생 시 가장 먼저 주변 사람들에게 알려야 합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "불이 났는지 확인하러 가기",
+        "reaction": "오답! 화재 경보가 울리면 확인보다는 먼저 주변 사람들에게 알려야 합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-2",
+    "title": "출입문 손잡이 확인",
+    "content": "당장 탈출해야 합니다. 현관문을 나서기 전에 확인해야할 것으로 올바른 것은?",
+    "sceneScript": "현관문 앞에 서있습니다. 문을 열기 전에 무엇을 확인해야 할까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 2,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "손등으로 출입문 손잡이를 만져보기",
+        "reaction": "정답! 손잡이가 뜨거우면 문 반대쪽에 불이 난 것이므로 열면 안 됩니다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 문을 열기",
+        "reaction": "오답! 문을 열면 뜨거운 불길과 연기가 들어올 수 있습니다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-3",
+    "title": "대피 경로 선택",
+    "content": "손잡이가 뜨겁습니다. 연기가 복도에서 들어오고 있습니다.",
+    "sceneScript": "손잡이가 뜨겁고 연기가 복도에서 들어옵니다. 어떻게 대피하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 3,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "계단을 통해 지상으로 대피하기",
+        "reaction": "정답! 연기가 있는 복도보다는 계단이 더 안전합니다.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "엘리베이터를 타고 내려가기",
+        "reaction": "오답! 화재 시 엘리베이터는 정전될 수 있고 연기로 가득 찰 수 있습니다.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      },
+      {
+        "answerId": "answer3",
+        "answer": "창문으로 구조 요청하기",
+        "reaction": "부분 정답! 하지만 먼저 계단으로 대피를 시도해보세요.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-4",
+    "title": "연기 속 대피",
+    "content": "계단을 내려가다 연기가 가득합니다.",
+    "sceneScript": "계단을 내려가다 연기가 가득합니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 4,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "낮은 자세로 기어서 내려가기",
+        "reaction": "정답! 연기는 위로 올라가므로 낮은 자세가 안전합니다.",
+        "nextId": "#1-5",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "숨을 참고 뛰어서 내려가기",
+        "reaction": "오답! 뛰면 숨이 더 빨리 차고 연기를 더 많이 들이마실 수 있습니다.",
+        "nextId": "#1-5",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-5",
+    "title": "놀이터에 도착",
+    "content": "안전하게 놀이터에 도착했습니다.",
+    "sceneScript": "놀이터에 안전하게 도착했습니다. 이제 무엇을 해야 할까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 5,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "119에 추가 상황 보고하기",
+        "reaction": "정답! 안전하게 대피한 후 119에 추가 상황을 보고해야 합니다.",
+        "nextId": "#1-6",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "다시 건물로 들어가기",
+        "reaction": "오답! 화재가 진화될 때까지 건물에 들어가면 안 됩니다.",
+        "nextId": "#1-6",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-6",
+    "title": "가족 인원 확인",
+    "content": "119에 추가 상황을 보고했습니다.",
+    "sceneScript": "119에 추가 상황을 보고했습니다. 이제 무엇을 해야 할까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 6,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "함께 대피한 가족 인원을 확인하기",
+        "reaction": "정답! 대피 후 인원을 확인하여 누락된 사람이 있는지 점검해야 합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "화재 상황을 지켜보기",
+        "reaction": "부분 정답! 하지만 먼저 인원을 확인해야 합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-1",
+    "title": "부엌에서 불 발견",
+    "content": "부엌에서 작은 불이 발생했습니다. 불길이 천장까지 닿지 않았습니다.",
+    "sceneScript": "부엌에서 작은 불이 발생했습니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 7,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "가스밸브를 먼저 차단하고 전기 차단하기",
+        "reaction": "정답! 부엌 화재 시 가장 중요한 것은 가스밸브 차단과 전기 차단입니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "소화기로 불 끄기",
+        "reaction": "오답! 부엌 화재 시 가스와 전기를 먼저 차단해야 합니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      },
+      {
+        "answerId": "answer3",
+        "answer": "바로 대피하기",
+        "reaction": "부분 정답! 하지만 작은 불이라면 가스와 전기를 차단한 후 끄려고 시도해보세요.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-2",
+    "title": "가스밸브와 전기 차단 완료",
+    "content": "가스밸브와 전기를 차단했습니다.",
+    "sceneScript": "다음으로 해야할 일로 올바른 것을 고르세요.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 8,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "소화기로 불 끄기",
+        "reaction": "정답! 가스와 전기를 차단한 후 소화기로 안전하게 불을 끌 수 있습니다.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "물양동이로 불 끄기",
+        "reaction": "정답! 소화기가 없다면 물양동이도 좋은 방법입니다.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer3",
+        "answer": "바로 대피하기",
+        "reaction": "오답! 가스와 전기를 차단했으니 이제 안전하게 불을 끌 수 있습니다.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-3",
+    "title": "소화기 사용법",
+    "content": "소화기를 가져왔습니다.",
+    "sceneScript": "소화기를 가져왔습니다. 올바른 사용 순서는 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 9,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "안전핀을 뽑고 → 노즐을 잡고 → 손잡이를 움켜쥐고 → 불을 향해 분사",
+        "reaction": "정답! 소화기의 올바른 사용 순서입니다.",
+        "nextId": "#2-4",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 불을 향해 분사하기",
+        "reaction": "오답! 안전핀을 뽑지 않으면 소화기가 작동하지 않습니다.",
+        "nextId": "#2-4",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-4",
+    "title": "옷에 불이 붙었습니다",
+    "content": "소화기를 사용하다 옷에 불이 붙었습니다.",
+    "sceneScript": "옷에 불이 붙었습니다! 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 10,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "바닥에 엎드려 몸을 뒹굴기",
+        "reaction": "정답! 옷에 붙은 불을 끄는 올바른 방법입니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "뛰어다니며 불 끄기",
+        "reaction": "오답! 뛰면 바람으로 불이 더 커질 수 있습니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-1",
+    "title": "아파트 화재 발생",
+    "content": "아파트에서 화재가 발생했습니다. 현관 입구에 불이 난 상황입니다.",
+    "sceneScript": "아파트에서 화재가 발생했습니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 11,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "대피공간이나 경량칸막이를 이용하여 대피하기",
+        "reaction": "정답! 현관이 막혀있을 때는 대피공간을 활용해야 합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "현관문을 열고 뛰어나가기",
+        "reaction": "오답! 현관에 불이 난 상황에서는 문을 열면 위험합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-2",
+    "title": "완강기 사용법",
+    "content": "대피공간이 없어 완강기를 사용해야 합니다.",
+    "sceneScript": "완강기를 사용해야 합니다. 올바른 사용 순서는 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 12,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "지지대 고리에 걸고 → 창밖으로 밀고 → 벨트를 조이고 → 벽을 짚으며 내려가기",
+        "reaction": "정답! 완강기의 올바른 사용 순서입니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 창밖으로 뛰어내리기",
+        "reaction": "오답! 높은 곳에서 뛰어내리면 다칠 수 있습니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-1",
+    "title": "이웃집 화재",
+    "content": "이웃집에서 화재가 발생했습니다. 연기가 복도로 들어오고 있습니다.",
+    "sceneScript": "이웃집에서 화재가 발생했습니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 13,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "창문을 닫고 119에 신고하기",
+        "reaction": "정답! 연기가 들어오지 못하게 하고 신고해야 합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 계단으로 대피하기",
+        "reaction": "오답! 연기가 있는 복도로 나가면 위험할 수 있습니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        }
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-2",
+    "title": "화재 대응 훈련 완료",
+    "content": "화재 대응 훈련을 완료했습니다.",
+    "sceneScript": "축하합니다! 화재 대응 훈련을 완료했습니다.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 14,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "훈련 내용을 복습하기",
+        "reaction": "정답! 훈련 내용을 복습하여 실제 상황에 대비해야 합니다.",
+        "nextId": "#END",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        }
+      },
+      {
+        "answerId": "answer2",
+        "answer": "훈련을 다시 시작하기",
+        "reaction": "좋은 선택! 반복 훈련으로 더욱 익숙해질 수 있습니다.",
+        "nextId": "#1-1",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        }
+      }
+    ]
+  }
+]

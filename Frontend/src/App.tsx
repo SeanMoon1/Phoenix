@@ -1,5 +1,5 @@
 import React from 'react';
-import ScenarioPage from "./pages/scenario/ScenarioPage";
+import ScenarioPage from './pages/scenario/ScenarioPage';
 import {
   BrowserRouter as Router,
   Routes,
@@ -243,7 +243,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/scenario" element={<ScenarioPage />} />
+          <Route path="/training/fire" element={<ScenarioPage />} />
         </Routes>
       </Router>
     </QueryClientProvider>

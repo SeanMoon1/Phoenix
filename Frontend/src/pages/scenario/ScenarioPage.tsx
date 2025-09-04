@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
-import { fireBasicSteps } from "../../mocks/scenarios/fire-basic";
-import type { ScenarioStep } from "../../types/scenario";
-import Confetti from "react-confetti";
-import phoenixImg from "../../assets/images/phoenix.png";
+import { useEffect, useMemo, useState } from 'react';
+import { fetchFireScenario } from '@/services/scenarioService';
+import type { Scenario, ScenarioOption } from '@/types/scenario';
+import Confetti from 'react-confetti';
+import phoenixImg from '../../assets/images/phoenix.png';
+import Layout from '@/components/layout/Layout';
 
+// ---- 경험치/레벨 상태 ----
 type PersistState = {
   EXP: number;
   level: number;
@@ -11,19 +13,15 @@ type PersistState = {
   totalCorrect: number;
 };
 
-const PERSIST_KEY = "phoenix_training_state";
-const BASE_EXP = 10; // ✅ 정답 기본 경험치
-const STREAK_BONUS_PER = 2; // ✅ 연속정답(스트릭) 보너스: newStreak * 2
+const PERSIST_KEY = 'phoenix_training_state';
+const BASE_EXP = 10;
+const STREAK_BONUS_PER = 2;
+const scenarioSetName = '화재 대응';
 
 function getEXPForNextLevel(level: number) {
-  // ✅ 레벨업 필요 경험치 공식 (원하면 난이도 곡선으로 변경 가능)
   return level * 100;
 }
 
-/**
- * 숫자 애니메이션 유틸 (EXP 게이지가 부드럽게 차오르도록)
- * - easeOutCubic으로 0.5s 동안 from → to
- */
 function animateValue(opts: {
   from: number;
   to: number;
@@ -45,44 +43,63 @@ function animateValue(opts: {
 }
 
 export default function ScenarioPage() {
-  const scenarios: ScenarioStep[] = fireBasicSteps;
-  const scenarioSetName = "화재 대응 기초"; // ✅ 시나리오 묶음 이름(모달/메시지에 사용)
-
-  // 진행 상태
+  // 데이터 & 진행
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
+  const [history, setHistory] = useState<number[]>([]); // 이전으로 돌아가기용 스택
+
   const scenario = scenarios[current];
 
-  // 게임화(게이미피케이션) 상태
+  // 선택/피드백
+  const [selected, setSelected] = useState<ScenarioOption | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  // 게임화 상태
   const [EXP, setEXP] = useState(0);
   const [level, setLevel] = useState(1);
   const [streak, setStreak] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
-
-  // 게이지 표시용 애니메이션 값 (실제 EXP와 분리)
   const [EXPDisplay, setEXPDisplay] = useState(0);
+  const neededEXP = useMemo(() => getEXPForNextLevel(level), [level]);
+  const progressPct = useMemo(() => {
+    const pct = Math.min(100, Math.round((EXPDisplay / neededEXP) * 100));
+    return Number.isFinite(pct) ? pct : 0;
+  }, [EXPDisplay, neededEXP]);
 
-  // 시나리오 결과 모달/컨페티
+  // 성공/실패 모달 & 컨페티
   const [showConfetti, setShowConfetti] = useState(false);
   const [clearMsg, setClearMsg] = useState<string | null>(null);
   const [failMsg, setFailMsg] = useState<string | null>(null);
+  const [vw, setVw] = useState<number>(
+    typeof window !== 'undefined' ? window.innerWidth : 0
+  );
+  const [vh, setVh] = useState<number>(
+    typeof window !== 'undefined' ? window.innerHeight : 0
+  );
 
-  // 이번 시나리오에서 오답 여부(한 번이라도 틀리면 클리어 불가)
+  // 한 번이라도 틀렸는지 플래그
   const [failedThisRun, setFailedThisRun] = useState(false);
 
-  // Confetti 캔버스 크기 (고정 포지션 + 1px 여유로 가로 스크롤 방지)
-  const [vw, setVw] = useState<number>(window.innerWidth);
-  const [vh, setVh] = useState<number>(window.innerHeight);
+  // 초기 로드
+  useEffect(() => {
+    fetchFireScenario()
+      .then(data => setScenarios(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
+  // 리사이즈
   useEffect(() => {
     const onResize = () => {
       setVw(window.innerWidth);
       setVh(window.innerHeight);
     };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 로컬 스토리지 복구
+  // 로컬 스토리지 복구/저장
   useEffect(() => {
     const raw = localStorage.getItem(PERSIST_KEY);
     if (raw) {
@@ -94,35 +111,21 @@ export default function ScenarioPage() {
         setTotalCorrect(s.totalCorrect ?? 0);
         setEXPDisplay(s.EXP ?? 0);
       } catch {
-        // 복구 실패 시 무시
-        console.warn("Failed to restore training state from localStorage");
+        console.warn('Failed to restore training state');
       }
     }
   }, []);
-
-  // 로컬 스토리지 저장
   useEffect(() => {
     const s: PersistState = { EXP, level, streak, totalCorrect };
     localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
   }, [EXP, level, streak, totalCorrect]);
 
-  // 파생 값: 현재 레벨의 필요 EXP, 게이지 퍼센트
-  const neededEXP = useMemo(() => getEXPForNextLevel(level), [level]);
-  const progressPct = useMemo(() => {
-    const pct = Math.min(100, Math.round((EXPDisplay / neededEXP) * 100));
-    return Number.isFinite(pct) ? pct : 0;
-  }, [EXPDisplay, neededEXP]);
+  // 선택 핸들러: 피드백 표시, 점수/레벨 처리 (진행은 버튼으로 수동)
+  const handleChoice = (option: ScenarioOption) => {
+    setSelected(option);
+    setFeedback(option.reaction);
 
-  /**
-   * 선택 처리:
-   * - 정답: 스트릭 +1, EXP 계산/레벨업, 게이지 애니메이션
-   * - 오답: 스트릭 0, 실패 플래그 ON
-   * - 마지막 문제: 이번 선택까지 반영한 실패 여부(nextFailed)로 클리어/실패 분기
-   */
-  const handleChoice = (pickedIndex: number) => {
-    const isCorrect = pickedIndex === scenario.correctIndex;
-
-    // 이번 선택까지 포함한 실패 여부를 즉시 계산(상태 비동기 보완)
+    const isCorrect = (option.points?.accuracy ?? 0) > 0;
     const nextFailed = failedThisRun || !isCorrect;
 
     if (isCorrect) {
@@ -132,7 +135,6 @@ export default function ScenarioPage() {
       let tempEXP = EXP + gained;
       let tempLevel = level;
 
-      // 게이지 애니메이션: EXPDisplay -> tempEXP
       animateValue({
         from: EXPDisplay,
         to: tempEXP,
@@ -140,7 +142,6 @@ export default function ScenarioPage() {
         onUpdate: setEXPDisplay,
       });
 
-      // 연쇄 레벨업 처리
       while (tempEXP >= getEXPForNextLevel(tempLevel)) {
         tempEXP -= getEXPForNextLevel(tempLevel);
         tempLevel += 1;
@@ -149,221 +150,355 @@ export default function ScenarioPage() {
       setEXP(tempEXP);
       setLevel(tempLevel);
       setStreak(newStreak);
-      setTotalCorrect((c) => c + 1);
+      setTotalCorrect(c => c + 1);
     } else {
       setStreak(0);
-      // 오답 시 게이지 변화 없음(필요 시 진동/빨간 깜빡임 등 UI 연출 추가 가능)
     }
 
-    // 이번 선택 결과를 상태에 반영
     setFailedThisRun(nextFailed);
+  };
 
-    const isLast = current >= scenarios.length - 1;
-    if (!isLast) {
-      // 다음 문제로 진행
-      setCurrent((c) => c + 1);
+  // 다음/이전
+  const handleNext = () => {
+    if (!selected || !scenario) return;
+
+    // 다음 인덱스 찾기 (nextId 기반)
+    const nextId = selected.nextId;
+    const nextIndex =
+      typeof nextId === 'string'
+        ? scenarios.findIndex(s => s.sceneId === nextId)
+        : -1;
+
+    // 상태 초기화
+    setSelected(null);
+    setFeedback(null);
+
+    if (nextIndex !== -1) {
+      setHistory(h => [...h, current]);
+      setCurrent(nextIndex);
+      return;
+    }
+
+    // nextId 매칭 없거나 "#END" 등: 종료 분기
+    if (!failedThisRun) {
+      setClearMsg(
+        `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
+      );
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4500);
     } else {
-      // 마지막 문제: 실패 여부에 따라 분기
-      if (!nextFailed) {
-        setClearMsg(
-          `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
-        );
-        setShowConfetti(true);
-        // confetti는 4.5초 뒤 자동 종료
-        setTimeout(() => setShowConfetti(false), 4500);
-      } else {
-        setFailMsg(
-          `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
-        );
-      }
+      setFailMsg(
+        `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
+      );
     }
   };
 
-  // 클리어 메시지 닫기
-  const closeClearMsg = () => {
-    setClearMsg(null);
-    setShowConfetti(false);
+  const handlePrev = () => {
+    if (history.length === 0) return;
+    const prev = history[history.length - 1];
+    setHistory(h => h.slice(0, -1));
+    setCurrent(prev);
+    setSelected(null);
+    setFeedback(null);
+    // 실패 플래그/스트릭은 유지 (원한다면 여기서 재계산 로직 가능)
   };
 
-  // 재도전 핸들러
-  const handleRetry = () => {
-    setFailMsg(null);
-    setCurrent(0);
-    setFailedThisRun(false);
-  };
-
-  /*
-   * 모달/컨페티 표시 시 스크롤 잠금
-   * - 가로 스크롤도 강제 차단하여 레이아웃 흔들림 방지
-   */
+  // 모달 열릴 때 스크롤 잠금
   useEffect(() => {
-    const lock = clearMsg || showConfetti;
+    const lock = clearMsg || failMsg || showConfetti;
     const { body, documentElement: html } = document;
-
     if (lock) {
       const prevBodyOverflow = body.style.overflow;
       const prevHtmlOverflowX = html.style.overflowX;
-
-      body.style.overflow = "hidden";
-      html.style.overflowX = "hidden";
-
+      body.style.overflow = 'hidden';
+      html.style.overflowX = 'hidden';
       return () => {
         body.style.overflow = prevBodyOverflow;
         html.style.overflowX = prevHtmlOverflowX;
       };
     }
-  }, [clearMsg, showConfetti]);
+  }, [clearMsg, failMsg, showConfetti]);
 
-  // 공통 섹션 스타일
-  const sectionBaseClasses =
-    "w-full mx-0 md:max-w-screen-md md:mx-auto md:px-4 max-[770px]:px-2.5";
+  // 로딩/에러 처리
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[linear-gradient(135deg,#232526_0%,#414345_100%)] dark:text-white">
+        <div className="text-center">
+          <img
+            src={phoenixImg}
+            alt="Phoenix"
+            className="h-24 w-auto mx-auto mb-4 animate-pulse"
+          />
+          <p className="text-xl">시나리오 로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+  if (!scenarios.length || !scenario) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[linear-gradient(135deg,#232526_0%,#414345_100%)] dark:text-white">
+        <div className="text-center">
+          <img
+            src={phoenixImg}
+            alt="Phoenix"
+            className="h-24 w-auto mx-auto mb-4"
+          />
+          <p className="text-xl">시나리오를 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 진행 퍼센트 (UI)
+  const percentAll = Math.round(((current + 1) / scenarios.length) * 100);
+
+  // 피드백 색상
+  const acc = selected?.points?.accuracy ?? 0;
+  const feedbackBg =
+    acc >= 10
+      ? 'bg-emerald-500 dark:bg-emerald-600'
+      : acc > 0
+      ? 'bg-amber-500 dark:bg-amber-600'
+      : 'bg-rose-600 dark:bg-rose-700';
 
   return (
-    // 전체 래퍼: 가로 스크롤 숨김 + 상대 포지션
-    <div className="min-h-screen w-full overflow-x-hidden flex flex-col bg-[linear-gradient(135deg,#232526_0%,#414345_100%)] text-white py-10 relative items-center md:items-center max-[770px]:items-stretch">
-      {/* 헤더: 팀 마스코트 */}
-      <header className={`${sectionBaseClasses} flex items-center mb-8`}>
-        <img
-          src={phoenixImg}
-          alt="Phoenix Mascot"
-          className="h-16 w-auto object-contain"
-        />
-      </header>
-
-      {/* 시나리오 종료시에 중앙 분출 confetti */}
-      {showConfetti && (
-        <Confetti
-          width={Math.max(0, vw - 1)}
-          height={vh}
-          recycle={false}
-          numberOfPieces={320}
-          gravity={0.25}
-          wind={0}
-          tweenDuration={4800}
-          confettiSource={{ x: vw / 2 - 10, y: vh / 2 - 10, w: 20, h: 20 }}
-          style={{ position: "fixed", inset: 0, pointerEvents: "none" }}
-        />
-      )}
-
-      {/* 상단 상태바 */}
-      <section className={`${sectionBaseClasses} mb-6`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-black/50 rounded-xl p-4 shadow-md">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-lg font-semibold">레벨</h2>
-              <span className="text-2xl font-bold">Lv.{level}</span>
-            </div>
-            <div className="mt-3">
-              <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden">
-                {/* 게이지는 EXPDisplay 기준 + transition 으로 부드럽게 */}
-                <div
-                  className="h-full bg-emerald-400 transition-[width] duration-500"
-                  style={{ width: `${progressPct}%` }}
-                  aria-label="EXP-progress"
-                />
-              </div>
-              <p className="mt-2 text-sm text-white/80">
-                EXP {Math.round(EXPDisplay)} / {neededEXP} ({progressPct}%)
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-black/50 rounded-xl p-4 shadow-md">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-lg font-semibold">진행</h2>
-              <span className="text-2xl font-bold">
-                {current + 1} / {scenarios.length}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-white/80">
-              연속 정답: <strong>{streak}</strong> • 정답 수:{" "}
-              <strong>{totalCorrect}</strong>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 상황 설명 */}
-      <section className={`${sectionBaseClasses} mb-8`}>
-        <div className="bg-black/60 rounded-xl p-4 md:p-6 shadow-xl leading-relaxed">
-          <p className="text-[1.5rem]">
-            <strong>상황:</strong> {scenario.description}
-          </p>
-        </div>
-      </section>
-
-      {/* 선택지 */}
-      <section className={`${sectionBaseClasses} flex flex-col gap-4 mb-10`}>
-        {scenario.choices.map((choice, idx) => (
-          <button
-            key={idx}
-            className="w-full bg-red-500 text-white px-8 py-4 text-xl shadow-md transition-colors hover:bg-orange-400 hover:cursor-pointer rounded-lg"
-            onClick={() => handleChoice(idx)}
-          >
-            {choice}
-          </button>
-        ))}
-      </section>
-
-      {/* 클리어 모달 */}
-      {clearMsg && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70"
-          aria-live="assertive"
-        >
-          <div className="relative flex flex-col items-center">
-            <div className="relative flex flex-col items-center">
+    <Layout>
+      <div className="min-h-screen w-full overflow-x-hidden py-8 md:py-10 bg-neutral-100 text-neutral-900 dark:bg-[linear-gradient(135deg,#232526_0%,#414345_100%)] dark:text-white">
+        {/* 메인 그리드: md(>=768/770px)에서 좌측 패널 + 우측 컨텐츠 */}
+        <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4 grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-6">
+          {/* 좌측 패널: 캐릭터 + 레벨 (>=770px에서만 보이기) */}
+          <aside className="hidden md:flex md:flex-col md:gap-4">
+            <div className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4">
               <img
                 src={phoenixImg}
                 alt="Phoenix Mascot"
-                className="h-56 w-auto animate-bounce"
+                className="w-full max-w-[240px] object-contain"
               />
-              {/* 말풍선 */}
-              <div className="absolute -top-28 left-1/2 -translate-x-1/2 bg-white text-black rounded-2xl p-4 shadow-lg w-72 text-center">
-                <p className="text-base font-semibold leading-relaxed">
-                  {clearMsg}
+            </div>
+
+            <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-4">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-lg font-semibold">
+                  플레이어 이름{/* 회원 닉네임으로 수정할 것 */}
+                </h2>
+                <span className="text-2xl font-bold">Lv.{level}</span>
+              </div>
+              <div className="mt-3">
+                <div className="h-3 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-500"
+                    style={{ width: `${progressPct}%` }}
+                    aria-label="EXP-progress"
+                  />
+                </div>
+                <p className="mt-2 text-sm opacity-80">
+                  EXP {Math.round(EXPDisplay)} / {neededEXP} ({progressPct}%)
                 </p>
-                <div
-                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0
-                       border-l-8 border-r-8 border-t-8 border-transparent border-t-white"
-                />
               </div>
             </div>
+          </aside>
 
-            {/* 확인 버튼 */}
-            <button
-              className="-mt-5 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
-              onClick={closeClearMsg}
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
+          {/* 우측(모바일에서는 전체) 컨텐츠 */}
+          <main>
+            {/* 상단 진행바 카드 */}
+            <section className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-4">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-lg font-semibold">진행</h2>
+                <span className="text-2xl font-bold">
+                  {current + 1} / {scenarios.length}
+                </span>
+              </div>
+              <div className="h-3 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-3">
+                <div
+                  className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-300"
+                  style={{ width: `${percentAll}%` }}
+                />
+              </div>
 
-      {/* 실패 모달 */}
-      {failMsg && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="bg-white text-black rounded-2xl p-8 shadow-2xl w-[90%] max-w-[480px] text-center">
-            <h2 className="text-3xl font-bold mb-3 text-red-700">실패</h2>
-            <p className="text-lg mb-6">{failMsg}</p>
-            <div className="flex gap-3 justify-center">
-              <button
-                className="px-5 py-3 rounded-lg bg-neutral-700 text-white hover:bg-neutral-800 transition-colors hover:cursor-pointer font-semibold"
-                onClick={() => setFailMsg(null)}
+              {/* 모바일(<770px)에서는 캐릭터+레벨을 상단에 표시 */}
+              <div className="md:hidden mt-4 grid grid-cols-1 gap-4">
+                <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
+                  <img
+                    src={phoenixImg}
+                    alt="Phoenix Mascot"
+                    className="h-24 w-auto mx-auto"
+                  />
+                  <div className="mt-4">
+                    <div className="flex items-baseline justify-between">
+                      <h2 className="text-base font-semibold">레벨</h2>
+                      <span className="text-xl font-bold">Lv.{level}</span>
+                    </div>
+                    <div className="mt-2">
+                      <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-500"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 text-xs opacity-80">
+                        EXP {Math.round(EXPDisplay)} / {neededEXP} (
+                        {progressPct}%)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 제목 */}
+            <section className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-4">
+              <h1 className="text-2xl font-bold text-center">
+                {scenario.title}
+              </h1>
+            </section>
+
+            {/* 상황 설명 */}
+            <section className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-5 md:p-6 mb-6 leading-relaxed">
+              <p className="text-lg mb-3">
+                <strong>상황:</strong> {scenario.content}
+              </p>
+              <p className="text-base opacity-90">{scenario.sceneScript}</p>
+            </section>
+
+            {/* 선택지 */}
+            <section className="flex flex-col gap-3 mb-6">
+              {scenario.options.map(option => {
+                const isSelected = selected?.answerId === option.answerId;
+                return (
+                  <button
+                    key={option.answerId}
+                    className={`w-full rounded-xl px-6 py-4 text-lg shadow-md transition
+                      ${isSelected ? 'ring-2 ring-amber-400' : ''}
+                      bg-rose-500 hover:bg-rose-400 text-white
+                      dark:bg-rose-600 dark:hover:bg-rose-500`}
+                    onClick={() => handleChoice(option)}
+                  >
+                    {option.answer}
+                  </button>
+                );
+              })}
+            </section>
+
+            {/* 피드백 (자동 진행 안내 제거, 사용자가 버튼으로 진행) */}
+            {feedback && (
+              <div
+                className={`rounded-2xl shadow-md px-5 py-4 mb-6 text-white ${feedbackBg}`}
+                role="status"
+                aria-live="polite"
               >
-                닫기
+                <p className="text-base md:text-lg font-medium text-center">
+                  {feedback}
+                </p>
+              </div>
+            )}
+
+            {/* 이전/다음 버튼 */}
+            <section className="flex items-center justify-between gap-3">
+              <button
+                className="px-5 py-3 rounded-xl bg-neutral-300 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600 disabled:opacity-50"
+                onClick={handlePrev}
+                disabled={history.length === 0}
+              >
+                ← 이전
               </button>
+
               <button
-                className="px-5 py-3 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors hover:cursor-pointer font-semibold"
-                onClick={handleRetry}
+                className="px-6 py-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
+                onClick={handleNext}
+                disabled={!selected}
               >
-                다시 도전
+                다음 →
+              </button>
+            </section>
+          </main>
+        </div>
+
+        {/* 컨페티 */}
+        {showConfetti && (
+          <Confetti
+            width={Math.max(0, vw - 1)}
+            height={vh}
+            recycle={false}
+            numberOfPieces={320}
+            gravity={0.25}
+            wind={0}
+            tweenDuration={4800}
+            confettiSource={{ x: vw / 2 - 10, y: vh / 2 - 10, w: 20, h: 20 }}
+            style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}
+          />
+        )}
+
+        {/* 클리어 모달 */}
+        {clearMsg && (
+          <div
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70"
+            aria-live="assertive"
+          >
+            <div className="relative flex flex-col items-center">
+              <div className="relative flex flex-col items-center">
+                <img
+                  src={phoenixImg}
+                  alt="Phoenix Mascot"
+                  className="h-56 w-auto animate-bounce"
+                />
+                {/* 말풍선 */}
+                <div className="absolute -top-28 left-1/2 -translate-x-1/2 bg-white text-black rounded-2xl p-4 shadow-lg w-72 text-center">
+                  <p className="text-base font-semibold leading-relaxed">
+                    {clearMsg}
+                  </p>
+                  <div
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0
+                 border-l-8 border-r-8 border-t-8 border-transparent border-t-white"
+                  />
+                </div>
+              </div>
+
+              {/* 확인 버튼 */}
+              <button
+                className="-mt-5 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                onClick={() => {
+                  setClearMsg(null);
+                  setShowConfetti(false);
+                }}
+              >
+                확인
               </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {/* 실패 모달 */}
+        {failMsg && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div className="bg-white text-black rounded-2xl p-8 shadow-2xl w-[90%] max-w-[520px] text-center">
+              <h2 className="text-3xl font-bold mb-3 text-red-700">실패</h2>
+              <p className="text-lg mb-6">{failMsg}</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  className="px-5 py-3 rounded-lg bg-neutral-700 text-white hover:bg-neutral-800"
+                  onClick={() => setFailMsg(null)}
+                >
+                  닫기
+                </button>
+                <button
+                  className="px-5 py-3 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600"
+                  onClick={() => {
+                    setFailMsg(null);
+                    setCurrent(0);
+                    setHistory([]);
+                    setFailedThisRun(false);
+                    setSelected(null);
+                    setFeedback(null);
+                    setStreak(0);
+                  }}
+                >
+                  다시 도전
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 }

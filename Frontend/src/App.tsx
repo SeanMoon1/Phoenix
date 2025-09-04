@@ -8,7 +8,9 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
+import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
+import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 
 // React Query 클라이언트 생성
@@ -235,6 +237,19 @@ const HomePage: React.FC = () => {
   );
 };
 
+// 관리자 라우트 보호 컴포넌트 (개발용 - 임시 비활성화)
+const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // 개발 중에는 인증 체크를 비활성화
+  // const { isAuthenticated } = useAuthStore();
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
+
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -242,6 +257,16 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedAdminRoute>
+                <AdminLayout>
+                  <DashboardPage />
+                </AdminLayout>
+              </ProtectedAdminRoute>
+            }
+          />
         </Routes>
       </Router>
     </QueryClientProvider>

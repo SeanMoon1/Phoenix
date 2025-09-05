@@ -1,14 +1,19 @@
 [
   {
+    "id": 1,
+    "teamId": 1,
+    "scenarioCode": "SCEN001",
     "sceneId": "#1-1",
     "title": "감염된 도시의 화재 경보",
     "content": "세상의 끝이 온 지 몇 달, 폐허가 된 도시에서 당신은 낡은 아파트에 은신하고 있다. 새벽 3시, 차가운 공기가 피부를 스치는데 갑자기 날카로운 화재 경보가 귓전을 찢는다. 먼지 쌓인 공기 속에 연기 냄새가 스며들고, 밖에서는 감염된 자들의 끔찍한 신음 소리가 메아리친다. 당신의 연인이 아래층에 갇혀 있을지도 모른다 – 심장이 쿵쾅거린다.",
     "sceneScript": "경보가 울리고, 연기와 신음 소리가 당신을 에워싼다. 공포가 목을 조인다. 어떻게 하시겠습니까?",
+    "status": "임시저장",
     "approvalStatus": "DRAFT",
     "createdAt": "2025-09-04T00:00:00.000Z",
-    "createdBy": "시나리오 관리자",
+    "createdBy": 1,
     "order": 1,
     "disasterType": "fire",
+    "riskLevel": "MEDIUM",
     "difficulty": "easy",
     "options": [
       {

@@ -1,0 +1,36 @@
+{
+  "name": "phoenix-scenario-generator",
+  "version": "1.0.0",
+  "description": "Phoenix 시나리오 데이터 변환 및 검증 도구",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "convert": "ts-node src/convert-scenario.ts",
+    "convert-all": "ts-node src/convert-all.ts",
+    "validate": "ts-node src/validate-data.ts",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "phoenix",
+    "scenario",
+    "converter",
+    "mysql",
+    "typescript"
+  ],
+  "author": "Phoenix Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/commander": "^2.12.2",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0",
+    "rimraf": "^5.0.5"
+  }
+}

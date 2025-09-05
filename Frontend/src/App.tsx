@@ -256,11 +256,51 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          {/* 홈 */}
           <Route path="/" element={<HomePage />} />
+
+          {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
+
+          {/* 훈련하기 */}
+          <Route path="/manual" element={<ScenarioPage />} />
           <Route path="/training/fire" element={<ScenarioPage />} />
+          <Route path="/training/earthquake" element={<ScenarioPage />} />
+          <Route path="/training/emergency" element={<ScenarioPage />} />
+          <Route path="/training/flood" element={<ScenarioPage />} />
+
+          {/* 마이페이지 */}
+          <Route path="/mypage/records" element={<ScenarioPage />} />
+          <Route path="/mypage/scores" element={<ScenarioPage />} />
+          <Route path="/mypage/profile" element={<ScenarioPage />} />
+
+          {/* 고객지원 */}
+          <Route path="/faq" element={<ScenarioPage />} />
+          <Route path="/contact" element={<ScenarioPage />} />
+
+          {/* 관리자페이지 */}
           <Route
             path="/admin"
+            element={
+              <ProtectedAdminRoute>
+                <AdminLayout>
+                  <DashboardPage />
+                </AdminLayout>
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/scenarios"
+            element={
+              <ProtectedAdminRoute>
+                <AdminLayout>
+                  <DashboardPage />
+                </AdminLayout>
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
             element={
               <ProtectedAdminRoute>
                 <AdminLayout>

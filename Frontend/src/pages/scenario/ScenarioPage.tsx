@@ -236,7 +236,7 @@ export default function ScenarioPage() {
   // 로딩/에러 처리
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[linear-gradient(135deg,#232526_0%,#414345_100%)] dark:text-white">
+      <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-darkgray dark:text-white">
         <div className="text-center">
           <img
             src={phoenixImg}

@@ -2,20 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchFireScenario } from '@/services/scenarioService';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import Confetti from 'react-confetti';
-import phoenixImg from '../../assets/images/phoenix.png';
+import phoenixImg from '@/assets/images/phoenix.png';
 import Layout from '@/components/layout/Layout';
 
 // ---- 경험치/레벨 상태 ----
 type PersistState = {
   EXP: number;
   level: number;
+  // streak는 더 이상 사용하지 않지만 기존 로컬스토리지 호환을 위해 타입만 유지
   streak: number;
   totalCorrect: number;
 };
 
 const PERSIST_KEY = 'phoenix_training_state';
-const BASE_EXP = 10;
-const STREAK_BONUS_PER = 2;
+const BASE_EXP = 10; // 스트릭 보너스 제거 → 고정 EXP
 const scenarioSetName = '화재 대응';
 
 function getEXPForNextLevel(level: number) {
@@ -55,10 +55,9 @@ export default function ScenarioPage() {
   const [selected, setSelected] = useState<ScenarioOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  // 게임화 상태
+  // 게임화 상태 (스트릭 제거)
   const [EXP, setEXP] = useState(0);
   const [level, setLevel] = useState(1);
-  const [streak, setStreak] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [EXPDisplay, setEXPDisplay] = useState(0);
   const neededEXP = useMemo(() => getEXPForNextLevel(level), [level]);
@@ -78,8 +77,13 @@ export default function ScenarioPage() {
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
 
-  // 한 번이라도 틀렸는지 플래그
+  // 시나리오 단위 제어:
+  // - 한 문제에서 오답이 단 한 번이라도 나오면 true (러닝 전체 실패 판정에 사용)
   const [failedThisRun, setFailedThisRun] = useState(false);
+  // - 현재 문제에서 오답을 시도했는지 (정답 눌러도 EXP 지급 방지용)
+  const [wrongTriedInThisScene, setWrongTriedInThisScene] = useState(false);
+  // - 현재 문제에서 EXP가 이미 지급되었는지(중복 EXP 방지)
+  const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
 
   // 초기 로드
   useEffect(() => {
@@ -107,7 +111,6 @@ export default function ScenarioPage() {
         const s: PersistState = JSON.parse(raw);
         setEXP(s.EXP ?? 0);
         setLevel(s.level ?? 1);
-        setStreak(s.streak ?? 0);
         setTotalCorrect(s.totalCorrect ?? 0);
         setEXPDisplay(s.EXP ?? 0);
       } catch {
@@ -116,46 +119,52 @@ export default function ScenarioPage() {
     }
   }, []);
   useEffect(() => {
-    const s: PersistState = { EXP, level, streak, totalCorrect };
+    // streak는 더 이상 사용하지 않으므로 0으로 고정 저장
+    const s: PersistState = { EXP, level, streak: 0, totalCorrect };
     localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
-  }, [EXP, level, streak, totalCorrect]);
+  }, [EXP, level, totalCorrect]);
 
-  // 선택 핸들러: 피드백 표시, 점수/레벨 처리 (진행은 버튼으로 수동)
+  // 선택 핸들러: 피드백 표시, EXP/레벨 처리 (진행은 버튼으로 수동)
   const handleChoice = (option: ScenarioOption) => {
+    const isCorrect = (option.points?.accuracy ?? 0) > 0;
+
+    // 피드백과 현재 선택은 항상 갱신 (UI 반응)
     setSelected(option);
     setFeedback(option.reaction);
 
-    const isCorrect = (option.points?.accuracy ?? 0) > 0;
-    const nextFailed = failedThisRun || !isCorrect;
+    // 오답이 한 번이라도 나오면 러닝 실패 플래그 ON
+    if (!isCorrect) {
+      setWrongTriedInThisScene(true);
+      setFailedThisRun(true);
+    }
 
-    if (isCorrect) {
-      const newStreak = streak + 1;
-      const gained = BASE_EXP + newStreak * STREAK_BONUS_PER;
+    // EXP 지급 규칙:
+    // 1) 현재 문제에서 아직 EXP를 지급하지 않았고,
+    // 2) 첫 시도가 정답(= 오답 시도 기록이 없음)일 때만,
+    // 3) 단 한 번만 BASE_EXP 지급
+    if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
+      const gained = BASE_EXP; // 스트릭 보너스 제거 → 고정 EXP
 
-      let tempEXP = EXP + gained;
-      let tempLevel = level;
+      let nextEXP = EXP + gained;
+      let nextLevel = level;
 
       animateValue({
         from: EXPDisplay,
-        to: tempEXP,
+        to: nextEXP,
         duration: 500,
         onUpdate: setEXPDisplay,
       });
 
-      while (tempEXP >= getEXPForNextLevel(tempLevel)) {
-        tempEXP -= getEXPForNextLevel(tempLevel);
-        tempLevel += 1;
+      while (nextEXP >= getEXPForNextLevel(nextLevel)) {
+        nextEXP -= getEXPForNextLevel(nextLevel);
+        nextLevel += 1;
       }
 
-      setEXP(tempEXP);
-      setLevel(tempLevel);
-      setStreak(newStreak);
+      setEXP(nextEXP);
+      setLevel(nextLevel);
       setTotalCorrect(c => c + 1);
-    } else {
-      setStreak(0);
+      setAwardedExpThisScene(true); // 같은 문제에서 추가 지급 방지
     }
-
-    setFailedThisRun(nextFailed);
   };
 
   // 다음/이전
@@ -169,9 +178,11 @@ export default function ScenarioPage() {
         ? scenarios.findIndex(s => s.sceneId === nextId)
         : -1;
 
-    // 상태 초기화
+    // 다음 문제로 넘어가기 전, 현재 문제 상태 초기화(다음 문제에서 다시 첫 시도 판단)
     setSelected(null);
     setFeedback(null);
+    setWrongTriedInThisScene(false);
+    setAwardedExpThisScene(false);
 
     if (nextIndex !== -1) {
       setHistory(h => [...h, current]);
@@ -200,7 +211,10 @@ export default function ScenarioPage() {
     setCurrent(prev);
     setSelected(null);
     setFeedback(null);
-    // 실패 플래그/스트릭은 유지 (원한다면 여기서 재계산 로직 가능)
+    // 이전 문제로 돌아가면 시도 플래그 초기화
+    setWrongTriedInThisScene(false);
+    setAwardedExpThisScene(false);
+    // failedThisRun은 유지 (러닝 전체 판정)
   };
 
   // 모달 열릴 때 스크롤 잠금
@@ -337,7 +351,8 @@ export default function ScenarioPage() {
                       </div>
                       <p className="mt-1 text-xs opacity-80">
                         EXP {Math.round(EXPDisplay)} / {neededEXP} (
-                        {progressPct}%)
+                        {progressPct}
+                        %)
                       </p>
                     </div>
                   </div>
@@ -379,7 +394,7 @@ export default function ScenarioPage() {
               })}
             </section>
 
-            {/* 피드백 (자동 진행 안내 제거, 사용자가 버튼으로 진행) */}
+            {/* 피드백 */}
             {feedback && (
               <div
                 className={`rounded-2xl shadow-md px-5 py-4 mb-6 text-white ${feedbackBg}`}
@@ -489,7 +504,9 @@ export default function ScenarioPage() {
                     setFailedThisRun(false);
                     setSelected(null);
                     setFeedback(null);
-                    setStreak(0);
+                    // 장면 단위 플래그 초기화
+                    setWrongTriedInThisScene(false);
+                    setAwardedExpThisScene(false);
                   }}
                 >
                   다시 도전

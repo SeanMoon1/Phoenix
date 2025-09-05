@@ -264,10 +264,7 @@ function App() {
 
           {/* 훈련하기 */}
           <Route path="/manual" element={<ScenarioPage />} />
-          <Route path="/training/fire" element={<ScenarioPage />} />
-          <Route path="/training/earthquake" element={<ScenarioPage />} />
-          <Route path="/training/emergency" element={<ScenarioPage />} />
-          <Route path="/training/flood" element={<ScenarioPage />} />
+          <Route path="/training/:type" element={<ScenarioPage />} />
 
           {/* 마이페이지 */}
           <Route path="/mypage/records" element={<ScenarioPage />} />

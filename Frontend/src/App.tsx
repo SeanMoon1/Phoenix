@@ -265,7 +265,7 @@ function App() {
 
           {/* 훈련하기 */}
           <Route path="/manual" element={<ScenarioPage />} />
-          <Route path="/training/select" element={<ScenarioSelectPage />} />
+          <Route path="/training" element={<ScenarioSelectPage />} />
           <Route path="/training/:type" element={<ScenarioPage />} />
 
           {/* 마이페이지 */}

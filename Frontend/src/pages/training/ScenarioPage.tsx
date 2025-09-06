@@ -12,6 +12,7 @@ import NavButtons from '@/components/common/NavButtons';
 import ClearModal from '@/components/common/ClearModal';
 import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
+import PlayMoreButton from '@/components/common/PlayMoreButton';
 
 import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue } from '@/utils/exp';
@@ -386,6 +387,10 @@ export default function ScenarioPage() {
               onPrev={handlePrev}
               onNext={handleNext}
             />
+
+            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
+              <PlayMoreButton to="/training" />
+            </div>
           </main>
         </div>
 

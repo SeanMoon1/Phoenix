@@ -33,12 +33,30 @@ const SCENARIO_SELECT_PATH = '/training/select';
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 
+// 마지막 토큰 집합
+const TERMINAL_TOKENS = new Set([TOKEN_REVIEW, TOKEN_SCENARIO_SELECT]);
+
+// 선택지가 '복습하기'인지 판별
 const isReviewChoice = (opt: ScenarioOption) =>
   opt.nextId === TOKEN_REVIEW || (opt.answer ?? '').includes('복습');
 
+// 선택지가 '다음 시나리오 선택하기'인지 판별
 const isScenarioSelectChoice = (opt: ScenarioOption) =>
   opt.nextId === TOKEN_SCENARIO_SELECT ||
   (opt.answer ?? '').includes('다음 시나리오');
+
+// 현재 장면이 '마지막 장면'인지 판별
+function isTerminalScene(scn: Scenario | undefined, all: Scenario[]): boolean {
+  if (!scn) return false;
+  const idSet = new Set(all.map(s => s.sceneId));
+  // 다음으로 갈 수 있는 정상 장면이 하나도 없고, 전부 특수 토큰/없음/미존재 ID면 '종단'
+  return scn.options.every(opt => {
+    const nextId = opt.nextId;
+    if (!nextId) return true;
+    if (TERMINAL_TOKENS.has(nextId as string)) return true;
+    return !idSet.has(nextId as string);
+  });
+}
 
 export default function ScenarioPage() {
   // 훅은 컴포넌트 내부에서 호출
@@ -82,6 +100,9 @@ export default function ScenarioPage() {
   const [wrongTriedInThisScene, setWrongTriedInThisScene] = useState(false);
   const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
 
+  // 모달 자동 1회 노출 방지 플래그
+  const [endModalAutoShown, setEndModalAutoShown] = useState(false);
+
   // 초기 로드
   useEffect(() => {
     fetchFireScenario()
@@ -120,10 +141,34 @@ export default function ScenarioPage() {
     localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
   }, [EXP, level, totalCorrect]);
 
-  // 선택 핸들러
+  // 마지막 장면 도달 시 자동으로 클리어/실패 모달 노출
+  useEffect(() => {
+    if (!scenario) return;
+    if (isTerminalScene(scenario, scenarios) && !endModalAutoShown) {
+      setEndModalAutoShown(true);
+
+      if (!failedThisRun) {
+        // 성공 모달 + 컨페티
+        setClearMsg(
+          `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
+        );
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4500);
+      } else {
+        // 실패 모달
+        setFailMsg(
+          `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
+        );
+      }
+    }
+  }, [scenario, scenarios, failedThisRun, endModalAutoShown]);
+
+  // 선택 핸들러(특수 선택지는 '즉시' 동작)
   const handleChoice = (option: ScenarioOption) => {
     setSelected(option);
     setFeedback(option.reaction);
+
+    // 특수 선택지 즉시 처리
     if (isReviewChoice(option)) {
       setCurrent(0);
       setHistory([]);
@@ -142,7 +187,7 @@ export default function ScenarioPage() {
       return;
     }
 
-    // 정답/오답 처리
+    // 정답, 오답 처리
     const isCorrect = (option.points?.accuracy ?? 0) > 0;
     if (!isCorrect) {
       setWrongTriedInThisScene(true);
@@ -192,6 +237,7 @@ export default function ScenarioPage() {
       setShowConfetti(false);
       setClearMsg(null);
       setFailMsg(null);
+      setEndModalAutoShown(false);
       return;
     }
 

@@ -15,7 +15,8 @@ import ConfettiOverlay from '@/components/common/ConfettiOverlay';
 import PlayMoreButton from '@/components/common/PlayMoreButton';
 
 import phoenixImg from '@/assets/images/phoenix.png';
-import { getEXPForNextLevel, animateValue } from '@/utils/exp';
+import LevelUpToast from '@/components/common/LevelUpToast';
+import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
 // ---- 경험치/레벨 상태 ----
@@ -30,7 +31,7 @@ const PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
 const scenarioSetName = '화재 대응';
 
-const SCENARIO_SELECT_PATH = '/training/select';
+const SCENARIO_SELECT_PATH = '/training';
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 
@@ -85,7 +86,7 @@ export default function ScenarioPage() {
     return Number.isFinite(pct) ? pct : 0;
   }, [EXPDisplay, neededEXP]);
 
-  // 성공/실패 모달 & 컨페티
+  // 성공, 실패 모달 & 컨페티
   const [showConfetti, setShowConfetti] = useState(false);
   const [clearMsg, setClearMsg] = useState<string | null>(null);
   const [failMsg, setFailMsg] = useState<string | null>(null);
@@ -100,6 +101,10 @@ export default function ScenarioPage() {
   const [failedThisRun, setFailedThisRun] = useState(false);
   const [wrongTriedInThisScene, setWrongTriedInThisScene] = useState(false);
   const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
+
+  // 레벨업 연출
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpBonus, setLevelUpBonus] = useState(0);
 
   // 모달 자동 1회 노출 방지 플래그
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
@@ -181,6 +186,7 @@ export default function ScenarioPage() {
       setShowConfetti(false);
       setClearMsg(null);
       setFailMsg(null);
+      setEndModalAutoShown(false); //
       return;
     }
     if (isScenarioSelectChoice(option)) {
@@ -199,22 +205,65 @@ export default function ScenarioPage() {
     if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
       const gained = BASE_EXP;
 
+      // 1) 현재 레벨의 목표치
+      const oldLevel = level;
+      const oldNeeded = getEXPForNextLevel(oldLevel);
+
+      // 2) 누적, 보너스 계산
       let nextEXP = EXP + gained;
       let nextLevel = level;
-
-      animateValue({
-        from: EXPDisplay,
-        to: nextEXP,
-        duration: 500,
-        onUpdate: setEXPDisplay,
-      });
+      let totalBonus = 0;
+      let leveled = false;
 
       while (nextEXP >= getEXPForNextLevel(nextLevel)) {
         nextEXP -= getEXPForNextLevel(nextLevel);
         nextLevel += 1;
+        const bonus = getLevelUpBonus(nextLevel);
+        totalBonus += bonus;
+        nextEXP += bonus;
+        leveled = true;
       }
-      setEXP(nextEXP);
-      setLevel(nextLevel);
+
+      if (!leveled) {
+        // (A) 레벨업 없음 → 잔여치까지 자연스럽게
+        animateValue({
+          from: EXPDisplay,
+          to: nextEXP,
+          duration: 600,
+          onUpdate: setEXPDisplay,
+        });
+        setEXP(nextEXP);
+        setLevel(nextLevel);
+      } else {
+        // (B) 레벨업 있음 → 2단계 애니메이션
+        // 1단계: 현재 레벨 바를 100%까지 채우기
+        animateValue({
+          from: EXPDisplay,
+          to: oldNeeded,
+          duration: 350,
+          onUpdate: setEXPDisplay,
+          onComplete: () => {
+            // 레벨/EXP 커밋 + 레벨업 이펙트
+            setLevel(nextLevel);
+            setEXP(nextEXP);
+
+            setLevelUpBonus(totalBonus);
+            setShowLevelUp(true);
+            window.setTimeout(() => setShowLevelUp(false), 1400);
+
+            // 2단계: 새 레벨에서 0 → 잔여 EXP(nextEXP)까지
+            setEXPDisplay(0);
+            animateValue({
+              from: 0,
+              to: nextEXP,
+              duration: 600,
+              onUpdate: setEXPDisplay,
+            });
+          },
+        });
+      }
+
+      // 공통 후처리
       setTotalCorrect(c => c + 1);
       setAwardedExpThisScene(true);
     }
@@ -355,6 +404,7 @@ export default function ScenarioPage() {
             expDisplay={EXPDisplay}
             neededExp={neededEXP}
             progressPct={progressPct}
+            highlight={showLevelUp}
           />
 
           <main>
@@ -394,6 +444,8 @@ export default function ScenarioPage() {
           </main>
         </div>
 
+        {showLevelUp && <LevelUpToast bonus={levelUpBonus} level={level} />}
+
         <ConfettiOverlay show={showConfetti} vw={vw} vh={vh} />
 
         {clearMsg && (
@@ -419,6 +471,7 @@ export default function ScenarioPage() {
               setFeedback(null);
               setWrongTriedInThisScene(false);
               setAwardedExpThisScene(false);
+              setEndModalAutoShown(false);
             }}
           />
         )}

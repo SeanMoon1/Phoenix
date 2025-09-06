@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { fetchFireScenario } from '@/services/scenarioService';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
+
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -11,8 +12,10 @@ import NavButtons from '@/components/common/NavButtons';
 import ClearModal from '@/components/common/ClearModal';
 import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
+
 import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue } from '@/utils/exp';
+import { useNavigate } from 'react-router-dom';
 
 // ---- 경험치/레벨 상태 ----
 type PersistState = {
@@ -26,13 +29,26 @@ const PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
 const scenarioSetName = '화재 대응';
 
+const SCENARIO_SELECT_PATH = '/training/select';
+const TOKEN_REVIEW = '#REVIEW';
+const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
+
+const isReviewChoice = (opt: ScenarioOption) =>
+  opt.nextId === TOKEN_REVIEW || (opt.answer ?? '').includes('복습');
+
+const isScenarioSelectChoice = (opt: ScenarioOption) =>
+  opt.nextId === TOKEN_SCENARIO_SELECT ||
+  (opt.answer ?? '').includes('다음 시나리오');
+
 export default function ScenarioPage() {
+  // 훅은 컴포넌트 내부에서 호출
+  const navigate = useNavigate();
+
   // 데이터 & 진행
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
-
   const scenario = scenarios[current];
 
   // 선택/피드백
@@ -106,15 +122,34 @@ export default function ScenarioPage() {
 
   // 선택 핸들러
   const handleChoice = (option: ScenarioOption) => {
-    const isCorrect = (option.points?.accuracy ?? 0) > 0;
     setSelected(option);
     setFeedback(option.reaction);
+    if (isReviewChoice(option)) {
+      setCurrent(0);
+      setHistory([]);
+      setSelected(null);
+      setFeedback(null);
+      setWrongTriedInThisScene(false);
+      setAwardedExpThisScene(false);
+      setFailedThisRun(false);
+      setShowConfetti(false);
+      setClearMsg(null);
+      setFailMsg(null);
+      return;
+    }
+    if (isScenarioSelectChoice(option)) {
+      navigate(SCENARIO_SELECT_PATH);
+      return;
+    }
 
+    // 정답/오답 처리
+    const isCorrect = (option.points?.accuracy ?? 0) > 0;
     if (!isCorrect) {
       setWrongTriedInThisScene(true);
       setFailedThisRun(true);
     }
 
+    // 같은 문제에서 오답 이력 없고 정답 첫 시도일 때만 EXP 지급
     if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
       const gained = BASE_EXP;
 
@@ -132,7 +167,6 @@ export default function ScenarioPage() {
         nextEXP -= getEXPForNextLevel(nextLevel);
         nextLevel += 1;
       }
-
       setEXP(nextEXP);
       setLevel(nextLevel);
       setTotalCorrect(c => c + 1);
@@ -142,26 +176,54 @@ export default function ScenarioPage() {
 
   // 다음/이전
   const handleNext = () => {
-    if (!selected || !scenario) return;
+    if (!selected || !scenario) return; // 널가드
+
     const nextId = selected.nextId;
+
+    // "훈련 내용을 복습하기" → 처음 장면으로 리셋
+    if (nextId === TOKEN_REVIEW) {
+      setCurrent(0);
+      setHistory([]);
+      setSelected(null);
+      setFeedback(null);
+      setWrongTriedInThisScene(false);
+      setAwardedExpThisScene(false);
+      setFailedThisRun(false);
+      setShowConfetti(false);
+      setClearMsg(null);
+      setFailMsg(null);
+      return;
+    }
+
+    // "다음 시나리오 훈련하기" → 선택 탭으로 이동
+    if (nextId === TOKEN_SCENARIO_SELECT) {
+      navigate(SCENARIO_SELECT_PATH);
+      return;
+    }
+
+    // nextId로 다음 장면 이동 or 종료 판단
     const nextIndex =
       typeof nextId === 'string'
         ? scenarios.findIndex(s => s.sceneId === nextId)
         : -1;
 
-    // 현재 장면 플래그 리셋
-    setSelected(null);
-    setFeedback(null);
-    setWrongTriedInThisScene(false);
-    setAwardedExpThisScene(false);
+    // 현재 장면 플래그 리셋은 '전환/종료' 직전에 수행
+    const resetSceneFlags = () => {
+      setSelected(null);
+      setFeedback(null);
+      setWrongTriedInThisScene(false);
+      setAwardedExpThisScene(false);
+    };
 
     if (nextIndex !== -1) {
+      resetSceneFlags();
       setHistory(h => [...h, current]);
       setCurrent(nextIndex);
       return;
     }
 
-    // 종료 분기
+    // 종료 분기(성공/실패)
+    resetSceneFlags();
     if (!failedThisRun) {
       setClearMsg(
         `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
@@ -175,6 +237,7 @@ export default function ScenarioPage() {
     }
   };
 
+  // 이전 장면
   const handlePrev = () => {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
@@ -205,10 +268,7 @@ export default function ScenarioPage() {
   // 로딩/에러
   if (loading) {
     return (
-      <div
-        className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827]
-] dark:text-white"
-      >
+      <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827] dark:text-white">
         <div className="text-center">
           <img
             src={phoenixImg}
@@ -241,10 +301,7 @@ export default function ScenarioPage() {
 
   return (
     <Layout>
-      <div
-        className="min-h-screen w-full overflow-x-hidden py-8 md:py-10 bg-white text-neutral-900 dark:bg-[#111827]
- dark:text-white"
-      >
+      <div className="min-h-screen w-full overflow-x-hidden py-8 md:py-10 bg-white text-neutral-900 dark:bg-[#111827] dark:text-white">
         <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4 grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-6">
           <CharacterPanel
             level={level}

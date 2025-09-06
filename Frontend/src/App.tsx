@@ -13,6 +13,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
+import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -264,6 +265,7 @@ function App() {
 
           {/* 훈련하기 */}
           <Route path="/manual" element={<ScenarioPage />} />
+          <Route path="/training/select" element={<ScenarioSelectPage />} />
           <Route path="/training/:type" element={<ScenarioPage />} />
 
           {/* 마이페이지 */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import ScenarioPage from './pages/scenario/ScenarioPage';
+import ScenarioPage from './pages/training/ScenarioPage';
 import {
   BrowserRouter as Router,
   Routes,

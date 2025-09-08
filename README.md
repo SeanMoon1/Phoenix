@@ -72,6 +72,12 @@ Phoenix/
 │   │   ├── 📁 stores/              # 상태 관리
 │   │   ├── 📁 types/               # TypeScript 타입
 │   │   └── 📁 hooks/               # 커스텀 훅
+│   ├── 📁 scripts/                 # 시나리오 스크립트 도구
+│   │   ├── 📁 game-script-tool/    # 게임 스크립트 생성 도구
+│   │   ├── 📁 scenario-generator/  # 시나리오 변환 스크립트
+│   │   ├── 📁 data/                # 샘플 시나리오 데이터
+│   │   ├── 📁 deploy/              # 배포 스크립트
+│   │   └── 📁 setup/               # 개발 환경 설정
 │   ├── package.json
 │   ├── tailwind.config.js
 │   └── vite.config.ts
@@ -107,18 +113,6 @@ Phoenix/
 │   ├── 📁 migrations/              # 수동 SQL 마이그레이션
 │   └── 📁 backups/                 # 데이터베이스 백업
 │
-├── 📁 Scripts/                     # 배포 및 유틸리티 스크립트
-│   ├── 📁 setup/                   # ✅ 개발 환경 설정
-│   │   ├── setup.sh                # Linux/Mac 설정 스크립트
-│   │   └── start-dev.sh            # 개발 서버 시작
-│   ├── 📁 build/                   # ✅ 빌드 스크립트
-│   │   ├── build.sh                # Linux/Mac 빌드
-│   │   └── build.bat               # Windows 빌드
-│   ├── 📁 deploy/                  # ✅ AWS 배포 스크립트
-│   │   └── deploy.sh               # 원클릭 배포
-│   ├── 📁 game-script-tool/        # 시나리오 생성 도구
-│   ├── 📁 scenario-generator/      # 시나리오 변환 스크립트
-│   └── 📁 data/                    # 샘플 시나리오 데이터
 │
 ├── 📁 Docs/                        # 📚 포괄적 문서
 │   ├── 📁 api/                     # ✅ API 문서 및 가이드
@@ -141,21 +135,20 @@ git clone <repository-url>
 cd Phoenix
 
 # 개발 환경 자동 설정 (Linux/Mac)
-chmod +x Scripts/setup/setup.sh
-./Scripts/setup/setup.sh
-
-# Windows의 경우
-Scripts\setup\setup.bat
+chmod +x Frontend/scripts/setup/setup.sh
+./Frontend/scripts/setup/setup.sh
 ```
 
 ### 2. 개발 서버 실행
 
 ```bash
-# Linux/Mac
-./Scripts/setup/start-dev.sh
+# Backend 서버 시작
+cd Backend
+npm run start:dev
 
-# Windows
-Scripts\setup\start-dev.bat
+# Frontend 서버 시작 (새 터미널)
+cd Frontend
+npm run dev
 ```
 
 ### 3. 접속 확인
@@ -168,10 +161,18 @@ Scripts\setup\start-dev.bat
 
 ### 게임 스크립트 도구
 
+- **위치**: `Frontend/scripts/game-script-tool/`
 - **출처**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
 - **라이선스**: 자유 사용 허가 (제작자: 1000ship)
 - **용도**: 재난 대응 훈련 시나리오 데이터 생성
+- **접근**: 관리자 페이지에서 웹 인터페이스로 접근 가능
 - **설명**: 게임 스크립트 형식의 시나리오를 Phoenix 시스템용 데이터로 변환하는 도구
+
+### 시나리오 생성기
+
+- **위치**: `Frontend/scripts/scenario-generator/`
+- **용도**: 기존 시나리오 데이터를 Phoenix 시스템 형식으로 변환
+- **기능**: JSON 형식의 시나리오를 MySQL INSERT 문으로 변환
 
 ### 생성되는 시나리오 유형
 
@@ -187,42 +188,21 @@ Scripts\setup\start-dev.bat
 게임 스크립트 → JSON 형식 → MySQL INSERT 문 → Phoenix 데이터베이스
 ```
 
-## 💰 AWS 배포 비용
-
-### 최소 구성 (월 $25.50)
-
-- EC2: t3.micro (1 vCPU, 1GB RAM)
-- RDS: db.t3.micro (1 vCPU, 1GB RAM)
-- 스토리지: 20GB GP2 SSD
-
-### 소규모 운영 (월 $49.30)
-
-- EC2: t3.small (2 vCPU, 2GB RAM)
-- RDS: db.t3.small (2 vCPU, 2GB RAM)
-- 스토리지: 20GB GP2 SSD
-
-### 중규모 운영 (월 $96.30)
-
-- EC2: t3.medium (2 vCPU, 4GB RAM)
-- RDS: db.t3.medium (2 vCPU, 4GB RAM)
-- 스토리지: 20GB GP2 SSD
-
 ## 🔧 배포
 
 ### 자동 배포 (권장)
 
 ```bash
 # AWS EC2 원클릭 배포
-chmod +x Scripts/deploy/deploy.sh
-./Scripts/deploy/deploy.sh
+chmod +x Frontend/scripts/deploy/deploy.sh
+./Frontend/scripts/deploy/deploy.sh
 ```
 
 ### 수동 배포
 
 ```bash
 # 프로덕션 빌드
-chmod +x Scripts/build/build.sh
-./Scripts/build/build.sh
+npm run build
 
 # 수동 배포 단계는 Docs/deployment/README.md 참조
 ```

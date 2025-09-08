@@ -1,9 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, AuthState, LoginCredentials } from '../types';
+import { api } from '../services/api';
+
+interface RegisterCredentials {
+  teamCode: string;
+  userCode: string;
+  loginId: string;
+  name: string;
+  email: string;
+  password: string;
+}
 
 interface AuthStore extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
@@ -12,7 +23,7 @@ interface AuthStore extends AuthState {
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    set => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -21,30 +32,71 @@ export const useAuthStore = create<AuthStore>()(
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true });
         try {
-          // TODO: 실제 API 호출로 대체
-          // const response = await authService.login(credentials);
-          
-          // 임시 로그인 로직 (개발용)
-          const mockUser: User = {
-            id: '1',
-            email: credentials.email,
-            name: '테스트 사용자',
-            role: 'user',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          
-          const mockToken = 'mock-jwt-token-' + Date.now();
-          
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-        } catch (error) {
+          // 실제 API 호출
+          const response = await api.post<{
+            access_token: string;
+            user: {
+              id: number;
+              email: string;
+              name: string;
+              userLevel: number;
+              currentTier: string;
+            };
+          }>('/auth/login', credentials);
+
+          if (response.success && response.data) {
+            const user: User = {
+              id: response.data.user.id.toString(),
+              email: response.data.user.email,
+              name: response.data.user.name,
+              role: 'user',
+              userLevel: response.data.user.userLevel,
+              currentTier: response.data.user.currentTier,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            set({
+              user,
+              token: response.data.access_token,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            throw new Error(response.error || '로그인에 실패했습니다.');
+          }
+        } catch (error: any) {
           set({ isLoading: false });
-          throw error;
+          throw new Error(error.message || '로그인에 실패했습니다.');
+        }
+      },
+
+      register: async (credentials: RegisterCredentials) => {
+        set({ isLoading: true });
+        try {
+          // 실제 API 호출
+          const response = await api.post<{
+            id: number;
+            email: string;
+            name: string;
+            userCode: string;
+            loginId: string;
+            team: {
+              id: number;
+              name: string;
+              teamCode: string;
+            };
+          }>('/auth/register', credentials);
+
+          if (response.success && response.data) {
+            // 회원가입 성공 - 로그인 페이지로 리다이렉트
+            set({ isLoading: false });
+          } else {
+            throw new Error(response.error || '회원가입에 실패했습니다.');
+          }
+        } catch (error: any) {
+          set({ isLoading: false });
+          throw new Error(error.message || '회원가입에 실패했습니다.');
         }
       },
 
@@ -76,7 +128,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,

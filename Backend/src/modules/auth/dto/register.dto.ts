@@ -8,10 +8,13 @@ import {
 } from 'class-validator';
 
 export class RegisterDto {
-  @ApiProperty({ example: 1, description: '팀 ID' })
-  @IsNumber()
+  @ApiProperty({
+    example: 'TEAM001',
+    description: '팀 코드 (팀 관리자로부터 받은 코드)',
+  })
+  @IsString()
   @IsNotEmpty()
-  teamId: number;
+  teamCode: string;
 
   @ApiProperty({ example: 'USER001', description: '사용자 코드' })
   @IsString()

@@ -1,9 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../../shared/decorators/public.decorator';
 
 @ApiTags('Teams')
 @Controller('teams')
@@ -46,5 +62,44 @@ export class TeamsController {
   remove(@Param('id') id: string) {
     return this.teamsService.remove(+id);
   }
-}
 
+  @Get('validate-code/:teamCode')
+  @Public() // 인증 없이 접근 가능 (회원가입 시 팀 코드 검증용)
+  @ApiOperation({
+    summary: '팀 코드 유효성 검증',
+    description:
+      '회원가입 시 팀 코드의 유효성을 검증합니다. AWS 호스팅 환경에서 활성 팀만 조회됩니다.',
+  })
+  @ApiParam({
+    name: 'teamCode',
+    description: '검증할 팀 코드 (예: TEAM001)',
+    example: 'TEAM001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '팀 코드 검증 결과',
+    schema: {
+      type: 'object',
+      properties: {
+        valid: { type: 'boolean', description: '팀 코드 유효성' },
+        team: {
+          type: 'object',
+          description: '팀 정보 (유효한 경우만)',
+          properties: {
+            id: { type: 'number', description: '팀 ID' },
+            name: { type: 'string', description: '팀 이름' },
+            description: { type: 'string', description: '팀 설명' },
+            teamCode: { type: 'string', description: '팀 코드' },
+          },
+        },
+        message: {
+          type: 'string',
+          description: '오류 메시지 (유효하지 않은 경우)',
+        },
+      },
+    },
+  })
+  async validateTeamCode(@Param('teamCode') teamCode: string) {
+    return this.teamsService.validateTeamCode(teamCode);
+  }
+}

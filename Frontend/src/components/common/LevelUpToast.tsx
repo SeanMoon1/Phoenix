@@ -1,4 +1,3 @@
-// src/components/common/LevelUpToast.tsx
 type Props = {
   bonus: number;
   level: number;

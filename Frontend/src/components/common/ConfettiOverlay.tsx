@@ -1,4 +1,3 @@
-// src/components/game/ConfettiOverlay.tsx
 import Confetti from 'react-confetti';
 
 type Props = {

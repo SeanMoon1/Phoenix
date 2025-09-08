@@ -268,6 +268,7 @@ function App() {
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/training/fire" element={<ScenarioPage />} />
+          <Route path="/training" element={<ScenarioSelectPage />} />
         </Routes>
       </Router>
     </QueryClientProvider>

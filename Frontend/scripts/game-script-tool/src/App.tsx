@@ -8,18 +8,18 @@
  *
  * 실제 훈련은 별도의 Training Dashboard에서 진행됩니다.
  */
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import ControlMenu from "./Components/ControlMenu/ControlMenu";
-import ScriptView from "./Components/ScriptView";
-import SceneIdSelector from "./Components/UI/SceneIdSelector";
-import NextSceneSelector from "./Components/UI/NextSceneSelector";
-import { useAppStateStore } from "./Stores/atom";
-import { useBlockListSelector } from "./Stores/selector";
-import type { User, ScriptBlock } from "./types";
-import { UserRole, ApprovalStatus } from "./types";
-import { loadBlockList, saveBlockList } from "./Utils/api";
-import { getNextAvailableSceneId } from "./utils/sceneIdGenerator";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import ControlMenu from './Components/ControlMenu/ControlMenu';
+import ScriptView from './Components/ScriptView';
+import SceneIdSelector from './Components/UI/SceneIdSelector';
+import NextSceneSelector from './Components/UI/NextSceneSelector';
+import { useAppStateStore } from './Stores/atom';
+import { useBlockListSelector } from './Stores/selector';
+import type { User, ScriptBlock } from './types';
+import { UserRole, ApprovalStatus } from './types';
+import { loadBlockList, saveBlockList } from './Utils/api';
+import { getNextAvailableSceneId } from './Utils/sceneIdGenerator';
 
 const Container = styled.div`
   @media (min-width: 800px) {
@@ -53,16 +53,16 @@ const RoleBadge = styled.span<{ role: UserRole }>`
   font-size: 10px;
   font-weight: bold;
   color: white;
-  background-color: ${(props) => {
+  background-color: ${props => {
     switch (props.role) {
       case UserRole.ADMIN:
-        return "#dc3545";
+        return '#dc3545';
       case UserRole.TRAINER:
-        return "#28a745";
+        return '#28a745';
       case UserRole.VIEWER:
-        return "#6c757d";
+        return '#6c757d';
       default:
-        return "#6c757d";
+        return '#6c757d';
     }
   }};
 `;
@@ -76,15 +76,15 @@ const TabContainer = styled.div`
 const Tab = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   border: none;
-  background: ${(props) => (props.$active ? "white" : "transparent")};
-  color: ${(props) => (props.$active ? "#007bff" : "#6c757d")};
+  background: ${props => (props.$active ? 'white' : 'transparent')};
+  color: ${props => (props.$active ? '#007bff' : '#6c757d')};
   cursor: pointer;
   border-bottom: 2px solid
-    ${(props) => (props.$active ? "#007bff" : "transparent")};
+    ${props => (props.$active ? '#007bff' : 'transparent')};
   transition: all 0.2s;
 
   &:hover {
-    background: ${(props) => (props.$active ? "white" : "#e9ecef")};
+    background: ${props => (props.$active ? 'white' : '#e9ecef')};
   }
 `;
 
@@ -227,16 +227,16 @@ const FormActions = styled.div`
 
 const ActionButton = styled.button<{ $primary?: boolean }>`
   padding: 10px 20px;
-  border: 1px solid ${(props) => (props.$primary ? "#007bff" : "#6c757d")};
-  background: ${(props) => (props.$primary ? "#007bff" : "white")};
-  color: ${(props) => (props.$primary ? "white" : "#6c757d")};
+  border: 1px solid ${props => (props.$primary ? '#007bff' : '#6c757d')};
+  background: ${props => (props.$primary ? '#007bff' : 'white')};
+  color: ${props => (props.$primary ? 'white' : '#6c757d')};
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
 
   &:hover {
-    background: ${(props) => (props.$primary ? "#0056b3" : "#f8f9fa")};
-    border-color: ${(props) => (props.$primary ? "#0056b3" : "#5a6268")};
+    background: ${props => (props.$primary ? '#0056b3' : '#f8f9fa')};
+    border-color: ${props => (props.$primary ? '#0056b3' : '#5a6268')};
   }
 `;
 
@@ -246,15 +246,15 @@ const App: React.FC = () => {
 
   // 폼 데이터 상태 관리 (기존 ScriptBlock 구조)
   const [formData, setFormData] = useState({
-    sceneId: "",
-    title: "",
-    content: "",
-    sceneScript: "",
-    disasterType: "fire",
-    difficulty: "medium",
+    sceneId: '',
+    title: '',
+    content: '',
+    sceneScript: '',
+    disasterType: 'fire',
+    difficulty: 'medium',
     options: [
-      { answerId: "answer1", answer: "", reaction: "", nextId: "" },
-      { answerId: "answer2", answer: "", reaction: "", nextId: "" },
+      { answerId: 'answer1', answer: '', reaction: '', nextId: '' },
+      { answerId: 'answer2', answer: '', reaction: '', nextId: '' },
     ],
   });
 
@@ -278,24 +278,24 @@ const App: React.FC = () => {
     if (appState.modifySceneId && appState.modifySceneId !== editingSceneId) {
       const currentBlocks = loadBlockList();
       const blockToEdit = currentBlocks.find(
-        (block) => block.sceneId === appState.modifySceneId
+        block => block.sceneId === appState.modifySceneId
       );
 
       if (blockToEdit) {
         setFormData({
           sceneId: blockToEdit.sceneId,
-          title: blockToEdit.title || "",
-          content: blockToEdit.content || "",
-          sceneScript: blockToEdit.sceneScript || "",
-          disasterType: blockToEdit.disasterType || "fire",
-          difficulty: blockToEdit.difficulty || "medium",
-          options: blockToEdit.options?.map((option) => ({
+          title: blockToEdit.title || '',
+          content: blockToEdit.content || '',
+          sceneScript: blockToEdit.sceneScript || '',
+          disasterType: blockToEdit.disasterType || 'fire',
+          difficulty: blockToEdit.difficulty || 'medium',
+          options: blockToEdit.options?.map(option => ({
             answerId: option.answerId,
             answer: option.answer,
             reaction: option.reaction,
             nextId: option.nextId,
           })) || [
-            { answerId: "answer1", answer: "", reaction: "", nextId: "" },
+            { answerId: 'answer1', answer: '', reaction: '', nextId: '' },
           ],
         });
         setIsEditMode(true);
@@ -311,7 +311,7 @@ const App: React.FC = () => {
       const nextSceneId = getNextAvailableSceneId(
         currentBlocks.map((block: ScriptBlock) => block.sceneId)
       );
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         sceneId: nextSceneId,
       }));
@@ -320,14 +320,14 @@ const App: React.FC = () => {
 
   // 사용자 역할을 관리자로 고정 (Admin Dashboard 전용)
   const currentUser: User = {
-    id: "admin001",
-    name: "시나리오 관리자",
+    id: 'admin001',
+    name: '시나리오 관리자',
     role: UserRole.ADMIN,
     user_level: 100, // 관리자는 최고 레벨
     user_exp: 999999, // 관리자는 최대 경험치
     total_score: 999999, // 관리자는 최고 점수
     completed_scenarios: 999, // 관리자는 모든 시나리오 완료
-    current_tier: "마스터", // 관리자는 마스터 등급
+    current_tier: '마스터', // 관리자는 마스터 등급
     level_progress: 100.0, // 관리자는 100% 진행도
     next_level_exp: 0, // 관리자는 다음 레벨 불필요
     scenario_stats: {
@@ -351,18 +351,18 @@ const App: React.FC = () => {
   };
 
   // 탭 관리 상태
-  const [activeTab, setActiveTab] = useState<string>("scenarios");
+  const [activeTab, setActiveTab] = useState<string>('scenarios');
 
   // 폼 입력 처리
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   // 선택지 입력 처리
   const handleOptionChange = (index: number, field: string, value: string) => {
     const newOptions = [...formData.options];
     newOptions[index] = { ...newOptions[index], [field]: value };
-    setFormData((prev) => ({ ...prev, options: newOptions }));
+    setFormData(prev => ({ ...prev, options: newOptions }));
   };
 
   // answerId 재정렬 함수
@@ -383,11 +383,11 @@ const App: React.FC = () => {
   // 선택지 추가
   const addOption = () => {
     const newAnswerId = `answer${formData.options.length + 1}`;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       options: [
         ...prev.options,
-        { answerId: newAnswerId, answer: "", reaction: "", nextId: "" },
+        { answerId: newAnswerId, answer: '', reaction: '', nextId: '' },
       ],
     }));
   };
@@ -398,14 +398,14 @@ const App: React.FC = () => {
       const newOptions = formData.options.filter((_, i) => i !== index);
       // answerId 재정렬
       const reorderedOptions = reorderAnswerIds(newOptions);
-      setFormData((prev) => ({ ...prev, options: reorderedOptions }));
+      setFormData(prev => ({ ...prev, options: reorderedOptions }));
     }
   };
 
   // 시나리오 저장 (생성 또는 수정)
   const handleSaveScenario = () => {
     if (!formData.sceneId || !formData.title || !formData.content) {
-      alert("필수 항목을 모두 입력해주세요.");
+      alert('필수 항목을 모두 입력해주세요.');
       return;
     }
 
@@ -414,7 +414,7 @@ const App: React.FC = () => {
 
     if (isEditMode && editingSceneId) {
       // 수정 모드: 기존 블록 업데이트
-      updatedBlocks = currentBlocks.map((block) =>
+      updatedBlocks = currentBlocks.map(block =>
         block.sceneId === editingSceneId
           ? {
               ...block,
@@ -423,7 +423,7 @@ const App: React.FC = () => {
               sceneScript: formData.sceneScript,
               disasterType: formData.disasterType,
               difficulty: formData.difficulty,
-              options: formData.options.map((option) => ({
+              options: formData.options.map(option => ({
                 answerId: option.answerId,
                 answer: option.answer,
                 reaction: option.reaction,
@@ -450,7 +450,7 @@ const App: React.FC = () => {
         order: Date.now(), // 임시 순서
         disasterType: formData.disasterType,
         difficulty: formData.difficulty,
-        options: formData.options.map((option) => ({
+        options: formData.options.map(option => ({
           answerId: option.answerId,
           answer: option.answer,
           reaction: option.reaction,
@@ -472,15 +472,15 @@ const App: React.FC = () => {
 
     // 폼 초기화
     setFormData({
-      sceneId: "",
-      title: "",
-      content: "",
-      sceneScript: "",
-      disasterType: "fire",
-      difficulty: "medium",
+      sceneId: '',
+      title: '',
+      content: '',
+      sceneScript: '',
+      disasterType: 'fire',
+      difficulty: 'medium',
       options: [
-        { answerId: "answer1", answer: "", reaction: "", nextId: "" },
-        { answerId: "answer2", answer: "", reaction: "", nextId: "" },
+        { answerId: 'answer1', answer: '', reaction: '', nextId: '' },
+        { answerId: 'answer2', answer: '', reaction: '', nextId: '' },
       ],
     });
 
@@ -492,22 +492,22 @@ const App: React.FC = () => {
     closeSceneForm();
 
     alert(
-      isEditMode ? "시나리오가 수정되었습니다!" : "시나리오가 저장되었습니다!"
+      isEditMode ? '시나리오가 수정되었습니다!' : '시나리오가 저장되었습니다!'
     );
   };
 
   // 폼 취소 시 초기화
   const handleCancel = () => {
     setFormData({
-      sceneId: "",
-      title: "",
-      content: "",
-      sceneScript: "",
-      disasterType: "fire",
-      difficulty: "medium",
+      sceneId: '',
+      title: '',
+      content: '',
+      sceneScript: '',
+      disasterType: 'fire',
+      difficulty: 'medium',
       options: [
-        { answerId: "answer1", answer: "", reaction: "", nextId: "" },
-        { answerId: "answer2", answer: "", reaction: "", nextId: "" },
+        { answerId: 'answer1', answer: '', reaction: '', nextId: '' },
+        { answerId: 'answer2', answer: '', reaction: '', nextId: '' },
       ],
     });
     setIsEditMode(false);
@@ -521,10 +521,10 @@ const App: React.FC = () => {
       <UserInfo>
         <div>👤 {currentUser.name}</div>
         <RoleBadge role={currentUser.role}>🔐 관리자</RoleBadge>
-        <div style={{ marginTop: "5px", fontSize: "10px", color: "#666" }}>
+        <div style={{ marginTop: '5px', fontSize: '10px', color: '#666' }}>
           🏆 {currentUser.current_tier} (Lv.{currentUser.user_level})
         </div>
-        <div style={{ fontSize: "10px", color: "#999" }}>Admin Dashboard</div>
+        <div style={{ fontSize: '10px', color: '#999' }}>Admin Dashboard</div>
       </UserInfo>
 
       <ControlMenu />
@@ -532,15 +532,15 @@ const App: React.FC = () => {
       {/* 탭 네비게이션 */}
       <TabContainer>
         <Tab
-          $active={activeTab === "scenarios"}
-          onClick={() => setActiveTab("scenarios")}
+          $active={activeTab === 'scenarios'}
+          onClick={() => setActiveTab('scenarios')}
         >
           📚 시나리오 관리
         </Tab>
       </TabContainer>
 
       {/* 시나리오 콘텐츠 */}
-      {activeTab === "scenarios" && (
+      {activeTab === 'scenarios' && (
         <BlockContainer>
           {/* 시나리오 편집 폼이 열려있을 때 */}
           {appState.isSceneFormOpened ? (
@@ -548,8 +548,8 @@ const App: React.FC = () => {
               <SceneFormHeader>
                 <h3>
                   {isEditMode
-                    ? "재난 대응 훈련 시나리오 수정"
-                    : "재난 대응 훈련 시나리오 생성"}
+                    ? '재난 대응 훈련 시나리오 수정'
+                    : '재난 대응 훈련 시나리오 생성'}
                 </h3>
                 <CloseButton onClick={handleCancel}>✕</CloseButton>
               </SceneFormHeader>
@@ -559,8 +559,8 @@ const App: React.FC = () => {
                     <label>재난 유형:</label>
                     <select
                       value={formData.disasterType}
-                      onChange={(e) =>
-                        handleInputChange("disasterType", e.target.value)
+                      onChange={e =>
+                        handleInputChange('disasterType', e.target.value)
                       }
                     >
                       <option value="fire">화재</option>
@@ -575,8 +575,8 @@ const App: React.FC = () => {
                     <label>난이도:</label>
                     <select
                       value={formData.difficulty}
-                      onChange={(e) =>
-                        handleInputChange("difficulty", e.target.value)
+                      onChange={e =>
+                        handleInputChange('difficulty', e.target.value)
                       }
                     >
                       <option value="easy">초급</option>
@@ -590,13 +590,10 @@ const App: React.FC = () => {
                   <label>장면 ID:</label>
                   <SceneIdSelector
                     value={formData.sceneId}
-                    onChange={(sceneId) =>
-                      handleInputChange("sceneId", sceneId)
-                    }
+                    onChange={sceneId => handleInputChange('sceneId', sceneId)}
                     existingSceneIds={blockListState.blockList.map(
                       (block: ScriptBlock) => block.sceneId
                     )}
-                    allowNew={!isEditMode}
                     placeholder="장면 ID를 선택하세요"
                     disabled={isEditMode} // 수정 모드에서는 장면 ID 변경 불가
                   />
@@ -608,7 +605,7 @@ const App: React.FC = () => {
                     type="text"
                     placeholder="화재 발생 현장 도착"
                     value={formData.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    onChange={e => handleInputChange('title', e.target.value)}
                   />
                 </FormField>
 
@@ -618,9 +615,7 @@ const App: React.FC = () => {
                     placeholder="화재 현장에 도착했습니다. 연기가 가득한 건물을 확인하고 대응 방안을 결정하세요."
                     rows={4}
                     value={formData.content}
-                    onChange={(e) =>
-                      handleInputChange("content", e.target.value)
-                    }
+                    onChange={e => handleInputChange('content', e.target.value)}
                   />
                 </FormField>
 
@@ -630,8 +625,8 @@ const App: React.FC = () => {
                     placeholder="화재 현장 상황을 파악하고 신속하게 대응하세요. 연기와 불길이 보이는 건물입니다."
                     rows={3}
                     value={formData.sceneScript}
-                    onChange={(e) =>
-                      handleInputChange("sceneScript", e.target.value)
+                    onChange={e =>
+                      handleInputChange('sceneScript', e.target.value)
                     }
                   />
                 </FormField>
@@ -645,26 +640,26 @@ const App: React.FC = () => {
                           type="text"
                           placeholder="답변 (예: 소화기로 진화 시도)"
                           value={option.answer}
-                          onChange={(e) =>
-                            handleOptionChange(index, "answer", e.target.value)
+                          onChange={e =>
+                            handleOptionChange(index, 'answer', e.target.value)
                           }
                         />
                         <input
                           type="text"
                           placeholder="반응 (예: 화재 확산 방지)"
                           value={option.reaction}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleOptionChange(
                               index,
-                              "reaction",
+                              'reaction',
                               e.target.value
                             )
                           }
                         />
                         <NextSceneSelector
                           value={option.nextId}
-                          onChange={(nextId) =>
-                            handleOptionChange(index, "nextId", nextId)
+                          onChange={nextId =>
+                            handleOptionChange(index, 'nextId', nextId)
                           }
                           availableScenes={blockListState.blockList.map(
                             (block: ScriptBlock) => ({
@@ -681,12 +676,12 @@ const App: React.FC = () => {
                             type="button"
                             onClick={() => removeOption(index)}
                             style={{
-                              background: "#dc3545",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              padding: "4px 8px",
-                              cursor: "pointer",
+                              background: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              cursor: 'pointer',
                             }}
                           >
                             삭제
@@ -703,7 +698,7 @@ const App: React.FC = () => {
                 <FormActions>
                   <ActionButton onClick={handleCancel}>취소</ActionButton>
                   <ActionButton $primary onClick={handleSaveScenario}>
-                    {isEditMode ? "시나리오 수정" : "시나리오 저장"}
+                    {isEditMode ? '시나리오 수정' : '시나리오 저장'}
                   </ActionButton>
                 </FormActions>
               </SceneFormContent>

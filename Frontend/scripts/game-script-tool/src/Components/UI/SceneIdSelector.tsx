@@ -1,16 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
+import React, { useState, useRef, useEffect } from 'react';
+import styled from 'styled-components';
 import {
   getAvailableSceneIds,
   compareSceneIds,
-  isValidSceneId,
-} from "../../utils/sceneIdGenerator";
+} from '../../Utils/sceneIdGenerator';
 
 interface SceneIdSelectorProps {
   value: string;
   onChange: (sceneId: string) => void;
   existingSceneIds: string[];
-  allowNew?: boolean;
   placeholder?: string;
   disabled?: boolean;
 }
@@ -25,9 +23,9 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  background: ${(props) => (props.$disabled ? "#f5f5f5" : "white")};
-  color: ${(props) => (props.$disabled ? "#999" : "#333")};
-  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
+  background: ${props => (props.$disabled ? '#f5f5f5' : 'white')};
+  color: ${props => (props.$disabled ? '#999' : '#333')};
+  cursor: ${props => (props.$disabled ? 'not-allowed' : 'pointer')};
   text-align: left;
   display: flex;
   justify-content: space-between;
@@ -36,7 +34,7 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
   transition: all 0.2s;
 
   &:hover {
-    border-color: ${(props) => (props.$disabled ? "#ddd" : "#007bff")};
+    border-color: ${props => (props.$disabled ? '#ddd' : '#007bff')};
   }
 
   &:focus {
@@ -47,7 +45,7 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
 `;
 
 const DropdownIcon = styled.span<{ $isOpen: boolean }>`
-  transform: ${(props) => (props.$isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+  transform: ${props => (props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
   transition: transform 0.2s;
   font-size: 12px;
   color: #666;
@@ -65,7 +63,7 @@ const DropdownList = styled.div<{ $isOpen: boolean }>`
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  display: ${(props) => (props.$isOpen ? "block" : "none")};
+  display: ${props => (props.$isOpen ? 'block' : 'none')};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
@@ -73,12 +71,12 @@ const DropdownItem = styled.div<{ $isSelected: boolean; $isNew: boolean }>`
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
-  background: ${(props) => (props.$isSelected ? "#e3f2fd" : "white")};
-  color: ${(props) => (props.$isNew ? "#007bff" : "#333")};
+  background: ${props => (props.$isSelected ? '#e3f2fd' : 'white')};
+  color: ${props => (props.$isNew ? '#007bff' : '#333')};
   border-bottom: 1px solid #f0f0f0;
 
   &:hover {
-    background: ${(props) => (props.$isSelected ? "#e3f2fd" : "#f8f9fa")};
+    background: ${props => (props.$isSelected ? '#e3f2fd' : '#f8f9fa')};
   }
 
   &:last-child {
@@ -96,8 +94,7 @@ const SceneIdSelector: React.FC<SceneIdSelectorProps> = ({
   value,
   onChange,
   existingSceneIds,
-  allowNew = true,
-  placeholder = "장면 ID를 선택하세요",
+  placeholder = '장면 ID를 선택하세요',
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -124,8 +121,8 @@ const SceneIdSelector: React.FC<SceneIdSelectorProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSelect = (sceneId: string) => {
@@ -161,7 +158,7 @@ const SceneIdSelector: React.FC<SceneIdSelectorProps> = ({
       </SelectButton>
 
       <DropdownList $isOpen={isOpen}>
-        {displayOptions.map((sceneId) => (
+        {displayOptions.map(sceneId => (
           <DropdownItem
             key={sceneId}
             $isSelected={sceneId === value}

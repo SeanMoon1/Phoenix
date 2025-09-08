@@ -45,13 +45,13 @@
 
 ### **1. 시나리오 생성 폼**
 
-![시나리오 생성 폼](_readme/scenario-creation-form.png)
+![시나리오 생성 폼](_readme/scenario.add.png)
 
 _재난 유형, 난이도, 장면 ID, 제목, 설명, 스크립트, 선택지 등을 설정할 수 있는 직관적인 폼 인터페이스_
 
 ### **2. 시나리오 관리 뷰**
 
-![시나리오 관리 뷰](_readme/scenario-management-view.png)
+![시나리오 관리 뷰](_readme/scenario.manage.png)
 
 _생성된 시나리오들을 카드 형태로 보여주고, 수정/삭제/순서 변경 등의 관리 기능을 제공_
 

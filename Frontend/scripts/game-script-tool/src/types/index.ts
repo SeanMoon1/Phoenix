@@ -31,11 +31,13 @@ export interface User {
   updated_at?: string; // 마지막 업데이트일
 }
 
-export enum UserRole {
-  ADMIN = "ADMIN",
-  TRAINER = "TRAINER",
-  VIEWER = "VIEWER",
-}
+export const UserRole = {
+  ADMIN: 'ADMIN',
+  TRAINER: 'TRAINER',
+  VIEWER: 'VIEWER',
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 // SQL 스키마 기반 새로운 인터페이스들
 export interface Scenario {
@@ -94,20 +96,25 @@ export interface ChoiceOption {
   isActive: boolean;
 }
 
-export enum ScenarioStatus {
-  DRAFT = "임시저장",
-  PENDING = "승인대기",
-  APPROVED = "승인완료",
-  REJECTED = "승인거부",
-  ACTIVE = "활성화",
-  INACTIVE = "비활성화",
-}
+export const ScenarioStatus = {
+  DRAFT: '임시저장',
+  PENDING: '승인대기',
+  APPROVED: '승인완료',
+  REJECTED: '승인거부',
+  ACTIVE: '활성화',
+  INACTIVE: '비활성화',
+} as const;
 
-export enum EventType {
-  CHOICE = "선택형",
-  SEQUENTIAL = "순차형",
-  TIMED = "시간제한형",
-}
+export type ScenarioStatus =
+  (typeof ScenarioStatus)[keyof typeof ScenarioStatus];
+
+export const EventType = {
+  CHOICE: '선택형',
+  SEQUENTIAL: '순차형',
+  TIMED: '시간제한형',
+} as const;
+
+export type EventType = (typeof EventType)[keyof typeof EventType];
 
 // 기존 ScriptBlock (하위 호환성을 위해 유지)
 export interface ScriptBlock {
@@ -139,12 +146,15 @@ export interface ScriptBlock {
   nextSceneId?: string;
 }
 
-export enum ApprovalStatus {
-  PENDING = "PENDING",
-  APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
-  DRAFT = "DRAFT",
-}
+export const ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  DRAFT: 'DRAFT',
+} as const;
+
+export type ApprovalStatus =
+  (typeof ApprovalStatus)[keyof typeof ApprovalStatus];
 
 export interface AppState {
   isSceneFormOpened: boolean;
@@ -191,14 +201,17 @@ export interface Achievement {
   is_completed: boolean;
 }
 
-export enum AchievementType {
-  LEVEL_UP = "LEVEL_UP", // 레벨업 달성
-  SCENARIO_COMPLETE = "SCENARIO_COMPLETE", // 시나리오 완료
-  PERFECT_SCORE = "PERFECT_SCORE", // 만점 달성
-  STREAK = "STREAK", // 연속 완료
-  SPEED_RUNNER = "SPEED_RUNNER", // 빠른 완료
-  ACCURACY_MASTER = "ACCURACY_MASTER", // 정확성 마스터
-}
+export const AchievementType = {
+  LEVEL_UP: 'LEVEL_UP', // 레벨업 달성
+  SCENARIO_COMPLETE: 'SCENARIO_COMPLETE', // 시나리오 완료
+  PERFECT_SCORE: 'PERFECT_SCORE', // 만점 달성
+  STREAK: 'STREAK', // 연속 완료
+  SPEED_RUNNER: 'SPEED_RUNNER', // 빠른 완료
+  ACCURACY_MASTER: 'ACCURACY_MASTER', // 정확성 마스터
+} as const;
+
+export type AchievementType =
+  (typeof AchievementType)[keyof typeof AchievementType];
 
 // 경험치 계산을 위한 상수
 export const EXP_CONSTANTS = {
@@ -246,11 +259,11 @@ export const EXP_CONSTANTS = {
   MAX_LEVEL: 100,
   // 레벨별 등급 시스템
   LEVEL_TIERS: {
-    BEGINNER: { min: 1, max: 20, name: "초급자", color: "#4CAF50" },
-    INTERMEDIATE: { min: 21, max: 40, name: "중급자", color: "#2196F3" },
-    ADVANCED: { min: 41, max: 60, name: "고급자", color: "#FF9800" },
-    EXPERT: { min: 61, max: 80, name: "전문가", color: "#9C27B0" },
-    MASTER: { min: 81, max: 100, name: "마스터", color: "#F44336" },
+    BEGINNER: { min: 1, max: 20, name: '초급자', color: '#4CAF50' },
+    INTERMEDIATE: { min: 21, max: 40, name: '중급자', color: '#2196F3' },
+    ADVANCED: { min: 41, max: 60, name: '고급자', color: '#FF9800' },
+    EXPERT: { min: 61, max: 80, name: '전문가', color: '#9C27B0' },
+    MASTER: { min: 81, max: 100, name: '마스터', color: '#F44336' },
   },
 } as const;
 

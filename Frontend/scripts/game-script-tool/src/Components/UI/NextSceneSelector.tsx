@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
+import React, { useState, useRef, useEffect } from 'react';
+import styled from 'styled-components';
 import {
   compareSceneIds,
   getRecommendedNextScenes,
-} from "../../utils/sceneIdGenerator";
+} from '../../Utils/sceneIdGenerator';
 
 interface NextSceneSelectorProps {
   value: string;
@@ -25,9 +25,9 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  background: ${(props) => (props.$disabled ? "#f5f5f5" : "white")};
-  color: ${(props) => (props.$disabled ? "#999" : "#333")};
-  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
+  background: ${props => (props.$disabled ? '#f5f5f5' : 'white')};
+  color: ${props => (props.$disabled ? '#999' : '#333')};
+  cursor: ${props => (props.$disabled ? 'not-allowed' : 'pointer')};
   text-align: left;
   display: flex;
   justify-content: space-between;
@@ -36,7 +36,7 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
   transition: all 0.2s;
 
   &:hover {
-    border-color: ${(props) => (props.$disabled ? "#ddd" : "#007bff")};
+    border-color: ${props => (props.$disabled ? '#ddd' : '#007bff')};
   }
 
   &:focus {
@@ -47,7 +47,7 @@ const SelectButton = styled.button<{ $isOpen: boolean; $disabled: boolean }>`
 `;
 
 const DropdownIcon = styled.span<{ $isOpen: boolean }>`
-  transform: ${(props) => (props.$isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+  transform: ${props => (props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
   transition: transform 0.2s;
   font-size: 12px;
   color: #666;
@@ -65,7 +65,7 @@ const DropdownList = styled.div<{ $isOpen: boolean }>`
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  display: ${(props) => (props.$isOpen ? "block" : "none")};
+  display: ${props => (props.$isOpen ? 'block' : 'none')};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
@@ -77,21 +77,21 @@ const DropdownItem = styled.div<{
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
-  background: ${(props) => {
-    if (props.$isSelected) return "#e3f2fd";
-    if (props.$isRecommended) return "#fff3cd";
-    return "white";
+  background: ${props => {
+    if (props.$isSelected) return '#e3f2fd';
+    if (props.$isRecommended) return '#fff3cd';
+    return 'white';
   }};
-  color: ${(props) => (props.$isEnding ? "#28a745" : "#333")};
+  color: ${props => (props.$isEnding ? '#28a745' : '#333')};
   border-bottom: 1px solid #f0f0f0;
-  border-left: ${(props) =>
-    props.$isRecommended ? "3px solid #ffc107" : "3px solid transparent"};
+  border-left: ${props =>
+    props.$isRecommended ? '3px solid #ffc107' : '3px solid transparent'};
 
   &:hover {
-    background: ${(props) => {
-      if (props.$isSelected) return "#e3f2fd";
-      if (props.$isRecommended) return "#ffeaa7";
-      return "#f8f9fa";
+    background: ${props => {
+      if (props.$isSelected) return '#e3f2fd';
+      if (props.$isRecommended) return '#ffeaa7';
+      return '#f8f9fa';
     }};
   }
 
@@ -134,7 +134,7 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
   availableScenes,
   currentSceneId,
   allowEnding = true,
-  placeholder = "다음 장면을 선택하세요",
+  placeholder = '다음 장면을 선택하세요',
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -144,7 +144,7 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
   const recommendedSceneIds = currentSceneId
     ? getRecommendedNextScenes(
         currentSceneId,
-        availableScenes.map((scene) => scene.sceneId),
+        availableScenes.map(scene => scene.sceneId),
         5
       )
     : [];
@@ -152,13 +152,13 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
   // 사용 가능한 옵션 목록 생성
   const options = [
     // 빈 옵션 (연결 없음)
-    { id: "", title: "연결 없음", isEnding: false, isRecommended: false },
+    { id: '', title: '연결 없음', isEnding: false, isRecommended: false },
     // 추천 장면들 (새로 생성될 장면들)
     ...recommendedSceneIds
       .filter(
-        (sceneId) => !availableScenes.some((scene) => scene.sceneId === sceneId)
+        sceneId => !availableScenes.some(scene => scene.sceneId === sceneId)
       )
-      .map((sceneId) => ({
+      .map(sceneId => ({
         id: sceneId,
         title: `${sceneId} (새로 생성)`,
         isEnding: false,
@@ -166,9 +166,9 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
       })),
     // 기존 장면들
     ...availableScenes
-      .filter((scene) => scene.sceneId !== value) // 현재 장면은 제외
+      .filter(scene => scene.sceneId !== value) // 현재 장면은 제외
       .sort((a, b) => compareSceneIds(a.sceneId, b.sceneId))
-      .map((scene) => ({
+      .map(scene => ({
         id: scene.sceneId,
         title: scene.title,
         isEnding: false,
@@ -178,8 +178,8 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
     ...(allowEnding
       ? [
           {
-            id: "ENDING",
-            title: "훈련 완료",
+            id: 'ENDING',
+            title: '훈련 완료',
             isEnding: true,
             isRecommended: false,
           },
@@ -198,8 +198,8 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSelect = (optionId: string) => {
@@ -216,16 +216,12 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
   const getDisplayText = () => {
     if (!value) return placeholder;
 
-    const selectedOption = options.find((option) => option.id === value);
+    const selectedOption = options.find(option => option.id === value);
     if (selectedOption) {
       return selectedOption.title;
     }
 
     return value;
-  };
-
-  const getSelectedOption = () => {
-    return options.find((option) => option.id === value);
   };
 
   return (

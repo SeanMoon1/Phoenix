@@ -1,23 +1,25 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  root: 'scripts/game-script-tool',
   build: {
-    outDir: "dist",
+    outDir: '../../dist-scripts',
     rollupOptions: {
       input: {
-        main: "index.html",
+        main: resolve(__dirname, 'scripts/game-script-tool/index.html'),
       },
     },
     // 빌드 최적화 설정
-    minify: "esbuild",
+    minify: 'esbuild',
     sourcemap: true,
   },
   server: {
-    port: 5173, // Vite 기본 포트 사용
+    port: 5174, // scripts 도구용 포트
     open: true,
     host: true, // 네트워크 접근 허용
     // HMR 설정 개선
@@ -32,6 +34,11 @@ export default defineConfig({
   },
   // 개발 환경 최적화
   optimizeDeps: {
-    include: ["react", "react-dom", "zustand", "styled-components"],
+    include: ['react', 'react-dom', 'zustand', 'styled-components'],
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'scripts/game-script-tool/src'),
+    },
   },
 });

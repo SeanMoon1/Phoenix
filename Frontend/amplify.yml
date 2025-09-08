@@ -1,0 +1,24 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Installing dependencies..."
+        - npm ci
+        - echo "Installing scripts dependencies..."
+        - cd scripts/game-script-tool && npm ci && cd ../..
+    build:
+      commands:
+        - echo "Building main application..."
+        - npm run build
+        - echo "Building scripts tools..."
+        - npm run build:scripts
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - scripts/game-script-tool/node_modules/**/*
+      - .next/cache/**/*

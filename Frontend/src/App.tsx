@@ -1,5 +1,5 @@
 import React from 'react';
-import ScenarioPage from './pages/scenario/ScenarioPage';
+import ScenarioPage from './pages/training/ScenarioPage';
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,9 +9,10 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
+import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
+import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -243,15 +244,31 @@ const HomePage: React.FC = () => {
   );
 };
 
+// 관리자 라우트 보호 컴포넌트 (개발용 - 임시 비활성화)
+const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // 개발 중에는 인증 체크를 비활성화
+  // const { isAuthenticated } = useAuthStore();
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
+
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          {/* 홈 */}
           <Route path="/" element={<HomePage />} />
+
+          {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="/training/fire" element={<ScenarioPage />} />
+          <Route path="/training" element={<ScenarioSelectPage />} />
         </Routes>
       </Router>
     </QueryClientProvider>

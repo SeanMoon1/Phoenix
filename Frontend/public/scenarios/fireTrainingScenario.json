@@ -486,22 +486,14 @@
       {
         "answerId": "answer1",
         "answer": "훈련 내용을 복습하기",
-        "reaction": "정답! 훈련 내용을 복습하여 실제 상황에 대비해야 합니다.",
-        "nextId": "#END",
-        "points": {
-          "speed": 10,
-          "accuracy": 10
-        }
+        "nextId": "#REVIEW",
+        "points": { "speed": 10, "accuracy": 10 }
       },
       {
         "answerId": "answer2",
-        "answer": "훈련을 다시 시작하기",
-        "reaction": "좋은 선택! 반복 훈련으로 더욱 익숙해질 수 있습니다.",
-        "nextId": "#1-1",
-        "points": {
-          "speed": 5,
-          "accuracy": 5
-        }
+        "answer": "다음 시나리오 훈련하기",
+        "nextId": "#SCENARIO_SELECT",
+        "points": { "speed": 10, "accuracy": 10 }
       }
     ]
   }

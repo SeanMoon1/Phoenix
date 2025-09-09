@@ -15,6 +15,12 @@ import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 
+// 새로 생성한 페이지들 import
+import ManualPage from './pages/manual/ManualPage';
+import TrainingPage from './pages/training/TrainingPage';
+import MyPage from './pages/mypage/MyPage';
+import SupportPage from './pages/support/SupportPage';
+
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,16 +41,16 @@ const FeatureCard: React.FC<{
   <AnimatedText
     delay={delay}
     animation="fadeIn"
-    className="p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600"
+    className="p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600 h-full w-full flex flex-col"
   >
-    <div className="text-center">
+    <div className="text-center flex flex-col h-full">
       <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl">
         {icon}
       </div>
       <h3 className="mb-3 text-xl font-bold text-gray-800 dark:text-gray-100">
         {title}
       </h3>
-      <p className="leading-relaxed text-gray-700 dark:text-gray-200">
+      <p className="leading-relaxed text-gray-700 dark:text-gray-200 flex-grow">
         {description}
       </p>
     </div>
@@ -117,7 +123,7 @@ const HomePage: React.FC = () => {
                   <img
                     src="/character.png"
                     alt="재난훈련 캐릭터"
-                    className="w-4/5 max-w-xs mx-auto sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl drop-shadow-2xl"
+                    className="w-4/5 max-w-xs mx-auto sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl"
                   />
                 </div>
               </AnimatedText>
@@ -142,7 +148,7 @@ const HomePage: React.FC = () => {
             </p>
           </AnimatedText>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch">
             <FeatureCard
               icon="🎮"
               title="가상현실 훈련"
@@ -178,12 +184,6 @@ const HomePage: React.FC = () => {
               title="모바일 지원"
               description="언제 어디서나 접근 가능한 모바일 환경을 지원합니다."
               delay={1200}
-            />
-            <FeatureCard
-              icon="🛡️"
-              title="안전 보장"
-              description="실제 위험 없이 안전하게 훈련할 수 있는 환경을 제공합니다."
-              delay={1400}
             />
           </div>
         </div>
@@ -271,20 +271,16 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
 
           {/* 훈련하기 */}
-          <Route path="/manual" element={<ScenarioPage />} />
-          <Route path="/training/fire" element={<ScenarioPage />} />
-          <Route path="/training/earthquake" element={<ScenarioPage />} />
-          <Route path="/training/emergency" element={<ScenarioPage />} />
-          <Route path="/training/flood" element={<ScenarioPage />} />
+          <Route path="/manual" element={<ManualPage />} />
+          <Route path="/training" element={<TrainingPage />} />
+          <Route path="/training/fire/game" element={<ScenarioPage />} />
+          <Route path="/home/training/fire" element={<ScenarioPage />} />
 
           {/* 마이페이지 */}
-          <Route path="/mypage/records" element={<ScenarioPage />} />
-          <Route path="/mypage/scores" element={<ScenarioPage />} />
-          <Route path="/mypage/profile" element={<ScenarioPage />} />
+          <Route path="/mypage" element={<MyPage />} />
 
           {/* 고객지원 */}
-          <Route path="/faq" element={<ScenarioPage />} />
-          <Route path="/contact" element={<ScenarioPage />} />
+          <Route path="/support" element={<SupportPage />} />
 
           {/* 관리자페이지 */}
           <Route

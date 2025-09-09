@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { fetchFireScenario } from '@/services/scenarioService';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
-
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -13,55 +11,36 @@ import ClearModal from '@/components/common/ClearModal';
 import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
 import PlayMoreButton from '@/components/common/PlayMoreButton';
-
 import phoenixImg from '@/assets/images/phoenix.png';
 import LevelUpToast from '@/components/common/LevelUpToast';
 import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
-// ---- 경험치/레벨 상태 ----
 type PersistState = {
   EXP: number;
   level: number;
-  streak: number; // 호환용
+  streak: number;
   totalCorrect: number;
 };
 
-const PERSIST_KEY = 'phoenix_training_state';
-const BASE_EXP = 10; // 고정 EXP
-const scenarioSetName = '화재 대응';
+type ScenarioPageProps = {
+  scenarioSetName: string; // 예) '화재 대응', '지진 대응'
+  fetchScenarios: () => Promise<Scenario[]>; // 데이터 소스 주입
+  nextScenarioPath: string; // 엔딩 후 이동 경로
+  persistKey?: string; // 로컬스토리지 키 (선택)
+};
 
-const SCENARIO_SELECT_PATH = '/training';
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
+const END_SCENE_ID = '#END';
+const BASE_EXP = 10;
 
-// 마지막 토큰 집합
-const TERMINAL_TOKENS = new Set([TOKEN_REVIEW, TOKEN_SCENARIO_SELECT]);
-
-// 선택지가 '복습하기'인지 판별
-const isReviewChoice = (opt: ScenarioOption) =>
-  opt.nextId === TOKEN_REVIEW || (opt.answer ?? '').includes('복습');
-
-// 선택지가 '다음 시나리오 선택하기'인지 판별
-const isScenarioSelectChoice = (opt: ScenarioOption) =>
-  opt.nextId === TOKEN_SCENARIO_SELECT ||
-  (opt.answer ?? '').includes('다음 시나리오');
-
-// 현재 장면이 '마지막 장면'인지 판별
-function isTerminalScene(scn: Scenario | undefined, all: Scenario[]): boolean {
-  if (!scn) return false;
-  const idSet = new Set(all.map(s => s.sceneId));
-  // 다음으로 갈 수 있는 정상 장면이 하나도 없고, 전부 특수 토큰/없음/미존재 ID면 '종단'
-  return scn.options.every(opt => {
-    const nextId = opt.nextId;
-    if (!nextId) return true;
-    if (TERMINAL_TOKENS.has(nextId as string)) return true;
-    return !idSet.has(nextId as string);
-  });
-}
-
-export default function ScenarioPage() {
-  // 훅은 컴포넌트 내부에서 호출
+export default function GenericScenarioPage({
+  scenarioSetName,
+  fetchScenarios,
+  nextScenarioPath,
+  persistKey = 'phoenix_training_state',
+}: ScenarioPageProps) {
   const navigate = useNavigate();
 
   // 데이터 & 진행
@@ -86,7 +65,7 @@ export default function ScenarioPage() {
     return Number.isFinite(pct) ? pct : 0;
   }, [EXPDisplay, neededEXP]);
 
-  // 성공, 실패 모달 & 컨페티
+  // 연출/모달
   const [showConfetti, setShowConfetti] = useState(false);
   const [clearMsg, setClearMsg] = useState<string | null>(null);
   const [failMsg, setFailMsg] = useState<string | null>(null);
@@ -97,25 +76,21 @@ export default function ScenarioPage() {
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
 
-  // 장면 단위 제어
+  // 장면 제어 플래그
   const [failedThisRun, setFailedThisRun] = useState(false);
   const [wrongTriedInThisScene, setWrongTriedInThisScene] = useState(false);
   const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
-
-  // 레벨업 연출
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpBonus, setLevelUpBonus] = useState(0);
-
-  // 모달 자동 1회 노출 방지 플래그
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
 
-  // 초기 로드
+  // 초기 데이터 로드
   useEffect(() => {
-    fetchFireScenario()
+    fetchScenarios()
       .then(data => setScenarios(data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchScenarios]);
 
   // 리사이즈
   useEffect(() => {
@@ -129,7 +104,7 @@ export default function ScenarioPage() {
 
   // 로컬 스토리지 복구/저장
   useEffect(() => {
-    const raw = localStorage.getItem(PERSIST_KEY);
+    const raw = localStorage.getItem(persistKey);
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -138,78 +113,50 @@ export default function ScenarioPage() {
         setTotalCorrect(s.totalCorrect ?? 0);
         setEXPDisplay(s.EXP ?? 0);
       } catch {
-        console.warn('Failed to restore training state');
+        /* ignore */
       }
     }
-  }, []);
+  }, [persistKey]);
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
-  }, [EXP, level, totalCorrect]);
+    localStorage.setItem(persistKey, JSON.stringify(s));
+  }, [EXP, level, totalCorrect, persistKey]);
 
-  // 마지막 장면 도달 시 자동으로 클리어/실패 모달 노출
+  // ✅ 엔딩(#END) 씬이 "렌더된 뒤" 모달 자동 오픈 → 진행바 21/21 등 먼저 표시됨
   useEffect(() => {
-    if (!scenario) return;
-    if (isTerminalScene(scenario, scenarios) && !endModalAutoShown) {
+    if (!scenario || endModalAutoShown) return;
+    if (scenario.sceneId === END_SCENE_ID) {
       setEndModalAutoShown(true);
-
       if (!failedThisRun) {
-        // 성공 모달 + 컨페티
         setClearMsg(
           `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
         );
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 4500);
       } else {
-        // 실패 모달
         setFailMsg(
           `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
         );
       }
     }
-  }, [scenario, scenarios, failedThisRun, endModalAutoShown]);
+  }, [scenario, endModalAutoShown, failedThisRun, scenarioSetName]);
 
-  // 선택 핸들러(특수 선택지는 '즉시' 동작)
+  // 선택
   const handleChoice = (option: ScenarioOption) => {
+    if (!scenario) return;
     setSelected(option);
-    setFeedback(option.reaction);
+    setFeedback(option.reaction || null);
 
-    // 특수 선택지 즉시 처리
-    if (isReviewChoice(option)) {
-      setCurrent(0);
-      setHistory([]);
-      setSelected(null);
-      setFeedback(null);
-      setWrongTriedInThisScene(false);
-      setAwardedExpThisScene(false);
-      setFailedThisRun(false);
-      setShowConfetti(false);
-      setClearMsg(null);
-      setFailMsg(null);
-      setEndModalAutoShown(false); //
-      return;
-    }
-    if (isScenarioSelectChoice(option)) {
-      navigate(SCENARIO_SELECT_PATH);
-      return;
-    }
-
-    // 정답, 오답 처리
-    const isCorrect = (option.points?.accuracy ?? 0) > 0;
+    const isCorrect = (option.points?.accuracy || 0) > 0;
     if (!isCorrect) {
       setWrongTriedInThisScene(true);
       setFailedThisRun(true);
     }
 
-    // 같은 문제에서 오답 이력 없고 정답 첫 시도일 때만 EXP 지급
     if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
       const gained = BASE_EXP;
-
-      // 1) 현재 레벨의 목표치
       const oldLevel = level;
       const oldNeeded = getEXPForNextLevel(oldLevel);
-
-      // 2) 누적, 보너스 계산
       let nextEXP = EXP + gained;
       let nextLevel = level;
       let totalBonus = 0;
@@ -225,7 +172,6 @@ export default function ScenarioPage() {
       }
 
       if (!leveled) {
-        // (A) 레벨업 없음 → 잔여치까지 자연스럽게
         animateValue({
           from: EXPDisplay,
           to: nextEXP,
@@ -235,23 +181,17 @@ export default function ScenarioPage() {
         setEXP(nextEXP);
         setLevel(nextLevel);
       } else {
-        // (B) 레벨업 있음 → 2단계 애니메이션
-        // 1단계: 현재 레벨 바를 100%까지 채우기
         animateValue({
           from: EXPDisplay,
           to: oldNeeded,
           duration: 350,
           onUpdate: setEXPDisplay,
           onComplete: () => {
-            // 레벨/EXP 커밋 + 레벨업 이펙트
             setLevel(nextLevel);
             setEXP(nextEXP);
-
             setLevelUpBonus(totalBonus);
             setShowLevelUp(true);
             window.setTimeout(() => setShowLevelUp(false), 1400);
-
-            // 2단계: 새 레벨에서 0 → 잔여 EXP(nextEXP)까지
             setEXPDisplay(0);
             animateValue({
               from: 0,
@@ -262,8 +202,6 @@ export default function ScenarioPage() {
           },
         });
       }
-
-      // 공통 후처리
       setTotalCorrect(c => c + 1);
       setAwardedExpThisScene(true);
     }
@@ -271,11 +209,9 @@ export default function ScenarioPage() {
 
   // 다음/이전
   const handleNext = () => {
-    if (!selected || !scenario) return; // 널가드
+    if (!selected || !scenario) return;
+    const nextId = selected.nextId ?? null;
 
-    const nextId = selected.nextId;
-
-    // "훈련 내용을 복습하기" → 처음 장면으로 리셋
     if (nextId === TOKEN_REVIEW) {
       setCurrent(0);
       setHistory([]);
@@ -290,20 +226,16 @@ export default function ScenarioPage() {
       setEndModalAutoShown(false);
       return;
     }
-
-    // "다음 시나리오 훈련하기" → 선택 탭으로 이동
     if (nextId === TOKEN_SCENARIO_SELECT) {
-      navigate(SCENARIO_SELECT_PATH);
+      navigate(nextScenarioPath);
       return;
     }
 
-    // nextId로 다음 장면 이동 or 종료 판단
     const nextIndex =
       typeof nextId === 'string'
         ? scenarios.findIndex(s => s.sceneId === nextId)
         : -1;
 
-    // 현재 장면 플래그 리셋은 '전환/종료' 직전에 수행
     const resetSceneFlags = () => {
       setSelected(null);
       setFeedback(null);
@@ -318,7 +250,7 @@ export default function ScenarioPage() {
       return;
     }
 
-    // 종료 분기(성공/실패)
+    // 구형 JSON 호환(다음 없음 → 종료)
     resetSceneFlags();
     if (!failedThisRun) {
       setClearMsg(
@@ -333,9 +265,8 @@ export default function ScenarioPage() {
     }
   };
 
-  // 이전 장면
   const handlePrev = () => {
-    if (history.length === 0) return;
+    if (!history.length) return;
     const prev = history[history.length - 1];
     setHistory(h => h.slice(0, -1));
     setCurrent(prev);
@@ -345,7 +276,7 @@ export default function ScenarioPage() {
     setAwardedExpThisScene(false);
   };
 
-  // 모달 열릴 때 스크롤 잠금
+  // 모달 시 스크롤 잠금
   useEffect(() => {
     const lock = clearMsg || failMsg || showConfetti;
     const { body, documentElement: html } = document;
@@ -406,7 +337,6 @@ export default function ScenarioPage() {
             progressPct={progressPct}
             highlight={showLevelUp}
           />
-
           <main>
             <ProgressBar
               currentIndex={current}
@@ -416,28 +346,23 @@ export default function ScenarioPage() {
               expDisplay={EXPDisplay}
               neededExp={neededEXP}
             />
-
             <SituationCard
-              title={scenario.title}
-              content={scenario.content}
-              sceneScript={scenario.sceneScript}
+              title={scenario.title ?? ''}
+              content={scenario.content ?? ''}
+              sceneScript={scenario.sceneScript ?? ''}
             />
-
             <OptionsList
-              options={scenario.options}
+              options={scenario.options ?? []}
               selected={selected}
               onSelect={handleChoice}
             />
-
             {feedback && <FeedbackBanner text={feedback} tone={tone} />}
-
             <NavButtons
               canGoPrev={history.length > 0}
               canGoNext={!!selected}
               onPrev={handlePrev}
               onNext={handleNext}
             />
-
             <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
               <PlayMoreButton to="/training" />
             </div>
@@ -445,7 +370,6 @@ export default function ScenarioPage() {
         </div>
 
         {showLevelUp && <LevelUpToast bonus={levelUpBonus} level={level} />}
-
         <ConfettiOverlay show={showConfetti} vw={vw} vh={vh} />
 
         {clearMsg && (
@@ -457,7 +381,6 @@ export default function ScenarioPage() {
             }}
           />
         )}
-
         {failMsg && (
           <FailModal
             message={failMsg}

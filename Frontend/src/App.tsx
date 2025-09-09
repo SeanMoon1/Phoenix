@@ -1,5 +1,4 @@
 import React from 'react';
-import ScenarioPage from './pages/training/ScenarioPage';
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,10 +8,11 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
-import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
+import FireScenarioPage from '@/pages/training/FireScenarioPage';
+import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -267,8 +267,12 @@ function App() {
 
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/training/fire" element={<ScenarioPage />} />
           <Route path="/training" element={<ScenarioSelectPage />} />
+          <Route path="/training/fire" element={<FireScenarioPage />} />
+          <Route
+            path="/training/earthquake"
+            element={<EarthquakeScenarioPage />}
+          />
         </Routes>
       </Router>
     </QueryClientProvider>

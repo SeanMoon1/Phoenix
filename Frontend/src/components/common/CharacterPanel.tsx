@@ -17,7 +17,7 @@ export default function CharacterPanel({
 }: Props) {
   return (
     <aside className="hidden md:flex md:flex-col md:gap-4">
-      <div className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4">
+      <div className="p-4 shadow-md bg-white/80 dark:bg-black/40 rounded-2xl">
         <img
           src={phoenixImg}
           alt="Phoenix Mascot"
@@ -25,7 +25,7 @@ export default function CharacterPanel({
         />
       </div>
 
-      <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-4">
+      <div className="p-4 shadow-md bg-white/90 dark:bg-black/40 rounded-2xl">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-semibold">플레이어 이름</h2>
           <span
@@ -40,7 +40,7 @@ export default function CharacterPanel({
           </span>
         </div>
         <div className="mt-3">
-          <div className="h-3 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="w-full h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
             <div
               className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-500"
               style={{ width: `${progressPct}%` }}

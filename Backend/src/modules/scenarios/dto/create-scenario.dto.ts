@@ -26,10 +26,10 @@ export class CreateScenarioDto {
   @ApiProperty({
     example: 'fire',
     description: '재난 유형',
-    enum: ['fire', 'earthquake', 'flood', 'other'],
+    enum: ['fire', 'earthquake', 'flood', 'emergency', 'traffic', 'other'],
   })
   @IsString()
-  @IsIn(['fire', 'earthquake', 'flood', 'other'])
+  @IsIn(['fire', 'earthquake', 'flood', 'emergency', 'traffic', 'other'])
   disasterType: string;
 
   @ApiProperty({

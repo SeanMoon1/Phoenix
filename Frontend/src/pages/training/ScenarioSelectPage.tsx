@@ -6,7 +6,7 @@ export default function ScenarioSelectPage() {
     <Layout>
       <div className="min-h-[60vh] max-w-3xl mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">다음 시나리오 선택</h1>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             to="/training/fire"
             className="p-5 rounded-xl shadow bg-white hover:bg-gray-50"
@@ -24,6 +24,18 @@ export default function ScenarioSelectPage() {
             className="p-5 rounded-xl shadow bg-white hover:bg-gray-50"
           >
             🌎 지진 대응
+          </Link>
+          <Link
+            to="/training/emergency"
+            className="p-5 rounded-xl shadow bg-white hover:bg-gray-50"
+          >
+            🚑 응급처치
+          </Link>
+          <Link
+            to="/training/traffic"
+            className="p-5 rounded-xl shadow bg-white hover:bg-gray-50"
+          >
+            🚗 교통사고 대응
           </Link>
         </div>
       </div>

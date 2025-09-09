@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { fetchFireScenario } from '@/services/scenarioService';
+import { fetchScenarioByType } from '@/services/scenarioService';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
+import { useLocation } from 'react-router-dom';
 
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
@@ -29,7 +30,23 @@ type PersistState = {
 
 const PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
-const scenarioSetName = '화재 대응';
+// 시나리오 타입별 이름 매핑
+const getScenarioSetName = (type: string): string => {
+  switch (type) {
+    case 'fire':
+      return '화재 대응';
+    case 'emergency':
+      return '응급처치';
+    case 'traffic':
+      return '교통사고 대응';
+    case 'earthquake':
+      return '지진 대응';
+    case 'flood':
+      return '홍수 대응';
+    default:
+      return '재난 대응';
+  }
+};
 
 const SCENARIO_SELECT_PATH = '/training';
 const TOKEN_REVIEW = '#REVIEW';
@@ -111,13 +128,18 @@ export default function ScenarioPage() {
   // 모달 자동 1회 노출 방지 플래그
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
 
+  // URL에서 시나리오 타입 추출
+  const location = useLocation();
+  const scenarioType = location.pathname.split('/').pop() || 'fire';
+  const scenarioSetName = getScenarioSetName(scenarioType);
+
   // 초기 로드
   useEffect(() => {
-    fetchFireScenario()
+    fetchScenarioByType(scenarioType)
       .then(data => setScenarios(data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [scenarioType]);
 
   // 리사이즈
   useEffect(() => {
@@ -371,7 +393,7 @@ export default function ScenarioPage() {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="h-24 w-auto mx-auto mb-4 animate-pulse"
+            className="w-auto h-24 mx-auto mb-4 animate-pulse"
           />
           <p className="text-xl">시나리오 로딩 중...</p>
         </div>
@@ -385,7 +407,7 @@ export default function ScenarioPage() {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="h-24 w-auto mx-auto mb-4"
+            className="w-auto h-24 mx-auto mb-4"
           />
           <p className="text-xl">시나리오를 불러올 수 없습니다.</p>
         </div>
@@ -440,7 +462,7 @@ export default function ScenarioPage() {
               onNext={handleNext}
             />
 
-            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
+            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
               <PlayMoreButton to="/training" />
             </div>
           </main>

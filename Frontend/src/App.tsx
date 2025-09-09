@@ -269,6 +269,8 @@ function App() {
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/training/fire" element={<ScenarioPage />} />
+          <Route path="/training/emergency" element={<ScenarioPage />} />
+          <Route path="/training/traffic" element={<ScenarioPage />} />
           <Route path="/training" element={<ScenarioSelectPage />} />
 
           {/* 관리자 페이지 */}

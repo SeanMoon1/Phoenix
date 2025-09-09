@@ -112,6 +112,13 @@ export class InitialDataSeed {
         codeDesc: '침수 및 홍수',
         codeOrder: 4,
       },
+      {
+        codeClass: 'DISASTER_TYPE',
+        codeName: '교통사고',
+        codeValue: 'TRAFFIC',
+        codeDesc: '교통사고 대응',
+        codeOrder: 5,
+      },
 
       // 위험도
       {

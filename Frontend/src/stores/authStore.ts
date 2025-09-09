@@ -5,7 +5,6 @@ import { api } from '../services/api';
 
 interface RegisterCredentials {
   teamCode: string;
-  userCode: string;
   loginId: string;
   name: string;
   email: string;
@@ -98,7 +97,6 @@ export const useAuthStore = create<AuthStore>()(
             id: number;
             email: string;
             name: string;
-            userCode: string;
             loginId: string;
             team: {
               id: number;

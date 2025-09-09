@@ -107,6 +107,21 @@ export const teamApi = {
   },
 };
 
+// 인증 관련 API 함수들
+export const authApi = {
+  /**
+   * 로그인 ID 중복 확인
+   * @param loginId 확인할 로그인 ID
+   * @returns 중복 확인 결과
+   */
+  checkLoginIdAvailability: async (loginId: string) => {
+    return api.get<{
+      available: boolean;
+      message?: string;
+    }>(`/auth/check-login-id/${loginId}`);
+  },
+};
+
 // 훈련 관련 API
 export const trainingApi = {
   // 훈련 세션 생성

@@ -8,10 +8,23 @@ export interface ApiResponse<T = any> {
 
 // 사용자 타입
 export interface User {
-  id: string;
-  email: string;
+  id: number;
+  teamId: number;
+  userCode: string;
+  loginId: string;
   name: string;
-  role: 'user' | 'admin' | 'trainer';
+  email: string;
+  useYn: string;
+  userLevel: number;
+  userExp: number;
+  totalScore: number;
+  completedScenarios: number;
+  currentTier: string;
+  levelProgress: number;
+  nextLevelExp: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,26 +42,62 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-// 훈련 시나리오 타입
-export interface TrainingScenario {
-  id: string;
+// 팀 타입
+export interface Team {
+  id: number;
+  teamCode: string;
+  name: string;
+  description?: string;
+  status: string;
+  createdBy?: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 시나리오 타입
+export interface Scenario {
+  id: number;
+  teamId: number;
+  scenarioCode: string;
   title: string;
+  disasterType: string;
   description: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  duration: number; // minutes
+  riskLevel: string;
+  occurrenceCondition?: string;
+  status: string;
+  approvalComment?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  createdBy: number;
+  approvedAt?: string;
+  approvedBy?: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 // 훈련 세션 타입
 export interface TrainingSession {
-  id: string;
-  scenarioId: string;
-  userId: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'failed';
-  score?: number;
-  startedAt: string;
-  completedAt?: string;
+  id: number;
+  teamId: number;
+  scenarioId: number;
+  sessionCode: string;
+  sessionName: string;
+  startTime: string;
+  endTime?: string;
+  maxParticipants?: number;
+  status: string;
+  createdBy: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 대시보드 통계 타입

@@ -1,0 +1,544 @@
+[
+  {
+    "id": 1,
+    "teamId": 1,
+    "scenarioCode": "SCEN001",
+    "sceneId": "#1-1",
+    "title": "감염된 도시의 화재 경보",
+    "content": "세상의 끝이 온 지 몇 달, 폐허가 된 도시에서 당신은 낡은 아파트에 은신하고 있다. 새벽 3시, 차가운 공기가 피부를 스치는데 갑자기 날카로운 화재 경보가 귓전을 찢는다. 먼지 쌓인 공기 속에 연기 냄새가 스며들고, 밖에서는 감염된 자들의 끔찍한 신음 소리가 메아리친다. 당신의 연인이 아래층에 갇혀 있을지도 모른다 – 심장이 쿵쾅거린다.",
+    "sceneScript": "경보가 울리고, 연기와 신음 소리가 당신을 에워싼다. 공포가 목을 조인다. 어떻게 하시겠습니까?",
+    "status": "임시저장",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 1,
+    "disasterType": "fire",
+    "riskLevel": "MEDIUM",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "주변 생존자들에게 \"불이야! 감염된 자들 조심!\" 소리치고 긴급 신호 보내기",
+        "reaction": "정답! 목소리가 떨리지만, 주변을 경고하고 도움을 청하는 게 생존의 열쇠다. 연인의 얼굴이 스치듯 떠오른다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "불의 원인을 확인하러 혼자 나서기",
+        "reaction": "오답! 복도의 어둠 속에서 감염된 자의 손톱이 당신의 살을 스칠 수 있다. 후회막급이다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-2",
+    "title": "출입문 손잡이와 위협 확인",
+    "content": "심장이 터질 듯 뛰는 가운데, 문 앞에 선 당신. 밖에서 감염된 자들의 발소리가 바닥을 긁는 소리가 들린다. 손이 떨리고, 땀이 흘러내린다. 연인의 안위가 머릿속을 가득 채운다.",
+    "sceneScript": "문 앞, 공포가 피부를 간질인다. 불길과 괴물이 기다릴 수 있다. 무엇을 확인할까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 2,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "손등으로 출입문 손잡이 온도 만져보고, 문틈으로 감염된 자 확인",
+        "reaction": "정답! 뜨거운 열기와 그림자 같은 형체를 느끼며, 이중 위협을 피한다. 생명의 실타래가 이어진다.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 문을 열고 무기 들고 돌진",
+        "reaction": "오답! 문이 열리자마자 뜨거운 불길이 얼굴을 핥고, 감염된 자의 이빨이 다가온다. 절망적인 순간.",
+        "nextId": "#1-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-3",
+    "title": "대피 경로와 생존자 선택",
+    "content": "손잡이에서 뜨거운 열기가 느껴지고, 복도의 어둠 속에 감염된 자들의 윤곽이 어른거린다. 연인의 비명 소리가 환청처럼 들리는 듯하다. 숨이 가빠오고, 선택의 순간이 다가온다.",
+    "sceneScript": "연기와 신음이 섞인 공기 속, 대피하라. 연인을 구해야 한다 – 시간이 없다.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 3,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "비상계단으로 내려가며 감염된 자를 피하기",
+        "reaction": "정답! 계단의 차가운 금속이 손을 스치며, 희미한 희망의 빛이 보인다. 연인을 향해.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "엘리베이터로 빠르게 내려가기",
+        "reaction": "오답! 문이 열리자 연기와 함께 갇힌 공포가 밀려오고, 감염된 자의 그림자가 스멀스멀 다가온다.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "창문으로 신호 보내고 도움 기다리기",
+        "reaction": "부분 정답! 바람이 얼굴을 때리지만, 연인을 구하기엔 늦을 수 있다. 초조함이 몸을 옥죄인다.",
+        "nextId": "#1-4",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-4",
+    "title": "연기와 감염된 자 속 대피",
+    "content": "계단으로 내려가자 검은 연기가 목을 조이고, 갑자기 감염된 자 한 마리가 어둠 속에서 튀어나온다. 썩은 살 냄새가 코를 찌르고, 그들의 붉은 눈이 당신을 노려본다.",
+    "sceneScript": "연기 속 괴물이 다가온다. 숨이 막히고, 공포가 뼈를 파고든다. 어떻게?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 4,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "낮은 자세로 기어가며 소음 피하고 감염된 자 우회",
+        "reaction": "정답! 바닥의 먼지가 피부를 문지르며, 연기 아래로 스며들어 생존한다. 괴물을 피해.",
+        "nextId": "#1-5",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "숨 참고 뛰며 감염된 자와 싸우기",
+        "reaction": "오답! 연기를 들이마시며 싸우다 지치고, 괴물의 손톱이 살을 파고든다. 고통의 비명.",
+        "nextId": "#1-5",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-5",
+    "title": "폐허 놀이터 도착",
+    "content": "마침내 폐허가 된 놀이터에 도착한다. 부서진 그네가 바람에 삐걱거리고, 연인의 모습은 보이지 않는다. 피로와 공포가 몸을 짓누른다.",
+    "sceneScript": "놀이터의 차가운 땅이 발을 맞이한다. 감염된 자들의 그림자가 어른거린다. 이제?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 5,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "생존자 그룹에 상황 보고하고 연인 수색 시작",
+        "reaction": "정답! 목소리가 갈라지지만, 도움을 청해 연인을 찾는다. 희망의 불씨가 타오른다.",
+        "nextId": "#1-6",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "혼자 건물로 돌아가기",
+        "reaction": "오답! 불길과 괴물 속으로 다시 뛰어들다니, 자살 행위다. 절망이 스며든다.",
+        "nextId": "#1-6",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-6",
+    "title": "생존자 인원과 연인 확인",
+    "content": "상황을 보고한 후, 그룹의 생존자들을 둘러본다. 피곤한 얼굴들 사이에 연인이 없다. 가슴이 철렁 내려앉고, 공포가 다시 피어오른다.",
+    "sceneScript": "보고 끝. 공포가 다시 엄습한다. 이제 무엇을?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 6,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "그룹 인원 확인하고 연인 추적 시작",
+        "reaction": "정답! 누락자를 찾아 나서며, 연인을 구할 희망이 솟는다. 생존의 끈을 붙잡는다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "화재와 감염 상황 지켜보기",
+        "reaction": "부분 정답! 불길을 바라보지만, 연인을 먼저 찾아야 한다. 초조함이 몸을 갉아먹는다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-1",
+    "title": "폐허 부엌에서 불과 감염",
+    "content": "폐허가 된 부엌에서 작은 불꽃이 피어오른다. 공기 중에 타는 냄새가 퍼지고, 근처에서 감염된 자의 낮은 으르렁 소리가 들린다. 땀이 등줄기를 타고 흐른다.",
+    "sceneScript": "작은 불이 춤추고, 괴물이 다가온다. 심장이 쿵쾅거린다. 어떻게?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 7,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "가스와 전기 차단 후 감염된 자 유인 피하기",
+        "reaction": "정답! 차가운 밸브를 돌리며 불을 제어하고, 괴물을 피해. 생존자의 본능이다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "소화기로 불 끄기 중 감염된 자 무시",
+        "reaction": "오답! 불을 끄다 괴물의 손톱이 등을 긁는다. 고통과 공포의 물결.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "바로 대피하며 불 버리기",
+        "reaction": "부분 정답! 불을 뒤로하고 달리지만, 은신처가 타오르는 소리가 뒤쫓는다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-2",
+    "title": "차단 완료, 불 제어",
+    "content": "가스와 전기를 차단하자 불꽃이 약해지지만, 감염된 자가 문을 긁는 소리가 가까워진다. 어둠 속에서 그들의 썩은 숨결이 느껴진다.",
+    "sceneScript": "다음 행동? 시간이 촉박하고, 공포가 피부를 찌른다.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 8,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "소화기로 불 끄며 감염된 자 경계",
+        "reaction": "정답! 분사가 불을 삼키고, 괴물을 멀리한다. 생존의 맛이 입안에 퍼진다.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "물로 불 끄기",
+        "reaction": "정답! 차가운 물이 불을 꺼뜨리며, 괴물의 소리를 피한다. 대안의 승리.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer3",
+        "answer": "바로 대피",
+        "reaction": "오답! 불이 번지며 은신처를 삼키고, 괴물이 쫓아온다. 후회의 불길.",
+        "nextId": "#2-3",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-3",
+    "title": "소화기 사용 중 위기",
+    "content": "무거운 소화기를 들자 팔이 떨리고, 문을 두드리는 소리가 점점 커진다. 감염된 자의 썩은 피 냄새가 코를 찌른다.",
+    "sceneScript": "올바른 순서? 문이 흔들리고, 서둘러야 한다.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 9,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "안전핀 뽑고 → 노즐 잡고 → 손잡이 움켜쥐고 → 불 향해 분사",
+        "reaction": "정답! 분사가 불을 꺼뜨리고, 생존의 안도감이 밀려온다.",
+        "nextId": "#2-4",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 분사하기",
+        "reaction": "오답! 핀이 안 뽑혀 실패하고, 문이 부서지며 괴물이 쏟아진다.",
+        "nextId": "#2-4",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-4",
+    "title": "옷에 불, 감염 위협",
+    "content": "소화기 사용 중 옷에 불이 옮겨 붙는다. 뜨거운 고통이 피부를 태우고, 감염된 자가 다가오는 소리가 심장을 찌른다.",
+    "sceneScript": "불이 피부를 핥는다! 괴물이 가까이. 어떻게?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 10,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "바닥에 뒹굴어 불 끄고 감염된 자 피하기",
+        "reaction": "정답! 바닥의 먼지가 불을 삼키고, 괴물을 피해. 생존의 기쁨.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "뛰며 불 끄기",
+        "reaction": "오답! 불이 커지며 괴물이 추격하고, 고통이 몸을 찢는다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-1",
+    "title": "폐허 아파트 화재와 함정",
+    "content": "아파트 현관에서 불길이 치솟고, 감염된 자들의 함정이 기다린다. 타는 냄새와 신음이 섞여 공기를 오염시킨다.",
+    "sceneScript": "화재와 괴물의 함정. 심장이 요동친다. 탈출 어떻게?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 11,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "대피 공간이나 경량 칸막이 이용해 우회 대피",
+        "reaction": "정답! 벽을 뚫고 나아가며, 함정을 피해. 영리한 생존자.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "문 열고 돌진",
+        "reaction": "오답! 불과 괴물에 휘말려, 고통의 끝이 다가온다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-2",
+    "title": "완강기와 추락 위기",
+    "content": "대피 공간이 막혔다. 완강기를 쥐자 손이 미끄러지고, 아래에서 감염된 자 무리의 신음이 올라온다. 바람이 얼굴을 때린다.",
+    "sceneScript": "순서대로! 떨어지면 괴물의 먹잇감. 서둘러.",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 12,
+    "disasterType": "fire",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "지지대 고리에 걸고 → 창밖 밀고 → 벨트 조이고 → 벽 짚으며 내려가기",
+        "reaction": "정답! 바람을 가르며 착지하고, 괴물을 피해. 자유의 맛.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 125
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 뛰어내리기",
+        "reaction": "오답! 추락의 충격과 괴물의 이빨. 비극의 끝.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-1",
+    "title": "이웃 폐허 화재와 침입",
+    "content": "이웃 폐허에서 불이 번지고, 연기와 함께 감염된 자가 문을 뚫고 들어오려 한다. 썩은 냄새가 코를 막는다.",
+    "sceneScript": "불과 괴물의 침입. 공포가 피부를 저린다. 어떻게?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 13,
+    "disasterType": "fire",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "창문 닫고 생존자 그룹에 신고",
+        "reaction": "정답! 연기를 차단하고 도움을 청하며, 생존한다. 안도의 한숨.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 계단 대피",
+        "reaction": "오답! 연기와 괴물 속에서 길을 잃고, 공포의 덫에 걸린다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-2",
+    "title": "극한 생존 훈련 완료",
+    "content": "모든 위기를 뚫고, 화재와 감염의 지옥에서 벗어났다. 연인을 구한 당신, 피곤하지만 승리의 미소가 입가에 번진다.",
+    "sceneScript": "축하! 훈련을 끝내고, 포스트 아포칼립스의 생존자가 되었다. 이제?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-09-04T00:00:00.000Z",
+    "createdBy": "시나리오 관리자",
+    "order": 14,
+    "disasterType": "fire",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "훈련 복습하고 연인과 공유",
+        "reaction": "정답! 과거의 공포를 복습하며, 미래의 재난에 대비한다. 유대의 따뜻함.",
+        "nextId": "#END",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "다시 시작하기",
+        "reaction": "좋은 선택! 다시 지옥으로 뛰어들어, 더 강해진다. 도전의 불꽃.",
+        "nextId": "#1-1",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  }
+]

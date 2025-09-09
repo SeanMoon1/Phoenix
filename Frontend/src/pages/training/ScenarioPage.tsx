@@ -249,20 +249,6 @@ export default function GenericScenarioPage({
       setCurrent(nextIndex);
       return;
     }
-
-    // 구형 JSON 호환(다음 없음 → 종료)
-    resetSceneFlags();
-    if (!failedThisRun) {
-      setClearMsg(
-        `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
-      );
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4500);
-    } else {
-      setFailMsg(
-        `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
-      );
-    }
   };
 
   const handlePrev = () => {

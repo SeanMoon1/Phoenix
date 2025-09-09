@@ -1,11 +1,11 @@
-import { create } from "zustand";
-import type { 
-  ScriptBlock, 
-  Scenario, 
-  DecisionEvent, 
+import { create } from 'zustand';
+import type {
+  ScriptBlock,
+  Scenario,
+  DecisionEvent,
   ChoiceOption,
-  AppState as AppStateType 
-} from "../types";
+  AppState as AppStateType,
+} from '../types';
 
 // 기존 ScriptBlock 스토어 (하위 호환성)
 interface BlockListStore {
@@ -16,20 +16,19 @@ interface BlockListStore {
   removeBlock: (sceneId: string) => void;
 }
 
-export const useBlockListStore = create<BlockListStore>((set) => ({
+export const useBlockListStore = create<BlockListStore>(set => ({
   blockList: [],
-  setBlockList: (blockList) => set({ blockList }),
-  addBlock: (block) =>
-    set((state) => ({ blockList: [...state.blockList, block] })),
+  setBlockList: blockList => set({ blockList }),
+  addBlock: block => set(state => ({ blockList: [...state.blockList, block] })),
   updateBlock: (sceneId, updates) =>
-    set((state) => ({
-      blockList: state.blockList.map((block) =>
+    set(state => ({
+      blockList: state.blockList.map(block =>
         block.sceneId === sceneId ? { ...block, ...updates } : block
       ),
     })),
-  removeBlock: (sceneId) =>
-    set((state) => ({
-      blockList: state.blockList.filter((block) => block.sceneId !== sceneId),
+  removeBlock: sceneId =>
+    set(state => ({
+      blockList: state.blockList.filter(block => block.sceneId !== sceneId),
     })),
 }));
 
@@ -41,109 +40,141 @@ interface ScenarioStore {
   updateScenario: (scenarioId: string, updates: Partial<Scenario>) => void;
   removeScenario: (scenarioId: string) => void;
   addEvent: (scenarioId: string, event: DecisionEvent) => void;
-  updateEvent: (scenarioId: string, eventId: string, updates: Partial<DecisionEvent>) => void;
+  updateEvent: (
+    scenarioId: string,
+    eventId: string,
+    updates: Partial<DecisionEvent>
+  ) => void;
   removeEvent: (scenarioId: string, eventId: string) => void;
-  addChoice: (scenarioId: string, eventId: string, choice: ChoiceOption) => void;
-  updateChoice: (scenarioId: string, eventId: string, choiceId: string, updates: Partial<ChoiceOption>) => void;
+  addChoice: (
+    scenarioId: string,
+    eventId: string,
+    choice: ChoiceOption
+  ) => void;
+  updateChoice: (
+    scenarioId: string,
+    eventId: string,
+    choiceId: string,
+    updates: Partial<ChoiceOption>
+  ) => void;
   removeChoice: (scenarioId: string, eventId: string, choiceId: string) => void;
 }
 
-export const useScenarioStore = create<ScenarioStore>((set) => ({
+export const useScenarioStore = create<ScenarioStore>(set => ({
   scenarios: [],
-  setScenarios: (scenarios) => set({ scenarios }),
-  addScenario: (scenario) =>
-    set((state) => ({ scenarios: [...state.scenarios, scenario] })),
-  updateScenario: (scenarioId, updates) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId ? { ...scenario, ...updates } : scenario
-      ),
-    })),
-  removeScenario: (scenarioId) =>
-    set((state) => ({
-      scenarios: state.scenarios.filter((scenario) => scenario.scenarioId !== scenarioId),
-    })),
-  addEvent: (scenarioId, event) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
-          ? { ...scenario, events: [...scenario.events, event] }
+  setScenarios: scenarios => set({ scenarios }),
+  addScenario: scenario =>
+    set(state => ({ scenarios: [...state.scenarios, scenario] })),
+  updateScenario: (scenarioCode, updates) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
+          ? { ...scenario, ...updates }
           : scenario
       ),
     })),
-  updateEvent: (scenarioId, eventId, updates) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
+  removeScenario: scenarioCode =>
+    set(state => ({
+      scenarios: state.scenarios.filter(
+        scenario => scenario.scenarioCode !== scenarioCode
+      ),
+    })),
+  addEvent: (scenarioCode, event) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
+          ? { ...scenario, events: [...(scenario.events || []), event] }
+          : scenario
+      ),
+    })),
+  updateEvent: (scenarioCode, eventId, updates) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
           ? {
               ...scenario,
-              events: scenario.events.map((event) =>
-                event.eventId === eventId ? { ...event, ...updates } : event
-              ),
+              events:
+                scenario.events?.map(event =>
+                  event.id === parseInt(eventId)
+                    ? { ...event, ...updates }
+                    : event
+                ) || [],
             }
           : scenario
       ),
     })),
-  removeEvent: (scenarioId, eventId) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
+  removeEvent: (scenarioCode, eventId) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
           ? {
               ...scenario,
-              events: scenario.events.filter((event) => event.eventId !== eventId),
+              events:
+                scenario.events?.filter(
+                  event => event.id !== parseInt(eventId)
+                ) || [],
             }
           : scenario
       ),
     })),
-  addChoice: (scenarioId, eventId, choice) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
+  addChoice: (scenarioCode, eventId, choice) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
           ? {
               ...scenario,
-              events: scenario.events.map((event) =>
-                event.eventId === eventId
-                  ? { ...event, choices: [...event.choices, choice] }
-                  : event
-              ),
+              events:
+                scenario.events?.map(event =>
+                  event.id === parseInt(eventId)
+                    ? { ...event, choices: [...(event.choices || []), choice] }
+                    : event
+                ) || [],
             }
           : scenario
       ),
     })),
-  updateChoice: (scenarioId, eventId, choiceId, updates) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
+  updateChoice: (scenarioCode, eventId, choiceId, updates) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
           ? {
               ...scenario,
-              events: scenario.events.map((event) =>
-                event.eventId === eventId
-                  ? {
-                      ...event,
-                      choices: event.choices.map((choice) =>
-                        choice.choiceId === choiceId ? { ...choice, ...updates } : choice
-                      ),
-                    }
-                  : event
-              ),
+              events:
+                scenario.events?.map(event =>
+                  event.id === parseInt(eventId)
+                    ? {
+                        ...event,
+                        choices:
+                          event.choices?.map(choice =>
+                            choice.id === parseInt(choiceId)
+                              ? { ...choice, ...updates }
+                              : choice
+                          ) || [],
+                      }
+                    : event
+                ) || [],
             }
           : scenario
       ),
     })),
-  removeChoice: (scenarioId, eventId, choiceId) =>
-    set((state) => ({
-      scenarios: state.scenarios.map((scenario) =>
-        scenario.scenarioId === scenarioId
+  removeChoice: (scenarioCode, eventId, choiceId) =>
+    set(state => ({
+      scenarios: state.scenarios.map(scenario =>
+        scenario.scenarioCode === scenarioCode
           ? {
               ...scenario,
-              events: scenario.events.map((event) =>
-                event.eventId === eventId
-                  ? {
-                      ...event,
-                      choices: event.choices.filter((choice) => choice.choiceId !== choiceId),
-                    }
-                  : event
-              ),
+              events:
+                scenario.events?.map(event =>
+                  event.id === parseInt(eventId)
+                    ? {
+                        ...event,
+                        choices:
+                          event.choices?.filter(
+                            choice => choice.id !== parseInt(choiceId)
+                          ) || [],
+                      }
+                    : event
+                ) || [],
             }
           : scenario
       ),
@@ -159,15 +190,15 @@ interface AppStateStore {
   closeScenarioForm: () => void;
 }
 
-export const useAppStateStore = create<AppStateStore>((set) => ({
+export const useAppStateStore = create<AppStateStore>(set => ({
   appState: {
     isSceneFormOpened: false,
     modifySceneId: null,
     isScenarioFormOpened: false,
     modifyScenarioId: null,
   },
-  openSceneForm: (sceneId) =>
-    set((state) => ({
+  openSceneForm: sceneId =>
+    set(state => ({
       appState: {
         ...state.appState,
         isSceneFormOpened: true,
@@ -175,15 +206,15 @@ export const useAppStateStore = create<AppStateStore>((set) => ({
       },
     })),
   closeSceneForm: () =>
-    set((state) => ({
+    set(state => ({
       appState: {
         ...state.appState,
         isSceneFormOpened: false,
         modifySceneId: null,
       },
     })),
-  openScenarioForm: (scenarioId) =>
-    set((state) => ({
+  openScenarioForm: scenarioId =>
+    set(state => ({
       appState: {
         ...state.appState,
         isScenarioFormOpened: true,
@@ -191,7 +222,7 @@ export const useAppStateStore = create<AppStateStore>((set) => ({
       },
     })),
   closeScenarioForm: () =>
-    set((state) => ({
+    set(state => ({
       appState: {
         ...state.appState,
         isScenarioFormOpened: false,

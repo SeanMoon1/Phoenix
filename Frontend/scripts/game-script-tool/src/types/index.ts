@@ -13,6 +13,7 @@ export interface User {
   currentTier: string;
   levelProgress: number;
   nextLevelExp: number;
+  role: string;
   updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;
@@ -77,7 +78,7 @@ export interface Scenario {
 
 export interface DecisionEvent {
   id: number;
-  scenarioId: number;
+  scenarioCode: string;
   eventCode: string;
   eventOrder: number;
   eventDescription: string;
@@ -94,7 +95,7 @@ export interface DecisionEvent {
 export interface ChoiceOption {
   id: number;
   eventId: number;
-  scenarioId: number;
+  scenarioCode: string;
   choiceCode: string;
   choiceText: string;
   isCorrect: boolean;

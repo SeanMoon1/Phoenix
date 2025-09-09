@@ -1,7 +1,7 @@
 export type ChoiceOption = {
   id: number;
   eventId: number;
-  scenarioId: number;
+  scenarioCode: string;
   choiceCode: string;
   choiceText: string;
   isCorrect: boolean;
@@ -16,7 +16,7 @@ export type ChoiceOption = {
 
 export type DecisionEvent = {
   id: number;
-  scenarioId: number;
+  scenarioCode: string;
   eventCode: string;
   eventOrder: number;
   eventDescription: string;
@@ -55,6 +55,7 @@ export type Scenario = {
   content?: string;
   sceneScript?: string;
   options?: ScenarioOption[];
+  events?: DecisionEvent[];
 };
 
 export type ScenarioOption = {

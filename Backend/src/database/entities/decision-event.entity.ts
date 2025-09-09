@@ -16,9 +16,9 @@ export class DecisionEvent {
   @PrimaryGeneratedColumn({ name: 'event_id' })
   id: number;
 
-  @ApiProperty({ description: '시나리오 ID' })
-  @Column({ name: 'scenario_id' })
-  scenarioId: number;
+  @ApiProperty({ description: '시나리오 코드' })
+  @Column({ name: 'scenario_code', length: 50 })
+  scenarioCode: string;
 
   @ApiProperty({ description: '이벤트 코드' })
   @Column({ name: 'event_code', length: 50 })
@@ -62,6 +62,6 @@ export class DecisionEvent {
 
   // Relations
   @ManyToOne(() => Scenario)
-  @JoinColumn({ name: 'scenario_id' })
+  @JoinColumn({ name: 'scenario_code' })
   scenario: Scenario;
 }

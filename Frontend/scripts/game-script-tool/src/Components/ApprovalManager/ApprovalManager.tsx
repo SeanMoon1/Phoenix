@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { APPROVAL_STATUS_INFO, USER_ROLES } from "../ScriptInput/constants";
-import { ScriptBlock, User, ApprovalStatus as ApprovalStatusType } from "../../types";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { APPROVAL_STATUS_INFO, USER_ROLES } from '../ScriptInput/constants';
+import {
+  ScriptBlock,
+  User,
+  ApprovalStatus as ApprovalStatusType,
+} from '../../types';
 
 const Container = styled.div`
   padding: 20px;
@@ -29,7 +33,7 @@ const ApprovalItem = styled.div`
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const ItemHeader = styled.div`
@@ -86,21 +90,27 @@ const Button = styled.button<{ variant?: 'approve' | 'reject' | 'view' }>`
   transition: background-color 0.2s;
 
   &.approve {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
-    &:hover { background-color: #45a049; }
+    &:hover {
+      background-color: #45a049;
+    }
   }
 
   &.reject {
     background-color: #f44336;
     color: white;
-    &:hover { background-color: #da190b; }
+    &:hover {
+      background-color: #da190b;
+    }
   }
 
   &.view {
-    background-color: #2196F3;
+    background-color: #2196f3;
     color: white;
-    &:hover { background-color: #1976D2; }
+    &:hover {
+      background-color: #1976d2;
+    }
   }
 
   &:disabled {
@@ -158,7 +168,7 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
   }>({
     isOpen: false,
     blockId: null,
-    reason: "",
+    reason: '',
   });
 
   const canManageApproval = (): boolean => {
@@ -169,7 +179,7 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
     const updatedBlock: ScriptBlock = {
       ...block,
       approvalStatus: ApprovalStatusType.APPROVED,
-      approvedBy: currentUser.id,
+      approvedBy: currentUser.id.toString(),
       approvedAt: new Date().toISOString(),
     };
     onApprovalUpdate(updatedBlock);
@@ -179,7 +189,7 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
     setRejectionModal({
       isOpen: true,
       blockId: block.sceneId,
-      reason: "",
+      reason: '',
     });
   };
 
@@ -192,16 +202,19 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
     const updatedBlock: ScriptBlock = {
       ...block,
       approvalStatus: ApprovalStatusType.REJECTED,
-      approvedBy: currentUser.id,
+      approvedBy: currentUser.id.toString(),
       approvedAt: new Date().toISOString(),
       rejectionReason: rejectionModal.reason,
     };
     onApprovalUpdate(updatedBlock);
-    setRejectionModal({ isOpen: false, blockId: null, reason: "" });
+    setRejectionModal({ isOpen: false, blockId: null, reason: '' });
   };
 
   const getStatusInfo = (status: ApprovalStatusType) => {
-    return APPROVAL_STATUS_INFO[status] || APPROVAL_STATUS_INFO[ApprovalStatusType.DRAFT];
+    return (
+      APPROVAL_STATUS_INFO[status] ||
+      APPROVAL_STATUS_INFO[ApprovalStatusType.DRAFT]
+    );
   };
 
   if (!canManageApproval()) {
@@ -213,19 +226,19 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
     );
   }
 
-  const pendingBlocks = blockList.filter(block => 
-    block.approvalStatus === ApprovalStatusType.PENDING
+  const pendingBlocks = blockList.filter(
+    block => block.approvalStatus === ApprovalStatusType.PENDING
   );
 
   return (
     <Container>
       <Title>🔐 승인 관리</Title>
       <p>승인 대기 중인 시나리오: {pendingBlocks.length}개</p>
-      
+
       <ApprovalList>
-        {pendingBlocks.map((block) => {
+        {pendingBlocks.map(block => {
           const statusInfo = getStatusInfo(block.approvalStatus);
-          
+
           return (
             <ApprovalItem key={block.sceneId}>
               <ItemHeader>
@@ -236,7 +249,7 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
                   </StatusBadge>
                 </div>
               </ItemHeader>
-              
+
               <ItemContent>
                 <ItemTitle>{block.title || block.content}</ItemTitle>
                 <ItemDetails>
@@ -246,19 +259,21 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
                   </DetailItem>
                   <DetailItem>
                     <span>📅 작성일:</span>
-                    <span>{new Date(block.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      {new Date(block.createdAt).toLocaleDateString()}
+                    </span>
                   </DetailItem>
                   <DetailItem>
                     <span>🔥 재난 유형:</span>
-                    <span>{block.disasterType || "미지정"}</span>
+                    <span>{block.disasterType || '미지정'}</span>
                   </DetailItem>
                   <DetailItem>
                     <span>⚡ 난이도:</span>
-                    <span>{block.difficulty || "미지정"}</span>
+                    <span>{block.difficulty || '미지정'}</span>
                   </DetailItem>
                 </ItemDetails>
               </ItemContent>
-              
+
               <ActionButtons>
                 <Button variant="view" onClick={() => {}}>
                   👁️ 상세보기
@@ -279,14 +294,32 @@ const ApprovalManager: React.FC<ApprovalManagerProps> = ({
         <RejectionModal>
           <ModalContent>
             <h3>거부 사유 입력</h3>
-            <p>Scene {rejectionModal.blockId}을 거부하는 이유를 입력해주세요.</p>
+            <p>
+              Scene {rejectionModal.blockId}을 거부하는 이유를 입력해주세요.
+            </p>
             <TextArea
               value={rejectionModal.reason}
-              onChange={(e) => setRejectionModal(prev => ({ ...prev, reason: e.target.value }))}
+              onChange={e =>
+                setRejectionModal(prev => ({ ...prev, reason: e.target.value }))
+              }
               placeholder="거부 사유를 입력하세요..."
             />
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-              <Button onClick={() => setRejectionModal({ isOpen: false, blockId: null, reason: "" })}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '10px',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <Button
+                onClick={() =>
+                  setRejectionModal({
+                    isOpen: false,
+                    blockId: null,
+                    reason: '',
+                  })
+                }
+              >
                 취소
               </Button>
               <Button variant="reject" onClick={confirmRejection}>

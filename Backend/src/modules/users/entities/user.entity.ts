@@ -78,6 +78,10 @@ export class User {
   @Column({ name: 'next_level_exp', default: 100 })
   nextLevelExp: number;
 
+  @ApiProperty({ description: '사용자 역할' })
+  @Column({ name: 'role', length: 20, default: 'USER' })
+  role: string;
+
   @ApiProperty({ description: '수정자 ID', required: false })
   @Column({ name: 'updated_by', nullable: true })
   updatedBy?: number;

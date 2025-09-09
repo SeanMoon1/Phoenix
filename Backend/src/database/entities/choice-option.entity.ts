@@ -21,9 +21,9 @@ export class ChoiceOption {
   @Column({ name: 'event_id' })
   eventId: number;
 
-  @ApiProperty({ description: '시나리오 ID' })
-  @Column({ name: 'scenario_id' })
-  scenarioId: number;
+  @ApiProperty({ description: '시나리오 코드' })
+  @Column({ name: 'scenario_code', length: 50 })
+  scenarioCode: string;
 
   @ApiProperty({ description: '선택지 코드' })
   @Column({ name: 'choice_code', length: 50 })
@@ -71,7 +71,7 @@ export class ChoiceOption {
   event: DecisionEvent;
 
   @ManyToOne(() => Scenario)
-  @JoinColumn({ name: 'scenario_id' })
+  @JoinColumn({ name: 'scenario_code' })
   scenario: Scenario;
 
   @ManyToOne(() => DecisionEvent)

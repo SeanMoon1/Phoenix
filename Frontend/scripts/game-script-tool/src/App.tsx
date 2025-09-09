@@ -320,34 +320,40 @@ const App: React.FC = () => {
 
   // 사용자 역할을 관리자로 고정 (Admin Dashboard 전용)
   const currentUser: User = {
-    id: 'admin001',
+    id: 1,
     name: '시나리오 관리자',
-    role: UserRole.ADMIN,
-    user_level: 100, // 관리자는 최고 레벨
-    user_exp: 999999, // 관리자는 최대 경험치
-    total_score: 999999, // 관리자는 최고 점수
-    completed_scenarios: 999, // 관리자는 모든 시나리오 완료
-    current_tier: '마스터', // 관리자는 마스터 등급
-    level_progress: 100.0, // 관리자는 100% 진행도
-    next_level_exp: 0, // 관리자는 다음 레벨 불필요
-    scenario_stats: {
-      fire: { completed: 999, total_score: 999999, best_score: 100 },
-      earthquake: { completed: 999, total_score: 999999, best_score: 100 },
-      flood: { completed: 999, total_score: 999999, best_score: 100 },
-      emergency: { completed: 999, total_score: 999999, best_score: 100 },
-      chemical: { completed: 999, total_score: 999999, best_score: 100 },
-      nuclear: { completed: 999, total_score: 999999, best_score: 100 },
-      terrorism: { completed: 999, total_score: 999999, best_score: 100 },
-      pandemic: { completed: 999, total_score: 999999, best_score: 100 },
-      natural_disaster: {
+    role: 'ADMIN',
+    userLevel: 100, // 관리자는 최고 레벨
+    userExp: 999999, // 관리자는 최대 경험치
+    totalScore: 999999, // 관리자는 최고 점수
+    completedScenarios: 999, // 관리자는 모든 시나리오 완료
+    currentTier: '마스터', // 관리자는 마스터 등급
+    levelProgress: 100.0, // 관리자는 100% 진행도
+    nextLevelExp: 0, // 관리자는 다음 레벨 불필요
+    teamId: 1,
+    userCode: 'ADMIN001',
+    loginId: 'admin',
+    email: 'admin@phoenix.com',
+    useYn: 'Y',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    scenarioStats: {
+      fire: { completed: 999, totalScore: 999999, bestScore: 100 },
+      earthquake: { completed: 999, totalScore: 999999, bestScore: 100 },
+      flood: { completed: 999, totalScore: 999999, bestScore: 100 },
+      emergency: { completed: 999, totalScore: 999999, bestScore: 100 },
+      chemical: { completed: 999, totalScore: 999999, bestScore: 100 },
+      nuclear: { completed: 999, totalScore: 999999, bestScore: 100 },
+      terrorism: { completed: 999, totalScore: 999999, bestScore: 100 },
+      pandemic: { completed: 999, totalScore: 999999, bestScore: 100 },
+      naturalDisaster: {
         completed: 999,
-        total_score: 999999,
-        best_score: 100,
+        totalScore: 999999,
+        bestScore: 100,
       },
-      complex: { completed: 999, total_score: 999999, best_score: 100 },
+      complex: { completed: 999, totalScore: 999999, bestScore: 100 },
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
   // 탭 관리 상태
@@ -520,9 +526,9 @@ const App: React.FC = () => {
       {/* 사용자 정보 표시 */}
       <UserInfo>
         <div>👤 {currentUser.name}</div>
-        <RoleBadge role={currentUser.role}>🔐 관리자</RoleBadge>
+        <RoleBadge role={currentUser.role as any}>🔐 관리자</RoleBadge>
         <div style={{ marginTop: '5px', fontSize: '10px', color: '#666' }}>
-          🏆 {currentUser.current_tier} (Lv.{currentUser.user_level})
+          🏆 {currentUser.currentTier} (Lv.{currentUser.userLevel})
         </div>
         <div style={{ fontSize: '10px', color: '#999' }}>Admin Dashboard</div>
       </UserInfo>

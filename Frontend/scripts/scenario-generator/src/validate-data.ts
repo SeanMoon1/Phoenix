@@ -5,35 +5,38 @@
  * 시나리오 JSON 데이터의 유효성을 검사
  */
 
-import { Command } from "commander";
-import * as fs from "fs";
-import * as path from "path";
-import { ScenarioEvent } from "./types";
-import { ScenarioValidator } from "./validator";
-import { Logger } from "./logger";
-import { config } from "./config";
+import { Command } from 'commander';
+import * as fs from 'fs';
+import * as path from 'path';
+import { ScenarioEvent } from './types';
+import { ScenarioValidator } from './validator';
+import { Logger } from './logger';
+import { config } from './config';
 
 const program = new Command();
 
 program
-  .name("validate-data")
-  .description("Phoenix 시나리오 JSON 데이터의 유효성을 검사")
-  .version("1.0.0")
+  .name('validate-data')
+  .description('Phoenix 시나리오 JSON 데이터의 유효성을 검사')
+  .version('1.0.0')
   .argument(
-    "[input-file]",
-    "검증할 JSON 파일 경로 (생략 시 data 폴더 전체 검증)"
+    '[input-file]',
+    '검증할 JSON 파일 경로 (생략 시 data 폴더 전체 검증)'
   )
-  .option("-v, --verbose", "상세 로그")
-  .option("-d, --debug", "디버그 모드")
-  .option("-s, --strict", "엄격 모드 (경고도 오류로 처리)")
-  .action(async (inputFile?: string, options?: any) => {
-    const logger = new Logger(options?.verbose, options?.debug);
+  .option('-v, --verbose', '상세 로그')
+  .option('-d, --debug', '디버그 모드')
+  .option('-s, --strict', '엄격 모드 (경고도 오류로 처리)')
+  .action(async (inputFile?: string, options?: Record<string, unknown>) => {
+    const logger = new Logger(
+      Boolean(options?.verbose),
+      Boolean(options?.debug)
+    );
 
     try {
       if (inputFile) {
-        await validateSingleFile(inputFile, options, logger);
+        await validateSingleFile(inputFile, options || {}, logger);
       } else {
-        await validateAllFiles(options, logger);
+        await validateAllFiles(options || {}, logger);
       }
     } catch (error) {
       logger.error(
@@ -45,7 +48,7 @@ program
 
 async function validateSingleFile(
   inputFile: string,
-  options: any,
+  options: Record<string, unknown>,
   logger: Logger
 ): Promise<void> {
   if (!fs.existsSync(inputFile)) {
@@ -65,18 +68,18 @@ async function validateAllFiles(options: any, logger: Logger): Promise<void> {
 
   const files = fs
     .readdirSync(dataDir)
-    .filter((file) => file.endsWith(".json"))
-    .map((file) => path.join(dataDir, file));
+    .filter(file => file.endsWith('.json'))
+    .map(file => path.join(dataDir, file));
 
   if (files.length === 0) {
-    logger.warn("검증할 파일이 없습니다.");
+    logger.warn('검증할 파일이 없습니다.');
     return;
   }
 
   logger.header(`시나리오 데이터 검증 (${files.length}개 파일)`);
 
   const results = await Promise.all(
-    files.map((file) => validateFile(file, options, logger))
+    files.map(file => validateFile(file, options, logger))
   );
 
   // 전체 결과 요약
@@ -88,20 +91,20 @@ async function validateAllFiles(options: any, logger: Logger): Promise<void> {
     (sum, result) => sum + result.warningCount,
     0
   );
-  const validFiles = results.filter((result) => result.valid).length;
+  const validFiles = results.filter(result => result.valid).length;
 
-  logger.header("검증 완료");
+  logger.header('검증 완료');
 
   logger.table({
-    "총 파일 수": files.length,
-    "유효한 파일": validFiles,
-    "오류가 있는 파일": files.length - validFiles,
-    "총 오류 수": totalErrors,
-    "총 경고 수": totalWarnings,
+    '총 파일 수': files.length,
+    '유효한 파일': validFiles,
+    '오류가 있는 파일': files.length - validFiles,
+    '총 오류 수': totalErrors,
+    '총 경고 수': totalWarnings,
   });
 
   // 상세 결과
-  logger.subheader("상세 결과");
+  logger.subheader('상세 결과');
   results.forEach((result, index) => {
     if (result.valid) {
       logger.success(`${index + 1}. ${result.file} - 유효함`);
@@ -133,7 +136,7 @@ async function validateFile(
 
     // JSON 파일 읽기
     const jsonData: ScenarioEvent[] = JSON.parse(
-      fs.readFileSync(filePath, "utf8")
+      fs.readFileSync(filePath, 'utf8')
     );
 
     // 데이터 검증
@@ -155,12 +158,12 @@ async function validateFile(
 
     if (validationResult.errors.length > 0) {
       logger.error(`오류: ${validationResult.errors.length}개`);
-      validationResult.errors.forEach((error) => logger.error(`  ❌ ${error}`));
+      validationResult.errors.forEach(error => logger.error(`  ❌ ${error}`));
     }
 
     if (validationResult.warnings.length > 0) {
       logger.warn(`경고: ${validationResult.warnings.length}개`);
-      validationResult.warnings.forEach((warning) =>
+      validationResult.warnings.forEach(warning =>
         logger.warn(`  ⚠️ ${warning}`)
       );
     }
@@ -169,13 +172,13 @@ async function validateFile(
     const stats = generateValidationStats(jsonData);
 
     if (options?.verbose) {
-      logger.subheader("통계");
+      logger.subheader('통계');
       logger.table({
-        "이벤트 수": stats.totalEvents,
-        "선택 옵션 수": stats.totalOptions,
-        "재난 유형": stats.disasterTypes.join(", ") || "없음",
-        난이도: stats.difficulties.join(", ") || "없음",
-        위험도: stats.riskLevels.join(", ") || "없음",
+        '이벤트 수': stats.totalEvents,
+        '선택 옵션 수': stats.totalOptions,
+        '재난 유형': stats.disasterTypes.join(', ') || '없음',
+        난이도: stats.difficulties.join(', ') || '없음',
+        위험도: stats.riskLevels.join(', ') || '없음',
       });
     }
 
@@ -216,13 +219,25 @@ function generateValidationStats(data: ScenarioEvent[]): {
   );
 
   const disasterTypes = [
-    ...new Set(data.map((event) => event.disasterType).filter(Boolean)),
+    ...new Set(
+      data
+        .map(event => event.disasterType)
+        .filter((type): type is string => Boolean(type))
+    ),
   ];
   const difficulties = [
-    ...new Set(data.map((event) => event.difficulty).filter(Boolean)),
+    ...new Set(
+      data
+        .map(event => event.difficulty)
+        .filter((diff): diff is string => Boolean(diff))
+    ),
   ];
   const riskLevels = [
-    ...new Set(data.map((event) => event.riskLevel).filter(Boolean)),
+    ...new Set(
+      data
+        .map(event => event.riskLevel)
+        .filter((level): level is string => Boolean(level))
+    ),
   ];
 
   return {

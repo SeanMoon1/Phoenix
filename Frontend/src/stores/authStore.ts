@@ -37,21 +37,40 @@ export const useAuthStore = create<AuthStore>()(
             access_token: string;
             user: {
               id: number;
+              teamId?: number;
+              userCode?: string;
+              loginId?: string;
               email: string;
               name: string;
+              useYn?: string;
               userLevel: number;
+              userExp?: number;
+              totalScore?: number;
+              completedScenarios?: number;
               currentTier: string;
+              levelProgress?: number;
+              nextLevelExp?: number;
+              isActive?: boolean;
             };
           }>('/auth/login', credentials);
 
           if (response.success && response.data) {
             const user: User = {
-              id: response.data.user.id.toString(),
+              id: parseInt(response.data.user.id.toString()),
+              teamId: response.data.user.teamId || 0,
+              userCode: response.data.user.userCode || '',
+              loginId: response.data.user.loginId || response.data.user.email,
               email: response.data.user.email,
               name: response.data.user.name,
-              role: 'user',
+              useYn: response.data.user.useYn || 'Y',
               userLevel: response.data.user.userLevel,
+              userExp: response.data.user.userExp || 0,
+              totalScore: response.data.user.totalScore || 0,
+              completedScenarios: response.data.user.completedScenarios || 0,
               currentTier: response.data.user.currentTier,
+              levelProgress: response.data.user.levelProgress || 0,
+              nextLevelExp: response.data.user.nextLevelExp || 0,
+              isActive: response.data.user.isActive ?? true,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
@@ -65,9 +84,9 @@ export const useAuthStore = create<AuthStore>()(
           } else {
             throw new Error(response.error || '로그인에 실패했습니다.');
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ isLoading: false });
-          throw new Error(error.message || '로그인에 실패했습니다.');
+          throw new Error((error as Error).message || '로그인에 실패했습니다.');
         }
       },
 
@@ -94,9 +113,11 @@ export const useAuthStore = create<AuthStore>()(
           } else {
             throw new Error(response.error || '회원가입에 실패했습니다.');
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ isLoading: false });
-          throw new Error(error.message || '회원가입에 실패했습니다.');
+          throw new Error(
+            (error as Error).message || '회원가입에 실패했습니다.'
+          );
         }
       },
 

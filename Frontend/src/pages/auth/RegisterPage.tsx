@@ -8,14 +8,14 @@ import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 import { teamApi } from '../../services/api';
 
-// 팀 코드 검증 스키마
-const teamCodeSchema = yup.object({
-  teamCode: yup
-    .string()
-    .required('팀 코드를 입력해주세요.')
-    .min(3, '팀 코드는 최소 3자 이상이어야 합니다.')
-    .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
-});
+// 팀 코드 검증 스키마 (사용되지 않음)
+// const teamCodeSchema = yup.object({
+//   teamCode: yup
+//     .string()
+//     .required('팀 코드를 입력해주세요.')
+//     .min(3, '팀 코드는 최소 3자 이상이어야 합니다.')
+//     .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
+// });
 
 // 회원가입 스키마
 const registerSchema = yup.object({
@@ -75,7 +75,7 @@ const RegisterPage: React.FC = () => {
     formState: { errors },
     setError,
     watch,
-    setValue,
+    // setValue,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   });
@@ -105,7 +105,7 @@ const RegisterPage: React.FC = () => {
           response.data?.message || '유효하지 않은 팀 코드입니다.'
         );
       }
-    } catch (error) {
+    } catch (error: unknown) {
       setTeamInfo(null);
       setTeamValidationError('팀 코드 검증 중 오류가 발생했습니다.');
     } finally {
@@ -145,10 +145,10 @@ const RegisterPage: React.FC = () => {
       navigate('/login', {
         state: { message: '회원가입이 완료되었습니다. 로그인해주세요.' },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError('root', {
         type: 'manual',
-        message: error.message || '회원가입에 실패했습니다.',
+        message: (error as Error).message || '회원가입에 실패했습니다.',
       });
     }
   };

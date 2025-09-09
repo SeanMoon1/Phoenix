@@ -1,34 +1,40 @@
 export interface User {
-  id: string;
+  id: number;
+  teamId: number;
+  userCode: string;
+  loginId: string;
   name: string;
-  role: UserRole;
-  user_level: number; // 사용자 레벨 (1-100)
-  user_exp: number; // 사용자 경험치
-  total_score: number; // 총점
-  completed_scenarios: number; // 완료한 시나리오 수
-  // 레벨업 시스템 상세 정보
-  current_tier: string; // 현재 등급 (초급자, 중급자, 고급자, 전문가, 마스터)
-  level_progress: number; // 현재 레벨에서의 진행도 (0-100%)
-  next_level_exp: number; // 다음 레벨까지 필요한 경험치
-  // 시나리오별 통계
-  scenario_stats: {
-    fire: { completed: number; total_score: number; best_score: number };
-    earthquake: { completed: number; total_score: number; best_score: number };
-    flood: { completed: number; total_score: number; best_score: number };
-    emergency: { completed: number; total_score: number; best_score: number };
-    chemical: { completed: number; total_score: number; best_score: number };
-    nuclear: { completed: number; total_score: number; best_score: number };
-    terrorism: { completed: number; total_score: number; best_score: number };
-    pandemic: { completed: number; total_score: number; best_score: number };
-    natural_disaster: {
+  email: string;
+  useYn: string;
+  userLevel: number;
+  userExp: number;
+  totalScore: number;
+  completedScenarios: number;
+  currentTier: string;
+  levelProgress: number;
+  nextLevelExp: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // 시나리오별 통계 (선택적)
+  scenarioStats?: {
+    fire: { completed: number; totalScore: number; bestScore: number };
+    earthquake: { completed: number; totalScore: number; bestScore: number };
+    flood: { completed: number; totalScore: number; bestScore: number };
+    emergency: { completed: number; totalScore: number; bestScore: number };
+    chemical: { completed: number; totalScore: number; bestScore: number };
+    nuclear: { completed: number; totalScore: number; bestScore: number };
+    terrorism: { completed: number; totalScore: number; bestScore: number };
+    pandemic: { completed: number; totalScore: number; bestScore: number };
+    naturalDisaster: {
       completed: number;
-      total_score: number;
-      best_score: number;
+      totalScore: number;
+      bestScore: number;
     };
-    complex: { completed: number; total_score: number; best_score: number };
+    complex: { completed: number; totalScore: number; bestScore: number };
   };
-  created_at: string; // 계정 생성일
-  updated_at?: string; // 마지막 업데이트일
 }
 
 export const UserRole = {
@@ -39,61 +45,88 @@ export const UserRole = {
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-// SQL 스키마 기반 새로운 인터페이스들
+// Frontend와 통합된 시나리오 타입
 export interface Scenario {
-  scenarioId: string;
-  teamId: string;
+  id: number;
+  teamId: number;
   scenarioCode: string;
   title: string;
   disasterType: string;
   description: string;
   riskLevel: string;
   occurrenceCondition?: string;
-  status: ScenarioStatus;
+  status: string;
   approvalComment?: string;
   imageUrl?: string;
   videoUrl?: string;
-  createdAt: string;
-  createdBy: string;
+  createdBy: number;
   approvedAt?: string;
-  approvedBy?: string;
-  updatedAt?: string;
-  updatedBy?: string;
+  approvedBy?: number;
+  updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;
-  events: DecisionEvent[];
+  createdAt: string;
+  updatedAt: string;
+  // game-script-tool 전용 필드들
+  sceneId?: string;
+  content?: string;
+  sceneScript?: string;
+  options?: ScenarioOption[];
+  events?: DecisionEvent[];
 }
 
 export interface DecisionEvent {
-  eventId: string;
-  scenarioId: string;
+  id: number;
+  scenarioId: number;
   eventCode: string;
   eventOrder: number;
   eventDescription: string;
   eventType: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
+  createdBy: number;
+  updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;
-  choices: ChoiceOption[];
+  createdAt: string;
+  updatedAt: string;
+  choices?: ChoiceOption[];
 }
 
 export interface ChoiceOption {
-  choiceId: string;
-  eventId: string;
-  scenarioId: string;
+  id: number;
+  eventId: number;
+  scenarioId: number;
   choiceCode: string;
   choiceText: string;
   isCorrect: boolean;
   scoreWeight: number;
-  nextEventId?: string;
-  createdAt: string;
-  updatedAt?: string;
-  updatedBy?: string;
+  nextEventId?: number;
+  updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // game-script-tool 전용 필드들
+  answerId?: string;
+  answer?: string;
+  reaction?: string;
+  nextId?: string;
+  points?: {
+    speed: number;
+    accuracy: number;
+  };
+  exp?: number;
+}
+
+// Frontend와 호환되는 ScenarioOption 타입
+export interface ScenarioOption {
+  id: number;
+  answerId: string;
+  answer: string;
+  reaction: string;
+  nextId: string;
+  points?: {
+    accuracy: number;
+  };
 }
 
 export const ScenarioStatus = {

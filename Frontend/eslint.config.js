@@ -5,7 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
-  { ignores: ['dist'] },
+  {
+    ignores: [
+      'dist',
+      'scripts/game-script-tool/node_modules',
+      'scripts/scenario-generator/node_modules',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -20,6 +26,9 @@ export default tseslint.config([
         'warn',
         { allowConstantExport: true },
       ],
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn',
     },
     languageOptions: {
       ecmaVersion: 2020,

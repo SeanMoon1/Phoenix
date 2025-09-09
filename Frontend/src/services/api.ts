@@ -57,12 +57,12 @@ export const apiRequest = async <T>(
   try {
     const response = await apiClient(config);
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
       error:
-        error.response?.data?.message ||
-        error.message ||
+        (error as any).response?.data?.message ||
+        (error as Error).message ||
         '알 수 없는 오류가 발생했습니다.',
     };
   }
@@ -73,13 +73,13 @@ export const api = {
   get: <T>(url: string, config?: AxiosRequestConfig) =>
     apiRequest<T>({ ...config, method: 'GET', url }),
 
-  post: <T>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiRequest<T>({ ...config, method: 'POST', url, data }),
 
-  put: <T>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiRequest<T>({ ...config, method: 'PUT', url, data }),
 
-  patch: <T>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiRequest<T>({ ...config, method: 'PATCH', url, data }),
 
   delete: <T>(url: string, config?: AxiosRequestConfig) =>
@@ -105,4 +105,31 @@ export const teamApi = {
       message?: string;
     }>(`/teams/validate-code/${teamCode}`);
   },
+};
+
+// 훈련 관련 API
+export const trainingApi = {
+  // 훈련 세션 생성
+  createSession: (data: {
+    title: string;
+    scenarioId: number;
+    teamId: number;
+    startTime: string;
+    endTime?: string;
+    createdBy: number;
+  }) => api.post('/training', data),
+
+  // 팀별 훈련 세션 조회
+  getSessionsByTeam: (teamId: number) => api.get(`/training?teamId=${teamId}`),
+
+  // 세션 참가
+  joinSession: (sessionCode: string, userId: number) =>
+    api.post(`/training/join/${sessionCode}`, { userId }),
+
+  // 세션 참가자 목록 조회
+  getSessionParticipants: (sessionId: number) =>
+    api.get(`/training/${sessionId}/participants`),
+
+  // 팀별 통계 조회 (관리자용)
+  getTeamStats: (teamId: number) => api.get(`/training/stats/team/${teamId}`),
 };

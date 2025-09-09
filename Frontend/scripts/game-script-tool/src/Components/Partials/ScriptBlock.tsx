@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/accessible-emoji */
+/* eslint-disable */
 import React from "react";
 import styled from "styled-components";
 import { APPROVAL_STATUS_INFO } from "../ScriptInput/constants";

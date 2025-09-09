@@ -46,6 +46,7 @@ export interface ConversionOptions {
   backup: boolean;
   verbose: boolean;
   debug: boolean;
+  output?: string;
 }
 
 export interface ConversionResult {

@@ -52,12 +52,14 @@ function isTerminalScene(scn: Scenario | undefined, all: Scenario[]): boolean {
   if (!scn) return false;
   const idSet = new Set(all.map(s => s.sceneId));
   // 다음으로 갈 수 있는 정상 장면이 하나도 없고, 전부 특수 토큰/없음/미존재 ID면 '종단'
-  return scn.options.every(opt => {
-    const nextId = opt.nextId;
-    if (!nextId) return true;
-    if (TERMINAL_TOKENS.has(nextId as string)) return true;
-    return !idSet.has(nextId as string);
-  });
+  return (
+    scn.options?.every(opt => {
+      const nextId = opt.nextId;
+      if (!nextId) return true;
+      if (TERMINAL_TOKENS.has(nextId as string)) return true;
+      return !idSet.has(nextId as string);
+    }) ?? false
+  );
 }
 
 export default function ScenarioPage() {
@@ -419,12 +421,12 @@ export default function ScenarioPage() {
 
             <SituationCard
               title={scenario.title}
-              content={scenario.content}
-              sceneScript={scenario.sceneScript}
+              content={scenario.content || ''}
+              sceneScript={scenario.sceneScript || ''}
             />
 
             <OptionsList
-              options={scenario.options}
+              options={scenario.options || []}
               selected={selected}
               onSelect={handleChoice}
             />

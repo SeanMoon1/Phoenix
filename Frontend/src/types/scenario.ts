@@ -50,4 +50,20 @@ export type Scenario = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 추가 필드들
+  sceneId?: string;
+  content?: string;
+  sceneScript?: string;
+  options?: ScenarioOption[];
+};
+
+export type ScenarioOption = {
+  id: number;
+  answerId: string;
+  answer: string;
+  reaction: string;
+  nextId: string;
+  points?: {
+    accuracy: number;
+  };
 };

@@ -12,6 +12,7 @@ import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 
@@ -269,6 +270,7 @@ function App() {
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
           {/* 훈련하기 */}
           <Route path="/manual" element={<ManualPage />} />

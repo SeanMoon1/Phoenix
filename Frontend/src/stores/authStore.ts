@@ -18,6 +18,11 @@ interface AuthStore extends AuthState {
   logout: () => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
+  setAuth: (authData: {
+    token: string;
+    user: User;
+    isAuthenticated: boolean;
+  }) => void;
   clearAuth: () => void;
 }
 
@@ -115,6 +120,19 @@ export const useAuthStore = create<AuthStore>()(
 
       setToken: (token: string) => {
         set({ token, isAuthenticated: true });
+      },
+
+      setAuth: (authData: {
+        token: string;
+        user: User;
+        isAuthenticated: boolean;
+      }) => {
+        set({
+          token: authData.token,
+          user: authData.user,
+          isAuthenticated: authData.isAuthenticated,
+          isLoading: false,
+        });
       },
 
       clearAuth: () => {

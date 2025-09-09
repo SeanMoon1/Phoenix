@@ -79,4 +79,52 @@ export class AuthService {
       throw error;
     }
   }
+
+  /**
+   * Google OAuth 로그인/회원가입
+   * @param googleUser Google OAuth에서 받은 사용자 정보
+   * @returns JWT 토큰과 사용자 정보
+   */
+  async googleLogin(googleUser: any) {
+    try {
+      // 1. 이메일로 기존 사용자 조회
+      let user = await this.usersService.findByEmail(googleUser.email);
+
+      if (!user) {
+        // 2. 사용자가 없으면 기본 팀에 가입 (팀 코드: 'DEFAULT')
+        const defaultTeam = await this.teamsService.findByTeamCode('DEFAULT');
+
+        if (!defaultTeam) {
+          throw new BadRequestException('기본 팀이 설정되지 않았습니다.');
+        }
+
+        // 3. Google 사용자 정보로 새 사용자 생성
+        user = await this.usersService.create({
+          email: googleUser.email,
+          name: googleUser.name,
+          password: '', // OAuth 사용자는 비밀번호 없음
+          teamId: defaultTeam.id,
+          userLevel: 1, // 기본 레벨
+          currentTier: 1, // 기본 티어
+        });
+      }
+
+      // 4. JWT 토큰 생성
+      const payload = { email: user.email, sub: user.id };
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          userLevel: user.userLevel,
+          currentTier: user.currentTier,
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Google 로그인 처리 중 오류가 발생했습니다.',
+      );
+    }
+  }
 }

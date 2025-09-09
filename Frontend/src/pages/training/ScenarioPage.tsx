@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
+
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -11,8 +12,9 @@ import ClearModal from '@/components/common/ClearModal';
 import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
 import PlayMoreButton from '@/components/common/PlayMoreButton';
-import phoenixImg from '@/assets/images/phoenix.png';
 import LevelUpToast from '@/components/common/LevelUpToast';
+
+import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
@@ -122,7 +124,7 @@ export default function GenericScenarioPage({
     localStorage.setItem(persistKey, JSON.stringify(s));
   }, [EXP, level, totalCorrect, persistKey]);
 
-  // ✅ 엔딩(#END) 씬이 "렌더된 뒤" 모달 자동 오픈 → 진행바 21/21 등 먼저 표시됨
+  // 엔딩(#END) 씬이 렌더된 뒤 모달 자동 오픈 → 진행바 표시
   useEffect(() => {
     if (!scenario || endModalAutoShown) return;
     if (scenario.sceneId === END_SCENE_ID) {
@@ -354,10 +356,8 @@ export default function GenericScenarioPage({
             </div>
           </main>
         </div>
-
         {showLevelUp && <LevelUpToast bonus={levelUpBonus} level={level} />}
         <ConfettiOverlay show={showConfetti} vw={vw} vh={vh} />
-
         {clearMsg && (
           <ClearModal
             message={clearMsg}

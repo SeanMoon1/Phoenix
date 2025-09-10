@@ -13,7 +13,9 @@ async function testShuffler() {
 
   try {
     // JSON 파일 읽기
-    const jsonData = JSON.parse(fs.readFileSync('../data/fire_training_scenario.json', 'utf8'));
+    const jsonData = JSON.parse(
+      fs.readFileSync('../data/fire_training_scenario.json', 'utf8')
+    );
     console.log(`📁 JSON 파일 로드 완료: ${jsonData.length}개 이벤트`);
 
     // 첫 번째 씬의 옵션 확인
@@ -21,8 +23,15 @@ async function testShuffler() {
     if (firstScene && firstScene.options) {
       console.log('\n📋 원본 옵션 순서:');
       firstScene.options.forEach((option: any, index: number) => {
-        const isCorrect = option.points && option.points.speed > 0 && option.points.accuracy > 0;
-        console.log(`   ${index + 1}. ${option.answer.substring(0, 50)}... (${isCorrect ? '정답' : '오답'})`);
+        const isCorrect =
+          option.points &&
+          option.points.speed > 0 &&
+          option.points.accuracy > 0;
+        console.log(
+          `   ${index + 1}. ${option.answer.substring(0, 50)}... (${
+            isCorrect ? '정답' : '오답'
+          })`
+        );
       });
 
       // 옵션 섞기 테스트
@@ -30,16 +39,23 @@ async function testShuffler() {
       const shuffledOptions = shuffler.shuffleOptions(firstScene.options, {
         useSeed: true,
         seed: 12345,
-        preserveCorrectness: true
+        preserveCorrectness: true,
       });
 
       console.log('\n🎲 섞인 옵션 순서:');
       shuffledOptions.forEach((option, index) => {
-        console.log(`   ${index + 1}. ${option.answer.substring(0, 50)}... (${option.isCorrect ? '정답' : '오답'})`);
+        console.log(
+          `   ${index + 1}. ${option.answer.substring(0, 50)}... (${
+            option.isCorrect ? '정답' : '오답'
+          })`
+        );
       });
 
       // 통계 생성
-      const stats = shuffler.generateShuffleStatistics(firstScene.options, shuffledOptions);
+      const stats = shuffler.generateShuffleStatistics(
+        firstScene.options,
+        shuffledOptions
+      );
       console.log('\n📊 섞기 통계:');
       console.log(`   - 총 옵션: ${stats.totalOptions}개`);
       console.log(`   - 정답: ${stats.correctOptions}개`);
@@ -52,7 +68,7 @@ async function testShuffler() {
       const shuffledScenario = shuffler.shuffleScenarioOptions(jsonData, {
         useSeed: true,
         seed: 12345,
-        preserveCorrectness: true
+        preserveCorrectness: true,
       });
 
       console.log(`✅ 섞기 완료: ${shuffledScenario.length}개 씬 처리`);
@@ -60,15 +76,21 @@ async function testShuffler() {
       // 결과 저장
       const outputFile = './output/enhanced/test_shuffled_scenario.json';
       fs.mkdirSync('./output/enhanced', { recursive: true });
-      fs.writeFileSync(outputFile, JSON.stringify(shuffledScenario, null, 2), 'utf8');
+      fs.writeFileSync(
+        outputFile,
+        JSON.stringify(shuffledScenario, null, 2),
+        'utf8'
+      );
       console.log(`💾 섞인 시나리오 저장: ${outputFile}`);
-
     } else {
       console.log('❌ 옵션 데이터를 찾을 수 없습니다.');
     }
-
   } catch (error) {
-    console.error(`❌ 테스트 실패: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(
+      `❌ 테스트 실패: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   console.log('\n🎉 테스트 완료!');

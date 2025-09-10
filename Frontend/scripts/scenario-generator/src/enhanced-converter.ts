@@ -62,7 +62,11 @@ export class EnhancedScenarioConverter {
   private optionShuffler: OptionShuffler;
   private enableShuffling: boolean;
 
-  constructor(teamId: number = 1, createdBy: number = 1, enableShuffling: boolean = true) {
+  constructor(
+    teamId: number = 1,
+    createdBy: number = 1,
+    enableShuffling: boolean = true
+  ) {
     this.teamId = teamId;
     this.createdBy = createdBy;
     this.enableShuffling = enableShuffling;
@@ -72,7 +76,10 @@ export class EnhancedScenarioConverter {
   /**
    * JSON 시나리오를 DB 형식으로 변환
    */
-  convertToDatabaseFormat(jsonData: any[], options: ConversionOptions = {}): ConversionResult {
+  convertToDatabaseFormat(
+    jsonData: any[],
+    options: ConversionOptions = {}
+  ): ConversionResult {
     const scenarios: ScenarioData[] = [];
     const scenes: SceneData[] = [];
     const optionsData: OptionData[] = [];
@@ -81,13 +88,16 @@ export class EnhancedScenarioConverter {
     const shuffleOptions = options.shuffleOptions || {
       useSeed: true,
       seed: Date.now(),
-      preserveCorrectness: true
+      preserveCorrectness: true,
     };
 
     // 옵션 섞기 적용
     let processedData = jsonData;
     if (this.enableShuffling && options.enableShuffling !== false) {
-      processedData = this.optionShuffler.shuffleScenarioOptions(jsonData, shuffleOptions);
+      processedData = this.optionShuffler.shuffleScenarioOptions(
+        jsonData,
+        shuffleOptions
+      );
     }
 
     // 시나리오별로 그룹화

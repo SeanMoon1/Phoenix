@@ -33,7 +33,9 @@ program
     try {
       await convertEnhanced(inputFile, options);
     } catch (error) {
-      console.error(`변환 실패: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `변환 실패: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
   });
@@ -71,7 +73,11 @@ async function convertEnhanced(
   console.log(`📁 JSON 파일 로드 완료: ${jsonData.length}개 이벤트`);
 
   // 변환기 초기화
-  const converter = new EnhancedScenarioConverter(teamId, createdBy, enableShuffling);
+  const converter = new EnhancedScenarioConverter(
+    teamId,
+    createdBy,
+    enableShuffling
+  );
   const sqlGenerator = new EnhancedSQLGenerator();
 
   // 변환 옵션 설정
@@ -82,12 +88,15 @@ async function convertEnhanced(
     shuffleOptions: {
       useSeed: true,
       seed: seed,
-      preserveCorrectness: true
-    }
+      preserveCorrectness: true,
+    },
   };
 
   // 데이터 변환
-  const converted = converter.convertToDatabaseFormat(jsonData, conversionOptions);
+  const converted = converter.convertToDatabaseFormat(
+    jsonData,
+    conversionOptions
+  );
   console.log(`✅ 데이터 변환 완료`);
 
   // 통계 출력
@@ -101,7 +110,7 @@ async function convertEnhanced(
   console.log(`   - 위험도: ${stats.riskLevels.join(', ')}`);
 
   // SQL 생성
-  const sql = batchMode 
+  const sql = batchMode
     ? sqlGenerator.generateBatchSQL(converted)
     : sqlGenerator.generateSQL(converted);
 
@@ -111,9 +120,10 @@ async function convertEnhanced(
 
   // 출력 파일 경로 결정
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const outputFile = (options.output as string) || 
+  const outputFile =
+    (options.output as string) ||
     path.join(outputDir, `enhanced_scenarios_${timestamp}.sql`);
-  
+
   fs.writeFileSync(outputFile, sql, 'utf8');
   console.log(`💾 SQL 파일 생성 완료: ${outputFile}`);
 

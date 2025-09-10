@@ -8,31 +8,21 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
-<<<<<<< HEAD
-// import AdminLayout from './components/layout/AdminLayout';
-=======
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
-import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
-<<<<<<< HEAD
-import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
 import AdminPage from './pages/admin/AdminPage';
-=======
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
 import TrafficAccidentScenarioPage from '@/pages/training/TrafficAccidentScenarioPage';
-import AdminLayout from './components/layout/AdminLayout';
 
 // 새로 생성한 페이지들 import
 import ManualPage from './pages/manual/ManualPage';
 import TrainingPage from './pages/training/TrainingPage';
 import MyPage from './pages/mypage/MyPage';
 import SupportPage from './pages/support/SupportPage';
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -54,16 +44,16 @@ const FeatureCard: React.FC<{
   <AnimatedText
     delay={delay}
     animation="fadeIn"
-    className="p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600 h-full w-full flex flex-col"
+    className="flex flex-col w-full h-full p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600"
   >
-    <div className="text-center flex flex-col h-full">
+    <div className="flex flex-col h-full text-center">
       <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl">
         {icon}
       </div>
       <h3 className="mb-3 text-xl font-bold text-gray-800 dark:text-gray-100">
         {title}
       </h3>
-      <p className="leading-relaxed text-gray-700 dark:text-gray-200 flex-grow">
+      <p className="flex-grow leading-relaxed text-gray-700 dark:text-gray-200">
         {description}
       </p>
     </div>
@@ -161,7 +151,7 @@ const HomePage: React.FC = () => {
             </p>
           </AnimatedText>
 
-          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+          <div className="grid items-stretch grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon="🎮"
               title="가상현실 훈련"
@@ -281,15 +271,6 @@ function App() {
 
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
-<<<<<<< HEAD
-          <Route path="/training/fire" element={<ScenarioPage />} />
-          <Route path="/training/emergency" element={<ScenarioPage />} />
-          <Route path="/training/traffic" element={<ScenarioPage />} />
-          <Route path="/training" element={<ScenarioSelectPage />} />
-
-          {/* 관리자 페이지 */}
-          <Route path="/admin" element={<AdminPage />} />
-=======
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
@@ -307,36 +288,7 @@ function App() {
           <Route path="/support" element={<SupportPage />} />
 
           {/* 관리자페이지 */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/scenarios"
-            element={
-              <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
-              </ProtectedAdminRoute>
-            }
-          />
+          <Route path="/admin" element={<AdminPage />} />
 
           {/* 지진 훈련 */}
           <Route
@@ -355,7 +307,6 @@ function App() {
             path="/training/traffic-accident"
             element={<TrafficAccidentScenarioPage />}
           />
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         </Routes>
       </Router>
     </QueryClientProvider>

@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
-<<<<<<< HEAD
 import { fetchScenarioByType } from '@/services/scenarioService';
-=======
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import { useLocation } from 'react-router-dom';
 
@@ -30,9 +27,9 @@ type PersistState = {
   totalCorrect: number;
 };
 
-<<<<<<< HEAD
 const PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
+
 // 시나리오 타입별 이름 매핑
 const getScenarioSetName = (type: string): string => {
   switch (type) {
@@ -49,58 +46,18 @@ const getScenarioSetName = (type: string): string => {
     default:
       return '재난 대응';
   }
-=======
-type ScenarioPageProps = {
-  scenarioSetName: string; // 예) '화재 대응', '지진 대응'
-  fetchScenarios: () => Promise<Scenario[]>; // 데이터 소스 주입
-  nextScenarioPath: string; // 엔딩 후 이동 경로
-  persistKey?: string; // 로컬스토리지 키 (선택)
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 };
 
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 const END_SCENE_ID = '#END';
-const BASE_EXP = 10;
-
-<<<<<<< HEAD
-// 마지막 토큰 집합
-const TERMINAL_TOKENS = new Set([TOKEN_REVIEW, TOKEN_SCENARIO_SELECT]);
-
-// 선택지가 '복습하기'인지 판별
-const isReviewChoice = (opt: ScenarioOption) =>
-  opt.nextId === TOKEN_REVIEW || (opt.answer ?? '').includes('복습');
-
-// 선택지가 '다음 시나리오 선택하기'인지 판별
-const isScenarioSelectChoice = (opt: ScenarioOption) =>
-  opt.nextId === TOKEN_SCENARIO_SELECT ||
-  (opt.answer ?? '').includes('다음 시나리오');
-
-// 현재 장면이 '마지막 장면'인지 판별
-function isTerminalScene(scn: Scenario | undefined, all: Scenario[]): boolean {
-  if (!scn) return false;
-  const idSet = new Set(all.map(s => s.sceneId));
-  // 다음으로 갈 수 있는 정상 장면이 하나도 없고, 전부 특수 토큰/없음/미존재 ID면 '종단'
-  return (
-    scn.options?.every(opt => {
-      const nextId = opt.nextId;
-      if (!nextId) return true;
-      if (TERMINAL_TOKENS.has(nextId as string)) return true;
-      return !idSet.has(nextId as string);
-    }) ?? false
-  );
-}
 
 export default function ScenarioPage() {
-  // 훅은 컴포넌트 내부에서 호출
-=======
-export default function GenericScenarioPage({
-  scenarioSetName,
-  fetchScenarios,
-  nextScenarioPath,
-  persistKey = 'phoenix_training_state',
-}: ScenarioPageProps) {
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
+  // URL에서 시나리오 타입 추출
+  const location = useLocation();
+  const scenarioType = location.pathname.split('/').pop() || 'fire';
+  const scenarioSetName = getScenarioSetName(scenarioType);
+  const nextScenarioPath = '/training';
   const navigate = useNavigate();
 
   // 데이터 & 진행
@@ -144,28 +101,13 @@ export default function GenericScenarioPage({
   const [levelUpBonus, setLevelUpBonus] = useState(0);
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
 
-<<<<<<< HEAD
-  // URL에서 시나리오 타입 추출
-  const location = useLocation();
-  const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName = getScenarioSetName(scenarioType);
-
-  // 초기 로드
+  // 초기 데이터 로드
   useEffect(() => {
     fetchScenarioByType(scenarioType)
       .then(data => setScenarios(data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [scenarioType]);
-=======
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchScenarios()
-      .then(data => setScenarios(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [fetchScenarios]);
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 
   // 리사이즈
   useEffect(() => {
@@ -179,7 +121,7 @@ export default function GenericScenarioPage({
 
   // 로컬 스토리지 복구/저장
   useEffect(() => {
-    const raw = localStorage.getItem(persistKey);
+    const raw = localStorage.getItem(PERSIST_KEY);
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -191,11 +133,11 @@ export default function GenericScenarioPage({
         /* ignore */
       }
     }
-  }, [persistKey]);
+  }, []);
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(persistKey, JSON.stringify(s));
-  }, [EXP, level, totalCorrect, persistKey]);
+    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
+  }, [EXP, level, totalCorrect]);
 
   // 엔딩(#END) 씬이 렌더된 뒤 모달 자동 오픈 → 진행바 표시
   useEffect(() => {
@@ -408,22 +350,12 @@ export default function GenericScenarioPage({
               neededExp={neededEXP}
             />
             <SituationCard
-<<<<<<< HEAD
-              title={scenario.title}
-              content={scenario.content || ''}
-              sceneScript={scenario.sceneScript || ''}
-=======
               title={scenario.title ?? ''}
               content={scenario.content ?? ''}
               sceneScript={scenario.sceneScript ?? ''}
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
             />
             <OptionsList
-<<<<<<< HEAD
-              options={scenario.options || []}
-=======
               options={scenario.options ?? []}
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
               selected={selected}
               onSelect={handleChoice}
             />
@@ -434,12 +366,7 @@ export default function GenericScenarioPage({
               onPrev={handlePrev}
               onNext={handleNext}
             />
-<<<<<<< HEAD
-
-            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
-=======
             <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
               <PlayMoreButton to="/training" />
             </div>
           </main>

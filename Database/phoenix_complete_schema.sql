@@ -1,6 +1,13 @@
--- Phoenix Disaster Training System Database Schema (MySQL Compatible Version)
--- 생성일: 2025년 9월 1일
--- 설명: 재난 대응 훈련 시스템을 위한 데이터베이스 스키마 (단일 팀 중심 MVP 버전)
+-- =====================================================
+-- Phoenix Disaster Training System - Complete Database Schema
+-- 생성일: 2025년 1월 10일
+-- 설명: 재난 대응 훈련 시스템을 위한 완전한 MySQL 스키마
+--       (기본 스키마 + 개선사항 통합)
+-- =====================================================
+
+-- 데이터베이스 생성 (선택사항)
+-- CREATE DATABASE phoenix_training_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE phoenix_training_system;
 
 -- 1. 팀 정보 테이블 (단일 팀 구조)
 CREATE TABLE team (
@@ -105,7 +112,7 @@ CREATE TABLE code (
     FOREIGN KEY (team_id) REFERENCES team(team_id)
 );
 
--- 6. 시나리오 테이블
+-- 6. 시나리오 테이블 (개선된 버전)
 CREATE TABLE scenario (
     scenario_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '시나리오 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID (생성 팀)',
@@ -114,6 +121,8 @@ CREATE TABLE scenario (
     disaster_type VARCHAR(50) NOT NULL COMMENT '재난 유형',
     description TEXT NOT NULL COMMENT '시나리오 설명',
     risk_level VARCHAR(20) NOT NULL COMMENT '위험도',
+    difficulty VARCHAR(20) NOT NULL DEFAULT 'easy' COMMENT '난이도 (easy, medium, hard, expert)',
+    approval_status VARCHAR(20) NOT NULL DEFAULT 'DRAFT' COMMENT '승인 상태 (DRAFT, PENDING, APPROVED, REJECTED)',
     occurrence_condition TEXT COMMENT '발생 조건',
     status VARCHAR(20) NOT NULL DEFAULT '임시저장' COMMENT '상태',
     approval_comment TEXT COMMENT '승인 코멘트',
@@ -131,8 +140,32 @@ CREATE TABLE scenario (
     UNIQUE KEY uk_team_scenario_code (team_id, scenario_code)
 );
 
--- 7. 의사결정 이벤트 테이블
-CREATE TABLE decision_event (
+-- 7. 시나리오 씬 테이블 (새로 추가)
+CREATE TABLE scenario_scene (
+    scene_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '씬 ID',
+    scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
+    scene_code VARCHAR(50) NOT NULL COMMENT '씬 코드 (예: #1-1, #1-2)',
+    scene_order INT NOT NULL COMMENT '씬 순서',
+    title VARCHAR(255) NOT NULL COMMENT '씬 제목',
+    content TEXT NOT NULL COMMENT '씬 내용',
+    scene_script TEXT NOT NULL COMMENT '씬 스크립트',
+    image_url VARCHAR(500) COMMENT '씬 이미지 URL',
+    video_url VARCHAR(500) COMMENT '씬 비디오 URL',
+    estimated_time INT COMMENT '예상 소요 시간 (초)',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    created_by BIGINT NOT NULL COMMENT '생성자 ID',
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    updated_by BIGINT COMMENT '수정자 ID',
+    deleted_at DATETIME NULL COMMENT '삭제일시',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
+    FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id) ON DELETE CASCADE,
+    UNIQUE KEY uk_scenario_scene_code (scenario_id, scene_code),
+    UNIQUE KEY uk_scenario_scene_order (scenario_id, scene_order),
+    INDEX idx_scenario_scene_order (scenario_id, scene_order)
+);
+
+-- 8. 의사결정 이벤트 테이블 (scenario_event로 이름 변경)
+CREATE TABLE scenario_event (
     event_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '이벤트 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     event_code VARCHAR(50) NOT NULL COMMENT '이벤트 코드 (예: EVENT001, EVENT002)',
@@ -149,14 +182,20 @@ CREATE TABLE decision_event (
     UNIQUE KEY uk_scenario_event_code (scenario_id, event_code)
 );
 
--- 8. 선택 옵션 테이블
+-- 9. 선택 옵션 테이블 (개선된 버전)
 CREATE TABLE choice_option (
     choice_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '선택지 ID',
     event_id BIGINT NOT NULL COMMENT '이벤트 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
+    scene_id BIGINT COMMENT '씬 ID',
     choice_code VARCHAR(50) NOT NULL COMMENT '선택지 코드 (예: CHOICE001, CHOICE002)',
     choice_text VARCHAR(500) NOT NULL COMMENT '선택지 텍스트',
     is_correct TINYINT(1) NOT NULL COMMENT '정답 여부 (1: 정답, 0: 오답)',
+    speed_points INT NOT NULL DEFAULT 0 COMMENT '속도 점수',
+    accuracy_points INT NOT NULL DEFAULT 0 COMMENT '정확도 점수',
+    exp_points INT NOT NULL DEFAULT 0 COMMENT '경험치 점수',
+    reaction_text TEXT COMMENT '선택 후 반응 텍스트',
+    next_scene_code VARCHAR(50) COMMENT '다음 씬 코드',
     score_weight INT NOT NULL COMMENT '점수 가중치',
     next_event_id BIGINT COMMENT '다음 이벤트 ID',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
@@ -164,13 +203,16 @@ CREATE TABLE choice_option (
     updated_by BIGINT COMMENT '수정자 ID',
     deleted_at DATETIME NULL COMMENT '삭제일시',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
-    FOREIGN KEY (event_id) REFERENCES decision_event(event_id),
+    FOREIGN KEY (event_id) REFERENCES scenario_event(event_id),
     FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id),
-    FOREIGN KEY (next_event_id) REFERENCES decision_event(event_id),
-    UNIQUE KEY uk_event_choice_code (event_id, choice_code)
+    FOREIGN KEY (scene_id) REFERENCES scenario_scene(scene_id) ON DELETE CASCADE,
+    FOREIGN KEY (next_event_id) REFERENCES scenario_event(event_id),
+    UNIQUE KEY uk_event_choice_code (event_id, choice_code),
+    INDEX idx_scene_options (scene_id),
+    INDEX idx_next_scene (next_scene_code)
 );
 
--- 9. 훈련 세션 테이블
+-- 10. 훈련 세션 테이블
 CREATE TABLE training_session (
     session_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '세션 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID (생성 팀)',
@@ -192,7 +234,7 @@ CREATE TABLE training_session (
     UNIQUE KEY uk_team_session_code (team_id, session_code)
 );
 
--- 10. 훈련 참가자 테이블
+-- 11. 훈련 참가자 테이블
 CREATE TABLE training_participant (
     participant_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '참가자 ID',
     session_id BIGINT NOT NULL COMMENT '세션 ID',
@@ -215,7 +257,7 @@ CREATE TABLE training_participant (
     UNIQUE KEY uk_session_participant_code (session_id, participant_code)
 );
 
--- 11. 훈련 결과 테이블
+-- 12. 훈련 결과 테이블
 CREATE TABLE training_result (
     result_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결과 ID',
     participant_id BIGINT NOT NULL COMMENT '참가자 ID',
@@ -241,7 +283,7 @@ CREATE TABLE training_result (
     UNIQUE KEY uk_participant_result_code (participant_id, result_code)
 );
 
--- 12. 사용자 선택 로그 테이블
+-- 13. 사용자 선택 로그 테이블
 CREATE TABLE user_choice_log (
     log_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '로그 ID',
     result_id BIGINT NOT NULL COMMENT '결과 ID',
@@ -257,12 +299,12 @@ CREATE TABLE user_choice_log (
     deleted_at DATETIME NULL COMMENT '삭제일시',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '활성화 여부 (1: 활성, 0: 비활성)',
     FOREIGN KEY (result_id) REFERENCES training_result(result_id),
-    FOREIGN KEY (event_id) REFERENCES decision_event(event_id),
+    FOREIGN KEY (event_id) REFERENCES scenario_event(event_id),
     FOREIGN KEY (choice_id) REFERENCES choice_option(choice_id),
     UNIQUE KEY uk_result_log_code (result_id, log_code)
 );
 
--- 13. 문의사항 테이블
+-- 14. 문의사항 테이블
 CREATE TABLE inquiry (
     inquiry_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '문의 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -286,7 +328,7 @@ CREATE TABLE inquiry (
     UNIQUE KEY uk_team_inquiry_code (team_id, inquiry_code)
 );
 
--- 14. FAQ 테이블
+-- 15. FAQ 테이블
 CREATE TABLE faq (
     faq_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'FAQ ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -305,21 +347,6 @@ CREATE TABLE faq (
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     UNIQUE KEY uk_team_faq_code (team_id, faq_code)
 );
-
--- 15. 권한 제어 뷰 (팀 중심)
-CREATE VIEW v_admin_access_control AS
-SELECT 
-    a.admin_id,
-    a.team_id,
-    al.level_code,
-    al.can_manage_team,
-    al.can_manage_users,
-    al.can_manage_scenarios,
-    al.can_approve_scenarios,
-    al.can_view_results
-FROM admin a
-JOIN admin_level al ON a.admin_level_id = al.level_id
-WHERE a.use_yn = 'Y' AND a.is_active = 1;
 
 -- 16. 사용자 진행 상황 테이블 (레벨업 시스템)
 CREATE TABLE user_progress (
@@ -407,7 +434,26 @@ CREATE TABLE user_level_history (
     FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id)
 );
 
--- 16. 팀별 데이터 접근 제어 뷰
+-- =====================================================
+-- 뷰 (Views)
+-- =====================================================
+
+-- 20. 권한 제어 뷰 (팀 중심)
+CREATE VIEW v_admin_access_control AS
+SELECT 
+    a.admin_id,
+    a.team_id,
+    al.level_code,
+    al.can_manage_team,
+    al.can_manage_users,
+    al.can_manage_scenarios,
+    al.can_approve_scenarios,
+    al.can_view_results
+FROM admin a
+JOIN admin_level al ON a.admin_level_id = al.level_id
+WHERE a.use_yn = 'Y' AND a.is_active = 1;
+
+-- 21. 팀별 데이터 접근 제어 뷰
 CREATE VIEW v_team_data_access AS
 SELECT 
     t.team_id,
@@ -423,7 +469,7 @@ LEFT JOIN training_session ts ON t.team_id = ts.team_id AND ts.is_active = 1
 WHERE t.is_active = 1
 GROUP BY t.team_id, t.team_name, t.team_code;
 
--- 17. 사용자별 권한 요약 뷰
+-- 22. 사용자별 권한 요약 뷰
 CREATE VIEW v_user_permission_summary AS
 SELECT 
     u.user_id,
@@ -443,7 +489,11 @@ LEFT JOIN admin a ON u.user_id = a.admin_id AND a.use_yn = 'Y' AND a.is_active =
 LEFT JOIN admin_level al ON a.admin_level_id = al.level_id
 WHERE u.is_active = 1 AND t.is_active = 1;
 
--- 인덱스 생성
+-- =====================================================
+-- 인덱스 (Indexes)
+-- =====================================================
+
+-- 기본 인덱스
 CREATE INDEX idx_team_code ON team(team_code);
 CREATE INDEX idx_user_team ON user(team_id);
 CREATE INDEX idx_user_code ON user(user_code);
@@ -452,6 +502,8 @@ CREATE INDEX idx_user_name ON user(name);
 CREATE INDEX idx_user_level ON user(user_level);
 CREATE INDEX idx_user_exp ON user(user_exp);
 CREATE INDEX idx_user_tier ON user(current_tier);
+
+-- 레벨업 시스템 인덱스
 CREATE INDEX idx_user_progress_user ON user_progress(user_id);
 CREATE INDEX idx_user_progress_team ON user_progress(team_id);
 CREATE INDEX idx_achievement_user ON achievement(user_id);
@@ -460,42 +512,182 @@ CREATE INDEX idx_scenario_stats_user ON user_scenario_stats(user_id);
 CREATE INDEX idx_scenario_stats_type ON user_scenario_stats(scenario_type);
 CREATE INDEX idx_level_history_user ON user_level_history(user_id);
 CREATE INDEX idx_level_history_level ON user_level_history(new_level);
+
+-- 관리자 인덱스
 CREATE INDEX idx_admin_team ON admin(team_id);
 CREATE INDEX idx_admin_level ON admin(admin_level_id);
+
+-- 시나리오 인덱스
 CREATE INDEX idx_scenario_team ON scenario(team_id);
 CREATE INDEX idx_scenario_code ON scenario(scenario_code);
-CREATE INDEX idx_decision_event_scenario ON decision_event(scenario_id);
-CREATE INDEX idx_decision_event_code ON decision_event(event_code);
+CREATE INDEX idx_scenario_type ON scenario(disaster_type);
+CREATE INDEX idx_scenario_difficulty ON scenario(difficulty);
+
+-- 이벤트 및 선택지 인덱스
+CREATE INDEX idx_scenario_event_scenario ON scenario_event(scenario_id);
+CREATE INDEX idx_scenario_event_code ON scenario_event(event_code);
 CREATE INDEX idx_choice_option_event ON choice_option(event_id);
+CREATE INDEX idx_choice_option_scenario ON choice_option(scenario_id);
+
+-- 훈련 관련 인덱스
 CREATE INDEX idx_training_session_scenario ON training_session(scenario_id);
 CREATE INDEX idx_training_session_team ON training_session(team_id);
 CREATE INDEX idx_training_participant_session ON training_participant(session_id);
 CREATE INDEX idx_training_result_participant ON training_result(participant_id);
 CREATE INDEX idx_user_choice_log_result ON user_choice_log(result_id);
+
+-- 기타 인덱스
 CREATE INDEX idx_inquiry_team ON inquiry(team_id);
 CREATE INDEX idx_faq_team ON faq(team_id);
 
--- 기본 데이터 삽입 (권한 레벨 - 단순화된 3단계)
-INSERT INTO admin_level (level_name, level_code, description, can_manage_team, can_manage_users, can_manage_scenarios, can_approve_scenarios, can_view_results) VALUES
-('팀관리자', 'TEAM_ADMIN', '팀 전체 관리자', 1, 1, 1, 1, 1),
-('팀운영자', 'TEAM_OPERATOR', '팀 운영자', 0, 1, 1, 0, 1),
-('일반사용자', 'GENERAL_USER', '일반 사용자', 0, 0, 0, 0, 0);
+-- =====================================================
+-- 함수 (Functions)
+-- =====================================================
 
--- 기본 데이터 삽입 (시스템 공통 코드)
-INSERT INTO code (code_class, code_name, code_value, code_desc, code_order, created_by) VALUES
-('DISASTER_TYPE', '화재', 'FIRE', '화재 재난', 1, 1),
-('DISASTER_TYPE', '지진', 'EARTHQUAKE', '지진 재난', 2, 1),
-('DISASTER_TYPE', '응급처치', 'EMERGENCY', '응급처치 상황', 3, 1),
-('DISASTER_TYPE', '침수홍수', 'FLOOD', '침수 및 홍수', 4, 1),
-('RISK_LEVEL', '낮음', 'LOW', '위험도 낮음', 1, 1),
-('RISK_LEVEL', '보통', 'MEDIUM', '위험도 보통', 2, 1),
-('RISK_LEVEL', '높음', 'HIGH', '위험도 높음', 3, 1),
-('RISK_LEVEL', '매우높음', 'VERY_HIGH', '위험도 매우 높음', 4, 1),
-('EVENT_TYPE', '선택형', 'CHOICE', '선택형 이벤트', 1, 1),
-('EVENT_TYPE', '순차형', 'SEQUENTIAL', '순차형 이벤트', 2, 1);
+-- 23. 시나리오 코드 자동 생성 함수
+DELIMITER $$
+CREATE FUNCTION generate_scenario_code(team_id BIGINT, disaster_type VARCHAR(50)) 
+RETURNS VARCHAR(50)
+READS SQL DATA
+DETERMINISTIC
+BEGIN
+    DECLARE next_number INT;
+    DECLARE type_code VARCHAR(3);
+    DECLARE result_code VARCHAR(50);
+    
+    -- 재난 유형별 코드 생성
+    SET type_code = CASE 
+        WHEN disaster_type = 'fire' THEN 'FIR'
+        WHEN disaster_type = 'earthquake' THEN 'EAR'
+        WHEN disaster_type = 'emergency' THEN 'EME'
+        WHEN disaster_type = 'traffic' THEN 'TRA'
+        WHEN disaster_type = 'flood' THEN 'FLO'
+        ELSE 'GEN'
+    END;
+    
+    -- 다음 시퀀스 번호 조회
+    SELECT COALESCE(MAX(CAST(SUBSTRING(scenario_code, 5) AS UNSIGNED)), 0) + 1
+    INTO next_number
+    FROM scenario 
+    WHERE team_id = team_id 
+    AND scenario_code LIKE CONCAT(type_code, '%')
+    AND is_active = 1;
+    
+    SET result_code = CONCAT(type_code, LPAD(next_number, 3, '0'));
+    RETURN result_code;
+END$$
+DELIMITER ;
 
--- 권한 제어를 위한 저장 프로시저 예시 (팀 중심, MySQL 호환)
-DELIMITER //
+-- 24. MySQL 권한 검증을 위한 함수
+DELIMITER $$
+CREATE FUNCTION CheckUserPermission(
+    p_user_id BIGINT,
+    p_required_permission VARCHAR(50)
+) RETURNS TINYINT(1)
+READS SQL DATA
+DETERMINISTIC
+BEGIN
+    DECLARE v_has_permission TINYINT(1) DEFAULT 0;
+    DECLARE v_admin_level VARCHAR(20);
+    
+    -- 사용자가 관리자인지 확인
+    SELECT level_code INTO v_admin_level
+    FROM admin a
+    JOIN admin_level al ON a.admin_level_id = al.level_id
+    WHERE a.admin_id = p_user_id AND a.use_yn = 'Y' AND a.is_active = 1;
+    
+    -- 권한 레벨에 따른 권한 확인
+    CASE p_required_permission
+        WHEN 'MANAGE_TEAM' THEN
+            IF v_admin_level = 'TEAM_ADMIN' THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'MANAGE_USERS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'MANAGE_SCENARIOS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'APPROVE_SCENARIOS' THEN
+            IF v_admin_level = 'TEAM_ADMIN' THEN
+                SET v_has_permission = 1;
+            END IF;
+        WHEN 'VIEW_RESULTS' THEN
+            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
+                SET v_has_permission = 1;
+            END IF;
+        ELSE
+            SET v_has_permission = 0;
+    END CASE;
+    
+    RETURN v_has_permission;
+END$$
+DELIMITER ;
+
+-- =====================================================
+-- 트리거 (Triggers)
+-- =====================================================
+
+-- 25. 시나리오 코드 생성 트리거
+DELIMITER $$
+CREATE TRIGGER tr_scenario_code_generation
+BEFORE INSERT ON scenario
+FOR EACH ROW
+BEGIN
+    IF NEW.scenario_code IS NULL OR NEW.scenario_code = '' THEN
+        SET NEW.scenario_code = generate_scenario_code(NEW.team_id, NEW.disaster_type);
+    END IF;
+END$$
+DELIMITER ;
+
+-- 26. 시나리오 코드 중복 방지 트리거
+DELIMITER $$
+CREATE TRIGGER tr_scenario_code_unique
+BEFORE INSERT ON scenario
+FOR EACH ROW
+BEGIN
+    DECLARE code_count INT DEFAULT 0;
+    
+    SELECT COUNT(*) INTO code_count
+    FROM scenario 
+    WHERE team_id = NEW.team_id 
+    AND scenario_code = NEW.scenario_code
+    AND is_active = 1;
+    
+    IF code_count > 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '시나리오 코드가 이미 존재합니다.';
+    END IF;
+END$$
+DELIMITER ;
+
+-- 27. 권한 검증을 위한 트리거
+DELIMITER $$
+CREATE TRIGGER tr_admin_team_check
+BEFORE INSERT ON admin
+FOR EACH ROW
+BEGIN
+    DECLARE v_team_exists TINYINT(1) DEFAULT 0;
+    
+    -- 팀 존재 여부 확인
+    SELECT COUNT(*) INTO v_team_exists
+    FROM team 
+    WHERE team_id = NEW.team_id AND is_active = 1;
+    
+    IF v_team_exists = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '존재하지 않는 팀입니다.';
+    END IF;
+END$$
+DELIMITER ;
+
+-- =====================================================
+-- 저장 프로시저 (Stored Procedures)
+-- =====================================================
+
+-- 28. 권한 제어를 위한 저장 프로시저
+DELIMITER $$
 CREATE PROCEDURE GetUserResultsByAdmin(
     IN p_admin_id BIGINT,
     IN p_team_id BIGINT
@@ -536,30 +728,11 @@ BEGIN
     WHERE tp.team_id = p_team_id
     AND tr.is_active = 1;
     
-END //
+END$$
 DELIMITER ;
 
--- 권한 검증을 위한 트리거 예시 (MySQL 호환)
-DELIMITER //
-CREATE TRIGGER tr_admin_team_check
-BEFORE INSERT ON admin
-FOR EACH ROW
-BEGIN
-    DECLARE v_team_exists TINYINT(1) DEFAULT 0;
-    
-    -- 팀 존재 여부 확인
-    SELECT COUNT(*) INTO v_team_exists
-    FROM team 
-    WHERE team_id = NEW.team_id AND is_active = 1;
-    
-    IF v_team_exists = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '존재하지 않는 팀입니다.';
-    END IF;
-END //
-DELIMITER ;
-
--- 팀별 데이터 접근 제어를 위한 저장 프로시저
-DELIMITER //
+-- 29. 팀별 데이터 접근 제어를 위한 저장 프로시저
+DELIMITER $$
 CREATE PROCEDURE GetTeamDataByAdmin(
     IN p_admin_id BIGINT,
     IN p_target_team_id BIGINT,
@@ -605,59 +778,11 @@ BEGIN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
     END CASE;
     
-END //
+END$$
 DELIMITER ;
 
--- MySQL 권한 검증을 위한 함수
-DELIMITER //
-CREATE FUNCTION CheckUserPermission(
-    p_user_id BIGINT,
-    p_required_permission VARCHAR(50)
-) RETURNS TINYINT(1)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    DECLARE v_has_permission TINYINT(1) DEFAULT 0;
-    DECLARE v_admin_level VARCHAR(20);
-    
-    -- 사용자가 관리자인지 확인
-    SELECT level_code INTO v_admin_level
-    FROM admin a
-    JOIN admin_level al ON a.admin_level_id = al.level_id
-    WHERE a.admin_id = p_user_id AND a.use_yn = 'Y' AND a.is_active = 1;
-    
-    -- 권한 레벨에 따른 권한 확인
-    CASE p_required_permission
-        WHEN 'MANAGE_TEAM' THEN
-            IF v_admin_level = 'TEAM_ADMIN' THEN
-                SET v_has_permission = 1;
-            END IF;
-        WHEN 'MANAGE_USERS' THEN
-            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
-                SET v_has_permission = 1;
-            END IF;
-        WHEN 'MANAGE_SCENARIOS' THEN
-            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
-                SET v_has_permission = 1;
-            END IF;
-        WHEN 'APPROVE_SCENARIOS' THEN
-            IF v_admin_level = 'TEAM_ADMIN' THEN
-                SET v_has_permission = 1;
-            END IF;
-        WHEN 'VIEW_RESULTS' THEN
-            IF v_admin_level IN ('TEAM_ADMIN', 'TEAM_OPERATOR') THEN
-                SET v_has_permission = 1;
-            END IF;
-        ELSE
-            SET v_has_permission = 0;
-    END CASE;
-    
-    RETURN v_has_permission;
-END //
-DELIMITER ;
-
--- 팀별 데이터 격리를 위한 저장 프로시저
-DELIMITER //
+-- 30. 팀별 데이터 격리를 위한 저장 프로시저
+DELIMITER $$
 CREATE PROCEDURE GetTeamIsolatedData(
     IN p_admin_id BIGINT,
     IN p_data_type VARCHAR(50)
@@ -707,64 +832,82 @@ BEGIN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_msg;
     END CASE;
     
-END //
+END$$
 DELIMITER ;
 
--- 사용 예시 쿼리들
--- 1. 특정 팀의 사용자 수 조회
-SELECT 
-    t.team_name,
-    COUNT(u.user_id) as user_count
-FROM team t
-LEFT JOIN user u ON t.team_id = u.team_id AND u.use_yn = 'Y' AND u.is_active = 1
-WHERE t.is_active = 1
-GROUP BY t.team_id, t.team_name;
+-- =====================================================
+-- 기본 데이터 삽입 (Initial Data)
+-- =====================================================
 
--- 2. 권한별 관리자 수 조회
-SELECT 
-    al.level_name,
-    COUNT(a.admin_id) as admin_count
-FROM admin_level al
-LEFT JOIN admin a ON al.level_id = a.admin_level_id AND a.use_yn = 'Y' AND a.is_active = 1
-WHERE al.is_active = 1
-GROUP BY al.level_id, al.level_name;
+-- 31. 기본 데이터 삽입 (권한 레벨 - 단순화된 3단계)
+INSERT INTO admin_level (level_name, level_code, description, can_manage_team, can_manage_users, can_manage_scenarios, can_approve_scenarios, can_view_results) VALUES
+('팀관리자', 'TEAM_ADMIN', '팀 전체 관리자', 1, 1, 1, 1, 1),
+('팀운영자', 'TEAM_OPERATOR', '팀 운영자', 0, 1, 1, 0, 1),
+('일반사용자', 'GENERAL_USER', '일반 사용자', 0, 0, 0, 0, 0);
 
--- 3. 팀별 시나리오 통계
-SELECT 
-    t.team_name,
-    COUNT(s.scenario_id) as total_scenarios,
-    COUNT(CASE WHEN s.status = '활성화' THEN 1 END) as active_scenarios,
-    COUNT(CASE WHEN s.status = '승인대기' THEN 1 END) as pending_scenarios
-FROM team t
-LEFT JOIN scenario s ON t.team_id = s.team_id AND s.is_active = 1
-WHERE t.is_active = 1
-GROUP BY t.team_id, t.team_name;
+-- 32. 기본 데이터 삽입 (시스템 공통 코드)
+INSERT INTO code (code_class, code_name, code_value, code_desc, code_order, created_by) VALUES
+('DISASTER_TYPE', '화재', 'FIRE', '화재 재난', 1, 1),
+('DISASTER_TYPE', '지진', 'EARTHQUAKE', '지진 재난', 2, 1),
+('DISASTER_TYPE', '응급처치', 'EMERGENCY', '응급처치 상황', 3, 1),
+('DISASTER_TYPE', '교통사고', 'TRAFFIC', '교통사고 대응', 4, 1),
+('DISASTER_TYPE', '침수홍수', 'FLOOD', '침수 및 홍수', 5, 1),
+('RISK_LEVEL', '낮음', 'LOW', '위험도 낮음', 1, 1),
+('RISK_LEVEL', '보통', 'MEDIUM', '위험도 보통', 2, 1),
+('RISK_LEVEL', '높음', 'HIGH', '위험도 높음', 3, 1),
+('RISK_LEVEL', '매우높음', 'VERY_HIGH', '위험도 매우 높음', 4, 1),
+('DIFFICULTY', '쉬움', 'easy', '난이도 쉬움', 1, 1),
+('DIFFICULTY', '보통', 'medium', '난이도 보통', 2, 1),
+('DIFFICULTY', '어려움', 'hard', '난이도 어려움', 3, 1),
+('DIFFICULTY', '전문가', 'expert', '난이도 전문가', 4, 1),
+('EVENT_TYPE', '선택형', 'CHOICE', '선택형 이벤트', 1, 1),
+('EVENT_TYPE', '순차형', 'SEQUENTIAL', '순차형 이벤트', 2, 1);
 
--- 4. 개인 훈련 결과 통계 (팀 중심)
-SELECT 
-    u.name as user_name,
-    t.team_name,
-    COUNT(tr.result_id) as total_trainings,
-    AVG(tr.total_score) as avg_score,
-    AVG(tr.accuracy_score) as avg_accuracy,
-    AVG(tr.speed_score) as avg_speed
-FROM user u
-JOIN team t ON u.team_id = t.team_id
-LEFT JOIN training_result tr ON u.user_id = tr.user_id AND tr.is_active = 1
-WHERE u.is_active = 1 AND t.is_active = 1
-GROUP BY u.user_id, u.name, t.team_name
-ORDER BY avg_score DESC;
+-- 33. 기본 팀 데이터 삽입
+INSERT INTO team (team_code, team_name, description, status, created_by) VALUES
+('TEAM001', '기본 팀', 'Phoenix 재난 대응 훈련 시스템 기본 팀', 'ACTIVE', 1);
 
--- 5. 권한 검증 예시
--- 특정 사용자가 팀 관리 권한이 있는지 확인
-SELECT 
-    u.name,
-    CheckUserPermission(u.user_id, 'MANAGE_TEAM') as can_manage_team,
-    CheckUserPermission(u.user_id, 'MANAGE_USERS') as can_manage_users
-FROM user u
-WHERE u.user_id = 1;
+-- 34. 기본 관리자 데이터 삽입
+INSERT INTO admin (team_id, admin_level_id, login_id, password, name, email, phone, created_by) VALUES
+(1, 1, 'admin', '$2b$10$example_hash_here', '시스템 관리자', 'admin@phoenix.com', '010-0000-0000', 1);
 
--- 6. 팀별 데이터 접근 제어 테스트
--- CALL GetTeamIsolatedData(1, 'USERS');
--- CALL GetTeamIsolatedData(1, 'SCENARIOS');
--- CALL GetTeamIsolatedData(1, 'TRAINING_RESULTS');
+-- 35. 샘플 시나리오 데이터 삽입
+INSERT INTO scenario (team_id, scenario_code, title, disaster_type, risk_level, difficulty, description, created_by) VALUES
+(1, 'FIR001', '아파트 화재 대응', 'fire', 'MEDIUM', 'easy', '새벽 3시 아파트 화재 상황 대응', 1),
+(1, 'EAR001', '지진 대피 훈련', 'earthquake', 'HIGH', 'medium', '지진 발생 시 대피 절차 훈련', 1),
+(1, 'EME001', '응급처치 기본', 'emergency', 'LOW', 'easy', '기본 응급처치 방법 훈련', 1),
+(1, 'TRA001', '교통사고 대응', 'traffic', 'MEDIUM', 'medium', '교통사고 발생 시 대응 절차', 1);
+
+-- 36. 샘플 씬 데이터 삽입
+INSERT INTO scenario_scene (scenario_id, scene_code, scene_order, title, content, scene_script, created_by) VALUES
+-- 화재 시나리오 씬들
+(1, '#1-1', 1, '화재 경보 발생', '새벽 3시, 아파트 화재 경보가 울렸습니다. 연기가 복도로 퍼져나가고 있습니다.', '경보음이 울리고 있습니다. 연기가 보입니다.', 1),
+(1, '#1-2', 2, '현장 확인', '화재 현장을 확인해야 합니다. 어디서 불이 났는지 파악하세요.', '현장 상황을 파악하세요. 안전을 우선으로 하세요.', 1),
+(1, '#1-3', 3, '대피 결정', '대피할지 진화할지 결정해야 합니다.', '빠른 판단이 필요합니다.', 1),
+-- 지진 시나리오 씬들
+(2, '#2-1', 1, '지진 발생', '지진이 발생했습니다. 땅이 흔들리고 있습니다.', '땅이 흔들리고 있습니다. 안전한 곳을 찾으세요.', 1),
+(2, '#2-2', 2, '대피 준비', '안전한 곳으로 대피해야 합니다.', '대피 준비를 하세요. 머리를 보호하세요.', 1),
+(2, '#2-3', 3, '대피 실행', '대피를 실행합니다.', '차근차근 대피하세요.', 1);
+
+-- 37. 샘플 선택 옵션 데이터 삽입
+INSERT INTO choice_option (scene_id, scenario_id, choice_code, choice_text, reaction_text, speed_points, accuracy_points, exp_points, is_correct, next_scene_code, created_by) VALUES
+-- 화재 시나리오 씬 1의 선택지들
+(1, 1, 'FIR001_OPT001', '119에 신고한다', '신고를 완료했습니다. 소방서에서 출동한다고 합니다.', 10, 10, 50, 1, '#1-2', 1),
+(1, 1, 'FIR001_OPT002', '직접 진화한다', '위험합니다! 연기가 더 심해질 수 있습니다.', 5, 0, 10, 0, '#1-1', 1),
+(1, 1, 'FIR001_OPT003', '대피한다', '안전한 곳으로 대피하세요.', 8, 8, 30, 1, '#1-3', 1),
+-- 화재 시나리오 씬 2의 선택지들
+(2, 1, 'FIR001_OPT004', '화재 위치 확인', '화재 위치를 확인했습니다. 3층에서 발생했습니다.', 10, 10, 50, 1, '#1-3', 1),
+(2, 1, 'FIR001_OPT005', '소화기 사용', '소화기를 사용해보세요.', 7, 5, 25, 0, '#1-2', 1),
+-- 지진 시나리오 씬 1의 선택지들
+(4, 2, 'EAR001_OPT001', '책상 아래로 숨는다', '책상 아래로 숨었습니다. 안전합니다.', 10, 10, 50, 1, '#2-2', 1),
+(4, 2, 'EAR001_OPT002', '바로 밖으로 나간다', '위험합니다! 떨어지는 물건에 맞을 수 있습니다.', 3, 0, 5, 0, '#2-1', 1);
+
+-- =====================================================
+-- 완료 메시지
+-- =====================================================
+
+SELECT 'Phoenix Database Schema 생성 완료!' as status;
+SELECT '총 테이블 수:' as info, COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE();
+SELECT '총 뷰 수:' as info, COUNT(*) as count FROM information_schema.views WHERE table_schema = DATABASE();
+SELECT '총 함수 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE routine_type = 'FUNCTION' AND routine_schema = DATABASE();
+SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = DATABASE();

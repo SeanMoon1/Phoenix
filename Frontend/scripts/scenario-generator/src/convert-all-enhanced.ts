@@ -48,8 +48,8 @@ async function convertAllScenarios(options: ConversionOptions): Promise<void> {
     shuffleOptions: {
       useSeed: true,
       seed: options.seed || Date.now(),
-      preserveCorrectness: true
-    }
+      preserveCorrectness: true,
+    },
   };
 
   const allScenarios: any[] = [];
@@ -78,7 +78,10 @@ async function convertAllScenarios(options: ConversionOptions): Promise<void> {
       }
 
       const jsonData = JSON.parse(fs.readFileSync(file, 'utf8'));
-      const converted = converter.convertToDatabaseFormat(jsonData, conversionOptions);
+      const converted = converter.convertToDatabaseFormat(
+        jsonData,
+        conversionOptions
+      );
 
       allScenarios.push(...converted.scenarios);
       allScenes.push(...converted.scenes);
@@ -201,7 +204,7 @@ if (require.main === module) {
     verbose: true,
     batchMode: true,
     enableShuffling: true,
-    seed: Date.now()
+    seed: Date.now(),
   };
 
   convertAllScenarios(options).catch(console.error);

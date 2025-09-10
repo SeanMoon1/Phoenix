@@ -34,36 +34,54 @@ export class OptionShuffler {
   /**
    * 선택 옵션들을 랜덤하게 섞기
    */
-  shuffleOptions(options: any[], shuffleOptions: ShuffleOptions = {}): ShuffledOption[] {
+  shuffleOptions(
+    options: any[],
+    shuffleOptions: ShuffleOptions = {}
+  ): ShuffledOption[] {
     const {
       useSeed = true,
       seed = this.seed,
-      preserveCorrectness = true
+      preserveCorrectness = true,
     } = shuffleOptions;
 
     // 정답 여부 판단
     const optionsWithCorrectness = options.map((option, index) => ({
       ...option,
       originalIndex: index,
-      isCorrect: this.determineCorrectness(option)
+      isCorrect: this.determineCorrectness(option),
     }));
 
     // 정답과 오답 분리
     const correctOptions = optionsWithCorrectness.filter(opt => opt.isCorrect);
-    const incorrectOptions = optionsWithCorrectness.filter(opt => !opt.isCorrect);
+    const incorrectOptions = optionsWithCorrectness.filter(
+      opt => !opt.isCorrect
+    );
 
     let shuffledOptions: ShuffledOption[] = [];
 
     if (preserveCorrectness) {
       // 정답과 오답을 각각 섞은 후 합치기
-      const shuffledCorrect = this.shuffleArray(correctOptions, useSeed ? seed : undefined);
-      const shuffledIncorrect = this.shuffleArray(incorrectOptions, useSeed ? seed + 1 : undefined);
-      
+      const shuffledCorrect = this.shuffleArray(
+        correctOptions,
+        useSeed ? seed : undefined
+      );
+      const shuffledIncorrect = this.shuffleArray(
+        incorrectOptions,
+        useSeed ? seed + 1 : undefined
+      );
+
       // 정답과 오답을 랜덤하게 배치
-      shuffledOptions = this.interleaveOptions(shuffledCorrect, shuffledIncorrect, useSeed ? seed + 2 : undefined);
+      shuffledOptions = this.interleaveOptions(
+        shuffledCorrect,
+        shuffledIncorrect,
+        useSeed ? seed + 2 : undefined
+      );
     } else {
       // 모든 옵션을 완전히 랜덤하게 섞기
-      shuffledOptions = this.shuffleArray(optionsWithCorrectness, useSeed ? seed : undefined);
+      shuffledOptions = this.shuffleArray(
+        optionsWithCorrectness,
+        useSeed ? seed : undefined
+      );
     }
 
     return shuffledOptions;
@@ -99,8 +117,12 @@ export class OptionShuffler {
     let incorrectIndex = 0;
 
     // 정답과 오답을 랜덤하게 배치
-    while (correctIndex < correctOptions.length || incorrectIndex < incorrectOptions.length) {
-      const shouldAddCorrect = correctIndex < correctOptions.length && 
+    while (
+      correctIndex < correctOptions.length ||
+      incorrectIndex < incorrectOptions.length
+    ) {
+      const shouldAddCorrect =
+        correctIndex < correctOptions.length &&
         (incorrectIndex >= incorrectOptions.length || random() < 0.5);
 
       if (shouldAddCorrect) {
@@ -135,13 +157,19 @@ export class OptionShuffler {
   /**
    * 시나리오 데이터의 모든 씬에 대해 옵션 섞기 적용
    */
-  shuffleScenarioOptions(scenarioData: any[], shuffleOptions: ShuffleOptions = {}): any[] {
+  shuffleScenarioOptions(
+    scenarioData: any[],
+    shuffleOptions: ShuffleOptions = {}
+  ): any[] {
     return scenarioData.map(scene => {
       if (scene.options && Array.isArray(scene.options)) {
-        const shuffledOptions = this.shuffleOptions(scene.options, shuffleOptions);
+        const shuffledOptions = this.shuffleOptions(
+          scene.options,
+          shuffleOptions
+        );
         return {
           ...scene,
-          options: shuffledOptions
+          options: shuffledOptions,
         };
       }
       return scene;
@@ -151,7 +179,10 @@ export class OptionShuffler {
   /**
    * 섞기 통계 생성
    */
-  generateShuffleStatistics(originalOptions: any[], shuffledOptions: ShuffledOption[]): {
+  generateShuffleStatistics(
+    originalOptions: any[],
+    shuffledOptions: ShuffledOption[]
+  ): {
     totalOptions: number;
     correctOptions: number;
     incorrectOptions: number;
@@ -170,9 +201,11 @@ export class OptionShuffler {
       }
     });
 
-    const averageCorrectPosition = correctPositions.length > 0 
-      ? correctPositions.reduce((sum, pos) => sum + pos, 0) / correctPositions.length 
-      : 0;
+    const averageCorrectPosition =
+      correctPositions.length > 0
+        ? correctPositions.reduce((sum, pos) => sum + pos, 0) /
+          correctPositions.length
+        : 0;
 
     return {
       totalOptions: shuffledOptions.length,
@@ -180,14 +213,17 @@ export class OptionShuffler {
       incorrectOptions: incorrectPositions.length,
       correctPositions,
       incorrectPositions,
-      averageCorrectPosition: Math.round(averageCorrectPosition * 100) / 100
+      averageCorrectPosition: Math.round(averageCorrectPosition * 100) / 100,
     };
   }
 
   /**
    * 섞기 설정 검증
    */
-  validateShuffleOptions(options: ShuffleOptions): { valid: boolean; errors: string[] } {
+  validateShuffleOptions(options: ShuffleOptions): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (options.useSeed && options.seed !== undefined) {
@@ -201,7 +237,7 @@ export class OptionShuffler {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

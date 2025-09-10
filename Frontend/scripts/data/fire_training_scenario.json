@@ -2,20 +2,14 @@
   {
     "id": 1,
     "teamId": 1,
-    "scenarioCode": "FIRE_APT_001",
+    "scenarioCode": "SCEN001",
     "sceneId": "#1-1",
-<<<<<<< HEAD
     "title": "아파트 화재 경보",
     "content": "새벽 3시, 평화롭게 잠들어 있던 중 갑자기 날카로운 화재 경보가 울려 퍼집니다. 창문 밖으로 연기가 보이고, 복도에서 다른 주민들의 발걸음 소리가 들립니다. 아래층에서 화재가 발생한 것 같습니다. 가족의 안전이 걱정됩니다.",
     "sceneScript": "화재 경보가 울리고, 연기 냄새가 스며듭니다. 어떻게 하시겠습니까?",
-=======
-    "title": "새벽의 경보음",
-    "content": "새벽 3시, 거실 천장에서 화재경보음이 울린다. 공기 속에 타는 냄새가 스며들고 가족들 중에 당신만 잠에서 깨어난다.",
-    "sceneScript": "우선 무엇을 할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
     "status": "임시저장",
     "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591560+09:00",
+    "createdAt": "2025-09-04T00:00:00.000Z",
     "createdBy": 1,
     "order": 1,
     "disasterType": "fire",
@@ -24,45 +18,35 @@
     "options": [
       {
         "answerId": "answer1",
-<<<<<<< HEAD
         "answer": "가족을 깨우고 \"불이야! 대피해!\" 소리치며 119에 신고하기",
         "reaction": "정답! 가족을 깨우고 화재를 신고하는 것이 가장 중요한 첫 번째 행동입니다. 신속한 대응이 생명을 구합니다.",
-=======
-        "answer": "가족에게 화재 사실을 알리고 모두를 깨운다",
-        "reaction": "정답! 수면 중인 가족에게 신속히 알리는 것이 첫 단계다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-2",
-        "points": { "speed": 10, "accuracy": 10 },
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
         "exp": 50
       },
       {
         "answerId": "answer2",
-<<<<<<< HEAD
         "answer": "불의 원인을 확인하러 혼자 나서기",
         "reaction": "오답! 화재 상황에서는 원인을 확인하려 하지 말고 즉시 대피해야 합니다. 연기와 열기에 노출될 위험이 있습니다.",
-=======
-        "answer": "소리가 거슬리니 경보를 끄고 다시 잔다",
-        "reaction": "오답! 골든타임을 잃으면 대피가 더 위험해진다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-2",
-        "points": { "speed": 0, "accuracy": 0 },
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
         "exp": 0
       }
     ]
   },
   {
     "sceneId": "#1-2",
-<<<<<<< HEAD
     "title": "출입문 손잡이와 연기 확인",
     "content": "심장이 터질 듯 뛰는 가운데, 문 앞에 선 당신. 복도에서 다른 주민들의 발걸음 소리가 들리고, 연기 냄새가 더 진해집니다. 손이 떨리고, 땀이 흘러내립니다. 가족의 안전이 걱정됩니다.",
     "sceneScript": "문 앞에서 대피 준비를 합니다. 무엇을 먼저 확인해야 할까요?",
-=======
-    "title": "현관문 확인",
-    "content": "현관으로 가기 전에 열기와 연기 여부를 판단해야 한다.",
-    "sceneScript": "어떻게 확인할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
     "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591625+09:00",
+    "createdAt": "2025-09-04T00:00:00.000Z",
     "createdBy": "시나리오 관리자",
     "order": 2,
     "disasterType": "fire",
@@ -70,878 +54,72 @@
     "options": [
       {
         "answerId": "answer1",
-<<<<<<< HEAD
         "answer": "손등으로 출입문 손잡이 온도 만져보고, 문틈으로 연기와 불길 확인",
         "reaction": "정답! 손잡이가 뜨거우면 복도에 화재가 있다는 뜻입니다. 문틈으로 연기와 불길을 확인하여 안전한 대피 경로를 선택할 수 있습니다.",
-=======
-        "answer": "손등으로 손잡이를 만져 뜨거운지 확인하고 문틈의 연기 유무를 본다",
-        "reaction": "정답! 출입문 온도와 연기를 먼저 확인해야 한다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-3",
-        "points": { "speed": 10, "accuracy": 10 },
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
         "exp": 50
       },
       {
         "answerId": "answer2",
-<<<<<<< HEAD
         "answer": "바로 문을 열고 대피하기",
         "reaction": "오답! 문을 열기 전에 손잡이 온도와 문틈을 확인하지 않으면 뜨거운 연기와 불길에 노출될 수 있습니다. 안전 확인이 먼저입니다.",
-=======
-        "answer": "바로 문을 활짝 열고 밖으로 나간다",
-        "reaction": "오답! 갑작스런 개방은 연기와 불길 확산을 부른다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-3",
-        "points": { "speed": 0, "accuracy": 0 },
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
         "exp": 0
       }
     ]
   },
   {
     "sceneId": "#1-3",
-<<<<<<< HEAD
     "title": "대피 경로 선택",
-    "content": "손잡이에서 뜨거운 열기가 느껴지고, 복도에서 연기가 보입니다. 다른 주민들의 대피 소리가 들립니다. 숨이 가빠오고, 안전한 대피 경로를 선택해야 합니다.",
-    "sceneScript": "연기가 진해지는 상황에서 안전한 대피 경로를 선택해야 합니다. 어떻게 하시겠습니까?",
-=======
-    "title": "대피 가능 여부 판단",
-    "content": "문 손잡이가 뜨겁지 않고 복도에 연기가 심하지 않다면 대피가 가능하다.",
-    "sceneScript": "대피 경로는?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
+    "content": "문 손잡이가 뜨거우지 않고, 문틈으로 연기가 보이지 않습니다. 복도에서 다른 주민들의 발걸음 소리가 들리고, 화재 경보가 계속 울리고 있습니다. 안전한 대피 경로를 선택해야 합니다.",
+    "sceneScript": "대피할 준비가 되었습니다. 어떤 경로로 대피하시겠습니까?",
     "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591641+09:00",
+    "createdAt": "2025-09-04T00:00:00.000Z",
     "createdBy": "시나리오 관리자",
     "order": 3,
     "disasterType": "fire",
-    "difficulty": "medium",
+    "difficulty": "easy",
     "options": [
       {
         "answerId": "answer1",
-<<<<<<< HEAD
         "answer": "비상계단으로 내려가며 연기를 피하기",
         "reaction": "정답! 비상계단은 화재 시 가장 안전한 대피 경로입니다. 연기를 피하며 낮은 자세로 대피하세요.",
-=======
-        "answer": "계단을 이용해 낮은 자세로 이동한다(엘리베이터는 타지 않는다)",
-        "reaction": "정답! 엘리베이터는 정전·연기 침투 위험이 있어 금지다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-4",
-        "points": { "speed": 10, "accuracy": 10 },
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
         "exp": 75
       },
       {
         "answerId": "answer2",
-<<<<<<< HEAD
         "answer": "엘리베이터로 빠르게 내려가기",
         "reaction": "오답! 화재 시에는 엘리베이터를 사용하면 안 됩니다. 정전되거나 연기에 가득 찰 수 있어 매우 위험합니다.",
-=======
-        "answer": "엘리베이터로 빠르게 내려간다",
-        "reaction": "오답! 화재 시 엘리베이터 사용은 매우 위험하다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-4",
-        "points": { "speed": 0, "accuracy": 0 },
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
         "exp": 0
       },
       {
         "answerId": "answer3",
-<<<<<<< HEAD
         "answer": "창문으로 신호 보내고 도움 기다리기",
         "reaction": "부분 정답! 창문으로 신호를 보내는 것은 좋지만, 가능하면 직접 대피하는 것이 더 안전합니다. 시간이 지날수록 상황이 악화될 수 있습니다.",
-=======
-        "answer": "복도 비상벨을 누르고 119에 신고한다",
-        "reaction": "부분 정답! 대피 중에도 경보와 신고는 중요하다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
         "nextId": "#1-4",
-        "points": { "speed": 5, "accuracy": 5 },
-        "exp": 25
-      }
-    ]
-  },
-  {
-    "sceneId": "#1-4",
-<<<<<<< HEAD
-    "title": "연기 속 대피",
-    "content": "계단으로 내려가자 검은 연기가 목을 조이고, 시야가 흐려집니다. 다른 주민들의 기침 소리가 들리고, 연기가 점점 진해집니다. 안전한 대피를 위해 조심스럽게 움직여야 합니다.",
-    "sceneScript": "연기가 진해지는 상황에서 안전하게 대피해야 합니다. 어떻게 하시겠습니까?",
-=======
-    "title": "대피가 어려울 때",
-    "content": "현관 쪽 불길/연기로 대피가 곤란하다.",
-    "sceneScript": "어떻게 행동할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591656+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 4,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "낮은 자세로 기어가며 연기 피하고 조용히 대피",
-        "reaction": "정답! 연기는 위로 올라가므로 낮은 자세로 기어가면 연기를 피할 수 있습니다. 조용히 대피하여 다른 사람들에게 혼란을 주지 않습니다.",
-=======
-        "answer": "세대 내 대피공간·경량칸막이·하향식피난구 등으로 이동한다",
-        "reaction": "정답! 세대 내 피난설비를 활용해 일시 안전을 확보한다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#1-5",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "숨 참고 뛰며 빠르게 대피하기",
-        "reaction": "오답! 연기를 들이마시며 뛰면 더 많은 연기를 흡입하게 되어 위험합니다. 낮은 자세로 천천히 대피하는 것이 안전합니다.",
-=======
-        "answer": "방문을 열어 환기시키며 불길이 약해지길 기다린다",
-        "reaction": "오답! 문을 열면 연기가 실내로 유입된다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#1-5",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#1-5",
-<<<<<<< HEAD
-    "title": "아파트 단지 도착",
-    "content": "마침내 아파트 단지 안전지대에 도착합니다. 다른 주민들이 이미 대피해 있고, 소방차가 도착하고 있습니다. 피로와 안도의 한숨이 나옵니다.",
-    "sceneScript": "안전지대에 도착했습니다. 이제 어떻게 하시겠습니까?",
-=======
-    "title": "틈새 차단과 신고",
-    "content": "대피공간이 없거나 일시 대기해야 한다.",
-    "sceneScript": "무엇을 할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591667+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 5,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "소방관에게 상황 보고하고 이웃 주민 확인",
-        "reaction": "정답! 소방관에게 정확한 상황을 보고하고, 이웃 주민들의 안전을 확인하는 것이 중요합니다. 협력이 생명을 구합니다.",
-=======
-        "answer": "문틈을 젖은 수건·테이프로 막고 창문을 닫는다",
-        "reaction": "정답! 연기 유입을 최대한 차단한다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#1-6",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "혼자 건물로 돌아가기",
-        "reaction": "오답! 화재가 진행 중인 건물로 다시 들어가는 것은 매우 위험합니다. 소방관의 지시를 기다리세요.",
-=======
-        "answer": "창문을 활짝 열어 연기를 빼낸다",
-        "reaction": "오답! 외부 연기가 실내로 유입될 수 있다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#1-6",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#1-6",
-<<<<<<< HEAD
-    "title": "대피자 인원과 이웃 확인",
-    "content": "상황을 보고한 후, 대피한 주민들을 둘러봅니다. 피곤한 얼굴들 사이에 일부 이웃들이 보이지 않습니다. 가슴이 철렁 내려앉고, 걱정이 다시 피어오릅니다.",
-    "sceneScript": "보고가 끝났습니다. 이제 어떻게 하시겠습니까?",
-=======
-    "title": "119 신고",
-    "content": "정확한 신고는 구조 시간을 단축한다.",
-    "sceneScript": "어떻게 말할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591678+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 6,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "대피자 인원 확인하고 누락된 이웃 찾기",
-        "reaction": "정답! 누락된 이웃을 찾아 나서며, 모든 주민의 안전을 확인하는 것이 중요합니다. 협력이 생명을 구합니다.",
-=======
-        "answer": "주소·동·호수, 상황, 대기 인원과 위치를 명확히 전달한다",
-        "reaction": "정답! 상황요원의 안내에 따라 행동한다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#2-1",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "화재 상황 지켜보기",
-        "reaction": "부분 정답! 화재 상황을 지켜보는 것도 중요하지만, 누락된 이웃을 먼저 찾는 것이 우선입니다. 시간이 지날수록 위험해집니다.",
-=======
-        "answer": "‘빨리 와주세요’만 반복한다",
-        "reaction": "오답! 정확한 정보가 필요하다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#2-1",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#2-1",
-<<<<<<< HEAD
-    "title": "오피스 빌딩 화재",
-    "content": "오피스 빌딩에서 화재가 발생했습니다. 복도에서 작은 불꽃이 피어오르고, 공기 중에 타는 냄새가 퍼집니다. 근처에서 다른 직원들의 기침 소리가 들립니다. 땀이 등줄기를 타고 흐릅니다.",
-    "sceneScript": "화재가 진행되고 있습니다. 심장이 쿵쾅거립니다. 어떻게 하시겠습니까?",
-=======
-    "title": "다른 곳에서 화재",
-    "content": "화재는 다른 세대에서 발생했다. 우리 집으로 연기가 들어오지 않는다.",
-    "sceneScript": "어떻게 할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591688+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 7,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "가스와 전기 차단 후 안전하게 대피하기",
-        "reaction": "정답! 가스와 전기를 차단하여 화재 확산을 막고, 안전하게 대피하는 것이 중요합니다. 생명이 최우선입니다.",
-=======
-        "answer": "세대 내에서 대기하며 창문으로 상황을 모니터링한다",
-        "reaction": "정답! 무리한 외부 대피는 오히려 위험할 수 있다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#2-2",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "소화기로 불 끄기 시도",
-        "reaction": "오답! 화재가 진행 중일 때는 소화기로 불을 끄려 하지 말고 즉시 대피해야 합니다. 연기와 열기에 노출될 위험이 있습니다.",
-        "nextId": "#2-2",
-        "points": {
-          "speed": 0,
-          "accuracy": 0
-        },
-        "exp": 0
-      },
-      {
-        "answerId": "answer3",
-        "answer": "바로 대피하기",
-        "reaction": "부분 정답! 즉시 대피하는 것은 좋지만, 가능하면 가스와 전기를 차단한 후 대피하는 것이 더 안전합니다.",
-        "nextId": "#2-2",
-        "points": {
-          "speed": 5,
-          "accuracy": 5
-        },
-=======
-        "answer": "즉시 계단으로 대피한다",
-        "reaction": "부분 정답! 연기가 없다면 대기는 안전할 수 있다.",
-        "nextId": "#2-2",
-        "points": { "speed": 5, "accuracy": 5 },
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "exp": 25
-      }
-    ]
-  },
-  {
-    "sceneId": "#2-2",
-<<<<<<< HEAD
-    "title": "차단 완료, 화재 제어",
-    "content": "가스와 전기를 차단하자 불꽃이 약해지지만, 연기가 여전히 진합니다. 다른 직원들의 기침 소리가 들리고, 대피가 시급합니다.",
-    "sceneScript": "다음 행동은 무엇입니까? 시간이 촉박합니다.",
-=======
-    "title": "연기 유입 시작",
-    "content": "시간이 지나며 문틈과 환기창으로 연기가 들어온다.",
-    "sceneScript": "다음 조치는?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591702+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 8,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "틈새 추가 차단·저자세 유지·대피 가능 여부 재판단",
-        "reaction": "정답! 상황 변화에 맞춰 전략을 바꾼다.",
-        "nextId": "#2-3",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-        "answer": "연기를 들이마시지 않도록 뛰어다니며 환기시킨다",
-        "reaction": "오답! 뛰면 흡입량이 늘고, 개방은 연기 유입을 악화한다.",
-        "nextId": "#2-3",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#2-3",
-    "title": "계단 대피 재도전",
-    "content": "복도와 계단의 연기가 옅어졌다.",
-    "sceneScript": "어떻게 내려갈까?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:41:59.591716+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 9,
-    "disasterType": "fire",
-    "difficulty": "hard",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "방화문과 출입문을 닫고, 가장 가까운 계단으로 낮은 자세로 이동",
-        "reaction": "정답! 문 닫기는 연기 확산을 억제해 다른 세대를 보호한다.",
-        "nextId": "#3-1",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 100
-      },
-      {
-        "answerId": "answer2",
-        "answer": "엘리베이터 호출 후 빠르게 탑승",
-        "reaction": "오답! 화재 시 엘리베이터 금지 원칙을 잊지 말자.",
-        "nextId": "#3-1",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#3-1",
-<<<<<<< HEAD
-    "title": "아파트 현관 화재",
-    "content": "아파트 현관에서 불길이 치솟고, 연기가 진합니다. 다른 주민들의 기침 소리가 들리고, 대피가 시급합니다.",
-    "sceneScript": "화재가 진행되고 있습니다. 심장이 요동칩니다. 어떻게 탈출하시겠습니까?",
-=======
-    "title": "집결지 도착",
-    "content": "지상층 안전한 집결지에 도착했다. 관리자와 소방대 지시에 따른다.",
-    "sceneScript": "마무리 행동은?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:00+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 10,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "대피 공간이나 경량 칸막이 이용해 우회 대피",
-        "reaction": "정답! 대피 공간을 이용하여 안전한 경로로 우회 대피하는 것이 좋습니다. 영리한 대응입니다.",
-=======
-        "answer": "가족 인원 확인, 부상 여부 점검, 재진입 금지",
-        "reaction": "정답! 가장 중요한 마무리 단계다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#3-2",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "문 열고 돌진",
-        "reaction": "오답! 화재가 진행 중인 문을 열고 돌진하면 뜨거운 연기와 불길에 노출될 수 있습니다. 안전한 경로를 찾아야 합니다.",
-=======
-        "answer": "집에 중요한 물건을 가지러 잠깐 올라간다",
-        "reaction": "오답! 재진입은 가장 위험한 행동 중 하나다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#3-2",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#3-2",
-<<<<<<< HEAD
-    "title": "완강기와 추락 위기",
-    "content": "대피 공간이 막혔습니다. 완강기를 쥐자 손이 미끄러지고, 아래에서 다른 주민들의 소리가 들립니다. 바람이 얼굴을 때립니다.",
-    "sceneScript": "순서대로! 떨어지면 위험합니다. 서둘러야 합니다.",
-=======
-    "title": "경보 해제 전 확인",
-    "content": "관리팀이 경보음을 해제하려 한다.",
-    "sceneScript": "당신의 태도는?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:00+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 11,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "소방대의 공식 ‘안전 확인’ 후 해제하도록 요청한다",
-        "reaction": "정답! 경보 해제는 안전 확인 이후에 해야 한다.",
-        "nextId": "#3-3",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-        "answer": "이미 불이 꺼진 것 같으니 바로 해제해도 된다고 한다",
-        "reaction": "오답! 잔불·재발화 위험을 간과했다.",
-        "nextId": "#3-3",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-<<<<<<< HEAD
-    "sceneId": "#4-1",
-    "title": "이웃 건물 화재 확산",
-    "content": "이웃 건물에서 불이 번지고, 연기가 우리 건물로 스며들고 있습니다. 문틈으로 연기가 들어오고 있습니다.",
-    "sceneScript": "화재가 확산되고 있습니다. 공포가 피부를 저립니다. 어떻게 하시겠습니까?",
-=======
-    "sceneId": "#3-3",
-    "title": "재발화 위험",
-    "content": "화재가 진압된 것으로 보이지만 내부 잔불 가능성이 있다.",
-    "sceneScript": "어떻게 해야 할까?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:00+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 12,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "소방대에 잔불 확인(개방부·천장 내부) 요청",
-        "reaction": "정답! 재발화는 보이지 않는 곳에서 시작되기 쉽다.",
-        "nextId": "#3-4",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-        "answer": "냄새가 약하니 걱정할 필요 없다고 판단",
-        "reaction": "오답! 냄새 약화만으로 안전을 단정할 수 없다.",
-        "nextId": "#3-4",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#3-4",
-    "title": "연기 흡입자 응급조치",
-    "content": "이웃 중 기침과 어지럼을 호소하는 사람이 있다.",
-    "sceneScript": "초기 대응은?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:00+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 13,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "창문 닫고 소방서에 신고",
-        "reaction": "정답! 연기를 차단하고 소방서에 신고하여 도움을 청하는 것이 중요합니다. 안도의 한숨이 나옵니다.",
-        "nextId": "#5-1",
-        "points": {
-          "speed": 10,
-          "accuracy": 10
-        },
-=======
-        "answer": "신선한 공기가 통하는 곳에서 안정을 취하게 하고 필요 시 119에 추가 신고",
-        "reaction": "정답! 일산화탄소 노출이 의심되면 의료평가가 필요하다.",
-        "nextId": "#3-5",
-        "points": { "speed": 10, "accuracy": 10 },
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "바로 계단 대피",
-        "reaction": "오답! 연기가 진한 상황에서 바로 계단으로 대피하면 연기에 노출될 수 있습니다. 먼저 연기를 차단하고 신고해야 합니다.",
-        "nextId": "#5-1",
-        "points": {
-          "speed": 0,
-          "accuracy": 0
-        },
-=======
-        "answer": "따뜻한 물을 마시게 하고 귀가시키기",
-        "reaction": "오답! 증상 악화 가능성을 고려해야 한다.",
-        "nextId": "#3-5",
-        "points": { "speed": 0, "accuracy": 0 },
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "exp": 0
-      }
-    ]
-  },
-  {
-<<<<<<< HEAD
-    "sceneId": "#5-1",
-    "title": "방화벽 앞에서의 선택",
-    "content": "대피를 위해 복도를 따라 내려가던 중, 갑자기 방화벽이 내려와 길을 막습니다. 다른 사람들이 방화벽 앞에서 당황하고 있고, 연기가 점점 진해지고 있습니다. 방화벽에는 작은 문이 보입니다.",
-    "sceneScript": "방화벽이 내려와 길을 막았습니다. 연기가 진해지고 있습니다. 어떻게 하시겠습니까?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-01-15T00:00:00.000Z",
-    "createdBy": 1,
-    "order": 15,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "방화벽의 문을 몸으로 밀어서 열기",
-        "reaction": "정답! 방화벽의 문은 비상시 몸으로 밀면 열리도록 설계되어 있습니다. 많은 사람들이 이를 모르고 갇혀 죽는 경우가 많습니다.",
-        "nextId": "#5-2",
-        "points": {
-          "speed": 10,
-          "accuracy": 10
-        },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-        "answer": "방화벽이 열릴 때까지 기다리기",
-        "reaction": "오답! 방화벽은 화재가 진압될 때까지 자동으로 열리지 않습니다. 연기가 진해지면 위험해집니다.",
-        "nextId": "#5-2",
-        "points": {
-          "speed": 0,
-          "accuracy": 0
-        },
-        "exp": 0
-      },
-      {
-        "answerId": "answer3",
-        "answer": "다른 대피로를 찾기",
-        "reaction": "부분 정답! 다른 대피로를 찾는 것도 좋지만, 시간이 오래 걸릴 수 있습니다. 방화벽의 문을 먼저 시도해보세요.",
-        "nextId": "#5-2",
         "points": {
           "speed": 5,
           "accuracy": 5
         },
         "exp": 25
-=======
-    "sceneId": "#3-5",
-    "title": "전기 안전",
-    "content": "화재 인근 전기설비가 젖어 있고 차단기가 내려간 흔적이 있다.",
-    "sceneScript": "올바른 조치는?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:00+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 14,
-    "disasterType": "fire",
-    "difficulty": "hard",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "전문가 점검 전까지 전원 복구 금지·감전 위험 구역 통제",
-        "reaction": "정답! 감전·재발화 위험을 차단한다.",
-        "nextId": "#4-1",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 100
-      },
-      {
-        "answerId": "answer2",
-        "answer": "가전제품부터 하나씩 켜 보며 이상 유무 확인",
-        "reaction": "오답! 젖은 설비 가동은 2차 사고 위험.",
-        "nextId": "#4-1",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-      }
-    ]
-  },
-  {
-<<<<<<< HEAD
-    "sceneId": "#5-2",
-    "title": "방화벽 통과 후 안전 확인",
-    "content": "방화벽의 문을 성공적으로 열고 통과했습니다. 다른 사람들도 따라 나오고 있습니다. 이제 안전한 곳으로 대피해야 합니다.",
-    "sceneScript": "방화벽을 통과했습니다. 이제 어떻게 하시겠습니까?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-01-15T00:00:00.000Z",
-    "createdBy": 1,
-    "order": 16,
-=======
-    "sceneId": "#4-1",
-    "title": "계단 대피 자세 훈련",
-    "content": "다음 훈련을 위해 올바른 대피 자세를 복습한다.",
-    "sceneScript": "가장 적절한 자세는?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:01+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 15,
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "다른 사람들에게 방화벽 문 열기 방법 알려주기",
-        "reaction": "정답! 다른 사람들에게도 방화벽의 문을 몸으로 밀면 열린다는 것을 알려주어 모두가 안전하게 대피할 수 있도록 도와주세요.",
-        "nextId": "#4-2",
-        "points": {
-          "speed": 10,
-          "accuracy": 10
-        },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-        "answer": "바로 안전한 곳으로 대피하기",
-        "reaction": "부분 정답! 자신의 안전도 중요하지만, 다른 사람들을 도울 수 있다면 더 좋습니다.",
-        "nextId": "#4-2",
-        "points": {
-          "speed": 5,
-          "accuracy": 5
-        },
-        "exp": 25
-      },
-      {
-        "answerId": "answer3",
-        "answer": "방화벽을 다시 닫기",
-        "reaction": "오답! 방화벽을 닫으면 다른 사람들이 갇힐 수 있습니다. 열어두어야 합니다.",
-=======
-        "answer": "젖은 수건으로 코·입을 막고 벽을 짚으며 낮은 자세로 이동",
-        "reaction": "정답! 연기층 아래로 이동하면 흡입을 줄일 수 있다.",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "nextId": "#4-2",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-        "answer": "빠르게 뛰어내려 시간을 줄인다",
-        "reaction": "오답! 호흡량 증가로 연기 흡입이 늘어난다.",
-        "nextId": "#4-2",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#4-2",
-<<<<<<< HEAD
-    "title": "화재 대응 훈련 완료",
-    "content": "모든 위기를 뚫고, 화재 상황에서 안전하게 대피했습니다. 가족과 이웃을 구한 당신, 피곤하지만 안도의 미소가 입가에 번집니다.",
-    "sceneScript": "축하! 화재 대응 훈련을 완료하고, 안전한 생존자가 되었습니다. 이제 어떻게 하시겠습니까?",
-=======
-    "title": "문 닫기의 의미",
-    "content": "대피 중 문을 닫는 행동이 왜 중요한가?",
-    "sceneScript": "가장 적절한 설명은?",
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:01+09:00",
-    "createdBy": "시나리오 관리자",
-<<<<<<< HEAD
-    "order": 17,
-=======
-    "order": 16,
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-<<<<<<< HEAD
-        "answer": "훈련 복습하고 가족과 공유",
-        "reaction": "정답! 화재 대응 방법을 복습하며, 미래의 재난에 대비하는 것이 중요합니다. 가족의 안전을 위한 따뜻한 마음입니다.",
-        "nextId": "#END",
-        "points": {
-          "speed": 10,
-          "accuracy": 10
-        },
-=======
-        "answer": "연기·불길의 확산을 늦춰 다른 세대를 보호한다",
-        "reaction": "정답! 문 닫기는 확산 억제의 핵심 행동이다.",
-        "nextId": "#4-3",
-        "points": { "speed": 10, "accuracy": 10 },
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-<<<<<<< HEAD
-        "answer": "다시 시작하기",
-        "reaction": "좋은 선택! 다시 훈련을 시작하여 더 강해집니다. 화재 대응 능력을 향상시키는 도전의 마음입니다.",
-        "nextId": "#1-1",
-        "points": {
-          "speed": 5,
-          "accuracy": 5
-        },
-        "exp": 25
-=======
-        "answer": "소리를 줄여 대피자 스트레스를 낮춘다",
-        "reaction": "오답! 주효과는 연기·열 확산 억제다.",
-        "nextId": "#4-3",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#4-3",
-    "title": "소화기 사용 원칙",
-    "content": "초기 화재 시 올바른 소화기 사용 요령은?",
-    "sceneScript": "선택하라.",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:01+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 17,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "핀 뽑기 → 호스 잡기 → 바람을 등지고 불꽃의 밑동을 쓸며 분사",
-        "reaction": "정답! PASS 원칙을 기억하자.",
-        "nextId": "#4-4",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-        "answer": "불꽃 위쪽 공기층을 향해 고정 분사",
-        "reaction": "오답! 화점(밑동)을 노려야 효과적이다.",
-        "nextId": "#4-4",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#4-4",
-    "title": "부상자 운반",
-    "content": "연기를 마신 동료가 걸을 수 없다.",
-    "sceneScript": "가장 안전한 이동법은?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:01+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 18,
-    "disasterType": "fire",
-    "difficulty": "hard",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "머리를 높이지 않도록 어깨 걸치기보다 드래그(끌기) 방식으로 낮게 이동",
-        "reaction": "정답! 호흡기 보호가 우선이다.",
-        "nextId": "#5-1",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 100
-      },
-      {
-        "answerId": "answer2",
-        "answer": "등에 업고 빠르게 뛰어 이동",
-        "reaction": "오답! 뛰면 흡입량 증가·넘어짐 위험.",
-        "nextId": "#5-1",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#5-1",
-    "title": "복귀 판단",
-    "content": "소방대가 ‘부분 통제 해제’를 알렸다. 건물 일부는 아직 통제 구역이다.",
-    "sceneScript": "어떻게 할까?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:02+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 19,
-    "disasterType": "fire",
-    "difficulty": "medium",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "지시에 따라 통제 구역은 접근 금지, 환기 완료 구역만 제한적 복귀",
-        "reaction": "정답! 잔존 위험을 통제해야 한다.",
-        "nextId": "#5-2",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 75
-      },
-      {
-        "answerId": "answer2",
-        "answer": "집이 걱정되니 통제선을 넘어 상태 확인",
-        "reaction": "오답! 2차 사고·법적 문제 유발.",
-        "nextId": "#5-2",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#5-2",
-    "title": "사후 점검 체크리스트",
-    "content": "훈련을 마치며 재난 대비 역량을 점검한다.",
-    "sceneScript": "무엇이 핵심인가?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:02+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 20,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "answer1",
-        "answer": "피난 경로 점검·소화기 위치와 압력 확인·경보장치 테스트 주기 설정",
-        "reaction": "정답! 사전 대비가 생존 확률을 좌우한다.",
-        "nextId": "#END",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 50
-      },
-      {
-        "answerId": "answer2",
-        "answer": "큰불만 아니면 대충 넘어가도 된다",
-        "reaction": "오답! 작은 불씨가 큰 재난으로 번진다.",
-        "nextId": "#END",
-        "points": { "speed": 0, "accuracy": 0 },
-        "exp": 0
-      }
-    ]
-  },
-  {
-    "sceneId": "#END",
-    "title": "화재 대응 훈련 완료",
-    "content": "축하합니다! 화재 대응 훈련을 완료했습니다.",
-    "sceneScript": "다음으로 무엇을 할까요?",
-    "approvalStatus": "DRAFT",
-    "createdAt": "2025-09-09T12:42:02+09:00",
-    "createdBy": "시나리오 관리자",
-    "order": 999,
-    "disasterType": "fire",
-    "difficulty": "easy",
-    "options": [
-      {
-        "answerId": "review",
-        "answer": "훈련 내용을 복습하기",
-        "reaction": "처음 문제부터 다시 시작합니다.",
-        "nextId": "#REVIEW",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 0
-      },
-      {
-        "answerId": "next-scenario",
-        "answer": "다음 시나리오로 넘어가기",
-        "reaction": "다음 시나리오로 이동합니다.",
-        "nextId": "#SCENARIO_SELECT",
-        "points": { "speed": 10, "accuracy": 10 },
-        "exp": 0
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
       }
     ]
   }

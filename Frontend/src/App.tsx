@@ -13,6 +13,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import AdminPage from './pages/admin/AdminPage';
+
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';

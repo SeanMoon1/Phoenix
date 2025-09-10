@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OAuth 콜백 테스트</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .test-section {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .test-button {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .test-button:hover {
+        background: #e55a2b;
+      }
+      .result {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        border-left: 4px solid #ff6b35;
+      }
+      .error {
+        border-left-color: #dc3545;
+        background: #f8d7da;
+      }
+      .success {
+        border-left-color: #28a745;
+        background: #d4edda;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 OAuth 콜백 테스트 페이지</h1>
+
+    <div class="test-section">
+      <h2>1. URL 파라미터 테스트</h2>
+      <p>다양한 OAuth 콜백 URL을 테스트해보세요:</p>
+
+      <button class="test-button" onclick="testSuccessCallback()">
+        성공 콜백 테스트
+      </button>
+      <button class="test-button" onclick="testErrorCallback()">
+        에러 콜백 테스트
+      </button>
+      <button class="test-button" onclick="testMissingDataCallback()">
+        누락 데이터 테스트
+      </button>
+      <button class="test-button" onclick="testInvalidDataCallback()">
+        잘못된 데이터 테스트
+      </button>
+
+      <div id="url-result" class="result" style="display: none"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>2. 인증 스토어 상태 테스트</h2>
+      <p>Zustand 인증 스토어의 상태 관리를 테스트합니다:</p>
+
+      <button class="test-button" onclick="testSetAuth()">
+        인증 상태 설정
+      </button>
+      <button class="test-button" onclick="testClearAuth()">
+        인증 상태 초기화
+      </button>
+      <button class="test-button" onclick="testGetAuthState()">
+        현재 인증 상태 확인
+      </button>
+
+      <div id="store-result" class="result" style="display: none"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>3. Google OAuth 버튼 클릭 테스트</h2>
+      <p>Google OAuth 버튼 클릭 시 리다이렉트 URL을 확인합니다:</p>
+
+      <button class="test-button" onclick="testGoogleOAuthRedirect()">
+        Google OAuth 리다이렉트 테스트
+      </button>
+
+      <div id="oauth-result" class="result" style="display: none"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>4. 환경변수 테스트</h2>
+      <p>프론트엔드 환경변수 설정을 확인합니다:</p>
+
+      <button class="test-button" onclick="testEnvironmentVariables()">
+        환경변수 확인
+      </button>
+
+      <div id="env-result" class="result" style="display: none"></div>
+    </div>
+
+    <script>
+      // 테스트용 가짜 인증 스토어 (실제 Zustand 스토어와 유사한 구조)
+      const mockAuthStore = {
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+
+        setAuth: function (authData) {
+          this.user = authData.user;
+          this.token = authData.token;
+          this.isAuthenticated = authData.isAuthenticated;
+          this.isLoading = false;
+          console.log('인증 상태 설정됨:', authData);
+        },
+
+        clearAuth: function () {
+          this.user = null;
+          this.token = null;
+          this.isAuthenticated = false;
+          this.isLoading = false;
+          console.log('인증 상태 초기화됨');
+        },
+
+        getState: function () {
+          return {
+            user: this.user,
+            token: this.token,
+            isAuthenticated: this.isAuthenticated,
+            isLoading: this.isLoading,
+          };
+        },
+      };
+
+      function showResult(elementId, message, type = 'info') {
+        const element = document.getElementById(elementId);
+        element.style.display = 'block';
+        element.className = `result ${type}`;
+        element.innerHTML = message;
+      }
+
+      function testSuccessCallback() {
+        const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.token';
+        const mockUser = {
+          id: 1,
+          email: 'test@example.com',
+          name: '테스트 사용자',
+          userLevel: 1,
+          currentTier: 1,
+        };
+
+        const testUrl = `http://localhost:5173/auth/callback?token=${mockToken}&user=${encodeURIComponent(
+          JSON.stringify(mockUser)
+        )}`;
+
+        showResult(
+          'url-result',
+          `
+                <strong>성공 콜백 URL 테스트:</strong><br>
+                <code>${testUrl}</code><br><br>
+                <strong>파싱된 데이터:</strong><br>
+                • 토큰: ${mockToken}<br>
+                • 사용자: ${JSON.stringify(mockUser, null, 2)}
+            `,
+          'success'
+        );
+      }
+
+      function testErrorCallback() {
+        const testUrl =
+          'http://localhost:5173/auth/callback?error=google_auth_failed';
+
+        showResult(
+          'url-result',
+          `
+                <strong>에러 콜백 URL 테스트:</strong><br>
+                <code>${testUrl}</code><br><br>
+                <strong>예상 동작:</strong><br>
+                • 에러 파라미터 감지<br>
+                • 로그인 페이지로 리다이렉트<br>
+                • 에러 메시지 표시
+            `,
+          'error'
+        );
+      }
+
+      function testMissingDataCallback() {
+        const testUrl = 'http://localhost:5173/auth/callback';
+
+        showResult(
+          'url-result',
+          `
+                <strong>누락 데이터 콜백 URL 테스트:</strong><br>
+                <code>${testUrl}</code><br><br>
+                <strong>예상 동작:</strong><br>
+                • 토큰 또는 사용자 정보 없음 감지<br>
+                • 로그인 페이지로 리다이렉트<br>
+                • "missing_callback_data" 에러
+            `,
+          'error'
+        );
+      }
+
+      function testInvalidDataCallback() {
+        const testUrl =
+          'http://localhost:5173/auth/callback?token=invalid&user=invalid_json';
+
+        showResult(
+          'url-result',
+          `
+                <strong>잘못된 데이터 콜백 URL 테스트:</strong><br>
+                <code>${testUrl}</code><br><br>
+                <strong>예상 동작:</strong><br>
+                • JSON 파싱 실패<br>
+                • 로그인 페이지로 리다이렉트<br>
+                • "invalid_callback" 에러
+            `,
+          'error'
+        );
+      }
+
+      function testSetAuth() {
+        const mockAuthData = {
+          token: 'test_token_123',
+          user: {
+            id: 1,
+            email: 'test@example.com',
+            name: '테스트 사용자',
+            userLevel: 1,
+            currentTier: 1,
+          },
+          isAuthenticated: true,
+        };
+
+        mockAuthStore.setAuth(mockAuthData);
+
+        showResult(
+          'store-result',
+          `
+                <strong>인증 상태 설정 테스트:</strong><br>
+                <pre>${JSON.stringify(mockAuthStore.getState(), null, 2)}</pre>
+            `,
+          'success'
+        );
+      }
+
+      function testClearAuth() {
+        mockAuthStore.clearAuth();
+
+        showResult(
+          'store-result',
+          `
+                <strong>인증 상태 초기화 테스트:</strong><br>
+                <pre>${JSON.stringify(mockAuthStore.getState(), null, 2)}</pre>
+            `,
+          'success'
+        );
+      }
+
+      function testGetAuthState() {
+        const currentState = mockAuthStore.getState();
+
+        showResult(
+          'store-result',
+          `
+                <strong>현재 인증 상태:</strong><br>
+                <pre>${JSON.stringify(currentState, null, 2)}</pre>
+            `,
+          'info'
+        );
+      }
+
+      function testGoogleOAuthRedirect() {
+        const apiUrl = 'http://localhost:3000'; // 기본 백엔드 URL
+        const redirectUrl = `${apiUrl}/auth/google`;
+
+        showResult(
+          'oauth-result',
+          `
+                <strong>Google OAuth 리다이렉트 테스트:</strong><br>
+                <code>${redirectUrl}</code><br><br>
+                <strong>예상 동작:</strong><br>
+                • Google OAuth 페이지로 리다이렉트<br>
+                • 사용자 인증 후 콜백 URL로 돌아옴<br>
+                • 백엔드 서버가 실행 중이어야 함
+            `,
+          'info'
+        );
+      }
+
+      function testEnvironmentVariables() {
+        // Vite 환경변수는 빌드 시점에 결정되므로 런타임에서는 확인하기 어려움
+        // 대신 일반적인 환경변수들을 확인
+        const envInfo = {
+          NODE_ENV:
+            typeof process !== 'undefined'
+              ? process.env.NODE_ENV
+              : '브라우저 환경',
+          VITE_API_URL: '빌드 시점에 결정됨',
+          '현재 URL': window.location.href,
+          'User Agent': navigator.userAgent,
+        };
+
+        showResult(
+          'env-result',
+          `
+                <strong>환경 정보:</strong><br>
+                <pre>${JSON.stringify(envInfo, null, 2)}</pre><br>
+                <strong>참고:</strong> Vite 환경변수는 빌드 시점에 결정되므로, 
+                실제 환경변수는 .env 파일과 빌드 설정을 확인해야 합니다.
+            `,
+          'info'
+        );
+      }
+
+      // 페이지 로드 시 현재 URL 파라미터 확인
+      window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.toString()) {
+          showResult(
+            'url-result',
+            `
+                    <strong>현재 URL 파라미터:</strong><br>
+                    <code>${window.location.search}</code><br><br>
+                    <strong>파싱된 파라미터:</strong><br>
+                    ${Array.from(urlParams.entries())
+                      .map(([key, value]) => `• ${key}: ${value}`)
+                      .join('<br>')}
+                `,
+            'info'
+          );
+        }
+      };
+    </script>
+  </body>
+</html>

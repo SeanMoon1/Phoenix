@@ -1,7 +1,7 @@
 export type ChoiceOption = {
   id: number;
   eventId: number;
-  scenarioId: number;
+  scenarioCode: string;
   choiceCode: string;
   choiceText: string;
   isCorrect: boolean;
@@ -16,7 +16,7 @@ export type ChoiceOption = {
 
 export type DecisionEvent = {
   id: number;
-  scenarioId: number;
+  scenarioCode: string;
   eventCode: string;
   eventOrder: number;
   eventDescription: string;
@@ -50,4 +50,21 @@ export type Scenario = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 추가 필드들
+  sceneId?: string;
+  content?: string;
+  sceneScript?: string;
+  options?: ScenarioOption[];
+  events?: DecisionEvent[];
+};
+
+export type ScenarioOption = {
+  id: number;
+  answerId: string;
+  answer: string;
+  reaction: string;
+  nextId: string;
+  points?: {
+    accuracy: number;
+  };
 };

@@ -1,5 +1,4 @@
 import React from 'react';
-import ScenarioPage from './pages/scenario/ScenarioPage';
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,12 +8,14 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
-import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
+import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
+import FireScenarioPage from '@/pages/training/FireScenarioPage';
+import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 
 // 새로 생성한 페이지들 import
 import ManualPage from './pages/manual/ManualPage';
@@ -275,6 +276,7 @@ function App() {
           {/* 훈련하기 */}
           <Route path="/manual" element={<ManualPage />} />
           <Route path="/training" element={<TrainingPage />} />
+          <Route path="/training/fire" element={<FireScenarioPage />} />
           <Route path="/training/fire/game" element={<ScenarioPage />} />
           <Route path="/home/training/fire" element={<ScenarioPage />} />
 
@@ -314,6 +316,12 @@ function App() {
                 </AdminLayout>
               </ProtectedAdminRoute>
             }
+          />
+          
+          {/* 지진 훈련 */}
+          <Route
+            path="/training/earthquake"
+            element={<EarthquakeScenarioPage />}
           />
         </Routes>
       </Router>

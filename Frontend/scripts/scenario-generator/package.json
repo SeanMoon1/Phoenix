@@ -1,0 +1,28 @@
+{
+  "name": "phoenix-scenario-converter",
+  "version": "2.0.0",
+  "description": "Phoenix 시나리오 변환기 - 개선된 버전",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "convert": "node dist/convert-enhanced.js",
+    "convert-all": "node dist/convert-all-enhanced.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "phoenix",
+    "scenario",
+    "converter",
+    "mysql"
+  ],
+  "author": "Phoenix Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

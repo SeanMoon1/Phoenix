@@ -12,21 +12,12 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   // 각 드롭다운 상태 관리
-  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
-  const [isMyPageDropdownOpen, setIsMyPageDropdownOpen] = useState(false);
-  const [isSupportDropdownOpen, setIsSupportDropdownOpen] = useState(false);
   const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
 
   // 모바일 서브메뉴 상태 관리
-  const [mobileTrainingOpen, setMobileTrainingOpen] = useState(false);
-  const [mobileMyPageOpen, setMobileMyPageOpen] = useState(false);
-  const [mobileSupportOpen, setMobileSupportOpen] = useState(false);
   const [mobileAdminOpen, setMobileAdminOpen] = useState(false);
 
   // 각 드롭다운 ref
-  const trainingDropdownRef = useRef<HTMLDivElement>(null);
-  const myPageDropdownRef = useRef<HTMLDivElement>(null);
-  const supportDropdownRef = useRef<HTMLDivElement>(null);
   const adminDropdownRef = useRef<HTMLDivElement>(null);
 
   // 관리자 페이지 여부 확인
@@ -58,6 +49,12 @@ const Header: React.FC = () => {
         shouldBeFixed
       );
       setIsScrolled(shouldBeFixed);
+
+      // 모바일 메뉴가 열린 상태에서 스크롤 시 메뉴 닫기
+      if (isMobileMenuOpen && scrollTop > 0) {
+        setIsMobileMenuOpen(false);
+        setMobileAdminOpen(false);
+      }
     };
 
     // 초기 스크롤 위치 확인
@@ -67,25 +64,17 @@ const Header: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isMobileMenuOpen]);
 
   // 외부 클릭 감지하여 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const refs = [
-        trainingDropdownRef,
-        myPageDropdownRef,
-        supportDropdownRef,
-        adminDropdownRef,
-      ];
+      const refs = [adminDropdownRef];
       const isOutside = refs.every(
         ref => !ref.current || !ref.current.contains(event.target as Node)
       );
 
       if (isOutside) {
-        setIsTrainingDropdownOpen(false);
-        setIsMyPageDropdownOpen(false);
-        setIsSupportDropdownOpen(false);
         setIsAdminDropdownOpen(false);
       }
     };
@@ -118,46 +107,16 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     // 모바일 메뉴가 닫힐 때 모든 서브메뉴도 닫기
     if (isMobileMenuOpen) {
-      setMobileTrainingOpen(false);
-      setMobileMyPageOpen(false);
-      setMobileSupportOpen(false);
       setMobileAdminOpen(false);
     }
   };
 
   // 드롭다운 토글 함수들
-  const toggleTrainingDropdown = () => {
-    setIsTrainingDropdownOpen(!isTrainingDropdownOpen);
-    setIsMyPageDropdownOpen(false);
-    setIsSupportDropdownOpen(false);
-    setIsAdminDropdownOpen(false);
-  };
-
-  const toggleMyPageDropdown = () => {
-    setIsMyPageDropdownOpen(!isMyPageDropdownOpen);
-    setIsTrainingDropdownOpen(false);
-    setIsSupportDropdownOpen(false);
-    setIsAdminDropdownOpen(false);
-  };
-
-  const toggleSupportDropdown = () => {
-    setIsSupportDropdownOpen(!isSupportDropdownOpen);
-    setIsTrainingDropdownOpen(false);
-    setIsMyPageDropdownOpen(false);
-    setIsAdminDropdownOpen(false);
-  };
-
   const toggleAdminDropdown = () => {
     setIsAdminDropdownOpen(!isAdminDropdownOpen);
-    setIsTrainingDropdownOpen(false);
-    setIsMyPageDropdownOpen(false);
-    setIsSupportDropdownOpen(false);
   };
 
   // 모바일 서브메뉴 토글 함수들
-  const toggleMobileTraining = () => setMobileTrainingOpen(!mobileTrainingOpen);
-  const toggleMobileMyPage = () => setMobileMyPageOpen(!mobileMyPageOpen);
-  const toggleMobileSupport = () => setMobileSupportOpen(!mobileSupportOpen);
   const toggleMobileAdmin = () => setMobileAdminOpen(!mobileAdminOpen);
 
   return (
@@ -190,32 +149,15 @@ const Header: React.FC = () => {
                 상황별 행동 메뉴얼
               </Link>
 
-              {/* 훈련하기 드롭다운 */}
-              <div className="relative" ref={trainingDropdownRef}>
-                <button
-                  onClick={toggleTrainingDropdown}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                    isTrainingDropdownOpen
-                      ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                  }`}
-                >
-                  <span>훈련하기</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isTrainingDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
+              {/* 훈련하기 */}
+              <Link
+                to="/training"
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+              >
+                훈련하기
+              </Link>
 
+<<<<<<< HEAD
                 {/* 훈련하기 드롭다운 메뉴 */}
                 {isTrainingDropdownOpen && (
                   <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
@@ -358,6 +300,23 @@ const Header: React.FC = () => {
                   </div>
                 )}
               </div>
+=======
+              {/* 마이페이지 */}
+              <Link
+                to="/mypage"
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+              >
+                마이페이지
+              </Link>
+
+              {/* 고객지원 */}
+              <Link
+                to="/support"
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+              >
+                고객지원
+              </Link>
+>>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 
               {/* 관리자 드롭다운 - 관리자 페이지에서만 표시 */}
               {isAdminPage && (
@@ -523,6 +482,7 @@ const Header: React.FC = () => {
                   </Link>
                 </div>
 
+<<<<<<< HEAD
                 {/* 훈련하기 섹션 */}
                 <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <button
@@ -678,6 +638,39 @@ const Header: React.FC = () => {
                       </Link>
                     </div>
                   )}
+=======
+                {/* 훈련하기 */}
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                  <Link
+                    to="/training"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    훈련하기
+                  </Link>
+                </div>
+
+                {/* 마이페이지 */}
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                  <Link
+                    to="/mypage"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    마이페이지
+                  </Link>
+                </div>
+
+                {/* 고객지원 */}
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                  <Link
+                    to="/support"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    고객지원
+                  </Link>
+>>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
                 </div>
 
                 {/* 관리자 섹션 - 관리자 페이지에서만 표시 */}

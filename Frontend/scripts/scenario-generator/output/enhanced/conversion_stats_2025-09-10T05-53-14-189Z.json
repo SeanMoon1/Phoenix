@@ -1,0 +1,96 @@
+{
+  "timestamp": "2025-09-10T05:53:14.190Z",
+  "totalFiles": 4,
+  "successfulFiles": 4,
+  "failedFiles": 0,
+  "totalScenarios": 7,
+  "totalScenes": 0,
+  "totalOptions": 135,
+  "disasterTypes": [
+    "fire",
+    "emergency",
+    "traffic",
+    "earthquake"
+  ],
+  "difficulties": [
+    "easy"
+  ],
+  "riskLevels": [
+    "MEDIUM",
+    "HIGH"
+  ],
+  "conversionResults": [
+    {
+      "file": "../data/fire_training_scenario.json",
+      "success": true,
+      "stats": {
+        "totalScenarios": 2,
+        "totalScenes": 0,
+        "totalOptions": 37,
+        "disasterTypes": [
+          "fire"
+        ],
+        "difficulties": [
+          "easy"
+        ],
+        "riskLevels": [
+          "MEDIUM"
+        ]
+      }
+    },
+    {
+      "file": "../data/emergency_first_aid_scenario.json",
+      "success": true,
+      "stats": {
+        "totalScenarios": 2,
+        "totalScenes": 0,
+        "totalOptions": 30,
+        "disasterTypes": [
+          "emergency"
+        ],
+        "difficulties": [
+          "easy"
+        ],
+        "riskLevels": [
+          "MEDIUM"
+        ]
+      }
+    },
+    {
+      "file": "../data/traffic_accident_scenario.json",
+      "success": true,
+      "stats": {
+        "totalScenarios": 2,
+        "totalScenes": 0,
+        "totalOptions": 33,
+        "disasterTypes": [
+          "traffic"
+        ],
+        "difficulties": [
+          "easy"
+        ],
+        "riskLevels": [
+          "HIGH"
+        ]
+      }
+    },
+    {
+      "file": "../data/earthquake_training_scenario.json",
+      "success": true,
+      "stats": {
+        "totalScenarios": 1,
+        "totalScenes": 0,
+        "totalOptions": 35,
+        "disasterTypes": [
+          "earthquake"
+        ],
+        "difficulties": [
+          "easy"
+        ],
+        "riskLevels": [
+          "MEDIUM"
+        ]
+      }
+    }
+  ]
+}

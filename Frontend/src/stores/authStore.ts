@@ -17,6 +17,11 @@ interface AuthStore extends AuthState {
   logout: () => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
+  setAuth: (authData: {
+    token: string;
+    user: User;
+    isAuthenticated: boolean;
+  }) => void;
   clearAuth: () => void;
 }
 
@@ -55,6 +60,7 @@ export const useAuthStore = create<AuthStore>()(
 
           if (response.success && response.data) {
             const user: User = {
+<<<<<<< HEAD
               id: parseInt(response.data.user.id.toString()),
               teamId: response.data.user.teamId || 0,
               userCode: response.data.user.userCode || '',
@@ -70,6 +76,23 @@ export const useAuthStore = create<AuthStore>()(
               levelProgress: response.data.user.levelProgress || 0,
               nextLevelExp: response.data.user.nextLevelExp || 0,
               isActive: response.data.user.isActive ?? true,
+=======
+              id: response.data.user.id,
+              teamId: 0,
+              userCode: '',
+              loginId: '',
+              email: response.data.user.email,
+              name: response.data.user.name,
+              useYn: 'Y',
+              userLevel: response.data.user.userLevel,
+              userExp: 0,
+              totalScore: 0,
+              completedScenarios: 0,
+              currentTier: response.data.user.currentTier,
+              levelProgress: 0,
+              nextLevelExp: 0,
+              isActive: true,
+>>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
@@ -134,6 +157,19 @@ export const useAuthStore = create<AuthStore>()(
 
       setToken: (token: string) => {
         set({ token, isAuthenticated: true });
+      },
+
+      setAuth: (authData: {
+        token: string;
+        user: User;
+        isAuthenticated: boolean;
+      }) => {
+        set({
+          token: authData.token,
+          user: authData.user,
+          isAuthenticated: authData.isAuthenticated,
+          isLoading: false,
+        });
       },
 
       clearAuth: () => {

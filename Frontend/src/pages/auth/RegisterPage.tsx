@@ -8,6 +8,7 @@ import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 import { teamApi, authApi } from '../../services/api';
 
+<<<<<<< HEAD
 // 팀 코드 검증 스키마 (사용되지 않음)
 // const teamCodeSchema = yup.object({
 //   teamCode: yup
@@ -17,6 +18,8 @@ import { teamApi, authApi } from '../../services/api';
 //     .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
 // });
 
+=======
+>>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 // 회원가입 스키마
 const registerSchema = yup.object({
   teamCode: yup
@@ -76,7 +79,10 @@ const RegisterPage: React.FC = () => {
     formState: { errors },
     setError,
     watch,
+<<<<<<< HEAD
     // setValue,
+=======
+>>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   });

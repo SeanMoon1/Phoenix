@@ -14,10 +14,10 @@ export default function ScenarioSelectPage() {
             🔥 화재 대응
           </Link>
           <Link
-            to="/training/flood"
+            to="/training/traffic-accident"
             className="p-5 rounded-xl shadow bg-white hover:bg-gray-50"
           >
-            🌊 홍수 대응
+            🚗 교통사고 대응
           </Link>
           <Link
             to="/training/earthquake"

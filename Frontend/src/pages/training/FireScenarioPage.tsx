@@ -4,9 +4,9 @@ import { fetchFireScenario } from '@/services/scenarioService';
 export default function FireScenarioPage() {
   return (
     <ScenarioPage
-      scenarioSetName="화재 대응"
+      scenarioSetName="화재 훈련"
       fetchScenarios={fetchFireScenario}
-      nextScenarioPath="/training/earthquake"
+      nextScenarioPath="/training/"
       persistKey="phoenix_training_state"
     />
   );

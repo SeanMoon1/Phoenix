@@ -20,12 +20,21 @@ import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
-type PersistState = {
+// ✅ PersistState 타입 직접 정의 (추가)
+interface PersistState {
   EXP: number;
   level: number;
   streak: number;
   totalCorrect: number;
-};
+}
+
+// ✅ Props 인터페이스 추가
+interface ScenarioPageProps {
+  scenarioSetName?: string;
+  fetchScenarios?: () => Promise<Scenario[]>;
+  nextScenarioPath?: string;
+  persistKey?: string;
+}
 
 const PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
@@ -52,12 +61,16 @@ const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 const END_SCENE_ID = '#END';
 
-export default function ScenarioPage() {
+// ✅ Props를 받도록 컴포넌트 수정
+export default function ScenarioPage(props?: ScenarioPageProps) {
   // URL에서 시나리오 타입 추출
   const location = useLocation();
   const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName = getScenarioSetName(scenarioType);
-  const nextScenarioPath = '/training';
+
+  // ✅ Props 우선, 없으면 기존 로직 사용
+  const scenarioSetName =
+    props?.scenarioSetName || getScenarioSetName(scenarioType);
+  const nextScenarioPath = props?.nextScenarioPath || '/training';
   const navigate = useNavigate();
 
   // 데이터 & 진행
@@ -103,11 +116,28 @@ export default function ScenarioPage() {
 
   // 초기 데이터 로드
   useEffect(() => {
-    fetchScenarioByType(scenarioType)
-      .then(data => setScenarios(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [scenarioType]);
+    const loadData = async () => {
+      try {
+        let data: Scenario[];
+
+        if (props?.fetchScenarios) {
+          // Props로 전달된 fetch 함수 사용
+          data = await props.fetchScenarios();
+        } else {
+          // 기존 로직 - URL에서 타입 추출하여 로드
+          data = await fetchScenarioByType(scenarioType);
+        }
+
+        setScenarios(data);
+      } catch (error) {
+        console.error('시나리오 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [scenarioType, props?.fetchScenarios]);
 
   // 리사이즈
   useEffect(() => {
@@ -119,9 +149,11 @@ export default function ScenarioPage() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 로컬 스토리지 복구/저장
+  // ✅ 로컬 스토리지 복구/저장 수정 - PersistState 타입 사용
+  const storageKey = props?.persistKey || PERSIST_KEY;
+
   useEffect(() => {
-    const raw = localStorage.getItem(PERSIST_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -133,11 +165,12 @@ export default function ScenarioPage() {
         /* ignore */
       }
     }
-  }, []);
+  }, [storageKey]);
+
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
-  }, [EXP, level, totalCorrect]);
+    localStorage.setItem(storageKey, JSON.stringify(s));
+  }, [EXP, level, totalCorrect, storageKey]);
 
   // 엔딩(#END) 씬이 렌더된 뒤 모달 자동 오픈 → 진행바 표시
   useEffect(() => {

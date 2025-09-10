@@ -1,4 +1,3 @@
-// src/pages/training/FireScenarioPage.tsx
 import ScenarioPage from './ScenarioPage';
 import { fetchFireScenario } from '@/services/scenarioService';
 

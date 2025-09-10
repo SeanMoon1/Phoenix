@@ -2,7 +2,7 @@
   {
     "id": 1,
     "teamId": 1,
-    "scenarioCode": "SCEN_FIRE_APT_001",
+    "scenarioCode": "FIRE_APT_001",
     "sceneId": "#1-1",
     "title": "새벽의 경보음",
     "content": "새벽 3시, 거실 천장에서 화재경보음이 울린다. 공기 속에 타는 냄새가 스며들고 가족들 중에 당신만 잠에서 깨어난다.",
@@ -325,7 +325,7 @@
     "difficulty": "easy",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "소방대의 공식 ‘안전 확인’ 후 해제하도록 요청한다",
         "reaction": "정답! 경보 해제는 안전 확인 이후에 해야 한다.",
         "nextId": "#3-3",
@@ -333,7 +333,7 @@
         "exp": 50
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "이미 불이 꺼진 것 같으니 바로 해제해도 된다고 한다",
         "reaction": "오답! 잔불·재발화 위험을 간과했다.",
         "nextId": "#3-3",
@@ -355,7 +355,7 @@
     "difficulty": "medium",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "소방대에 잔불 확인(개방부·천장 내부) 요청",
         "reaction": "정답! 재발화는 보이지 않는 곳에서 시작되기 쉽다.",
         "nextId": "#3-4",
@@ -363,7 +363,7 @@
         "exp": 75
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "냄새가 약하니 걱정할 필요 없다고 판단",
         "reaction": "오답! 냄새 약화만으로 안전을 단정할 수 없다.",
         "nextId": "#3-4",
@@ -385,7 +385,7 @@
     "difficulty": "medium",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "신선한 공기가 통하는 곳에서 안정을 취하게 하고 필요 시 119에 추가 신고",
         "reaction": "정답! 일산화탄소 노출이 의심되면 의료평가가 필요하다.",
         "nextId": "#3-5",
@@ -393,7 +393,7 @@
         "exp": 75
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "따뜻한 물을 마시게 하고 귀가시키기",
         "reaction": "오답! 증상 악화 가능성을 고려해야 한다.",
         "nextId": "#3-5",
@@ -415,7 +415,7 @@
     "difficulty": "hard",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "전문가 점검 전까지 전원 복구 금지·감전 위험 구역 통제",
         "reaction": "정답! 감전·재발화 위험을 차단한다.",
         "nextId": "#4-1",
@@ -423,7 +423,7 @@
         "exp": 100
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "가전제품부터 하나씩 켜 보며 이상 유무 확인",
         "reaction": "오답! 젖은 설비 가동은 2차 사고 위험.",
         "nextId": "#4-1",
@@ -445,7 +445,7 @@
     "difficulty": "easy",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "젖은 수건으로 코·입을 막고 벽을 짚으며 낮은 자세로 이동",
         "reaction": "정답! 연기층 아래로 이동하면 흡입을 줄일 수 있다.",
         "nextId": "#4-2",
@@ -453,7 +453,7 @@
         "exp": 50
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "빠르게 뛰어내려 시간을 줄인다",
         "reaction": "오답! 호흡량 증가로 연기 흡입이 늘어난다.",
         "nextId": "#4-2",
@@ -475,7 +475,7 @@
     "difficulty": "easy",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "연기·불길의 확산을 늦춰 다른 세대를 보호한다",
         "reaction": "정답! 문 닫기는 확산 억제의 핵심 행동이다.",
         "nextId": "#4-3",
@@ -483,7 +483,7 @@
         "exp": 50
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "소리를 줄여 대피자 스트레스를 낮춘다",
         "reaction": "오답! 주효과는 연기·열 확산 억제다.",
         "nextId": "#4-3",
@@ -505,7 +505,7 @@
     "difficulty": "medium",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "핀 뽑기 → 호스 잡기 → 바람을 등지고 불꽃의 밑동을 쓸며 분사",
         "reaction": "정답! PASS 원칙을 기억하자.",
         "nextId": "#4-4",
@@ -513,7 +513,7 @@
         "exp": 75
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "불꽃 위쪽 공기층을 향해 고정 분사",
         "reaction": "오답! 화점(밑동)을 노려야 효과적이다.",
         "nextId": "#4-4",
@@ -535,7 +535,7 @@
     "difficulty": "hard",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "머리를 높이지 않도록 어깨 걸치기보다 드래그(끌기) 방식으로 낮게 이동",
         "reaction": "정답! 호흡기 보호가 우선이다.",
         "nextId": "#5-1",
@@ -543,7 +543,7 @@
         "exp": 100
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "등에 업고 빠르게 뛰어 이동",
         "reaction": "오답! 뛰면 흡입량 증가·넘어짐 위험.",
         "nextId": "#5-1",
@@ -565,7 +565,7 @@
     "difficulty": "medium",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "지시에 따라 통제 구역은 접근 금지, 환기 완료 구역만 제한적 복귀",
         "reaction": "정답! 잔존 위험을 통제해야 한다.",
         "nextId": "#5-2",
@@ -573,7 +573,7 @@
         "exp": 75
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "집이 걱정되니 통제선을 넘어 상태 확인",
         "reaction": "오답! 2차 사고·법적 문제 유발.",
         "nextId": "#5-2",
@@ -595,7 +595,7 @@
     "difficulty": "easy",
     "options": [
       {
-        "answerId": "a1",
+        "answerId": "answer1",
         "answer": "피난 경로 점검·소화기 위치와 압력 확인·경보장치 테스트 주기 설정",
         "reaction": "정답! 사전 대비가 생존 확률을 좌우한다.",
         "nextId": "#END",
@@ -603,7 +603,7 @@
         "exp": 50
       },
       {
-        "answerId": "a2",
+        "answerId": "answer2",
         "answer": "큰불만 아니면 대충 넘어가도 된다",
         "reaction": "오답! 작은 불씨가 큰 재난으로 번진다.",
         "nextId": "#END",

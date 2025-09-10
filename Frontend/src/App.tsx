@@ -15,6 +15,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
+import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
 import TrafficAccidentScenarioPage from '@/pages/training/TrafficAccidentScenarioPage';
 import AdminLayout from './components/layout/AdminLayout';
 
@@ -323,6 +324,12 @@ function App() {
           <Route
             path="/training/earthquake"
             element={<EarthquakeScenarioPage />}
+          />
+
+          {/* 응급처치 훈련 */}
+          <Route
+            path="/training/first-aid"
+            element={<EmergencyFirstAidScenarioPage />}
           />
 
           {/* 교통사고 훈련 */}

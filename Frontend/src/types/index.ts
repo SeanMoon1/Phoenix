@@ -22,7 +22,7 @@ export interface User {
   currentTier: string;
   levelProgress: number;
   nextLevelExp: number;
-  role: string;
+  role?: string; //추후 검토 필요
   updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;

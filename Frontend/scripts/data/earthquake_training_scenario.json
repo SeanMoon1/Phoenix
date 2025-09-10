@@ -507,7 +507,7 @@
         "answerId": "answer3",
         "answer": "상황을 더 지켜보기",
         "reaction": "부분 정답! 하지만 가족의 상황과 부상자를 먼저 확인해야 합니다.",
-        "nextId": "#5-3",
+        "nextId": "#END",
         "points": {
           "speed": 5,
           "accuracy": 5

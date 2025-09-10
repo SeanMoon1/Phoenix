@@ -10,9 +10,10 @@ import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/auth/LoginPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
-import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
+import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
+import TrafficAccidentScenarioPage from './pages/training/TrafficAccidentScenarioPage';
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -267,11 +268,19 @@ function App() {
 
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/training" element={<ScenarioSelectPage />} />
+          {/* <Route path="/training" element={<ScenarioSelectPage />} /> */}
           <Route path="/training/fire" element={<FireScenarioPage />} />
           <Route
             path="/training/earthquake"
             element={<EarthquakeScenarioPage />}
+          />
+          <Route
+            path="/training/first-aid"
+            element={<EmergencyFirstAidScenarioPage />}
+          />
+          <Route
+            path="/training/traffic-accident"
+            element={<TrafficAccidentScenarioPage />}
           />
         </Routes>
       </Router>

@@ -234,18 +234,18 @@ const Header: React.FC = () => {
                       지진 대응 훈련
                     </Link>
                     <Link
-                      to="/training/emergency"
+                      to="/training/first-aid"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
                       onClick={() => setIsTrainingDropdownOpen(false)}
                     >
                       응급처치 훈련
                     </Link>
                     <Link
-                      to="/training/flood"
+                      to="/training/traffic-accident"
                       className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 last:rounded-b-lg"
                       onClick={() => setIsTrainingDropdownOpen(false)}
                     >
-                      홍수 대응 훈련
+                      교통사고 대응 훈련
                     </Link>
                   </div>
                 )}

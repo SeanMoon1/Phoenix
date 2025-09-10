@@ -1,0 +1,485 @@
+[
+  {
+    "id": 1,
+    "teamId": 1,
+    "scenarioCode": "EMERGENCY001",
+    "sceneId": "#1-1",
+    "title": "화상 응급처치 상황",
+    "content": "주방에서 요리를 하던 중 뜨거운 기름이 손등에 튀어 화상을 입었습니다. 손등이 빨갛게 달아오르고 따끔한 통증이 느껴집니다. 주변에는 찬물이 흐르는 수도꼭지가 있고, 응급처치 상자가 있습니다.",
+    "sceneScript": "화상 부위가 빨갛게 달아오르고 통증이 심합니다. 어떻게 응급처치를 하시겠습니까?",
+    "status": "임시저장",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 1,
+    "disasterType": "emergency",
+    "riskLevel": "MEDIUM",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "화상 부위를 흐르는 찬물에 10-15분간 담그기",
+        "reaction": "정답! 화상 부위를 찬물로 냉각시키는 것이 가장 중요한 응급처치입니다. 통증이 완화되고 추가 손상을 방지할 수 있습니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "바로 연고나 로션을 바르기",
+        "reaction": "오답! 화상 부위에 연고나 로션을 바르면 열이 밖으로 나가지 못해 더 큰 손상을 입을 수 있습니다. 먼저 냉각 처치가 필요합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "얼음을 직접 화상 부위에 대기",
+        "reaction": "오답! 얼음을 직접 대면 동상에 걸릴 수 있고, 화상 부위를 더 손상시킬 수 있습니다. 흐르는 찬물이 더 안전합니다.",
+        "nextId": "#1-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#1-2",
+    "title": "화상 후 추가 처치",
+    "content": "화상 부위를 찬물로 냉각시킨 후, 통증이 어느 정도 완화되었습니다. 하지만 여전히 빨갛고 따끔한 느낌이 있습니다. 이제 추가적인 처치가 필요한 상황입니다.",
+    "sceneScript": "냉각 처치 후 추가로 해야 할 응급처치는 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 2,
+    "disasterType": "emergency",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "깨끗한 거즈로 화상 부위를 덮고 병원으로 이송",
+        "reaction": "정답! 화상 부위를 깨끗한 거즈로 덮어 감염을 방지하고, 전문의의 치료를 받는 것이 중요합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "물집을 터뜨리고 상처 부위 청소하기",
+        "reaction": "오답! 물집을 터뜨리면 감염의 위험이 높아집니다. 물집은 자연스럽게 낫도록 두어야 합니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "화상 부위에 붙어있는 옷을 강제로 떼어내기",
+        "reaction": "오답! 화상 부위에 붙어있는 물질을 강제로 떼어내면 피부가 함께 벗겨져 더 큰 상처를 만들 수 있습니다.",
+        "nextId": "#2-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-1",
+    "title": "일사병 응급처치",
+    "content": "한여름 뜨거운 햇볕 아래에서 장시간 운동을 하던 중 갑자기 어지러움과 두통, 메스꺼움을 느끼기 시작했습니다. 땀을 많이 흘리고 있고, 피부가 뜨겁고 건조한 상태입니다.",
+    "sceneScript": "일사병 증상이 나타났습니다. 어떻게 응급처치를 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 3,
+    "disasterType": "emergency",
+    "riskLevel": "HIGH",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "시원한 장소로 옮기고 옷을 벗기며 이온음료나 물을 마시게 하기",
+        "reaction": "정답! 일사병 환자를 시원한 곳으로 옮기고 체온을 낮추며 수분을 보충하는 것이 가장 중요한 처치입니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "더운 곳에서 계속 휴식시키기",
+        "reaction": "오답! 더운 곳에서 계속 있으면 체온이 더 올라가 일사병이 악화될 수 있습니다. 반드시 시원한 곳으로 옮겨야 합니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "의식이 없어도 강제로 물을 마시게 하기",
+        "reaction": "오답! 의식이 없는 환자에게 물을 강제로 마시게 하면 기도에 물이 들어가 질식할 수 있습니다. 의식이 있을 때만 수분을 보충해야 합니다.",
+        "nextId": "#2-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#2-2",
+    "title": "열사병 응급처치",
+    "content": "일사병 처치 후에도 증상이 호전되지 않고, 오히려 의식이 흐려지기 시작했습니다. 피부가 매우 뜨겁고 건조하며, 땀을 전혀 흘리지 않고 있습니다. 이는 더 심각한 열사병 증상입니다.",
+    "sceneScript": "열사병 증상이 나타났습니다. 이는 생명을 위협할 수 있는 응급상황입니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 4,
+    "disasterType": "emergency",
+    "riskLevel": "CRITICAL",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "119에 신고하고 젖은 수건으로 체온을 급격히 낮추며 병원으로 이송",
+        "reaction": "정답! 열사병은 생명을 위협하는 응급상황이므로 즉시 119에 신고하고 체온을 낮춘 후 병원으로 이송해야 합니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "집에서 휴식시키며 기다리기",
+        "reaction": "오답! 열사병은 시간이 지날수록 뇌와 내장기관에 손상을 줄 수 있어 즉시 의료진의 도움이 필요합니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "얼음물에 바로 담그기",
+        "reaction": "오답! 체온을 급격히 낮추면 혈관이 수축하여 오히려 체온 조절이 어려워질 수 있습니다. 젖은 수건으로 천천히 식혀야 합니다.",
+        "nextId": "#3-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-1",
+    "title": "벌에 쏘인 응급처치",
+    "content": "야외에서 벌에 쏘였습니다. 쏘인 부위가 빨갛게 부어오르고 따끔한 통증이 있습니다. 피부에 벌침이 남아있는 것을 확인했습니다.",
+    "sceneScript": "벌에 쏘인 상황입니다. 어떻게 응급처치를 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 5,
+    "disasterType": "emergency",
+    "riskLevel": "MEDIUM",
+    "difficulty": "easy",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "신용카드로 벌침을 밀어서 제거하고 비누와 물로 씻기",
+        "reaction": "정답! 벌침을 핀셋으로 뽑으면 독이 더 들어갈 수 있으므로 카드로 밀어서 제거하는 것이 안전합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 50
+      },
+      {
+        "answerId": "answer2",
+        "answer": "핀셋으로 벌침을 뽑기",
+        "reaction": "오답! 핀셋으로 벌침을 뽑으면 벌침에 남은 독이 더 많이 피부에 들어가게 됩니다. 카드로 밀어서 제거해야 합니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "벌침을 그대로 두고 병원으로 가기",
+        "reaction": "부분 정답! 벌침을 제거하지 않으면 독이 계속 들어가므로 먼저 제거한 후 병원으로 가는 것이 좋습니다.",
+        "nextId": "#3-2",
+        "points": {
+          "speed": 5,
+          "accuracy": 5
+        },
+        "exp": 25
+      }
+    ]
+  },
+  {
+    "sceneId": "#3-2",
+    "title": "벌 쏘임 후 추가 처치",
+    "content": "벌침을 제거한 후에도 부위가 계속 부어오르고 있습니다. 환자가 알레르기 반응을 보이기 시작했는지 확인해야 합니다.",
+    "sceneScript": "벌침 제거 후 추가 처치가 필요합니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 6,
+    "disasterType": "emergency",
+    "riskLevel": "MEDIUM",
+    "difficulty": "medium",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "얼음주머니로 냉찜질하고 알레르기 반응 확인 후 필요시 병원 이송",
+        "reaction": "정답! 냉찜질로 통증과 부종을 완화하고, 알레르기 반응이 있으면 즉시 병원으로 이송해야 합니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 75
+      },
+      {
+        "answerId": "answer2",
+        "answer": "상처에 소독약을 바르기",
+        "reaction": "오답! 벌에 쏘인 상처에는 소독약보다는 냉찜질이 더 효과적입니다. 소독약은 오히려 자극을 줄 수 있습니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "상처를 문지르며 독을 빼내기",
+        "reaction": "오답! 상처를 문지르면 독이 더 퍼지고 염증이 악화될 수 있습니다. 냉찜질로 부종을 완화하는 것이 좋습니다.",
+        "nextId": "#4-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-1",
+    "title": "뱀에 물린 응급처치",
+    "content": "산행 중 뱀에 물렸습니다. 물린 부위가 부어오르고 통증이 있습니다. 뱀의 종류는 확실하지 않지만 독사일 가능성이 있습니다.",
+    "sceneScript": "뱀에 물린 상황입니다. 독사일 가능성이 있으므로 신속한 처치가 필요합니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 7,
+    "disasterType": "emergency",
+    "riskLevel": "CRITICAL",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "119에 신고하고 물린 부위를 심장보다 낮게 위치시키며 비누와 물로 씻기",
+        "reaction": "정답! 뱀에 물렸을 때는 즉시 119에 신고하고, 독의 확산을 늦추기 위해 물린 부위를 심장보다 낮게 위치시켜야 합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "상처를 칼로 절개하여 독을 빼내기",
+        "reaction": "오답! 상처를 칼로 절개하면 혈관이나 신경을 손상시킬 수 있고, 2차 감염의 위험이 높아집니다. 절대 하지 말아야 할 처치입니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "상처에 담뱃재나 된장을 바르기",
+        "reaction": "오답! 민간요법인 담뱃재나 된장을 바르면 오히려 감염을 일으킬 수 있습니다. 비누와 물로 씻는 것이 가장 안전합니다.",
+        "nextId": "#4-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#4-2",
+    "title": "뱀 독 확산 방지",
+    "content": "119에 신고했고 물린 부위를 씻었습니다. 이제 독의 확산을 늦추기 위한 추가 처치가 필요합니다. 물린 지 15분 이내입니다.",
+    "sceneScript": "독의 확산을 늦추기 위한 처치가 필요합니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 8,
+    "disasterType": "emergency",
+    "riskLevel": "CRITICAL",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "물린 부위 10cm 위쪽을 폭 2cm 이상의 헝겊으로 느슨하게 묶기",
+        "reaction": "정답! 물린 부위 위쪽을 느슨하게 묶어 독의 확산을 늦추되, 혈액순환을 막지 않도록 손가락 하나가 들어갈 정도로 느슨하게 묶어야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "물린 부위를 꽉 조여서 묶기",
+        "reaction": "오답! 너무 꽉 조이면 혈액순환이 차단되어 조직이 괴사할 수 있습니다. 느슨하게 묶어야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "묶지 않고 그대로 두기",
+        "reaction": "오답! 묶지 않으면 독이 빠르게 전신으로 퍼져 더 위험해질 수 있습니다. 적절히 묶어서 확산을 늦춰야 합니다.",
+        "nextId": "#5-1",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#5-1",
+    "title": "기도폐쇄 응급처치",
+    "content": "식사 중 음식이 기도에 걸려 숨을 쉬기 어려운 상황이 발생했습니다. 환자가 목을 움켜쥐고 있고, 말을 할 수 없는 상태입니다.",
+    "sceneScript": "기도폐쇄 응급상황입니다. 환자가 말을 할 수 없고 숨을 쉬기 어려워합니다. 어떻게 하시겠습니까?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 9,
+    "disasterType": "emergency",
+    "riskLevel": "CRITICAL",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "하임리히법(복부 밀어올리기)을 실시하기",
+        "reaction": "정답! 기도폐쇄 시 하임리히법을 사용하여 이물질을 제거하는 것이 가장 효과적인 응급처치입니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "환자의 등을 두드리기",
+        "reaction": "오답! 등을 두드리면 이물질이 더 깊숙이 들어갈 수 있습니다. 하임리히법이 더 안전하고 효과적입니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "물을 마시게 하기",
+        "reaction": "오답! 기도폐쇄 시 물을 마시게 하면 이물질이 더 깊숙이 들어가거나 질식할 수 있습니다. 하임리히법을 먼저 시도해야 합니다.",
+        "nextId": "#5-2",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  },
+  {
+    "sceneId": "#5-2",
+    "title": "하임리히법 올바른 자세",
+    "content": "하임리히법을 실시하려고 합니다. 환자가 의식이 있고 서 있을 수 있는 상태입니다. 올바른 자세와 방법이 중요합니다.",
+    "sceneScript": "하임리히법을 올바르게 실시하는 방법은 무엇일까요?",
+    "approvalStatus": "DRAFT",
+    "createdAt": "2025-01-15T00:00:00.000Z",
+    "createdBy": 1,
+    "order": 10,
+    "disasterType": "emergency",
+    "riskLevel": "CRITICAL",
+    "difficulty": "hard",
+    "options": [
+      {
+        "answerId": "answer1",
+        "answer": "환자 뒤에 서서 두 손을 명치와 배꼽 중앙에 놓고 주먹을 감싸 쥐고 세게 밀어 올리기",
+        "reaction": "정답! 하임리히법의 올바른 자세입니다. 환자 뒤에서 명치와 배꼽 중앙에 손을 놓고 세게 밀어 올려 이물질을 제거합니다.",
+        "nextId": "#END",
+        "points": {
+          "speed": 10,
+          "accuracy": 10
+        },
+        "exp": 100
+      },
+      {
+        "answerId": "answer2",
+        "answer": "환자 앞에서 가슴을 두드리기",
+        "reaction": "오답! 가슴을 두드리는 것은 하임리히법이 아닙니다. 복부를 밀어 올려야 이물질이 제거됩니다.",
+        "nextId": "#END",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      },
+      {
+        "answerId": "answer3",
+        "answer": "환자 옆에서 팔을 잡고 흔들기",
+        "reaction": "오답! 팔을 흔드는 것으로는 기도폐쇄를 해결할 수 없습니다. 복부를 밀어 올리는 하임리히법이 필요합니다.",
+        "nextId": "#END",
+        "points": {
+          "speed": 0,
+          "accuracy": 0
+        },
+        "exp": 0
+      }
+    ]
+  }
+]

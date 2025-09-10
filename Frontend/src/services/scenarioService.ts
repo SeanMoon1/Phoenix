@@ -43,20 +43,6 @@ export async function fetchFirstAidScenario(): Promise<Scenario[]> {
 }
 
 export async function fetchTrafficAccidentScenario(): Promise<Scenario[]> {
-  const res = await fetch('/scripts/data/traffic_accident_scenario.json', {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) {
-    throw new Error(`교통사고 시나리오 로드 실패: ${res.status}`);
-  }
-  const data = (await res.json()) as unknown;
-  if (!Array.isArray(data)) {
-    throw new Error('시나리오 형식 오류: 배열이 아님');
-  }
-  return data as Scenario[];
-}
-
-export async function fetchTrafficAccidentScenario(): Promise<Scenario[]> {
   const res = await fetch(
     '/scripts/data/traffic_accident_training_scenario.json',
     {

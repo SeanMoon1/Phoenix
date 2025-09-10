@@ -152,159 +152,15 @@ const Header: React.FC = () => {
               {/* 훈련하기 */}
               <Link
                 to="/training"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg whitespace-nowrap dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
               >
                 훈련하기
               </Link>
 
-<<<<<<< HEAD
-                {/* 훈련하기 드롭다운 메뉴 */}
-                {isTrainingDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
-                    <Link
-                      to="/training/fire"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 first:rounded-t-lg"
-                      onClick={() => setIsTrainingDropdownOpen(false)}
-                    >
-                      화재 대응 훈련
-                    </Link>
-                    <Link
-                      to="/training/earthquake"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                      onClick={() => setIsTrainingDropdownOpen(false)}
-                    >
-                      지진 대응 훈련
-                    </Link>
-                    <Link
-                      to="/training/emergency"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                      onClick={() => setIsTrainingDropdownOpen(false)}
-                    >
-                      응급처치 훈련
-                    </Link>
-                    <Link
-                      to="/training/flood"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 last:rounded-b-lg"
-                      onClick={() => setIsTrainingDropdownOpen(false)}
-                    >
-                      홍수 대응 훈련
-                    </Link>
-                    <Link
-                      to="/training/traffic"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 last:rounded-b-lg"
-                      onClick={() => setIsTrainingDropdownOpen(false)}
-                    >
-                      교통사고 대응 훈련
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 마이페이지 드롭다운 */}
-              <div className="relative" ref={myPageDropdownRef}>
-                <button
-                  onClick={toggleMyPageDropdown}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                    isMyPageDropdownOpen
-                      ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                  }`}
-                >
-                  <span>마이페이지</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isMyPageDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                {/* 마이페이지 드롭다운 메뉴 */}
-                {isMyPageDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
-                    <Link
-                      to="/mypage/records"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 first:rounded-t-lg"
-                      onClick={() => setIsMyPageDropdownOpen(false)}
-                    >
-                      훈련기록
-                    </Link>
-                    <Link
-                      to="/mypage/scores"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                      onClick={() => setIsMyPageDropdownOpen(false)}
-                    >
-                      점수조회
-                    </Link>
-                    <Link
-                      to="/mypage/profile"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 last:rounded-b-lg"
-                      onClick={() => setIsMyPageDropdownOpen(false)}
-                    >
-                      개인정보 수정
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 고객지원 드롭다운 */}
-              <div className="relative" ref={supportDropdownRef}>
-                <button
-                  onClick={toggleSupportDropdown}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                    isSupportDropdownOpen
-                      ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                  }`}
-                >
-                  <span>고객지원</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      isSupportDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                {/* 고객지원 드롭다운 메뉴 */}
-                {isSupportDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
-                    <Link
-                      to="/faq"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 first:rounded-t-lg"
-                      onClick={() => setIsSupportDropdownOpen(false)}
-                    >
-                      FAQ
-                    </Link>
-                    <Link
-                      to="/contact"
-                      className="block px-4 py-3 text-sm text-gray-700 transition-all duration-200 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 last:rounded-b-lg"
-                      onClick={() => setIsSupportDropdownOpen(false)}
-                    >
-                      문의
-                    </Link>
-                  </div>
-                )}
-              </div>
-=======
               {/* 마이페이지 */}
               <Link
                 to="/mypage"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg whitespace-nowrap dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
               >
                 마이페이지
               </Link>
@@ -312,11 +168,10 @@ const Header: React.FC = () => {
               {/* 고객지원 */}
               <Link
                 to="/support"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg whitespace-nowrap dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
               >
                 고객지원
               </Link>
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
 
               {/* 관리자 드롭다운 - 관리자 페이지에서만 표시 */}
               {isAdminPage && (
@@ -482,168 +337,11 @@ const Header: React.FC = () => {
                   </Link>
                 </div>
 
-<<<<<<< HEAD
-                {/* 훈련하기 섹션 */}
-                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={toggleMobileTraining}
-                    className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-left text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  >
-                    <span>훈련하기</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        mobileTrainingOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* 훈련하기 서브메뉴 */}
-                  {mobileTrainingOpen && (
-                    <div className="mt-2 ml-4 space-y-1">
-                      <Link
-                        to="/training/fire"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        화재 대응 훈련
-                      </Link>
-                      <Link
-                        to="/training/earthquake"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        지진 대응 훈련
-                      </Link>
-                      <Link
-                        to="/training/emergency"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        응급처치 훈련
-                      </Link>
-                      <Link
-                        to="/training/flood"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        홍수 대응 훈련
-                      </Link>
-                      <Link
-                        to="/training/traffic"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        교통사고 대응 훈련
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* 마이페이지 섹션 */}
-                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={toggleMobileMyPage}
-                    className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-left text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  >
-                    <span>마이페이지</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        mobileMyPageOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* 마이페이지 서브메뉴 */}
-                  {mobileMyPageOpen && (
-                    <div className="mt-2 ml-4 space-y-1">
-                      <Link
-                        to="/mypage/records"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        훈련기록
-                      </Link>
-                      <Link
-                        to="/mypage/scores"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        점수조회
-                      </Link>
-                      <Link
-                        to="/mypage/profile"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        개인정보 수정
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* 고객지원 섹션 */}
-                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={toggleMobileSupport}
-                    className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-left text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  >
-                    <span>고객지원</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        mobileSupportOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* 고객지원 서브메뉴 */}
-                  {mobileSupportOpen && (
-                    <div className="mt-2 ml-4 space-y-1">
-                      <Link
-                        to="/faq"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        FAQ
-                      </Link>
-                      <Link
-                        to="/contact"
-                        className="block px-4 py-2 text-sm text-gray-600 transition-all duration-200 rounded-lg dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        문의
-                      </Link>
-                    </div>
-                  )}
-=======
                 {/* 훈련하기 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/training"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     훈련하기
@@ -651,10 +349,10 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* 마이페이지 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/mypage"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     마이페이지
@@ -662,15 +360,14 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* 고객지원 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/support"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     고객지원
                   </Link>
->>>>>>> 85ad5e0ebaed306d2b683cbeff197b357e405228
                 </div>
 
                 {/* 관리자 섹션 - 관리자 페이지에서만 표시 */}

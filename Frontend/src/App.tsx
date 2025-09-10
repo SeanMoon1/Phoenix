@@ -13,9 +13,9 @@ import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
-import ScenarioSelectPage from '@/pages/training/ScenarioSelectPage';
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
+import AdminLayout from './components/layout/AdminLayout';
 
 // 새로 생성한 페이지들 import
 import ManualPage from './pages/manual/ManualPage';
@@ -277,8 +277,8 @@ function App() {
           <Route path="/manual" element={<ManualPage />} />
           <Route path="/training" element={<TrainingPage />} />
           <Route path="/training/fire" element={<FireScenarioPage />} />
-          <Route path="/training/fire/game" element={<ScenarioPage />} />
-          <Route path="/home/training/fire" element={<ScenarioPage />} />
+          <Route path="/training/fire/game" element={<FireScenarioPage />} />
+          <Route path="/home/training/fire" element={<FireScenarioPage />} />
 
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
@@ -317,7 +317,7 @@ function App() {
               </ProtectedAdminRoute>
             }
           />
-          
+
           {/* 지진 훈련 */}
           <Route
             path="/training/earthquake"

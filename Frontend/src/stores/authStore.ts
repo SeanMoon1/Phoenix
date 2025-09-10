@@ -51,12 +51,21 @@ export const useAuthStore = create<AuthStore>()(
 
           if (response.success && response.data) {
             const user: User = {
-              id: response.data.user.id.toString(),
+              id: response.data.user.id,
+              teamId: 0,
+              userCode: '',
+              loginId: '',
               email: response.data.user.email,
               name: response.data.user.name,
-              role: 'user',
+              useYn: 'Y',
               userLevel: response.data.user.userLevel,
+              userExp: 0,
+              totalScore: 0,
+              completedScenarios: 0,
               currentTier: response.data.user.currentTier,
+              levelProgress: 0,
+              nextLevelExp: 0,
+              isActive: true,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };

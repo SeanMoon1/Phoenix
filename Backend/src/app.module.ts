@@ -2,20 +2,35 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+
+// Clean Architecture 구조에 맞는 새로운 app.module.ts
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { TeamsModule } from './modules/teams/teams.module';
-import { ScenariosModule } from './modules/scenarios/scenarios.module';
-import { TrainingModule } from './modules/training/training.module';
-import { TrainingResultsModule } from './modules/training-results/training-results.module';
-import { SupportModule } from './modules/support/support.module';
-import { UserProgressModule } from './modules/user-progress/user-progress.module';
-import { CodesModule } from './modules/codes/codes.module';
-import { AdminModule } from './modules/admin/admin.module';
-import { CommonModule } from './modules/common/common.module';
-import { getDatabaseConfig } from './config/database.config';
+
+// Presentation Layer - Controllers
+import { AuthController } from './presentation/controllers/auth.controller';
+import { UsersController } from './presentation/controllers/users.controller';
+import { ScenariosController } from './presentation/controllers/scenarios.controller';
+import { TrainingController } from './presentation/controllers/training.controller';
+import { TeamsController } from './presentation/controllers/teams.controller';
+import { AdminController } from './presentation/controllers/admin.controller';
+
+// Application Layer - Services
+import { AuthService } from './application/services/auth.service';
+import { UsersService } from './application/services/users.service';
+import { ScenariosService } from './application/services/scenarios.service';
+import { TrainingService } from './application/services/training.service';
+
+// Domain Layer - Entities
+import { User } from './domain/entities/user.entity';
+import { Scenario } from './domain/entities/scenario.entity';
+import { TrainingSession } from './domain/entities/training-session.entity';
+import { Team } from './domain/entities/team.entity';
+
+// Infrastructure Layer - Database
+import { getDatabaseConfig } from './infrastructure/config/database.config';
+
+// Shared Layer
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 
@@ -30,21 +45,24 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    AuthModule,
-    UsersModule,
-    TeamsModule,
-    ScenariosModule,
-    TrainingModule,
-    TrainingResultsModule,
-    SupportModule,
-    UserProgressModule,
-    CodesModule,
-    AdminModule,
-    CommonModule,
+    // Domain entities registration
+    TypeOrmModule.forFeature([User, Scenario, TrainingSession, Team]),
   ],
-  controllers: [AppController],
+  controllers: [
+    AppController,
+    AuthController,
+    UsersController,
+    ScenariosController,
+    TrainingController,
+    TeamsController,
+    AdminController,
+  ],
   providers: [
     AppService,
+    AuthService,
+    UsersService,
+    ScenariosService,
+    TrainingService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

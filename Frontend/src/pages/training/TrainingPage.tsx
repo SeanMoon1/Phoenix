@@ -15,7 +15,7 @@ const TrainingPage: React.FC = () => {
     { id: 'fire', name: '화재', icon: '🔥', color: 'red' },
     { id: 'earthquake', name: '지진', icon: '🌍', color: 'yellow' },
     { id: 'emergency', name: '응급처치', icon: '🚑', color: 'green' },
-    { id: 'flood', name: '홍수', icon: '🌊', color: 'blue' },
+    { id: 'trafficAccident', name: '교통사고', icon: '🚗', color: 'blue' },
   ];
 
   const fireContent = {
@@ -341,9 +341,9 @@ const TrainingPage: React.FC = () => {
     ),
   };
 
-  const floodContent = {
-    title: '홍수 대응 훈련',
-    icon: '🌊',
+  const trafficAccidentContent = {
+    title: '교통사고 대응 훈련',
+    icon: '🚗',
     color: 'blue',
     content: (
       <div className="space-y-8">
@@ -363,10 +363,11 @@ const TrainingPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    홍수 경보 대응
+                    사고 현장 안전 확보
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    홍수 경보 발령 시 즉시 대응하는 방법을 학습합니다.
+                    교통사고 발생 시 현장 안전을 확보하고 2차 사고를 방지하는
+                    방법을 학습합니다.
                   </p>
                 </div>
               </div>
@@ -378,10 +379,10 @@ const TrainingPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    안전한 대피
+                    응급 신고 및 구조
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    침수 위험 지역에서 안전한 고지대로 대피하는 방법을 익힙니다.
+                    신속한 신고와 부상자 구조를 위한 올바른 절차를 익힙니다.
                   </p>
                 </div>
               </div>
@@ -393,10 +394,11 @@ const TrainingPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    생존 요령
+                    응급처치 및 대응
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    홍수 상황에서 생존을 위한 필수 요령을 실습합니다.
+                    교통사고 부상자에 대한 응급처치와 상황별 대응 방법을
+                    실습합니다.
                   </p>
                 </div>
               </div>
@@ -439,8 +441,11 @@ const TrainingPage: React.FC = () => {
 
         {/* 훈련 시작 버튼 */}
         <div className="mt-24 text-center">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
-            홍수 대응 훈련 시작하기
+          <button
+            onClick={() => navigate('/training/traffic-accident')}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+          >
+            교통사고 대응 훈련 시작하기
           </button>
         </div>
       </div>
@@ -451,7 +456,7 @@ const TrainingPage: React.FC = () => {
     fire: fireContent,
     earthquake: earthquakeContent,
     emergency: emergencyContent,
-    flood: floodContent,
+    trafficAccident: trafficAccidentContent,
   };
 
   const currentContent = contentMap[activeTab as keyof typeof contentMap];
@@ -556,12 +561,12 @@ const TrainingPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🌊 홍수
+                      🚗 교통사고
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 홍수 경보 대응 방법</li>
-                      <li>• 침수 위험 지역 대피</li>
-                      <li>• 홍수 상황 생존 요령</li>
+                      <li>• 사고 현장 안전 확보</li>
+                      <li>• 응급 신고 및 구조</li>
+                      <li>• 교통사고 응급처치</li>
                     </ul>
                   </div>
                 </div>

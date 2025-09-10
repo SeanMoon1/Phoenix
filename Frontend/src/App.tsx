@@ -15,6 +15,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
+import TrafficAccidentScenarioPage from '@/pages/training/TrafficAccidentScenarioPage';
 import AdminLayout from './components/layout/AdminLayout';
 
 // 새로 생성한 페이지들 import
@@ -322,6 +323,12 @@ function App() {
           <Route
             path="/training/earthquake"
             element={<EarthquakeScenarioPage />}
+          />
+
+          {/* 교통사고 훈련 */}
+          <Route
+            path="/training/traffic-accident"
+            element={<TrafficAccidentScenarioPage />}
           />
         </Routes>
       </Router>

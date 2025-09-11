@@ -29,7 +29,7 @@ type PersistState = {
   totalCorrect: number;
 };
 
-const PERSIST_KEY = 'phoenix_training_state';
+const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
 
 // 시나리오 타입별 이름 매핑
@@ -54,21 +54,34 @@ const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 const END_SCENE_ID = '#END';
 
-export default function ScenarioPage() {
+interface ScenarioPageProps {
+  scenarioSetName?: string;
+  fetchScenarios?: () => Promise<Scenario[]>;
+  nextScenarioPath?: string;
+  persistKey?: string;
+}
+
+export default function ScenarioPage(props: ScenarioPageProps = {}) {
   // URL에서 시나리오 타입 추출
   const location = useLocation();
   const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName = getScenarioSetName(scenarioType);
-  const nextScenarioPath = '/training';
+  const scenarioSetName =
+    props.scenarioSetName || getScenarioSetName(scenarioType);
+  const nextScenarioPath = props.nextScenarioPath || '/training';
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const persistKey = props.persistKey || DEFAULT_PERSIST_KEY;
 
   // 데이터 & 진행
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
+  const startTime = useMemo(() => Date.now(), []); // 컴포넌트 마운트 시 한 번만 설정
   const scenario = scenarios[current];
+
+  // 경과 시간 계산
+  const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 초 단위
 
   // 선택/피드백
   const [selected, setSelected] = useState<ScenarioOption | null>(null);
@@ -106,11 +119,24 @@ export default function ScenarioPage() {
 
   // 초기 데이터 로드
   useEffect(() => {
-    fetchScenarioByType(scenarioType)
-      .then(data => setScenarios(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [scenarioType]);
+    const fetchData = async () => {
+      try {
+        if (props.fetchScenarios) {
+          const data = await props.fetchScenarios();
+          setScenarios(data);
+        } else {
+          const data = await fetchScenarioByType(scenarioType);
+          setScenarios(data);
+        }
+      } catch (error) {
+        console.error('시나리오 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [scenarioType, props.fetchScenarios]);
 
   // 리사이즈
   useEffect(() => {
@@ -124,7 +150,7 @@ export default function ScenarioPage() {
 
   // 로컬 스토리지 복구/저장
   useEffect(() => {
-    const raw = localStorage.getItem(PERSIST_KEY);
+    const raw = localStorage.getItem(persistKey);
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -136,11 +162,11 @@ export default function ScenarioPage() {
         /* ignore */
       }
     }
-  }, []);
+  }, [persistKey]);
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
-  }, [EXP, level, totalCorrect]);
+    localStorage.setItem(persistKey, JSON.stringify(s));
+  }, [EXP, level, totalCorrect, persistKey]);
 
   // 훈련 결과 서버 전송
   const saveTrainingResult = async () => {
@@ -403,7 +429,7 @@ export default function ScenarioPage() {
               onPrev={handlePrev}
               onNext={handleNext}
             />
-            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
+            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
               <PlayMoreButton to="/training" />
             </div>
           </main>

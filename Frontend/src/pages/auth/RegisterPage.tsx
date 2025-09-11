@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
-import { teamApi, authApi } from '../../services/api';
+import { authApi } from '../../services/api';
 // 회원가입 스키마
 const registerSchema = yup.object({
   loginId: yup
@@ -34,13 +34,6 @@ const registerSchema = yup.object({
 });
 
 type RegisterFormData = yup.InferType<typeof registerSchema>;
-
-interface TeamInfo {
-  id: number;
-  name: string;
-  description?: string;
-  teamCode: string;
-}
 
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isLoading } = useAuthStore();

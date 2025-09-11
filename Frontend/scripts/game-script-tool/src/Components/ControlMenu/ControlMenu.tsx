@@ -100,38 +100,41 @@ const ControlMenu: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl border border-gray-200 dark:border-gray-600 p-6">
-      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        시나리오 관리
-      </h3>
-      <div className="flex flex-col space-y-3 w-fit">
-        <button
-          onClick={onAddSceneBlockClick}
-          className="flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-medium rounded-lg hover:from-orange-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 shadow-lg hover:shadow-xl w-full justify-start"
-        >
-          <span className="text-lg">➕</span>
-          <span>시나리오 생성</span>
-        </button>
-        <button
-          onClick={onImportClick}
-          className="flex items-center space-x-3 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 w-full justify-start"
-        >
-          <span className="text-lg">📥</span>
-          <span>시나리오 가져오기</span>
-        </button>
-        <button
-          onClick={onExportClick}
-          className="flex items-center space-x-3 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 w-full justify-start"
-        >
-          <span className="text-lg">📤</span>
-          <span>시나리오 내보내기</span>
-        </button>
-        <button
-          onClick={onClearClick}
-          className="flex items-center space-x-3 px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 w-full justify-start"
-        >
-          <span className="text-lg">🗑️</span>
-          <span>모든 시나리오 삭제</span>
-        </button>
+      <div className="flex flex-col space-y-3">
+        {/* 첫 번째 행 */}
+        <div className="flex space-x-3">
+          <button
+            onClick={onAddSceneBlockClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white font-medium rounded-lg hover:from-orange-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[80px]"
+          >
+            <span className="text-xl">➕</span>
+            <span className="text-xs text-center">시나리오 생성</span>
+          </button>
+          <button
+            onClick={onImportClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">📥</span>
+            <span className="text-xs text-center">시나리오 가져오기</span>
+          </button>
+        </div>
+        {/* 두 번째 행 */}
+        <div className="flex space-x-3">
+          <button
+            onClick={onExportClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">📤</span>
+            <span className="text-xs text-center">시나리오 내보내기</span>
+          </button>
+          <button
+            onClick={onClearClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">🗑️</span>
+            <span className="text-xs text-center">모든 시나리오 삭제</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -192,6 +192,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   }, [scenario, endModalAutoShown, failedThisRun, scenarioSetName]);
 
   // 선택
+  // 상단 상태에 추가
+  const [hideExpFill, setHideExpFill] = useState(false);
+
+  // ...중략...
+
+  // handleChoice 함수만 교체
   const handleChoice = (option: ScenarioOption) => {
     if (!scenario) return;
     setSelected(option);
@@ -205,13 +211,16 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
     if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
       const gained = BASE_EXP;
+
       const oldLevel = level;
       const oldNeeded = getEXPForNextLevel(oldLevel);
+
       let nextEXP = EXP + gained;
       let nextLevel = level;
       let totalBonus = 0;
       let leveled = false;
 
+      // 연쇄 레벨업 포함 계산
       while (nextEXP >= getEXPForNextLevel(nextLevel)) {
         nextEXP -= getEXPForNextLevel(nextLevel);
         nextLevel += 1;
@@ -222,6 +231,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       }
 
       if (!leveled) {
+        // 레벨업 없음: 그냥 증가 애니메이션
         animateValue({
           from: EXPDisplay,
           to: nextEXP,
@@ -231,27 +241,44 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         setEXP(nextEXP);
         setLevel(nextLevel);
       } else {
+        // 레벨업 있음:
+        // 1) 현재 레벨 필요치까지 꽉 채우기(100%)
         animateValue({
           from: EXPDisplay,
           to: oldNeeded,
-          duration: 350,
+          duration: 500,
           onUpdate: setEXPDisplay,
           onComplete: () => {
-            setLevel(nextLevel);
-            setEXP(nextEXP);
+            // 100% 상태 하이라이트 유지
             setLevelUpBonus(totalBonus);
             setShowLevelUp(true);
-            window.setTimeout(() => setShowLevelUp(false), 1400);
-            setEXPDisplay(0);
-            animateValue({
-              from: 0,
-              to: nextEXP,
-              duration: 600,
-              onUpdate: setEXPDisplay,
-            });
+
+            window.setTimeout(() => {
+              setShowLevelUp(false);
+
+              // 2) 회색 바만 보이게: 초록바 잠깐 숨기고 EXPDisplay를 0으로 즉시 리셋(수축 애니메이션 방지)
+              setLevel(nextLevel); // neededEXP가 새 레벨 기준으로 바뀌도록 먼저 레벨 반영
+              setEXP(nextEXP); // 최종 잔여 EXP 반영
+              setHideExpFill(true); // 초록바 숨김
+              setEXPDisplay(0); // 즉시 0으로 (수축 애니메이션 없음)
+
+              // 3) 다음 프레임에서 초록바 다시 보이게 + 0 → 잔여 EXP로 우측 방향 채우기
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  setHideExpFill(false);
+                  animateValue({
+                    from: 0,
+                    to: nextEXP,
+                    duration: 600,
+                    onUpdate: setEXPDisplay,
+                  });
+                });
+              });
+            }, 1000); // 100% 연출 유지 시간
           },
         });
       }
+
       setTotalCorrect(c => c + 1);
       setAwardedExpThisScene(true);
     }
@@ -372,6 +399,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
             neededExp={neededEXP}
             progressPct={progressPct}
             highlight={showLevelUp}
+            hideExpFill={hideExpFill}
           />
           <main>
             <ProgressBar
@@ -381,6 +409,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               progressPct={progressPct}
               expDisplay={EXPDisplay}
               neededExp={neededEXP}
+              hideExpFill={hideExpFill}
             />
             <SituationCard
               title={scenario.title ?? ''}

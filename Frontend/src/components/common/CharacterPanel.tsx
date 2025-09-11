@@ -1,3 +1,4 @@
+// src/components/common/CharacterPanel.tsx
 import phoenixImg from '@/assets/images/phoenix.png';
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
   neededExp: number;
   progressPct: number;
   highlight?: boolean; // 레벨업 순간 하이라이트
+  hideExpFill?: boolean; // 레벨업 리셋 연출 시 초록바 잠깐 숨김
 };
 
 export default function CharacterPanel({
@@ -14,6 +16,7 @@ export default function CharacterPanel({
   neededExp,
   progressPct,
   highlight = false,
+  hideExpFill = false,
 }: Props) {
   return (
     <aside className="hidden md:flex md:flex-col md:gap-4">
@@ -29,12 +32,11 @@ export default function CharacterPanel({
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-semibold">플레이어 이름</h2>
           <span
-            className={`text-2xl font-bold inline-flex items-center px-2 rounded-lg transition-shadow
-              ${
-                highlight
-                  ? 'ring-2 ring-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.6)] animate-pulse'
-                  : ''
-              }`}
+            className={`text-2xl font-bold inline-flex items-center px-2 rounded-lg transition-shadow ${
+              highlight
+                ? 'ring-2 ring-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.6)] animate-pulse'
+                : ''
+            }`}
           >
             Lv.{level}
           </span>
@@ -42,8 +44,13 @@ export default function CharacterPanel({
         <div className="mt-3">
           <div className="w-full h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
             <div
-              className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-500"
-              style={{ width: `${progressPct}%` }}
+              className={
+                'h-full bg-emerald-500 dark:bg-emerald-400 ' +
+                (hideExpFill
+                  ? 'opacity-0 w-0 transition-none'
+                  : 'transition-[width] duration-500')
+              }
+              style={{ width: hideExpFill ? 0 : `${progressPct}%` }}
               aria-label="EXP-progress"
             />
           </div>

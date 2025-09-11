@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { fetchScenarioByType } from '@/services/scenarioService';
+import { trainingResultApi } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import { useLocation } from 'react-router-dom';
 
@@ -59,6 +61,7 @@ export default function ScenarioPage() {
   const scenarioSetName = getScenarioSetName(scenarioType);
   const nextScenarioPath = '/training';
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   // 데이터 & 진행
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
@@ -139,11 +142,45 @@ export default function ScenarioPage() {
     localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
   }, [EXP, level, totalCorrect]);
 
+  // 훈련 결과 서버 전송
+  const saveTrainingResult = async () => {
+    if (!user?.id) return;
+
+    try {
+      const totalScore = Math.floor((totalCorrect / scenarios.length) * 100);
+      const accuracyScore = Math.floor((totalCorrect / scenarios.length) * 100);
+      const speedScore = Math.floor(Math.max(0, 100 - timeSpent / 60)); // 시간 기반 속도 점수
+
+      const resultData = {
+        participantId: 0, // 임시값, 실제로는 훈련 세션 참가자 ID
+        sessionId: 0, // 임시값, 실제로는 훈련 세션 ID
+        scenarioId: 1, // 임시값, 실제로는 시나리오 ID
+        userId: user.id,
+        resultCode: `RESULT_${Date.now()}`,
+        accuracyScore,
+        speedScore,
+        totalScore,
+        completionTime: timeSpent,
+        feedback: failedThisRun ? '훈련 실패' : '훈련 완료',
+        completedAt: new Date().toISOString(),
+      };
+
+      await trainingResultApi.saveResult(resultData);
+      console.log('훈련 결과가 서버에 저장되었습니다.');
+    } catch (error) {
+      console.error('훈련 결과 저장 실패:', error);
+    }
+  };
+
   // 엔딩(#END) 씬이 렌더된 뒤 모달 자동 오픈 → 진행바 표시
   useEffect(() => {
     if (!scenario || endModalAutoShown) return;
     if (scenario.sceneId === END_SCENE_ID) {
       setEndModalAutoShown(true);
+
+      // 훈련 결과 서버에 저장
+      saveTrainingResult();
+
       if (!failedThisRun) {
         setClearMsg(
           `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`

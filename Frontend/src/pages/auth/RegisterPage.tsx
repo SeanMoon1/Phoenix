@@ -9,11 +9,6 @@ import Layout from '../../components/layout/Layout';
 import { teamApi, authApi } from '../../services/api';
 // 회원가입 스키마
 const registerSchema = yup.object({
-  teamCode: yup
-    .string()
-    .required('팀 코드를 입력해주세요.')
-    .min(3, '팀 코드는 최소 3자 이상이어야 합니다.')
-    .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
   loginId: yup
     .string()
     .required('로그인 ID를 입력해주세요.')
@@ -50,9 +45,6 @@ interface TeamInfo {
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isLoading } = useAuthStore();
   const navigate = useNavigate();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
-  const [isValidatingTeam, setIsValidatingTeam] = useState(false);
-  const [teamValidationError, setTeamValidationError] = useState<string>('');
   const [isValidatingLoginId, setIsValidatingLoginId] = useState(false);
   const [loginIdValidationError, setLoginIdValidationError] =
     useState<string>('');
@@ -70,41 +62,9 @@ const RegisterPage: React.FC = () => {
     resolver: yupResolver(registerSchema),
   });
 
-  const teamCode = watch('teamCode');
   const loginId = watch('loginId');
   const password = watch('password');
   const confirmPassword = watch('confirmPassword');
-
-  // 팀 코드 실시간 검증
-  const validateTeamCode = async (code: string) => {
-    if (!code || code.length < 3) {
-      setTeamInfo(null);
-      setTeamValidationError('');
-      return;
-    }
-
-    setIsValidatingTeam(true);
-    setTeamValidationError('');
-
-    try {
-      const response = await teamApi.validateTeamCode(code);
-
-      if (response.success && response.data?.valid) {
-        setTeamInfo(response.data.team || null);
-        setTeamValidationError('');
-      } else {
-        setTeamInfo(null);
-        setTeamValidationError(
-          response.data?.message || '유효하지 않은 팀 코드입니다.'
-        );
-      }
-    } catch (error: unknown) {
-      setTeamInfo(null);
-      setTeamValidationError('팀 코드 검증 중 오류가 발생했습니다.');
-    } finally {
-      setIsValidatingTeam(false);
-    }
-  };
 
   // 로그인 ID 중복 확인
   const validateLoginId = async (id: string) => {
@@ -140,17 +100,6 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  // 팀 코드 변경 시 검증
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (teamCode) {
-        validateTeamCode(teamCode);
-      }
-    }, 500); // 500ms 디바운스
-
-    return () => clearTimeout(timeoutId);
-  }, [teamCode]);
-
   // 로그인 ID 변경 시 검증
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -163,14 +112,6 @@ const RegisterPage: React.FC = () => {
   }, [loginId]);
 
   const onSubmit = async (data: RegisterFormData) => {
-    if (!teamInfo) {
-      setError('teamCode', {
-        type: 'manual',
-        message: '유효한 팀 코드를 입력해주세요.',
-      });
-      return;
-    }
-
     if (isLoginIdAvailable !== true) {
       setError('loginId', {
         type: 'manual',
@@ -181,7 +122,6 @@ const RegisterPage: React.FC = () => {
 
     try {
       await registerUser({
-        teamCode: data.teamCode,
         loginId: data.loginId,
         name: data.name,
         email: data.email,
@@ -207,7 +147,7 @@ const RegisterPage: React.FC = () => {
               회원가입
             </h2>
             <p className="mt-2 text-xs text-gray-600 sm:text-sm dark:text-gray-300">
-              팀 코드를 입력하여 재난훈련ON에 가입하세요
+              재난훈련ON에 가입하세요
             </p>
           </div>
 
@@ -216,40 +156,6 @@ const RegisterPage: React.FC = () => {
               className="space-y-4 sm:space-y-6"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* 팀 코드 입력 및 검증 */}
-              <div className="space-y-2">
-                <Input
-                  label="팀 코드"
-                  placeholder="TEAM001"
-                  error={errors.teamCode?.message || teamValidationError}
-                  {...register('teamCode')}
-                />
-
-                {/* 팀 코드 검증 상태 표시 */}
-                {isValidatingTeam && (
-                  <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
-                    <div className="w-4 h-4 mr-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                    팀 코드를 확인하는 중...
-                  </div>
-                )}
-
-                {teamInfo && !isValidatingTeam && (
-                  <div className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
-                    <div className="flex items-center text-sm text-green-800 dark:text-green-200">
-                      <span className="mr-2">✅</span>
-                      <div>
-                        <div className="font-medium">{teamInfo.name}</div>
-                        {teamInfo.description && (
-                          <div className="mt-1 text-xs text-green-600 dark:text-green-300">
-                            {teamInfo.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* 사용자 정보 입력 */}
               <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
@@ -344,12 +250,7 @@ const RegisterPage: React.FC = () => {
                 type="submit"
                 className="w-full"
                 isLoading={isLoading}
-                disabled={
-                  !teamInfo ||
-                  isValidatingTeam ||
-                  isValidatingLoginId ||
-                  isLoginIdAvailable !== true
-                }
+                disabled={isValidatingLoginId || isLoginIdAvailable !== true}
               >
                 회원가입
               </Button>
@@ -365,7 +266,7 @@ const RegisterPage: React.FC = () => {
 
               <div className="text-center">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  팀 코드가 없으시면 팀 관리자에게 문의하세요
+                  로그인 후 마이페이지에서 팀 코드를 입력하실 수 있습니다
                 </p>
               </div>
             </form>

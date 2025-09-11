@@ -42,40 +42,26 @@ export class AuthService {
   }
 
   /**
-   * 팀 코드 기반 회원가입 (AWS 호스팅 환경 최적화)
-   * @param registerDto 회원가입 정보 (팀 코드 포함)
+   * 회원가입 (팀 코드 없이)
+   * @param registerDto 회원가입 정보
    * @returns 생성된 사용자 정보
    */
   async register(registerDto: RegisterDto) {
     try {
-      // 1. 팀 코드로 팀 조회 및 검증
-      const team = await this.teamsService.findByTeamCode(registerDto.teamCode);
-
-      // 2. 비밀번호 해시화
+      // 1. 비밀번호 해시화
       const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-      // 3. 사용자 생성 (팀 코드를 팀 ID로 변환)
+      // 2. 사용자 생성 (팀 ID는 null로 설정)
       const user = await this.usersService.create({
         ...registerDto,
-        teamId: team.id, // 팀 코드에서 팀 ID로 변환
+        teamId: null, // 팀 코드 없이 가입
+        userCode: null, // 사용자 코드는 나중에 설정
         password: hashedPassword,
       });
 
       const { password, ...result } = user;
-      return {
-        ...result,
-        team: {
-          id: team.id,
-          name: team.name,
-          teamCode: team.teamCode,
-        },
-      };
+      return result;
     } catch (error) {
-      if (error.message.includes('팀 코드')) {
-        throw new BadRequestException(
-          '유효하지 않은 팀 코드입니다. 팀 관리자에게 문의하세요.',
-        );
-      }
       throw error;
     }
   }

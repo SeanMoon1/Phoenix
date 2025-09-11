@@ -14,6 +14,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
 import { UsersController } from './presentation/controllers/users.controller';
 import { ScenariosController } from './presentation/controllers/scenarios.controller';
 import { TrainingController } from './presentation/controllers/training.controller';
+import { TrainingResultController } from './presentation/controllers/training-result.controller';
 import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
 import { ScenarioImportController } from './presentation/controllers/scenario-import.controller';
@@ -23,6 +24,7 @@ import { AuthService } from './application/services/auth.service';
 import { UsersService } from './application/services/users.service';
 import { ScenariosService } from './application/services/scenarios.service';
 import { TrainingService } from './application/services/training.service';
+import { TrainingResultService } from './application/services/training-result.service';
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { ScenarioImportService } from './application/services/scenario-import.service';
@@ -31,6 +33,8 @@ import { ScenarioImportService } from './application/services/scenario-import.se
 import { User } from './domain/entities/user.entity';
 import { Scenario } from './domain/entities/scenario.entity';
 import { TrainingSession } from './domain/entities/training-session.entity';
+import { TrainingResult } from './domain/entities/training-result.entity';
+import { UserScenarioStats } from './domain/entities/user-scenario-stats.entity';
 import { Team } from './domain/entities/team.entity';
 import { TrainingParticipant } from './infrastructure/database/entities/training-participant.entity';
 import { Admin } from './domain/entities/admin.entity';
@@ -58,6 +62,8 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
       User,
       Scenario,
       TrainingSession,
+      TrainingResult,
+      UserScenarioStats,
       Team,
       TrainingParticipant,
       Admin,
@@ -79,6 +85,7 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
     UsersController,
     ScenariosController,
     TrainingController,
+    TrainingResultController,
     TeamsController,
     AdminController,
     ScenarioImportController,
@@ -89,6 +96,7 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
     UsersService,
     ScenariosService,
     TrainingService,
+    TrainingResultService,
     TeamsService,
     AdminService,
     ScenarioImportService,

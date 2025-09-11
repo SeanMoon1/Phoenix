@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui';
-import { trainingApi, scenarioApi } from '../../services/api';
+import {
+  trainingApi,
+  scenarioApi,
+  trainingResultApi,
+  teamApi,
+} from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 
 // game-script-tool 컴포넌트들을 import (향후 통합 예정)
@@ -15,26 +20,46 @@ interface TeamStats {
   completedParticipants: number;
 }
 
+interface TeamMemberStats {
+  userId: number;
+  userName: string;
+  userCode: string;
+  totalTrainings: number;
+  totalScore: number;
+  averageScore: number;
+  bestScore: number;
+  currentLevel: number;
+  currentTier: string;
+  lastTrainingAt?: Date;
+}
+
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    'scripts' | 'approval' | 'users' | 'training'
+    'scripts' | 'approval' | 'users' | 'training' | 'teams'
   >('training');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
+  const [memberStats, setMemberStats] = useState<TeamMemberStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamDescription, setNewTeamDescription] = useState('');
+  const [creatingTeam, setCreatingTeam] = useState(false);
   const { user } = useAuthStore();
 
   const tabs = [
     { id: 'training', label: '훈련 관리', icon: '🎯' },
+    { id: 'teams', label: '팀 관리', icon: '👥' },
     { id: 'scripts', label: '시나리오 관리', icon: '📝' },
     { id: 'approval', label: '승인 관리', icon: '✅' },
-    { id: 'users', label: '사용자 관리', icon: '👥' },
+    { id: 'users', label: '사용자 관리', icon: '👤' },
   ];
 
   // 팀 통계 로드
   useEffect(() => {
     if (user?.teamId) {
       loadTeamStats();
+      loadMemberStats();
     }
   }, [user?.teamId]);
 
@@ -51,6 +76,19 @@ const AdminPage: React.FC = () => {
       console.error('팀 통계 로드 실패:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMemberStats = async () => {
+    if (!user?.teamId) return;
+
+    try {
+      const response = await trainingResultApi.getTeamMemberStats(user.teamId);
+      if (response.success && response.data) {
+        setMemberStats((response.data as any).memberStats || []);
+      }
+    } catch (error) {
+      console.error('팀원 통계 로드 실패:', error);
     }
   };
 
@@ -98,6 +136,40 @@ const AdminPage: React.FC = () => {
       alert('시나리오 동기화 중 오류가 발생했습니다.');
     } finally {
       setImporting(false);
+    }
+  };
+
+  // 팀 생성
+  const createTeam = async () => {
+    if (!newTeamName.trim()) {
+      alert('팀 이름을 입력해주세요.');
+      return;
+    }
+
+    setCreatingTeam(true);
+    try {
+      const response = await teamApi.createTeam({
+        teamName: newTeamName,
+        description: newTeamDescription,
+      });
+
+      if (response.success && response.data) {
+        alert(
+          `팀이 성공적으로 생성되었습니다!\n팀 코드: ${
+            (response.data as any).teamCode
+          }`
+        );
+        setShowCreateTeamModal(false);
+        setNewTeamName('');
+        setNewTeamDescription('');
+      } else {
+        alert('팀 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('팀 생성 실패:', error);
+      alert('팀 생성 중 오류가 발생했습니다.');
+    } finally {
+      setCreatingTeam(false);
     }
   };
 
@@ -153,7 +225,7 @@ const AdminPage: React.FC = () => {
                 </div>
               ) : teamStats ? (
                 <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="p-6 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
                         <span className="text-2xl">🎯</span>
@@ -169,7 +241,7 @@ const AdminPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-green-50 rounded-lg dark:bg-green-900/20">
+                  <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
                         <span className="text-2xl">▶️</span>
@@ -185,7 +257,7 @@ const AdminPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-purple-50 rounded-lg dark:bg-purple-900/20">
+                  <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
                         <span className="text-2xl">👥</span>
@@ -201,7 +273,7 @@ const AdminPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-orange-50 rounded-lg dark:bg-orange-900/20">
+                  <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
                         <span className="text-2xl">✅</span>
@@ -225,8 +297,94 @@ const AdminPage: React.FC = () => {
                 </div>
               )}
 
+              {/* 팀원별 상세 통계 */}
+              {memberStats.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                    팀원별 상세 통계
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-lg shadow dark:bg-gray-800">
+                      <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            사용자
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            훈련 횟수
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            총 점수
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            평균 점수
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            최고 점수
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            레벨/등급
+                          </th>
+                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            마지막 훈련
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                        {memberStats.map(member => (
+                          <tr
+                            key={member.userId}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {member.userName}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {member.userCode}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                              {member.totalTrainings}회
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                              {member.totalScore.toLocaleString()}점
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                              {member.averageScore.toFixed(1)}점
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                              {member.bestScore}점
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  Lv.{member.currentLevel}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {member.currentTier}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
+                              {member.lastTrainingAt
+                                ? new Date(
+                                    member.lastTrainingAt
+                                  ).toLocaleDateString()
+                                : '없음'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* 훈련 세션 관리 버튼들 */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 mt-8">
                 <Button
                   onClick={() => {
                     // 훈련 세션 생성 모달 열기 (향후 구현)
@@ -237,7 +395,10 @@ const AdminPage: React.FC = () => {
                   새 훈련 세션 생성
                 </Button>
                 <Button
-                  onClick={loadTeamStats}
+                  onClick={() => {
+                    loadTeamStats();
+                    loadMemberStats();
+                  }}
                   className="bg-gray-600 hover:bg-gray-700"
                 >
                   통계 새로고침
@@ -253,7 +414,7 @@ const AdminPage: React.FC = () => {
               </h2>
 
               {/* 시나리오 임포트 섹션 */}
-              <div className="mb-8 p-6 bg-gray-50 rounded-lg dark:bg-gray-700">
+              <div className="p-6 mb-8 rounded-lg bg-gray-50 dark:bg-gray-700">
                 <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
                   시나리오 임포트
                 </h3>
@@ -308,6 +469,38 @@ const AdminPage: React.FC = () => {
             </div>
           )}
 
+          {activeTab === 'teams' && (
+            <div className="p-6">
+              <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+                팀 관리
+              </h2>
+
+              {/* 팀 생성 버튼 */}
+              <div className="mb-6">
+                <Button
+                  onClick={() => setShowCreateTeamModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  새 팀 생성
+                </Button>
+              </div>
+
+              {/* 팀 목록 */}
+              <div className="bg-white rounded-lg shadow dark:bg-gray-800">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    팀 목록
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    팀 목록 기능은 곧 추가될 예정입니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'approval' && (
             <div className="p-6">
               <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
@@ -343,6 +536,67 @@ const AdminPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 팀 생성 모달 */}
+      {showCreateTeamModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+              새 팀 생성
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  팀 이름 *
+                </label>
+                <input
+                  type="text"
+                  value={newTeamName}
+                  onChange={e => setNewTeamName(e.target.value)}
+                  placeholder="팀 이름을 입력하세요"
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  팀 설명
+                </label>
+                <textarea
+                  value={newTeamDescription}
+                  onChange={e => setNewTeamDescription(e.target.value)}
+                  placeholder="팀에 대한 설명을 입력하세요 (선택사항)"
+                  rows={3}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                onClick={() => {
+                  setShowCreateTeamModal(false);
+                  setNewTeamName('');
+                  setNewTeamDescription('');
+                }}
+                className="bg-gray-600 hover:bg-gray-700"
+                disabled={creatingTeam}
+              >
+                취소
+              </Button>
+              <Button
+                onClick={createTeam}
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={creatingTeam || !newTeamName.trim()}
+                isLoading={creatingTeam}
+              >
+                생성
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

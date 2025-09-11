@@ -69,4 +69,11 @@ export class AdminController {
   getTeamStats(@Param('teamId') teamId: string) {
     return this.adminService.getTeamStats(+teamId);
   }
+
+  @Get('team/:teamId/member-stats')
+  @ApiOperation({ summary: '팀원별 상세 통계 조회' })
+  @ApiResponse({ status: 200, description: '팀원별 통계 조회 성공' })
+  getTeamMemberStats(@Param('teamId') teamId: string) {
+    return this.adminService.getTeamMemberStats(+teamId);
+  }
 }

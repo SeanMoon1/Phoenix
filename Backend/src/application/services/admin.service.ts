@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Admin } from '../../domain/entities/admin.entity';
 import { User } from '../../domain/entities/user.entity';
+import { TrainingResultService } from './training-result.service';
+import { TeamStatsResponseDto } from '../../presentation/dto/team-stats-response.dto';
 
 @Injectable()
 export class AdminService {
@@ -11,6 +13,7 @@ export class AdminService {
     private adminRepository: Repository<Admin>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private trainingResultService: TrainingResultService,
   ) {}
 
   async findByLoginId(loginId: string): Promise<Admin> {
@@ -95,5 +98,9 @@ export class AdminService {
       activeMembers,
       totalCompletedScenarios: parseInt(completedScenarios.total) || 0,
     };
+  }
+
+  async getTeamMemberStats(teamId: number): Promise<TeamStatsResponseDto> {
+    return this.trainingResultService.getTeamStats(teamId);
   }
 }

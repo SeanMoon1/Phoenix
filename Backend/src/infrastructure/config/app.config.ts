@@ -8,7 +8,11 @@ export default registerAs('app', () => ({
   cors: {
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',')
-      : ['http://localhost:3001'],
+      : [
+          'http://localhost:3001',
+          'http://43.203.112.213:3000',
+          'http://43.203.112.213',
+        ],
     credentials: true,
   },
   rateLimit: {

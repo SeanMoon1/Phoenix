@@ -8,9 +8,10 @@ Phoenix 재난 대응 훈련 시스템의 RESTful API 문서입니다.
 
 ### 기본 정보
 
+- **Base URL**: `http://43.203.112.213:3000` (프로덕션)
 - **Base URL**: `http://localhost:3000` (개발환경)
 - **API Prefix**: `/api`
-- **Swagger 문서**: `http://localhost:3000/api`
+- **Swagger 문서**: `http://43.203.112.213:3000/api`
 
 ### 인증 (Authentication)
 

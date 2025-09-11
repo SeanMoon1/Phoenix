@@ -7,7 +7,7 @@ import type { ApiResponse } from '../types';
 
 // API 기본 설정
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://www.phoenix-4.com/api';
+  import.meta.env.VITE_API_BASE_URL || 'http://43.203.112.213:3000/api';
 
 // Axios 인스턴스 생성
 export const apiClient: AxiosInstance = axios.create({

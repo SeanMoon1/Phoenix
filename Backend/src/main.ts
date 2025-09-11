@@ -19,7 +19,10 @@ async function bootstrap() {
 
   // CORS 설정 - 환경 변수에서 가져오기
   const corsOrigins = configService
-    .get('CORS_ORIGIN', 'http://localhost:3001')
+    .get(
+      'CORS_ORIGIN',
+      'http://localhost:3001,http://43.203.112.213:3000,http://43.203.112.213,https://www.phoenix-4.com,https://api.phoenix-4.com',
+    )
     .split(',');
   app.enableCors({
     origin: corsOrigins,
@@ -40,7 +43,7 @@ async function bootstrap() {
 
   // 시드 기능은 향후 구현 예정
 
-  const port = configService.get('PORT', 3000);
+  const port = configService.get('http://43.203.112.213:3000', 3000);
   await app.listen(port);
   console.log(`🚀 Phoenix Backend 서버가 포트 ${port}에서 실행 중입니다.`);
   console.log(`📚 API 문서: http://localhost:${port}/api`);

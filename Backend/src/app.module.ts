@@ -45,6 +45,8 @@ import { getDatabaseConfig } from './infrastructure/config/database.config';
 // Shared Layer
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
+import { LocalStrategy } from './shared/strategies/local.strategy';
+import { JwtStrategy } from './shared/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -100,6 +102,8 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
     TeamsService,
     AdminService,
     ScenarioImportService,
+    LocalStrategy,
+    JwtStrategy,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

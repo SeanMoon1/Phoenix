@@ -101,12 +101,12 @@ const Header: React.FC = () => {
 
             {/* 네비게이션 - 데스크톱 */}
             <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 relative">
-              {/* 상황별 행동 메뉴얼 */}
+              {/* 행동메뉴얼 */}
               <Link
                 to="/manual"
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
               >
-                상황별 행동 메뉴얼
+                행동메뉴얼
               </Link>
 
               {/* 훈련하기 */}
@@ -240,14 +240,14 @@ const Header: React.FC = () => {
           {isMobileMenuOpen && (
             <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 py-4">
               <nav className="space-y-2">
-                {/* 상황별 행동 메뉴얼 */}
+                {/* 행동메뉴얼 */}
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <Link
                     to="/manual"
                     className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    상황별 행동 메뉴얼
+                    행동메뉴얼
                   </Link>
                 </div>
 

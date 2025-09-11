@@ -182,7 +182,7 @@ const LoginPage: React.FC = () => {
                       className="w-full flex items-center justify-center px-4 py-3 border border-dashed border-orange-300 dark:border-orange-600 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors duration-200 text-sm font-medium"
                     >
                       <span className="mr-2">🚀</span>
-                      개발용 관리자 대시보드 임시접속
+                      관리자페이지 임시접속
                     </Link>
                   </div>
                 </div>

@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -47,5 +55,28 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '잘못된 OAuth 정보' })
   async oauthRegister(@Body() oauthRegisterDto: OAuthRegisterDto) {
     return this.authService.oauthRegisterAndLogin(oauthRegisterDto);
+  }
+
+  @Get('check-login-id/:loginId')
+  @ApiOperation({ summary: '로그인 ID 중복 확인' })
+  @ApiResponse({
+    status: 200,
+    description: '로그인 ID 중복 확인 결과',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: {
+          type: 'object',
+          properties: {
+            available: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  async checkLoginIdAvailability(@Param('loginId') loginId: string) {
+    return this.authService.checkLoginIdAvailability(loginId);
   }
 }

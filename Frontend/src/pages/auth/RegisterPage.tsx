@@ -105,10 +105,20 @@ const RegisterPage: React.FC = () => {
   }, [loginId]);
 
   const onSubmit = async (data: RegisterFormData) => {
-    if (isLoginIdAvailable !== true) {
+    // 로그인 ID 중복 확인이 완료되었고 사용 불가능한 경우에만 에러 처리
+    if (isLoginIdAvailable === false) {
       setError('loginId', {
         type: 'manual',
-        message: '사용 가능한 로그인 ID를 입력해주세요.',
+        message: '이미 사용 중인 로그인 ID입니다.',
+      });
+      return;
+    }
+
+    // 로그인 ID 중복 확인이 아직 진행 중인 경우
+    if (isValidatingLoginId) {
+      setError('loginId', {
+        type: 'manual',
+        message: '로그인 ID 확인 중입니다. 잠시 후 다시 시도해주세요.',
       });
       return;
     }
@@ -243,7 +253,7 @@ const RegisterPage: React.FC = () => {
                 type="submit"
                 className="w-full"
                 isLoading={isLoading}
-                disabled={isValidatingLoginId || isLoginIdAvailable !== true}
+                disabled={isValidatingLoginId || isLoginIdAvailable === false}
               >
                 회원가입
               </Button>

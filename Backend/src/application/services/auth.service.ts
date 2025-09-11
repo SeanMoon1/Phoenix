@@ -142,6 +142,32 @@ export class AuthService {
   }
 
   /**
+   * 로그인 ID 중복 확인
+   * @param loginId 확인할 로그인 ID
+   * @returns 중복 확인 결과
+   */
+  async checkLoginIdAvailability(loginId: string) {
+    try {
+      const existingUser = await this.usersService.findByLoginId(loginId);
+
+      return {
+        success: true,
+        data: {
+          available: !existingUser,
+          message: existingUser
+            ? '이미 사용 중인 로그인 ID입니다.'
+            : '사용 가능한 로그인 ID입니다.',
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: '로그인 ID 확인 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
    * 고유한 로그인 ID 생성
    * @param email 이메일 주소
    * @returns 고유한 로그인 ID

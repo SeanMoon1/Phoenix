@@ -8,9 +8,6 @@ import { runSeeds } from './database/seeds';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global prefix 설정
-  app.setGlobalPrefix('api');
-
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({

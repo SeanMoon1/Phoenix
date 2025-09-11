@@ -148,3 +148,33 @@ export const trainingApi = {
   // 팀별 통계 조회 (관리자용)
   getTeamStats: (teamId: number) => api.get(`/training/stats/team/${teamId}`),
 };
+
+// 시나리오 관련 API
+export const scenarioApi = {
+  // 모든 시나리오 조회
+  getAllScenarios: () => api.get('/scenarios'),
+
+  // 특정 시나리오 조회
+  getScenarioById: (id: number) => api.get(`/scenarios/${id}`),
+
+  // 재난 유형별 시나리오 조회
+  getScenariosByType: (disasterType: string) =>
+    api.get(`/scenarios?disasterType=${disasterType}`),
+
+  // JSON 데이터로 시나리오 임포트
+  importFromJson: (jsonData: any[]) =>
+    api.post('/scenarios/import/json', jsonData),
+
+  // JSON 파일로 시나리오 임포트
+  importFromFile: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/scenarios/import/file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  // JSON 데이터와 DB 동기화
+  syncFromJson: (jsonData: any[]) =>
+    api.post('/scenarios/import/sync', jsonData),
+};

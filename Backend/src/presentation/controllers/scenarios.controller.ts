@@ -7,17 +7,20 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ScenariosService } from '../../application/services/scenarios.service';
 import { CreateScenarioDto } from '../dto/create-scenario.dto';
 import { UpdateScenarioDto } from '../dto/update-scenario.dto';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { Public } from '../../shared/decorators/public.decorator';
 
 @ApiTags('Scenarios')
 @Controller('scenarios')
@@ -34,9 +37,18 @@ export class ScenariosController {
   }
 
   @Get()
+  @Public() // 시나리오 조회는 인증 없이 가능
   @ApiOperation({ summary: '모든 시나리오 조회' })
   @ApiResponse({ status: 200, description: '시나리오 목록 조회 성공' })
-  findAll() {
+  @ApiQuery({
+    name: 'disasterType',
+    required: false,
+    description: '재난 유형으로 필터링',
+  })
+  findAll(@Query('disasterType') disasterType?: string) {
+    if (disasterType) {
+      return this.scenariosService.findByDisasterType(disasterType);
+    }
     return this.scenariosService.findAll();
   }
 

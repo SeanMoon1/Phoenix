@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui';
-import { trainingApi } from '../../services/api';
+import { trainingApi, scenarioApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 
 // game-script-tool 컴포넌트들을 import (향후 통합 예정)
@@ -21,6 +21,7 @@ const AdminPage: React.FC = () => {
   >('training');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const { user } = useAuthStore();
 
   const tabs = [
@@ -50,6 +51,53 @@ const AdminPage: React.FC = () => {
       console.error('팀 통계 로드 실패:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileImport = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    try {
+      const response = await scenarioApi.importFromFile(file);
+      if (response.success) {
+        alert('시나리오가 성공적으로 임포트되었습니다.');
+        // 시나리오 목록 새로고침
+        window.location.reload();
+      } else {
+        alert('시나리오 임포트에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('시나리오 임포트 실패:', error);
+      alert('시나리오 임포트 중 오류가 발생했습니다.');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleJsonImport = async () => {
+    // 기존 JSON 파일들을 로드하여 임포트
+    setImporting(true);
+    try {
+      const fireResponse = await fetch(
+        '/scripts/data/fire_training_scenario.json'
+      );
+      const fireData = await fireResponse.json();
+
+      const response = await scenarioApi.syncFromJson(fireData);
+      if (response.success) {
+        alert('화재 시나리오가 성공적으로 동기화되었습니다.');
+      } else {
+        alert('시나리오 동기화에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('시나리오 동기화 실패:', error);
+      alert('시나리오 동기화 중 오류가 발생했습니다.');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -200,16 +248,53 @@ const AdminPage: React.FC = () => {
 
           {activeTab === 'scripts' && (
             <div className="p-6">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+              <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
                 시나리오 관리
               </h2>
-              <div className="py-12 text-center">
-                <div className="mb-4 text-6xl">🚧</div>
+
+              {/* 시나리오 임포트 섹션 */}
+              <div className="mb-8 p-6 bg-gray-50 rounded-lg dark:bg-gray-700">
+                <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                  시나리오 임포트
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileImport}
+                      className="hidden"
+                      id="file-import"
+                    />
+                    <label
+                      htmlFor="file-import"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      {importing ? '임포트 중...' : 'JSON 파일 업로드'}
+                    </label>
+                  </div>
+                  <Button
+                    onClick={handleJsonImport}
+                    disabled={importing}
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {importing ? '동기화 중...' : '기존 JSON 동기화'}
+                  </Button>
+                </div>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  game-script-tool에서 생성한 JSON 파일을 업로드하거나, 기존
+                  JSON 파일을 DB와 동기화할 수 있습니다.
+                </p>
+              </div>
+
+              {/* 시나리오 도구 링크 */}
+              <div className="py-8 text-center">
+                <div className="mb-4 text-6xl">🛠️</div>
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                  시나리오 관리 도구
+                  시나리오 작성 도구
                 </h3>
                 <p className="mb-6 text-gray-600 dark:text-gray-400">
-                  game-script-tool이 여기에 통합될 예정입니다.
+                  game-script-tool을 사용하여 새로운 시나리오를 작성하세요.
                 </p>
                 <Button
                   onClick={() =>
@@ -217,7 +302,7 @@ const AdminPage: React.FC = () => {
                   }
                   className="bg-primary-600 hover:bg-primary-700"
                 >
-                  별도 창에서 열기
+                  시나리오 도구 열기
                 </Button>
               </div>
             </div>

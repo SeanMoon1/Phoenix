@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
 // Clean Architecture 구조에 맞는 새로운 app.module.ts
 import { AppController } from './app.controller';
@@ -14,18 +16,24 @@ import { ScenariosController } from './presentation/controllers/scenarios.contro
 import { TrainingController } from './presentation/controllers/training.controller';
 import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
+import { ScenarioImportController } from './presentation/controllers/scenario-import.controller';
 
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
 import { UsersService } from './application/services/users.service';
 import { ScenariosService } from './application/services/scenarios.service';
 import { TrainingService } from './application/services/training.service';
+import { TeamsService } from './application/services/teams.service';
+import { AdminService } from './application/services/admin.service';
+import { ScenarioImportService } from './application/services/scenario-import.service';
 
 // Domain Layer - Entities
 import { User } from './domain/entities/user.entity';
 import { Scenario } from './domain/entities/scenario.entity';
 import { TrainingSession } from './domain/entities/training-session.entity';
 import { Team } from './domain/entities/team.entity';
+import { TrainingParticipant } from './infrastructure/database/entities/training-participant.entity';
+import { Admin } from './domain/entities/admin.entity';
 
 // Infrastructure Layer - Database
 import { getDatabaseConfig } from './infrastructure/config/database.config';
@@ -46,7 +54,24 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
       inject: [ConfigService],
     }),
     // Domain entities registration
-    TypeOrmModule.forFeature([User, Scenario, TrainingSession, Team]),
+    TypeOrmModule.forFeature([
+      User,
+      Scenario,
+      TrainingSession,
+      Team,
+      TrainingParticipant,
+      Admin,
+    ]),
+    // JWT and Passport modules
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') || 'your-secret-key',
+        signOptions: { expiresIn: '24h' },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [
     AppController,
@@ -56,6 +81,7 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
     TrainingController,
     TeamsController,
     AdminController,
+    ScenarioImportController,
   ],
   providers: [
     AppService,
@@ -63,6 +89,9 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
     UsersService,
     ScenariosService,
     TrainingService,
+    TeamsService,
+    AdminService,
+    ScenarioImportService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

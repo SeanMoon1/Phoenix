@@ -2,8 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { DataSource } from 'typeorm';
-import { runSeeds } from './database/seeds';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,15 +31,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // 개발 환경에서만 시드 실행
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const dataSource = app.get(DataSource);
-      await runSeeds(dataSource);
-    } catch (error) {
-      console.warn('⚠️ 시드 실행 중 오류 (무시 가능):', error.message);
-    }
-  }
+  // 시드 기능은 향후 구현 예정
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

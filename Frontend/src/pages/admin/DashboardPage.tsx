@@ -25,7 +25,7 @@ import { getNextAvailableSceneId } from '../../../scripts/game-script-tool/src/U
 const DashboardPage: React.FC = () => {
   const { setBlockList } = useBlockListSelector();
   const { appState, closeSceneForm } = useAppStateStore();
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>('scenarios');
 
   // 폼 데이터 상태 관리
   const [formData, setFormData] = useState({
@@ -318,16 +318,6 @@ const DashboardPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'overview'
-                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
-            >
-              📊 개요
-            </button>
-            <button
               onClick={() => setActiveTab('scenarios')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'scenarios'
@@ -336,6 +326,26 @@ const DashboardPage: React.FC = () => {
               }`}
             >
               📚 시나리오 관리
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'users'
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              👥 이용자 관리
+            </button>
+            <button
+              onClick={() => setActiveTab('statistics')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'statistics'
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              📊 통계
             </button>
             <button
               onClick={() => setActiveTab('tools')}
@@ -353,7 +363,7 @@ const DashboardPage: React.FC = () => {
 
       {/* 메인 콘텐츠 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && (
+        {activeTab === 'statistics' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
@@ -721,6 +731,69 @@ const DashboardPage: React.FC = () => {
             ) : (
               <ScriptView />
             )}
+          </div>
+        )}
+
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">
+                  이용자 관리
+                </h3>
+                <div className="text-center py-12">
+                  <div className="mx-auto h-12 w-12 text-gray-400">
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      className="w-full h-full"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                    이용자 관리
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    이용자 관리 기능이 준비 중입니다.
+                  </p>
+                  <div className="mt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          0
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          총 이용자
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          0
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          활성 이용자
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          0
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          신규 가입자
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

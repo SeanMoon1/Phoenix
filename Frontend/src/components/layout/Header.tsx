@@ -11,15 +11,6 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // 각 드롭다운 상태 관리
-  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
-
-  // 모바일 서브메뉴 상태 관리
-  const [mobileAdminOpen, setMobileAdminOpen] = useState(false);
-
-  // 각 드롭다운 ref
-  const adminDropdownRef = useRef<HTMLDivElement>(null);
-
   // 관리자 페이지 여부 확인
   const isAdminPage = location.pathname.startsWith('/admin');
 
@@ -66,25 +57,6 @@ const Header: React.FC = () => {
     };
   }, [isMobileMenuOpen]);
 
-  // 외부 클릭 감지하여 드롭다운 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const refs = [adminDropdownRef];
-      const isOutside = refs.every(
-        ref => !ref.current || !ref.current.contains(event.target as Node)
-      );
-
-      if (isOutside) {
-        setIsAdminDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
@@ -105,19 +77,7 @@ const Header: React.FC = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-    // 모바일 메뉴가 닫힐 때 모든 서브메뉴도 닫기
-    if (isMobileMenuOpen) {
-      setMobileAdminOpen(false);
-    }
   };
-
-  // 드롭다운 토글 함수들
-  const toggleAdminDropdown = () => {
-    setIsAdminDropdownOpen(!isAdminDropdownOpen);
-  };
-
-  // 모바일 서브메뉴 토글 함수들
-  const toggleMobileAdmin = () => setMobileAdminOpen(!mobileAdminOpen);
 
   return (
     <>
@@ -173,60 +133,14 @@ const Header: React.FC = () => {
                 고객지원
               </Link>
 
-              {/* 관리자 드롭다운 - 관리자 페이지에서만 표시 */}
+              {/* 관리자 페이지 링크 - 관리자 페이지에서만 표시 */}
               {isAdminPage && (
-                <div className="relative" ref={adminDropdownRef}>
-                  <button
-                    onClick={toggleAdminDropdown}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center space-x-1 ${
-                      isAdminDropdownOpen
-                        ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                    }`}
-                  >
-                    <span>관리자페이지</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        isAdminDropdownOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* 관리자 드롭다운 메뉴 */}
-                  {isAdminDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
-                      <Link
-                        to="/admin"
-                        className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 first:rounded-t-lg"
-                        onClick={() => setIsAdminDropdownOpen(false)}
-                      >
-                        통계
-                      </Link>
-                      <Link
-                        to="/admin/scenarios"
-                        className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                        onClick={() => setIsAdminDropdownOpen(false)}
-                      >
-                        훈련 시나리오 관리
-                      </Link>
-                      <Link
-                        to="/admin/users"
-                        className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 last:rounded-b-lg"
-                        onClick={() => setIsAdminDropdownOpen(false)}
-                      >
-                        이용자 관리
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                <Link
+                  to="/admin"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                >
+                  관리자페이지
+                </Link>
               )}
             </nav>
 
@@ -372,54 +286,13 @@ const Header: React.FC = () => {
 
                 {/* 관리자 섹션 - 관리자 페이지에서만 표시 */}
                 {isAdminPage && (
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                    <button
-                      onClick={toggleMobileAdmin}
-                      className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
-                    >
-                      <span>관리자페이지</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          mobileAdminOpen ? 'rotate-180' : ''
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-
-                    {/* 관리자 서브메뉴 */}
-                    {mobileAdminOpen && (
-                      <div className="ml-4 mt-2 space-y-1">
-                        <Link
-                          to="/admin"
-                          className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          통계
-                        </Link>
-                        <Link
-                          to="/admin/scenarios"
-                          className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          훈련 시나리오 관리
-                        </Link>
-                        <Link
-                          to="/admin/users"
-                          className="block px-4 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          이용자 관리
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    관리자페이지
+                  </Link>
                 )}
               </nav>
             </div>

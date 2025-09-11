@@ -42,12 +42,12 @@ const Header: React.FC = () => {
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
       const shouldBeFixed = scrollTop > 10;
-      console.log(
-        'Scroll position:',
-        scrollTop,
-        'Should be fixed:',
-        shouldBeFixed
-      );
+      // console.log(
+      //   'Scroll position:',
+      //   scrollTop,
+      //   'Should be fixed:',
+      //   shouldBeFixed
+      // );
       setIsScrolled(shouldBeFixed);
 
       // 모바일 메뉴가 열린 상태에서 스크롤 시 메뉴 닫기

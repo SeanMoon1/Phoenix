@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 
 // Presentation Layer - Controllers
 import { AuthController } from './presentation/controllers/auth.controller';
+import { OAuthController } from './presentation/controllers/oauth.controller';
 import { UsersController } from './presentation/controllers/users.controller';
 import { ScenariosController } from './presentation/controllers/scenarios.controller';
 import { TrainingController } from './presentation/controllers/training.controller';
@@ -41,18 +42,21 @@ import { Admin } from './domain/entities/admin.entity';
 
 // Infrastructure Layer - Database
 import { getDatabaseConfig } from './infrastructure/config/database.config';
+import oauthConfig from './infrastructure/config/oauth.config';
 
 // Shared Layer
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 import { LocalStrategy } from './shared/strategies/local.strategy';
 import { JwtStrategy } from './shared/strategies/jwt.strategy';
+import { GoogleStrategy } from './shared/strategies/google.strategy';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [oauthConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -84,6 +88,7 @@ import { JwtStrategy } from './shared/strategies/jwt.strategy';
   controllers: [
     AppController,
     AuthController,
+    OAuthController,
     UsersController,
     ScenariosController,
     TrainingController,
@@ -104,6 +109,7 @@ import { JwtStrategy } from './shared/strategies/jwt.strategy';
     ScenarioImportService,
     LocalStrategy,
     JwtStrategy,
+    GoogleStrategy,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

@@ -13,4 +13,17 @@ export const getDatabaseConfig = (
   entities: [__dirname + '/../database/entities/*.entity{.ts,.js}'],
   synchronize: configService.get('NODE_ENV') === 'development',
   logging: configService.get('NODE_ENV') === 'development',
+  // 연결 풀 설정
+  extra: {
+    connectionLimit: 10,
+    acquireTimeout: 60000,
+    timeout: 60000,
+  },
+  // SSL 설정 (AWS RDS 사용 시)
+  ssl:
+    configService.get('NODE_ENV') === 'production'
+      ? {
+          rejectUnauthorized: false,
+        }
+      : false,
 });

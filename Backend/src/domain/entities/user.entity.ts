@@ -39,6 +39,19 @@ export class User {
   @Column({ name: 'email', length: 200 })
   email: string;
 
+  // OAuth 관련 필드들
+  @ApiProperty({ description: 'OAuth 제공자', required: false })
+  @Column({ name: 'oauth_provider', length: 50, nullable: true })
+  oauthProvider?: string;
+
+  @ApiProperty({ description: 'OAuth 제공자 사용자 ID', required: false })
+  @Column({ name: 'oauth_provider_id', length: 100, nullable: true })
+  oauthProviderId?: string;
+
+  @ApiProperty({ description: '프로필 이미지 URL', required: false })
+  @Column({ name: 'profile_image_url', length: 500, nullable: true })
+  profileImageUrl?: string;
+
   @ApiProperty({ description: '사용 여부' })
   @Column({ name: 'use_yn', length: 1, default: 'Y' })
   useYn: string;

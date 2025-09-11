@@ -27,6 +27,9 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // OAuth 관련 필드들
+  oauthProvider?: string;
+  profileImageUrl?: string;
 }
 
 // 인증 관련 타입

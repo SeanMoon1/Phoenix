@@ -150,6 +150,44 @@ export const authApi = {
       message?: string;
     }>(`/auth/check-login-id/${loginId}`);
   },
+
+  /**
+   * OAuth 회원가입 및 로그인
+   * @param oauthData OAuth 제공자로부터 받은 사용자 정보
+   * @returns JWT 토큰과 사용자 정보
+   */
+  oauthRegister: async (oauthData: {
+    email: string;
+    name: string;
+    provider: string;
+    providerId: string;
+    profileImage?: string;
+  }) => {
+    return api.post<{
+      access_token: string;
+      user: {
+        id: number;
+        teamId?: number;
+        userCode?: string;
+        loginId: string;
+        email: string;
+        name: string;
+        useYn: string;
+        userLevel: number;
+        userExp: number;
+        totalScore: number;
+        completedScenarios: number;
+        currentTier: string;
+        levelProgress: number;
+        nextLevelExp: number;
+        isActive: boolean;
+        oauthProvider?: string;
+        profileImageUrl?: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>('/auth/oauth/register', oauthData);
+  },
 };
 
 // 훈련 관련 API

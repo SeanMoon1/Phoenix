@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, AuthState, LoginCredentials } from '../types';
-import { api } from '../services/api';
+import { api, authApi } from '../services/api';
 
 interface RegisterCredentials {
   loginId: string;
@@ -10,9 +10,18 @@ interface RegisterCredentials {
   password: string;
 }
 
+interface OAuthCredentials {
+  email: string;
+  name: string;
+  provider: string;
+  providerId: string;
+  profileImage?: string;
+}
+
 interface AuthStore extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
+  oauthLogin: (credentials: OAuthCredentials) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
@@ -114,6 +123,50 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: false });
           throw new Error(
             (error as Error).message || '회원가입에 실패했습니다.'
+          );
+        }
+      },
+
+      oauthLogin: async (credentials: OAuthCredentials) => {
+        set({ isLoading: true });
+        try {
+          // OAuth 회원가입 및 로그인 API 호출
+          const response = await authApi.oauthRegister(credentials);
+
+          if (response.success && response.data) {
+            const user: User = {
+              id: response.data.user.id,
+              teamId: response.data.user.teamId || 0,
+              userCode: response.data.user.userCode || '',
+              loginId: response.data.user.loginId,
+              email: response.data.user.email,
+              name: response.data.user.name,
+              useYn: response.data.user.useYn,
+              userLevel: response.data.user.userLevel,
+              userExp: response.data.user.userExp,
+              totalScore: response.data.user.totalScore,
+              completedScenarios: response.data.user.completedScenarios,
+              currentTier: response.data.user.currentTier,
+              levelProgress: response.data.user.levelProgress,
+              nextLevelExp: response.data.user.nextLevelExp,
+              isActive: response.data.user.isActive,
+              createdAt: response.data.user.createdAt,
+              updatedAt: response.data.user.updatedAt,
+            };
+
+            set({
+              user,
+              token: response.data.access_token,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            throw new Error(response.error || 'OAuth 로그인에 실패했습니다.');
+          }
+        } catch (error: unknown) {
+          set({ isLoading: false });
+          throw new Error(
+            (error as Error).message || 'OAuth 로그인에 실패했습니다.'
           );
         }
       },

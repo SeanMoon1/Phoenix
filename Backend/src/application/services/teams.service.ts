@@ -86,7 +86,7 @@ export class TeamsService {
         valid: true,
         team: {
           id: team.id,
-          name: team.name,
+          teamName: team.teamName,
           description: team.description,
           teamCode: team.teamCode,
         },

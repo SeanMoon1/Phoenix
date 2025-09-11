@@ -78,4 +78,37 @@ export class UsersService {
     const user = await this.findOne(id);
     await this.usersRepository.remove(user);
   }
+
+  /**
+   * OAuth 제공자로 사용자 조회
+   * @param provider OAuth 제공자 (google, kakao, naver 등)
+   * @param providerId OAuth 제공자의 사용자 ID
+   * @returns 사용자 정보
+   */
+  async findByOAuthProvider(
+    provider: string,
+    providerId: string,
+  ): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: {
+        oauthProvider: provider,
+        oauthProviderId: providerId,
+        isActive: true,
+      },
+    });
+  }
+
+  /**
+   * 로그인 ID로 사용자 조회
+   * @param loginId 로그인 ID
+   * @returns 사용자 정보
+   */
+  async findByLoginId(loginId: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: {
+        loginId,
+        isActive: true,
+      },
+    });
+  }
 }

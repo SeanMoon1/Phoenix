@@ -10,15 +10,19 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 1, description: '팀 ID' })
+  @ApiProperty({ example: 1, description: '팀 ID', required: false })
   @IsNumber()
-  @IsNotEmpty()
-  teamId: number;
+  @IsOptional()
+  teamId?: number;
 
-  @ApiProperty({ example: 'USER001', description: '사용자 코드' })
+  @ApiProperty({
+    example: 'USER001',
+    description: '사용자 코드',
+    required: false,
+  })
   @IsString()
-  @IsNotEmpty()
-  userCode: string;
+  @IsOptional()
+  userCode?: string;
 
   @ApiProperty({ example: 'user001', description: '로그인 ID' })
   @IsString()
@@ -35,11 +39,43 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ example: 'password123', description: '비밀번호' })
+  // OAuth 관련 필드들
+  @ApiProperty({
+    example: 'google',
+    description: 'OAuth 제공자',
+    required: false,
+  })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  oauthProvider?: string;
+
+  @ApiProperty({
+    example: '1234567890',
+    description: 'OAuth 제공자 사용자 ID',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  oauthProviderId?: string;
+
+  @ApiProperty({
+    example: 'https://example.com/avatar.jpg',
+    description: '프로필 이미지 URL',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  profileImageUrl?: string;
+
+  @ApiProperty({
+    example: 'password123',
+    description: '비밀번호',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
   @MinLength(6)
-  password: string;
+  password?: string;
 
   @ApiProperty({
     example: 'Y',

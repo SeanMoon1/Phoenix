@@ -10,7 +10,10 @@ export const getDatabaseConfig = (
   username: configService.get('DB_USERNAME', 'root'),
   password: configService.get('DB_PASSWORD', ''),
   database: configService.get('DB_DATABASE', 'phoenix'),
-  entities: [__dirname + '/../database/entities/*.entity{.ts,.js}'],
+  entities: [
+    __dirname + '/../../domain/entities/*.entity{.ts,.js}',
+    __dirname + '/../database/entities/*.entity{.ts,.js}',
+  ],
   synchronize: configService.get('NODE_ENV') === 'development',
   logging: configService.get('NODE_ENV') === 'development',
   // 연결 풀 설정

@@ -40,6 +40,14 @@ export class Scenario {
   @Column({ name: 'risk_level', length: 20 })
   riskLevel: string;
 
+  @ApiProperty({ description: '난이도' })
+  @Column({ name: 'difficulty', length: 20, default: 'easy' })
+  difficulty: string;
+
+  @ApiProperty({ description: '승인 상태' })
+  @Column({ name: 'approval_status', length: 20, default: 'DRAFT' })
+  approvalStatus: string;
+
   @ApiProperty({ description: '발생 조건', required: false })
   @Column({ name: 'occurrence_condition', type: 'text', nullable: true })
   occurrenceCondition?: string;

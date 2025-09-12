@@ -18,7 +18,17 @@ export class ScenariosService {
   }
 
   async findAll(): Promise<Scenario[]> {
-    return this.scenariosRepository.find();
+    return this.scenariosRepository.find({
+      where: { isActive: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findByDisasterType(disasterType: string): Promise<Scenario[]> {
+    return this.scenariosRepository.find({
+      where: { disasterType, isActive: true },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findOne(id: number): Promise<Scenario> {

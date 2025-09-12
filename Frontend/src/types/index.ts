@@ -9,8 +9,8 @@ export interface ApiResponse<T = unknown> {
 // 사용자 타입
 export interface User {
   id: number;
-  teamId: number;
-  userCode: string;
+  teamId?: number;
+  userCode?: string;
   loginId: string;
   name: string;
   email: string;
@@ -22,12 +22,14 @@ export interface User {
   currentTier: string;
   levelProgress: number;
   nextLevelExp: number;
-  role?: string; //추후 검토 필요
   updatedBy?: number;
   deletedAt?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // OAuth 관련 필드들
+  oauthProvider?: string;
+  profileImageUrl?: string;
 }
 
 // 인증 관련 타입
@@ -100,6 +102,22 @@ export interface TrainingSession {
   createdAt: string;
   updatedAt: string;
 }
+
+// 훈련 세션 참가자 타입
+export interface TrainingParticipant {
+  id: number;
+  participantCode: string;
+  sessionId: number;
+  userId: number;
+  joinedAt: string;
+  status: string;
+}
+
+// 훈련 세션 생성 응답 타입
+export type CreateSessionResponse = ApiResponse<TrainingSession>;
+
+// 훈련 세션 참가 응답 타입
+export type JoinSessionResponse = ApiResponse<TrainingParticipant>;
 
 // 대시보드 통계 타입
 export interface DashboardStats {

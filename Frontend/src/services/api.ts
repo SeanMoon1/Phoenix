@@ -3,11 +3,14 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import type { ApiResponse } from '../types';
+import type {
+  ApiResponse,
+  CreateSessionResponse,
+  JoinSessionResponse,
+} from '../types';
 
 // API 기본 설정
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Axios 인스턴스 생성
 export const apiClient: AxiosInstance = axios.create({
@@ -105,6 +108,36 @@ export const teamApi = {
       message?: string;
     }>(`/teams/validate-code/${teamCode}`);
   },
+
+  /**
+   * 팀 가입
+   * @param teamCode 팀 코드
+   * @param userId 사용자 ID
+   * @returns 팀 가입 결과
+   */
+  joinTeam: async (teamCode: string, userId: number) => {
+    return api.post<{
+      success: boolean;
+      message?: string;
+    }>(`/teams/join`, { teamCode, userId });
+  },
+
+  /**
+   * 팀 생성
+   * @param teamData 팀 생성 데이터
+   * @returns 팀 생성 결과
+   */
+  createTeam: async (teamData: { teamName: string; description?: string }) => {
+    return api.post<{
+      success: boolean;
+      data?: {
+        teamId: number;
+        teamCode: string;
+        teamName: string;
+      };
+      message?: string;
+    }>(`/teams`, teamData);
+  },
 };
 
 // 인증 관련 API 함수들
@@ -120,6 +153,44 @@ export const authApi = {
       message?: string;
     }>(`/auth/check-login-id/${loginId}`);
   },
+
+  /**
+   * OAuth 회원가입 및 로그인
+   * @param oauthData OAuth 제공자로부터 받은 사용자 정보
+   * @returns JWT 토큰과 사용자 정보
+   */
+  oauthRegister: async (oauthData: {
+    email: string;
+    name: string;
+    provider: string;
+    providerId: string;
+    profileImage?: string;
+  }) => {
+    return api.post<{
+      access_token: string;
+      user: {
+        id: number;
+        teamId?: number;
+        userCode?: string;
+        loginId: string;
+        email: string;
+        name: string;
+        useYn: string;
+        userLevel: number;
+        userExp: number;
+        totalScore: number;
+        completedScenarios: number;
+        currentTier: string;
+        levelProgress: number;
+        nextLevelExp: number;
+        isActive: boolean;
+        oauthProvider?: string;
+        profileImageUrl?: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>('/auth/oauth/register', oauthData);
+  },
 };
 
 // 훈련 관련 API
@@ -132,14 +203,14 @@ export const trainingApi = {
     startTime: string;
     endTime?: string;
     createdBy: number;
-  }) => api.post('/training', data),
+  }) => api.post<CreateSessionResponse>('/training', data),
 
   // 팀별 훈련 세션 조회
   getSessionsByTeam: (teamId: number) => api.get(`/training?teamId=${teamId}`),
 
   // 세션 참가
   joinSession: (sessionCode: string, userId: number) =>
-    api.post(`/training/join/${sessionCode}`, { userId }),
+    api.post<JoinSessionResponse>(`/training/join/${sessionCode}`, { userId }),
 
   // 세션 참가자 목록 조회
   getSessionParticipants: (sessionId: number) =>
@@ -147,4 +218,77 @@ export const trainingApi = {
 
   // 팀별 통계 조회 (관리자용)
   getTeamStats: (teamId: number) => api.get(`/training/stats/team/${teamId}`),
+};
+
+// 훈련 결과 관련 API
+export const trainingResultApi = {
+  // 훈련 결과 저장
+  saveResult: (data: {
+    participantId: number;
+    sessionId: number;
+    scenarioId: number;
+    userId: number;
+    resultCode: string;
+    accuracyScore: number;
+    speedScore: number;
+    totalScore: number;
+    completionTime?: number;
+    feedback?: string;
+    completedAt: string;
+  }) => api.post('/training-result', data),
+
+  // 사용자 개인 통계 조회
+  getUserStats: (userId: number) =>
+    api.get(`/training-result/user/${userId}/stats`),
+
+  // 사용자 훈련 기록 조회
+  getUserHistory: (userId: number, limit?: number, offset?: number) =>
+    api.get(
+      `/training-result/user/${userId}/history?limit=${limit || 20}&offset=${
+        offset || 0
+      }`
+    ),
+
+  // 내 통계 조회 (현재 로그인한 사용자)
+  getMyStats: () => api.get('/training-result/my/stats'),
+
+  // 내 훈련 기록 조회 (현재 로그인한 사용자)
+  getMyHistory: (limit?: number, offset?: number) =>
+    api.get(
+      `/training-result/my/history?limit=${limit || 20}&offset=${offset || 0}`
+    ),
+
+  // 팀원별 상세 통계 조회 (관리자용)
+  getTeamMemberStats: (teamId: number) =>
+    api.get(`/admin/team/${teamId}/member-stats`),
+};
+
+// 시나리오 관련 API
+export const scenarioApi = {
+  // 모든 시나리오 조회
+  getAllScenarios: () => api.get('/scenarios'),
+
+  // 특정 시나리오 조회
+  getScenarioById: (id: number) => api.get(`/scenarios/${id}`),
+
+  // 재난 유형별 시나리오 조회
+  getScenariosByType: (disasterType: string) =>
+    api.get(`/scenarios?disasterType=${disasterType}`),
+
+  // JSON 데이터로 시나리오 임포트
+  importFromJson: (jsonData: any[]) =>
+    api.post('/scenarios/import/json', jsonData),
+
+  // JSON 파일로 시나리오 임포트
+  importFromFile: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/scenarios/import/file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  // JSON 데이터와 DB 동기화
+  syncFromJson: (jsonData: any[]) =>
+    api.post('/scenarios/import/sync', jsonData),
 };

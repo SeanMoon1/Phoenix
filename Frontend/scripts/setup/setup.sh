@@ -65,8 +65,8 @@ echo -e "${GREEN}✅ MySQL 설치 확인 완료${NC}"
 # 데이터베이스 생성
 echo -e "${YELLOW}🗄️ 데이터베이스 설정...${NC}"
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS phoenix;" || handle_error "데이터베이스 생성 실패"
-mysql -u root -p -e "CREATE USER IF NOT EXISTS 'phoenix_dev'@'localhost' IDENTIFIED BY 'phoenix_dev_2024';" || handle_error "개발용 사용자 생성 실패"
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON phoenix.* TO 'phoenix_dev'@'localhost';" || handle_error "권한 부여 실패"
+mysql -u root -p -e "CREATE USER IF NOT EXISTS 'phoenix_dev'@'%' IDENTIFIED BY 'phoenix_dev_2024';" || handle_error "개발용 사용자 생성 실패"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON phoenix.* TO 'phoenix_dev'@'%';" || handle_error "권한 부여 실패"
 mysql -u root -p -e "FLUSH PRIVILEGES;" || handle_error "권한 새로고침 실패"
 
 echo -e "${GREEN}✅ 데이터베이스 설정 완료${NC}"
@@ -78,7 +78,7 @@ cd ../Backend || handle_error "Backend 디렉토리를 찾을 수 없습니다"
 # 환경 변수 파일 생성
 cat > .env << EOF
 # Database Configuration
-DB_HOST=localhost
+DB_HOST=43.203.112.213
 DB_PORT=3306
 DB_USERNAME=phoenix_dev
 DB_PASSWORD=phoenix_dev_2024
@@ -139,9 +139,9 @@ cd ../Frontend
 npm run dev &
 
 echo "✅ 개발 서버가 시작되었습니다!"
-echo "🌐 Frontend: http://localhost:3001"
-echo "🔧 Backend API: http://localhost:3000"
-echo "📚 API 문서: http://localhost:3000/api"
+echo "🌐 Frontend: https://www.phoenix-4.com"
+echo "🔧 Backend API: http://43.203.112.213:3000"
+echo "📚 API 문서: http://43.203.112.213:3000/api"
 
 # 프로세스 종료를 위한 대기
 echo "종료하려면 Ctrl+C를 누르세요..."
@@ -168,9 +168,9 @@ echo 📦 Frontend 서버 시작 (포트 3001)...
 start "Phoenix Frontend" cmd /k "cd ..\..\Frontend && npm run dev"
 
 echo ✅ 개발 서버가 시작되었습니다!
-echo 🌐 Frontend: http://localhost:3001
-echo 🔧 Backend API: http://localhost:3000
-echo 📚 API 문서: http://localhost:3000/api
+echo 🌐 Frontend: https://www.phoenix-4.com
+echo 🔧 Backend API: http://43.203.112.213:3000
+echo 📚 API 문서: http://43.203.112.213:3000/api
 
 pause
 EOF
@@ -181,8 +181,8 @@ echo -e "${GREEN}✅ 개발 서버 시작 스크립트 생성 완료${NC}"
 echo -e "${GREEN}🎉 Phoenix 개발 환경 설정 완료!${NC}"
 echo -e "${BLUE}📋 다음 단계:${NC}"
 echo "1. 개발 서버 시작: ./Scripts/setup/start-dev.sh (Linux/Mac) 또는 start-dev.bat (Windows)"
-echo "2. 브라우저에서 http://localhost:3001 접속"
-echo "3. API 문서 확인: http://localhost:3000/api"
+echo "2. 브라우저에서 https://www.phoenix-4.com 접속"
+echo "3. API 문서 확인: http://43.203.112.213:3000/api"
 echo -e "${YELLOW}💡 유용한 명령어:${NC}"
 echo "- Backend만 실행: cd Backend && npm run start:dev"
 echo "- Frontend만 실행: cd Frontend && npm run dev"

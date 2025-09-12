@@ -1,13 +1,17 @@
-import ScenarioPage from './ScenarioPage';
-import { fetchTrafficScenario } from '@/services/scenarioService';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function TrafficAccidentScenarioPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // traffic 타입으로 ScenarioPage로 리다이렉트
+    navigate('/training/scenario/traffic', { replace: true });
+  }, [navigate]);
+
   return (
-    <ScenarioPage
-      scenarioSetName="교통사고 대응 훈련"
-      fetchScenarios={fetchTrafficScenario}
-      nextScenarioPath="/training"
-      persistKey="phoenix_traffic_training"
-    />
+    <div className="min-h-screen flex items-center justify-center">
+      <p>교통사고 대응 훈련으로 이동 중...</p>
+    </div>
   );
 }

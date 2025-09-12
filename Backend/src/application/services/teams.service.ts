@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Team } from '../../domain/entities/team.entity';
+import { User } from '../../domain/entities/user.entity';
 import { CreateTeamDto } from '../../presentation/dto/create-team.dto';
 import { UpdateTeamDto } from '../../presentation/dto/update-team.dto';
 
@@ -10,6 +15,8 @@ export class TeamsService {
   constructor(
     @InjectRepository(Team)
     private teamsRepository: Repository<Team>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
   async create(createTeamDto: CreateTeamDto): Promise<Team> {
@@ -79,7 +86,7 @@ export class TeamsService {
         valid: true,
         team: {
           id: team.id,
-          name: team.name,
+          teamName: team.teamName,
           description: team.description,
           teamCode: team.teamCode,
         },
@@ -88,6 +95,60 @@ export class TeamsService {
       return {
         valid: false,
         message: '유효하지 않은 팀 코드입니다. 팀 관리자에게 문의하세요.',
+      };
+    }
+  }
+
+  /**
+   * 팀 가입
+   * @param teamCode 팀 코드
+   * @param userId 사용자 ID
+   * @returns 팀 가입 결과
+   */
+  async joinTeam(
+    teamCode: string,
+    userId: number,
+  ): Promise<{ success: boolean; message?: string }> {
+    try {
+      // 1. 팀 코드로 팀 조회
+      const team = await this.findByTeamCode(teamCode);
+
+      // 2. 사용자 조회
+      const user = await this.usersRepository.findOne({
+        where: { id: userId, isActive: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      }
+
+      // 3. 이미 팀에 소속되어 있는지 확인
+      if (user.teamId) {
+        throw new BadRequestException('이미 팀에 소속되어 있습니다.');
+      }
+
+      // 4. 사용자 팀 ID 업데이트
+      user.teamId = team.id;
+      user.userCode = `USER${userId.toString().padStart(3, '0')}`; // 사용자 코드 자동 생성
+      await this.usersRepository.save(user);
+
+      return {
+        success: true,
+        message: '팀에 성공적으로 가입되었습니다.',
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      }
+      return {
+        success: false,
+        message: '팀 가입 중 오류가 발생했습니다.',
       };
     }
   }

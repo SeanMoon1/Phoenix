@@ -51,7 +51,7 @@ npm install
 
 ```bash
 # Database Configuration
-DB_HOST=localhost
+DB_HOST=43.203.112.213
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=your_password
@@ -85,37 +85,43 @@ npm run start:prod
 
 서버 실행 후 다음 URL에서 Swagger API 문서를 확인할 수 있습니다:
 
-- **개발 환경**: http://localhost:3000/api
+- **개발 환경**: http://43.203.112.213:3000/api
 - **프로덕션 환경**: http://your-domain/api
 
 ## 주요 기능
 
 ### 인증 (Auth)
+
 - 사용자 회원가입/로그인
 - JWT 토큰 기반 인증
 - 비밀번호 암호화
 
 ### 사용자 관리 (Users)
+
 - 사용자 CRUD 작업
 - 프로필 관리
 - 역할 기반 접근 제어
 
 ### 팀 관리 (Teams)
+
 - 팀 생성 및 관리
 - 팀원 관리
 - 팀 상태 관리
 
 ### 시나리오 관리 (Scenarios)
+
 - 훈련 시나리오 생성/수정
 - 시나리오 타입별 분류
 - 난이도 설정
 
 ### 훈련 세션 (Training)
+
 - 훈련 세션 스케줄링
 - 훈련 진행 상태 관리
 - 훈련 결과 저장
 
 ### 관리자 (Admin)
+
 - 시스템 통계 조회
 - 대시보드 데이터
 - 전체 시스템 관리
@@ -172,4 +178,3 @@ npm run start:prod
 ## 라이선스
 
 이 프로젝트는 비공개 라이선스입니다.
-

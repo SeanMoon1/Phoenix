@@ -10,7 +10,7 @@ export class CreateTeamDto {
   @ApiProperty({ example: '개발팀', description: '팀 이름' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  teamName: string;
 
   @ApiProperty({
     example: '개발 관련 업무를 담당하는 팀입니다.',

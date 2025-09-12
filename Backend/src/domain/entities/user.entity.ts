@@ -16,13 +16,13 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   id: number;
 
-  @ApiProperty({ description: '팀 ID' })
-  @Column({ name: 'team_id' })
-  teamId: number;
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
 
-  @ApiProperty({ description: '사용자 코드' })
-  @Column({ name: 'user_code', length: 50 })
-  userCode: string;
+  @ApiProperty({ description: '사용자 코드', required: false })
+  @Column({ name: 'user_code', length: 50, nullable: true })
+  userCode?: string;
 
   @ApiProperty({ description: '로그인 ID' })
   @Column({ name: 'login_id', length: 50, unique: true })
@@ -38,6 +38,19 @@ export class User {
   @ApiProperty({ description: '이메일 주소' })
   @Column({ name: 'email', length: 200 })
   email: string;
+
+  // OAuth 관련 필드들
+  @ApiProperty({ description: 'OAuth 제공자', required: false })
+  @Column({ name: 'oauth_provider', length: 50, nullable: true })
+  oauthProvider?: string;
+
+  @ApiProperty({ description: 'OAuth 제공자 사용자 ID', required: false })
+  @Column({ name: 'oauth_provider_id', length: 100, nullable: true })
+  oauthProviderId?: string;
+
+  @ApiProperty({ description: '프로필 이미지 URL', required: false })
+  @Column({ name: 'profile_image_url', length: 500, nullable: true })
+  profileImageUrl?: string;
 
   @ApiProperty({ description: '사용 여부' })
   @Column({ name: 'use_yn', length: 1, default: 'Y' })
@@ -77,10 +90,6 @@ export class User {
   @ApiProperty({ description: '다음 레벨까지 필요한 경험치' })
   @Column({ name: 'next_level_exp', default: 100 })
   nextLevelExp: number;
-
-  @ApiProperty({ description: '사용자 역할' })
-  @Column({ name: 'role', length: 20, default: 'USER' })
-  role: string;
 
   @ApiProperty({ description: '수정자 ID', required: false })
   @Column({ name: 'updated_by', nullable: true })

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { fetchScenarioByType } from '@/services/scenarioService';
+import { trainingResultApi, trainingApi } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import { useLocation } from 'react-router-dom';
 
@@ -20,7 +22,7 @@ import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
-// ✅ PersistState 타입 직접 정의 (추가)
+// ✅ PersistState 타입 직접 정의
 interface PersistState {
   EXP: number;
   level: number;
@@ -28,7 +30,6 @@ interface PersistState {
   totalCorrect: number;
 }
 
-// ✅ Props 인터페이스 추가
 interface ScenarioPageProps {
   scenarioSetName?: string;
   fetchScenarios?: () => Promise<Scenario[]>;
@@ -36,7 +37,7 @@ interface ScenarioPageProps {
   persistKey?: string;
 }
 
-const PERSIST_KEY = 'phoenix_training_state';
+const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
 
 // 시나리오 타입별 이름 매핑
@@ -61,24 +62,31 @@ const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 const END_SCENE_ID = '#END';
 
-// ✅ Props를 받도록 컴포넌트 수정
 export default function ScenarioPage(props?: ScenarioPageProps) {
-  // URL에서 시나리오 타입 추출
+  // URL에서 시나리오 타입 추출 (기본 방식 유지)
   const location = useLocation();
   const scenarioType = location.pathname.split('/').pop() || 'fire';
 
-  // ✅ Props 우선, 없으면 기존 로직 사용
+  // props가 있으면 사용, 없으면 기본값 사용
   const scenarioSetName =
     props?.scenarioSetName || getScenarioSetName(scenarioType);
   const nextScenarioPath = props?.nextScenarioPath || '/training';
+  const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
+
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   // 데이터 & 진행
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
+  const startTime = useMemo(() => Date.now(), []); // 컴포넌트 마운트 시 한 번만 설정
   const scenario = scenarios[current];
+
+  // 경과 시간 계산 (사용하지 않지만 오류 방지용 유지)
+  const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 초 단위
+  console.log('timeSpent:', timeSpent); // 사용되지 않는 변수 경고 방지
 
   // 선택/피드백
   const [selected, setSelected] = useState<ScenarioOption | null>(null);
@@ -116,28 +124,11 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // 초기 데이터 로드
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        let data: Scenario[];
-
-        if (props?.fetchScenarios) {
-          // Props로 전달된 fetch 함수 사용
-          data = await props.fetchScenarios();
-        } else {
-          // 기존 로직 - URL에서 타입 추출하여 로드
-          data = await fetchScenarioByType(scenarioType);
-        }
-
-        setScenarios(data);
-      } catch (error) {
-        console.error('시나리오 로드 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [scenarioType, props?.fetchScenarios]);
+    fetchScenarioByType(scenarioType)
+      .then(data => setScenarios(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [scenarioType]);
 
   // 리사이즈
   useEffect(() => {
@@ -149,11 +140,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // ✅ 로컬 스토리지 복구/저장 수정 - PersistState 타입 사용
-  const storageKey = props?.persistKey || PERSIST_KEY;
-
+  // ✅ 로컬 스토리지 복구/저장 수정 - persistKey 사용
   useEffect(() => {
-    const raw = localStorage.getItem(storageKey);
+    const raw = localStorage.getItem(persistKey); // ✅ PERSIST_KEY → persistKey
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -165,18 +154,88 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         /* ignore */
       }
     }
-  }, [storageKey]);
+  }, [persistKey]);
 
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(storageKey, JSON.stringify(s));
-  }, [EXP, level, totalCorrect, storageKey]);
+    localStorage.setItem(persistKey, JSON.stringify(s)); // ✅ PERSIST_KEY → persistKey
+  }, [EXP, level, totalCorrect, persistKey]);
+
+  const saveTrainingResult = async () => {
+    try {
+      if (user) {
+        // 시나리오 타입을 ID로 매핑
+        const scenarioIdMap: Record<string, number> = {
+          fire: 1,
+          emergency: 2,
+          traffic: 3,
+          earthquake: 4,
+          flood: 5,
+        };
+
+        const scenarioId = scenarioIdMap[scenarioType] || 1;
+
+        const resultData = {
+          participantId: user.id,
+          sessionId: Date.now(), // 현재 시간을 세션 ID로 사용
+          scenarioId,
+          userId: user.id,
+          resultCode: failedThisRun ? 'FAILED' : 'COMPLETED',
+          accuracyScore:
+            scenarios.length > 0
+              ? Math.round((totalCorrect / scenarios.length) * 100)
+              : 0,
+          speedScore: Math.max(0, 100 - Math.floor(timeSpent / 10)),
+          totalScore:
+            scenarios.length > 0
+              ? Math.round(
+                  ((totalCorrect / scenarios.length) * 100 +
+                    Math.max(0, 100 - Math.floor(timeSpent / 10))) /
+                    2
+                )
+              : 0,
+          completionTime: timeSpent,
+          feedback: `${scenarioSetName} 완료 - 레벨 ${level}, 정답 ${totalCorrect}/${scenarios.length}`,
+          completedAt: new Date().toISOString(),
+        };
+
+        // ✅ trainingResultApi.saveResult 사용
+        await trainingResultApi.saveResult(resultData);
+        console.log('Training result saved:', resultData);
+      }
+    } catch (error) {
+      console.error('Failed to save training result:', error);
+
+      // 실패 시 로컬 스토리지에 백업 저장
+      if (user) {
+        const backupData = {
+          scenarioType,
+          userId: user.id,
+          timeSpent,
+          totalCorrect,
+          level,
+          EXP,
+          failedThisRun,
+          completedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(
+          `training_result_backup_${user.id}_${Date.now()}`,
+          JSON.stringify(backupData)
+        );
+        console.log('Training result saved to localStorage as backup');
+      }
+    }
+  };
 
   // 엔딩(#END) 씬이 렌더된 뒤 모달 자동 오픈 → 진행바 표시
   useEffect(() => {
     if (!scenario || endModalAutoShown) return;
     if (scenario.sceneId === END_SCENE_ID) {
       setEndModalAutoShown(true);
+
+      // 훈련 결과 서버에 저장
+      saveTrainingResult();
+
       if (!failedThisRun) {
         setClearMsg(
           `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
@@ -195,9 +254,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   // 상단 상태에 추가
   const [hideExpFill, setHideExpFill] = useState(false);
 
-  // ...중략...
-
-  // handleChoice 함수만 교체
+  // handleChoice 함수
   const handleChoice = (option: ScenarioOption) => {
     if (!scenario) return;
     setSelected(option);
@@ -428,7 +485,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               onPrev={handlePrev}
               onNext={handleNext}
             />
-            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
+            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
               <PlayMoreButton to="/training" />
             </div>
           </main>

@@ -25,6 +25,6 @@
       "@/shared/*": ["src/shared/*"],
       "@/utils/*": ["src/utils/*"]
     }
-  }
+  },
+  "exclude": ["src/modules_backup/**/*", "node_modules", "dist"]
 }
-

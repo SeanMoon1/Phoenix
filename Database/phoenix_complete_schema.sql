@@ -66,12 +66,16 @@ CREATE TABLE admin (
 -- 4. 사용자 테이블 (팀 소속)
 CREATE TABLE user (
     user_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 ID',
-    team_id BIGINT NOT NULL COMMENT '팀 ID',
-    user_code VARCHAR(50) NOT NULL COMMENT '사용자 코드 (예: USER001, USER002)',
+    team_id BIGINT NULL COMMENT '팀 ID',
+    user_code VARCHAR(50) NULL COMMENT '사용자 코드 (예: USER001, USER002)',
     login_id VARCHAR(50) NOT NULL UNIQUE COMMENT '로그인 ID',
     password VARCHAR(255) NOT NULL COMMENT '비밀번호',
     name VARCHAR(100) NOT NULL COMMENT '사용자명',
     email VARCHAR(200) NOT NULL COMMENT '이메일',
+    -- OAuth 관련 필드들
+    oauth_provider VARCHAR(50) NULL COMMENT 'OAuth 제공자 (google, kakao, naver 등)',
+    oauth_provider_id VARCHAR(100) NULL COMMENT 'OAuth 제공자 사용자 ID',
+    profile_image_url VARCHAR(500) NULL COMMENT '프로필 이미지 URL',
     use_yn CHAR(1) NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
     -- 레벨업 시스템 관련 필드 추가
     user_level INT NOT NULL DEFAULT 1 COMMENT '사용자 레벨 (1-100)',

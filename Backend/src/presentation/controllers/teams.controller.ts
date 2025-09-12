@@ -46,21 +46,33 @@ export class TeamsController {
   @ApiOperation({ summary: '특정 팀 조회' })
   @ApiResponse({ status: 200, description: '팀 조회 성공' })
   findOne(@Param('id') id: string) {
-    return this.teamsService.findOne(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.findOne(idNum);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: '팀 정보 수정' })
   @ApiResponse({ status: 200, description: '팀 수정 성공' })
   update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamsService.update(+id, updateTeamDto);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.update(idNum, updateTeamDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: '팀 삭제' })
   @ApiResponse({ status: 200, description: '팀 삭제 성공' })
   remove(@Param('id') id: string) {
-    return this.teamsService.remove(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.remove(idNum);
   }
 
   @Get('validate-code/:teamCode')
@@ -101,5 +113,23 @@ export class TeamsController {
   })
   async validateTeamCode(@Param('teamCode') teamCode: string) {
     return this.teamsService.validateTeamCode(teamCode);
+  }
+
+  @Post('join')
+  @Public() // 인증 없이 접근 가능 (팀 가입용)
+  @ApiOperation({
+    summary: '팀 가입',
+    description: '사용자가 팀 코드로 팀에 가입합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '팀 가입 성공',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 팀 코드 또는 이미 가입된 팀',
+  })
+  async joinTeam(@Body() body: { teamCode: string; userId: number }) {
+    return this.teamsService.joinTeam(body.teamCode, body.userId);
   }
 }

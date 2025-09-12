@@ -6,14 +6,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
-import { teamApi, authApi } from '../../services/api';
+import { authApi } from '../../services/api';
 // 회원가입 스키마
 const registerSchema = yup.object({
-  teamCode: yup
-    .string()
-    .required('팀 코드를 입력해주세요.')
-    .min(3, '팀 코드는 최소 3자 이상이어야 합니다.')
-    .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
   loginId: yup
     .string()
     .required('로그인 ID를 입력해주세요.')
@@ -30,7 +25,11 @@ const registerSchema = yup.object({
     .required('이메일을 입력해주세요.'),
   password: yup
     .string()
-    .min(6, '비밀번호는 최소 6자 이상이어야 합니다.')
+    .min(12, '비밀번호는 최소 12자 이상이어야 합니다.')
+    .matches(
+      /^(?=.*[a-z])(?=.*\d)[a-z\d]{12,}$/,
+      '비밀번호는 소문자와 숫자를 포함하여 12자 이상이어야 합니다.'
+    )
     .required('비밀번호를 입력해주세요.'),
   confirmPassword: yup
     .string()
@@ -40,25 +39,47 @@ const registerSchema = yup.object({
 
 type RegisterFormData = yup.InferType<typeof registerSchema>;
 
-interface TeamInfo {
-  id: number;
-  name: string;
-  description?: string;
-  teamCode: string;
-}
-
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isLoading } = useAuthStore();
   const navigate = useNavigate();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
-  const [isValidatingTeam, setIsValidatingTeam] = useState(false);
-  const [teamValidationError, setTeamValidationError] = useState<string>('');
   const [isValidatingLoginId, setIsValidatingLoginId] = useState(false);
   const [loginIdValidationError, setLoginIdValidationError] =
     useState<string>('');
   const [isLoginIdAvailable, setIsLoginIdAvailable] = useState<boolean | null>(
     null
   );
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    feedback: string[];
+  }>({ score: 0, feedback: [] });
+
+  // 비밀번호 강도 검사 함수
+  const checkPasswordStrength = (password: string) => {
+    const feedback: string[] = [];
+    let score = 0;
+
+    // 길이 기반 점수 (가장 중요)
+    if (password.length >= 12) score += 2;
+    else feedback.push('최소 12자 이상이어야 합니다.');
+
+    if (password.length >= 16) score += 2;
+    if (password.length >= 20) score += 1;
+
+    // 소문자 포함 (필수)
+    if (/[a-z]/.test(password)) score += 1;
+    else feedback.push('소문자를 포함해야 합니다.');
+
+    // 숫자 포함 (필수)
+    if (/\d/.test(password)) score += 1;
+    else feedback.push('숫자를 포함해야 합니다.');
+
+    // 선택적 요소들 (보너스 점수)
+    if (/[A-Z]/.test(password)) score += 1; // 대문자 (선택사항)
+    if (/[@$!%*?&]/.test(password)) score += 1; // 특수문자 (선택사항)
+    if (/[^A-Za-z0-9@$!%*?&]/.test(password)) score += 1; // 기타 특수문자 (선택사항)
+
+    setPasswordStrength({ score, feedback });
+  };
 
   const {
     register,
@@ -70,41 +91,9 @@ const RegisterPage: React.FC = () => {
     resolver: yupResolver(registerSchema),
   });
 
-  const teamCode = watch('teamCode');
   const loginId = watch('loginId');
   const password = watch('password');
   const confirmPassword = watch('confirmPassword');
-
-  // 팀 코드 실시간 검증
-  const validateTeamCode = async (code: string) => {
-    if (!code || code.length < 3) {
-      setTeamInfo(null);
-      setTeamValidationError('');
-      return;
-    }
-
-    setIsValidatingTeam(true);
-    setTeamValidationError('');
-
-    try {
-      const response = await teamApi.validateTeamCode(code);
-
-      if (response.success && response.data?.valid) {
-        setTeamInfo(response.data.team || null);
-        setTeamValidationError('');
-      } else {
-        setTeamInfo(null);
-        setTeamValidationError(
-          response.data?.message || '유효하지 않은 팀 코드입니다.'
-        );
-      }
-    } catch (error: unknown) {
-      setTeamInfo(null);
-      setTeamValidationError('팀 코드 검증 중 오류가 발생했습니다.');
-    } finally {
-      setIsValidatingTeam(false);
-    }
-  };
 
   // 로그인 ID 중복 확인
   const validateLoginId = async (id: string) => {
@@ -140,17 +129,6 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  // 팀 코드 변경 시 검증
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (teamCode) {
-        validateTeamCode(teamCode);
-      }
-    }, 500); // 500ms 디바운스
-
-    return () => clearTimeout(timeoutId);
-  }, [teamCode]);
-
   // 로그인 ID 변경 시 검증
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -163,25 +141,26 @@ const RegisterPage: React.FC = () => {
   }, [loginId]);
 
   const onSubmit = async (data: RegisterFormData) => {
-    if (!teamInfo) {
-      setError('teamCode', {
+    // 로그인 ID 중복 확인이 완료되었고 사용 불가능한 경우에만 에러 처리
+    if (isLoginIdAvailable === false) {
+      setError('loginId', {
         type: 'manual',
-        message: '유효한 팀 코드를 입력해주세요.',
+        message: '이미 사용 중인 로그인 ID입니다.',
       });
       return;
     }
 
-    if (isLoginIdAvailable !== true) {
+    // 로그인 ID 중복 확인이 아직 진행 중인 경우
+    if (isValidatingLoginId) {
       setError('loginId', {
         type: 'manual',
-        message: '사용 가능한 로그인 ID를 입력해주세요.',
+        message: '로그인 ID 확인 중입니다. 잠시 후 다시 시도해주세요.',
       });
       return;
     }
 
     try {
       await registerUser({
-        teamCode: data.teamCode,
         loginId: data.loginId,
         name: data.name,
         email: data.email,
@@ -207,7 +186,7 @@ const RegisterPage: React.FC = () => {
               회원가입
             </h2>
             <p className="mt-2 text-xs text-gray-600 sm:text-sm dark:text-gray-300">
-              팀 코드를 입력하여 재난훈련ON에 가입하세요
+              재난훈련ON에 가입하세요
             </p>
           </div>
 
@@ -216,40 +195,6 @@ const RegisterPage: React.FC = () => {
               className="space-y-4 sm:space-y-6"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* 팀 코드 입력 및 검증 */}
-              <div className="space-y-2">
-                <Input
-                  label="팀 코드"
-                  placeholder="TEAM001"
-                  error={errors.teamCode?.message || teamValidationError}
-                  {...register('teamCode')}
-                />
-
-                {/* 팀 코드 검증 상태 표시 */}
-                {isValidatingTeam && (
-                  <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
-                    <div className="w-4 h-4 mr-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                    팀 코드를 확인하는 중...
-                  </div>
-                )}
-
-                {teamInfo && !isValidatingTeam && (
-                  <div className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
-                    <div className="flex items-center text-sm text-green-800 dark:text-green-200">
-                      <span className="mr-2">✅</span>
-                      <div>
-                        <div className="font-medium">{teamInfo.name}</div>
-                        {teamInfo.description && (
-                          <div className="mt-1 text-xs text-green-600 dark:text-green-300">
-                            {teamInfo.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* 사용자 정보 입력 */}
               <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
@@ -298,13 +243,78 @@ const RegisterPage: React.FC = () => {
                   {...register('email')}
                 />
 
-                <Input
-                  label="비밀번호"
-                  type="password"
-                  placeholder="••••••••"
-                  error={errors.password?.message}
-                  {...register('password')}
-                />
+                <div className="space-y-2">
+                  <Input
+                    label="비밀번호"
+                    type="password"
+                    placeholder="••••••••"
+                    error={errors.password?.message}
+                    {...register('password', {
+                      onChange: e => checkPasswordStrength(e.target.value),
+                    })}
+                  />
+
+                  {/* 비밀번호 강도 표시 */}
+                  {password && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">
+                          비밀번호 강도:
+                        </span>
+                        <span
+                          className={`font-medium ${
+                            passwordStrength.score >= 4
+                              ? 'text-green-600 dark:text-green-400'
+                              : passwordStrength.score >= 2
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : 'text-red-600 dark:text-red-400'
+                          }`}
+                        >
+                          {passwordStrength.score >= 4
+                            ? '강함'
+                            : passwordStrength.score >= 2
+                            ? '보통'
+                            : '약함'}
+                        </span>
+                      </div>
+
+                      {/* 강도 바 */}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            passwordStrength.score >= 4
+                              ? 'bg-green-500'
+                              : passwordStrength.score >= 2
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              (passwordStrength.score / 8) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+
+                      {/* 피드백 메시지 */}
+                      {passwordStrength.feedback.length > 0 && (
+                        <div className="text-xs text-red-600 dark:text-red-400">
+                          {passwordStrength.feedback.map((msg, index) => (
+                            <div key={index}>• {msg}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 보너스 점수 안내 */}
+                      {passwordStrength.score >= 4 && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          💡 대문자나 특수문자를 추가하면 더욱 안전합니다!
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <Input
@@ -344,12 +354,7 @@ const RegisterPage: React.FC = () => {
                 type="submit"
                 className="w-full"
                 isLoading={isLoading}
-                disabled={
-                  !teamInfo ||
-                  isValidatingTeam ||
-                  isValidatingLoginId ||
-                  isLoginIdAvailable !== true
-                }
+                disabled={isValidatingLoginId || isLoginIdAvailable === false}
               >
                 회원가입
               </Button>
@@ -365,7 +370,7 @@ const RegisterPage: React.FC = () => {
 
               <div className="text-center">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  팀 코드가 없으시면 팀 관리자에게 문의하세요
+                  로그인 후 마이페이지에서 팀 코드를 입력하실 수 있습니다
                 </p>
               </div>
             </form>

@@ -1,8 +1,22 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from '../../application/services/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
+import { OAuthRegisterDto } from '../dto/oauth-register.dto';
 import { LocalAuthGuard } from '../../shared/guards/local-auth.guard';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
@@ -34,5 +48,35 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
-}
 
+  @Post('oauth/register')
+  @ApiOperation({ summary: 'OAuth 회원가입 및 로그인' })
+  @ApiResponse({ status: 201, description: 'OAuth 회원가입 및 로그인 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 OAuth 정보' })
+  async oauthRegister(@Body() oauthRegisterDto: OAuthRegisterDto) {
+    return this.authService.oauthRegisterAndLogin(oauthRegisterDto);
+  }
+
+  @Get('check-login-id/:loginId')
+  @ApiOperation({ summary: '로그인 ID 중복 확인' })
+  @ApiResponse({
+    status: 200,
+    description: '로그인 ID 중복 확인 결과',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: {
+          type: 'object',
+          properties: {
+            available: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  async checkLoginIdAvailability(@Param('loginId') loginId: string) {
+    return this.authService.checkLoginIdAvailability(loginId);
+  }
+}

@@ -19,7 +19,7 @@ export class Team {
 
   @ApiProperty({ description: '팀 이름' })
   @Column({ name: 'team_name', length: 100 })
-  name: string;
+  teamName: string;
 
   @ApiProperty({ description: '팀 설명', required: false })
   @Column({ name: 'description', type: 'text', nullable: true })

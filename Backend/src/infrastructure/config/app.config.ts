@@ -9,9 +9,10 @@ export default registerAs('app', () => ({
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',')
       : [
-          'http://localhost:3001',
           'http://43.203.112.213:3000',
           'http://43.203.112.213',
+          'https://www.phoenix-4.com',
+          'https://api.phoenix-4.com',
         ],
     credentials: true,
   },

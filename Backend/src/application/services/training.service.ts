@@ -48,7 +48,13 @@ export class TrainingService {
 
     const lastSessionNumber =
       existingSessions.length > 0
-        ? parseInt(existingSessions[0].sessionCode.replace('SESS', '')) || 0
+        ? (() => {
+            const parsed = parseInt(
+              existingSessions[0].sessionCode.replace('SESS', ''),
+              10,
+            );
+            return isNaN(parsed) ? 0 : parsed;
+          })()
         : 0;
 
     return `SESS${String(lastSessionNumber + 1).padStart(3, '0')}`;
@@ -158,9 +164,13 @@ export class TrainingService {
 
     const lastParticipantNumber =
       existingParticipants.length > 0
-        ? parseInt(
-            existingParticipants[0].participantCode.replace('PART', ''),
-          ) || 0
+        ? (() => {
+            const parsed = parseInt(
+              existingParticipants[0].participantCode.replace('PART', ''),
+              10,
+            );
+            return isNaN(parsed) ? 0 : parsed;
+          })()
         : 0;
 
     return `PART${String(lastParticipantNumber + 1).padStart(3, '0')}`;

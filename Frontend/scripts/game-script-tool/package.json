@@ -1,0 +1,16 @@
+{
+  "name": "phoenix-game-script-tool",
+  "version": "1.0.0",
+  "description": "Phoenix Game Script Tool - 시나리오 스크립트 관리 도구",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.ts",
+    "build": "tsc && vite build --config vite.config.ts",
+    "preview": "vite preview --config vite.config.ts"
+  },
+  "dependencies": {
+    "jotai": "^2.6.0",
+    "lucide-react": "^0.294.0"
+  }
+}

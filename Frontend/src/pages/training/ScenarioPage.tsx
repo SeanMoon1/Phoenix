@@ -274,7 +274,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
                   });
                 });
               });
-            }, 1000); // 100% 연출 유지 시간
+            }, 500); // 100% 연출 유지 시간
           },
         });
       }

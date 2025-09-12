@@ -39,7 +39,12 @@ export class AdminController {
     @Param('teamId') teamId: string,
     @Param('userId') userId: string,
   ) {
-    return this.adminService.getTeamMemberById(+teamId, +userId);
+    const teamIdNum = parseInt(teamId, 10);
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(teamIdNum) || isNaN(userIdNum)) {
+      throw new Error('Invalid teamId or userId parameter');
+    }
+    return this.adminService.getTeamMemberById(teamIdNum, userIdNum);
   }
 
   @Patch('team/:teamId/members/:userId')

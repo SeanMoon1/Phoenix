@@ -42,7 +42,11 @@ export class TrainingController {
   @ApiQuery({ name: 'teamId', required: false, description: '팀 ID로 필터링' })
   findAll(@Query('teamId') teamId?: string) {
     if (teamId) {
-      return this.trainingService.findByTeam(+teamId);
+      const teamIdNum = parseInt(teamId, 10);
+      if (isNaN(teamIdNum)) {
+        throw new Error('Invalid teamId parameter');
+      }
+      return this.trainingService.findByTeam(teamIdNum);
     }
     return this.trainingService.findAll();
   }
@@ -51,7 +55,11 @@ export class TrainingController {
   @ApiOperation({ summary: '특정 훈련 세션 조회' })
   @ApiResponse({ status: 200, description: '훈련 세션 조회 성공' })
   findOne(@Param('id') id: string) {
-    return this.trainingService.findOne(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.trainingService.findOne(idNum);
   }
 
   @Patch(':id')
@@ -61,14 +69,22 @@ export class TrainingController {
     @Param('id') id: string,
     @Body() updateTrainingSessionDto: UpdateTrainingSessionDto,
   ) {
-    return this.trainingService.update(+id, updateTrainingSessionDto);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.trainingService.update(idNum, updateTrainingSessionDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: '훈련 세션 삭제' })
   @ApiResponse({ status: 200, description: '훈련 세션 삭제 성공' })
   remove(@Param('id') id: string) {
-    return this.trainingService.remove(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.trainingService.remove(idNum);
   }
 
   @Post('join/:sessionCode')
@@ -90,13 +106,21 @@ export class TrainingController {
   @ApiOperation({ summary: '세션 참가자 목록 조회' })
   @ApiResponse({ status: 200, description: '참가자 목록 조회 성공' })
   getSessionParticipants(@Param('id') id: string) {
-    return this.trainingService.getSessionParticipants(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.trainingService.getSessionParticipants(idNum);
   }
 
   @Get('stats/team/:teamId')
   @ApiOperation({ summary: '팀별 훈련 통계 조회 (관리자용)' })
   @ApiResponse({ status: 200, description: '팀 통계 조회 성공' })
   getTeamStats(@Param('teamId') teamId: string) {
-    return this.trainingService.getTeamStats(+teamId);
+    const teamIdNum = parseInt(teamId, 10);
+    if (isNaN(teamIdNum)) {
+      throw new Error('Invalid teamId parameter');
+    }
+    return this.trainingService.getTeamStats(teamIdNum);
   }
 }

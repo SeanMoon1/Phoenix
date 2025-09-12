@@ -47,7 +47,11 @@ export class TrainingResultController {
   })
   @ApiResponse({ status: 404, description: '사용자를 찾을 수 없음' })
   getUserStats(@Param('userId') userId: string) {
-    return this.trainingResultService.getUserStats(+userId);
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      throw new Error('Invalid userId parameter');
+    }
+    return this.trainingResultService.getUserStats(userIdNum);
   }
 
   @Get('user/:userId/history')
@@ -68,10 +72,21 @@ export class TrainingResultController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
+    const userIdNum = parseInt(userId, 10);
+    if (isNaN(userIdNum)) {
+      throw new Error('Invalid userId parameter');
+    }
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+    if (isNaN(limitNum) || isNaN(offsetNum)) {
+      throw new Error('Invalid limit or offset parameter');
+    }
+
     return this.trainingResultService.getUserTrainingHistory(
-      +userId,
-      limit ? +limit : 20,
-      offset ? +offset : 0,
+      userIdNum,
+      limitNum,
+      offsetNum,
     );
   }
 
@@ -104,10 +119,17 @@ export class TrainingResultController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+    if (isNaN(limitNum) || isNaN(offsetNum)) {
+      throw new Error('Invalid limit or offset parameter');
+    }
+
     return this.trainingResultService.getUserTrainingHistory(
       req.user.id,
-      limit ? +limit : 20,
-      offset ? +offset : 0,
+      limitNum,
+      offsetNum,
     );
   }
 }

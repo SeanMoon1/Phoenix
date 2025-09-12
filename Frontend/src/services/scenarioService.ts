@@ -109,19 +109,24 @@ export async function fetchScenarioByType(type: string): Promise<Scenario[]> {
   try {
     const response = await scenarioApi.getScenariosByType(type);
     if (response.success && response.data) {
-      return response.data as Scenario[];
+      // 실제 DB에서 가져온 시나리오 데이터 사용
+      const scenarios = response.data as Scenario[];
+      console.log(`서버에서 ${type} 시나리오 ${scenarios.length}개 로드됨`);
+      return scenarios;
     }
     throw new Error(response.error || `${type} 시나리오 로드 실패`);
   } catch (error) {
     console.error(`${type} 시나리오 로드 실패:`, error);
+    console.log('Fallback to JSON files...');
+
     // Fallback to individual functions
     switch (type) {
       case 'fire':
         return fetchFireScenario();
       case 'emergency':
-        return fetchEmergencyScenario();
+        return fetchFirstAidScenario();
       case 'traffic':
-        return fetchTrafficScenario();
+        return fetchTrafficAccidentScenario();
       case 'earthquake':
         return fetchEarthquakeScenario();
       default:

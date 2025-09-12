@@ -16,13 +16,13 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   id: number;
 
-  @ApiProperty({ description: '팀 ID' })
-  @Column({ name: 'team_id' })
-  teamId: number;
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
 
-  @ApiProperty({ description: '사용자 코드' })
-  @Column({ name: 'user_code', length: 50 })
-  userCode: string;
+  @ApiProperty({ description: '사용자 코드', required: false })
+  @Column({ name: 'user_code', length: 50, nullable: true })
+  userCode?: string;
 
   @ApiProperty({ description: '로그인 ID' })
   @Column({ name: 'login_id', length: 50, unique: true })

@@ -9,7 +9,7 @@ import { TeamsService } from './teams.service';
 import { LoginDto } from '../../presentation/dto/login.dto';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
-import * as bcrypt from 'bcryptjs';
+import { PasswordUtil } from '../../utils/password.util';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (user && (await PasswordUtil.comparePassword(password, user.password))) {
       const { password, ...result } = user;
       return result;
     }
@@ -49,10 +49,24 @@ export class AuthService {
    */
   async register(registerDto: RegisterDto) {
     try {
-      // 1. 비밀번호 해시화
-      const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+      // 1. 비밀번호 강도 검사 (길이 중심)
+      const passwordStrength = PasswordUtil.getPasswordStrength(
+        registerDto.password,
+      );
+      if (passwordStrength.score < 4) {
+        // 최소 점수 4 (12자 + 소문자 + 숫자)
+        throw new BadRequestException({
+          message: '비밀번호가 너무 약합니다.',
+          feedback: passwordStrength.feedback,
+        });
+      }
 
-      // 2. 사용자 생성 (팀 ID는 null로 설정)
+      // 2. 비밀번호 해시화
+      const hashedPassword = await PasswordUtil.hashPassword(
+        registerDto.password,
+      );
+
+      // 3. 사용자 생성 (팀 ID는 null로 설정)
       const user = await this.usersService.create({
         ...registerDto,
         teamId: null, // 팀 코드 없이 가입

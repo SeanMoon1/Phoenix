@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { fetchScenarioByType } from '@/services/scenarioService';
-import { trainingResultApi } from '@/services/api';
+import { trainingResultApi, trainingApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import { useLocation } from 'react-router-dom';
@@ -168,6 +168,63 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
     localStorage.setItem(persistKey, JSON.stringify(s));
   }, [EXP, level, totalCorrect, persistKey]);
 
+  // 훈련 세션 생성 및 참가
+  const createAndJoinSession = async () => {
+    if (!user?.id || !user?.teamId || scenarios.length === 0) return null;
+
+    try {
+      // 1. 훈련 세션 생성
+      const sessionRequestData = {
+        title: `${scenarioSetName} 훈련`,
+        scenarioId: scenarios[0].id,
+        teamId: user.teamId,
+        startTime: new Date().toISOString(),
+        createdBy: user.id,
+      };
+
+      const sessionResponse = await trainingApi.createSession(
+        sessionRequestData
+      );
+      if (!sessionResponse.success || !sessionResponse.data) {
+        throw new Error('훈련 세션 생성 실패');
+      }
+
+      // 타입 가드를 통한 안전한 타입 체크
+      const sessionInfo = sessionResponse.data;
+      if (
+        !sessionInfo ||
+        typeof (sessionInfo as any).id !== 'number' ||
+        !(sessionInfo as any).sessionCode
+      ) {
+        throw new Error('훈련 세션 데이터가 올바르지 않습니다');
+      }
+
+      // 2. 세션 참가
+      const joinResponse = await trainingApi.joinSession(
+        (sessionInfo as any).sessionCode,
+        user.id
+      );
+      if (!joinResponse.success || !joinResponse.data) {
+        throw new Error('훈련 세션 참가 실패');
+      }
+
+      // 타입 가드를 통한 안전한 타입 체크
+      const participantInfo = joinResponse.data;
+      if (!participantInfo || typeof (participantInfo as any).id !== 'number') {
+        throw new Error('참가자 데이터가 올바르지 않습니다');
+      }
+
+      return {
+        sessionId: (sessionInfo as any).id,
+        participantId: (participantInfo as any).id,
+        sessionCode: (sessionInfo as any).sessionCode,
+      };
+    } catch (error) {
+      console.error('훈련 세션 생성/참가 실패:', error);
+      return null;
+    }
+  };
+
   // 훈련 결과 서버 전송
   const saveTrainingResult = async () => {
     if (!user?.id) return;
@@ -177,10 +234,19 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
       const accuracyScore = Math.floor((totalCorrect / scenarios.length) * 100);
       const speedScore = Math.floor(Math.max(0, 100 - timeSpent / 60)); // 시간 기반 속도 점수
 
+      // 실제 시나리오 ID 사용 (첫 번째 시나리오의 ID)
+      const scenarioId = scenarios.length > 0 ? scenarios[0].id : 1;
+
+      // 훈련 세션 생성 및 참가 (팀이 있는 경우에만)
+      let sessionInfo = null;
+      if (user.teamId) {
+        sessionInfo = await createAndJoinSession();
+      }
+
       const resultData = {
-        participantId: 0, // 임시값, 실제로는 훈련 세션 참가자 ID
-        sessionId: 0, // 임시값, 실제로는 훈련 세션 ID
-        scenarioId: 1, // 임시값, 실제로는 시나리오 ID
+        participantId: sessionInfo?.participantId || 0, // 실제 참가자 ID 또는 0
+        sessionId: sessionInfo?.sessionId || 0, // 실제 세션 ID 또는 0
+        scenarioId: scenarioId,
         userId: user.id,
         resultCode: `RESULT_${Date.now()}`,
         accuracyScore,

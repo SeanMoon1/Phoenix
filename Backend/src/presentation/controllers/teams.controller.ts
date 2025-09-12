@@ -46,21 +46,33 @@ export class TeamsController {
   @ApiOperation({ summary: '특정 팀 조회' })
   @ApiResponse({ status: 200, description: '팀 조회 성공' })
   findOne(@Param('id') id: string) {
-    return this.teamsService.findOne(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.findOne(idNum);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: '팀 정보 수정' })
   @ApiResponse({ status: 200, description: '팀 수정 성공' })
   update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamsService.update(+id, updateTeamDto);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.update(idNum, updateTeamDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: '팀 삭제' })
   @ApiResponse({ status: 200, description: '팀 삭제 성공' })
   remove(@Param('id') id: string) {
-    return this.teamsService.remove(+id);
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new Error('Invalid id parameter');
+    }
+    return this.teamsService.remove(idNum);
   }
 
   @Get('validate-code/:teamCode')

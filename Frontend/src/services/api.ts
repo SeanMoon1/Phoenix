@@ -3,7 +3,11 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import type { ApiResponse } from '../types';
+import type {
+  ApiResponse,
+  CreateSessionResponse,
+  JoinSessionResponse,
+} from '../types';
 
 // API 기본 설정
 const API_BASE_URL =
@@ -200,14 +204,14 @@ export const trainingApi = {
     startTime: string;
     endTime?: string;
     createdBy: number;
-  }) => api.post('/training', data),
+  }) => api.post<CreateSessionResponse>('/training', data),
 
   // 팀별 훈련 세션 조회
   getSessionsByTeam: (teamId: number) => api.get(`/training?teamId=${teamId}`),
 
   // 세션 참가
   joinSession: (sessionCode: string, userId: number) =>
-    api.post(`/training/join/${sessionCode}`, { userId }),
+    api.post<JoinSessionResponse>(`/training/join/${sessionCode}`, { userId }),
 
   // 세션 참가자 목록 조회
   getSessionParticipants: (sessionId: number) =>

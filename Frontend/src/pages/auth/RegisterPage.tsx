@@ -25,7 +25,11 @@ const registerSchema = yup.object({
     .required('이메일을 입력해주세요.'),
   password: yup
     .string()
-    .min(6, '비밀번호는 최소 6자 이상이어야 합니다.')
+    .min(12, '비밀번호는 최소 12자 이상이어야 합니다.')
+    .matches(
+      /^(?=.*[a-z])(?=.*\d)[a-z\d]{12,}$/,
+      '비밀번호는 소문자와 숫자를 포함하여 12자 이상이어야 합니다.'
+    )
     .required('비밀번호를 입력해주세요.'),
   confirmPassword: yup
     .string()
@@ -44,6 +48,38 @@ const RegisterPage: React.FC = () => {
   const [isLoginIdAvailable, setIsLoginIdAvailable] = useState<boolean | null>(
     null
   );
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    feedback: string[];
+  }>({ score: 0, feedback: [] });
+
+  // 비밀번호 강도 검사 함수
+  const checkPasswordStrength = (password: string) => {
+    const feedback: string[] = [];
+    let score = 0;
+
+    // 길이 기반 점수 (가장 중요)
+    if (password.length >= 12) score += 2;
+    else feedback.push('최소 12자 이상이어야 합니다.');
+
+    if (password.length >= 16) score += 2;
+    if (password.length >= 20) score += 1;
+
+    // 소문자 포함 (필수)
+    if (/[a-z]/.test(password)) score += 1;
+    else feedback.push('소문자를 포함해야 합니다.');
+
+    // 숫자 포함 (필수)
+    if (/\d/.test(password)) score += 1;
+    else feedback.push('숫자를 포함해야 합니다.');
+
+    // 선택적 요소들 (보너스 점수)
+    if (/[A-Z]/.test(password)) score += 1; // 대문자 (선택사항)
+    if (/[@$!%*?&]/.test(password)) score += 1; // 특수문자 (선택사항)
+    if (/[^A-Za-z0-9@$!%*?&]/.test(password)) score += 1; // 기타 특수문자 (선택사항)
+
+    setPasswordStrength({ score, feedback });
+  };
 
   const {
     register,
@@ -207,13 +243,78 @@ const RegisterPage: React.FC = () => {
                   {...register('email')}
                 />
 
-                <Input
-                  label="비밀번호"
-                  type="password"
-                  placeholder="••••••••"
-                  error={errors.password?.message}
-                  {...register('password')}
-                />
+                <div className="space-y-2">
+                  <Input
+                    label="비밀번호"
+                    type="password"
+                    placeholder="••••••••"
+                    error={errors.password?.message}
+                    {...register('password', {
+                      onChange: e => checkPasswordStrength(e.target.value),
+                    })}
+                  />
+
+                  {/* 비밀번호 강도 표시 */}
+                  {password && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">
+                          비밀번호 강도:
+                        </span>
+                        <span
+                          className={`font-medium ${
+                            passwordStrength.score >= 4
+                              ? 'text-green-600 dark:text-green-400'
+                              : passwordStrength.score >= 2
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : 'text-red-600 dark:text-red-400'
+                          }`}
+                        >
+                          {passwordStrength.score >= 4
+                            ? '강함'
+                            : passwordStrength.score >= 2
+                            ? '보통'
+                            : '약함'}
+                        </span>
+                      </div>
+
+                      {/* 강도 바 */}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            passwordStrength.score >= 4
+                              ? 'bg-green-500'
+                              : passwordStrength.score >= 2
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              (passwordStrength.score / 8) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+
+                      {/* 피드백 메시지 */}
+                      {passwordStrength.feedback.length > 0 && (
+                        <div className="text-xs text-red-600 dark:text-red-400">
+                          {passwordStrength.feedback.map((msg, index) => (
+                            <div key={index}>• {msg}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 보너스 점수 안내 */}
+                      {passwordStrength.score >= 4 && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          💡 대문자나 특수문자를 추가하면 더욱 안전합니다!
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <Input

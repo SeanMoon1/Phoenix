@@ -9,8 +9,8 @@ export interface ApiResponse<T = unknown> {
 // 사용자 타입
 export interface User {
   id: number;
-  teamId: number;
-  userCode: string;
+  teamId?: number;
+  userCode?: string;
   loginId: string;
   name: string;
   email: string;
@@ -102,6 +102,22 @@ export interface TrainingSession {
   createdAt: string;
   updatedAt: string;
 }
+
+// 훈련 세션 참가자 타입
+export interface TrainingParticipant {
+  id: number;
+  participantCode: string;
+  sessionId: number;
+  userId: number;
+  joinedAt: string;
+  status: string;
+}
+
+// 훈련 세션 생성 응답 타입
+export type CreateSessionResponse = ApiResponse<TrainingSession>;
+
+// 훈련 세션 참가 응답 타입
+export type JoinSessionResponse = ApiResponse<TrainingParticipant>;
 
 // 대시보드 통계 타입
 export interface DashboardStats {

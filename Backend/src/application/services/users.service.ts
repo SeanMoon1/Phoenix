@@ -36,7 +36,7 @@ export class UsersService {
     user.email = createUserDto.email;
     user.password = createUserDto.password || '';
     user.name = createUserDto.name;
-    user.teamId = createUserDto.teamId || 1; // 임시로 기본 팀 ID 설정
+    user.teamId = createUserDto.teamId || null; // 임시로 기본 팀 ID 설정
     user.userCode = createUserDto.userCode || `USER${Date.now()}`; // 임시로 고유한 사용자 코드 생성
     user.oauthProvider = createUserDto.oauthProvider || null;
     user.oauthProviderId = createUserDto.oauthProviderId || null;

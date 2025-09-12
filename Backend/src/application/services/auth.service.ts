@@ -104,7 +104,7 @@ export class AuthService {
       // 3. 사용자 생성 (팀 ID는 기본값으로 설정)
       const user = await this.usersService.create({
         ...registerDto,
-        teamId: 1, // 기본 팀 ID로 설정
+        //teamId: 1, // 기본 팀 ID로 설정
         userCode: `USER${Date.now()}`, // 고유한 사용자 코드 생성
         password: hashedPassword,
       });

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
@@ -63,11 +58,7 @@ const FeatureCard: React.FC<{
 
 // 홈 페이지 컴포넌트
 const HomePage: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
-
-  if (isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   return (
     <Layout>
@@ -93,26 +84,50 @@ const HomePage: React.FC = () => {
                 className="mb-4 sm:mb-6"
               >
                 <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl md:text-4xl dark:text-gray-100">
-                  재난 대응 훈련 시스템
+                  {isAuthenticated
+                    ? `안녕하세요, ${user?.name}님!`
+                    : '재난 대응 훈련 시스템'}
                 </h2>
               </AnimatedText>
 
               <AnimatedText delay={1000} animation="slideUp" className="mb-8">
                 <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-700 sm:text-xl dark:text-gray-200 lg:mx-0 lg:text-left">
-                  가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을
-                  향상시키는 혁신적인 훈련 플랫폼입니다.
+                  {isAuthenticated
+                    ? '가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을 향상시켜보세요. 지금 바로 훈련을 시작할 수 있습니다!'
+                    : '가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을 향상시키는 혁신적인 훈련 플랫폼입니다.'}
                 </p>
               </AnimatedText>
 
               <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row lg:justify-start sm:space-y-0 sm:space-x-4">
-                <AnimatedButton
-                  href="/login"
-                  variant="primary"
-                  delay={1500}
-                  className="w-full sm:w-auto"
-                >
-                  훈련 시작하기
-                </AnimatedButton>
+                {isAuthenticated ? (
+                  <>
+                    <AnimatedButton
+                      href="/training"
+                      variant="primary"
+                      delay={1500}
+                      className="w-full sm:w-auto"
+                    >
+                      훈련 시작하기
+                    </AnimatedButton>
+                    <AnimatedButton
+                      href="/mypage"
+                      variant="outline"
+                      delay={1700}
+                      className="w-full sm:w-auto"
+                    >
+                      마이페이지
+                    </AnimatedButton>
+                  </>
+                ) : (
+                  <AnimatedButton
+                    href="/login"
+                    variant="primary"
+                    delay={1500}
+                    className="w-full sm:w-auto"
+                  >
+                    훈련 시작하기
+                  </AnimatedButton>
+                )}
               </div>
             </div>
 
@@ -234,14 +249,25 @@ const HomePage: React.FC = () => {
           </AnimatedText>
 
           <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-            <AnimatedButton
-              href="/login"
-              variant="primary"
-              delay={200}
-              className="w-full sm:w-auto"
-            >
-              훈련 시작하기
-            </AnimatedButton>
+            {isAuthenticated ? (
+              <AnimatedButton
+                href="/training"
+                variant="primary"
+                delay={200}
+                className="w-full sm:w-auto"
+              >
+                훈련 시작하기
+              </AnimatedButton>
+            ) : (
+              <AnimatedButton
+                href="/login"
+                variant="primary"
+                delay={200}
+                className="w-full sm:w-auto"
+              >
+                훈련 시작하기
+              </AnimatedButton>
+            )}
           </div>
         </div>
       </div>

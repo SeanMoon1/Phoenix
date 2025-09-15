@@ -18,6 +18,7 @@ import {
   TeamStatsResponseDto,
   TeamMemberStatsDto,
 } from '../../presentation/dto/team-stats-response.dto';
+import { validateNumericValue } from '../../shared/utils/number.util';
 
 @Injectable()
 export class TrainingResultService {
@@ -33,11 +34,46 @@ export class TrainingResultService {
   ) {}
 
   /**
+   * 숫자 값 검증 및 NaN 방지
+   */
+  private validateNumericValues(dto: CreateTrainingResultDto): void {
+    try {
+      // 필수 숫자 필드 검증
+      dto.participantId = validateNumericValue(
+        dto.participantId,
+        'participantId',
+      );
+      dto.sessionId = validateNumericValue(dto.sessionId, 'sessionId');
+      dto.scenarioId = validateNumericValue(dto.scenarioId, 'scenarioId');
+      dto.userId = validateNumericValue(dto.userId, 'userId');
+      dto.accuracyScore = validateNumericValue(
+        dto.accuracyScore,
+        'accuracyScore',
+      );
+      dto.speedScore = validateNumericValue(dto.speedScore, 'speedScore');
+      dto.totalScore = validateNumericValue(dto.totalScore, 'totalScore');
+
+      // 선택적 숫자 필드 검증
+      if (dto.completionTime !== undefined && dto.completionTime !== null) {
+        dto.completionTime = validateNumericValue(
+          dto.completionTime,
+          'completionTime',
+        );
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
    * 훈련 결과 저장
    */
   async createTrainingResult(
     createTrainingResultDto: CreateTrainingResultDto,
   ): Promise<TrainingResult> {
+    // 숫자 값 검증 및 NaN 방지
+    this.validateNumericValues(createTrainingResultDto);
+
     // 사용자 존재 확인
     const user = await this.userRepository.findOne({
       where: { id: createTrainingResultDto.userId, isActive: true },

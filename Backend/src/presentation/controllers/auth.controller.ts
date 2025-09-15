@@ -6,6 +6,8 @@ import {
   Request,
   Get,
   Param,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,6 +28,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: '사용자 회원가입' })
   @ApiResponse({ status: 201, description: '회원가입 성공' })
   async register(@Body() registerDto: RegisterDto) {
@@ -34,9 +37,11 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '사용자 로그인' })
   @ApiResponse({ status: 200, description: '로그인 성공' })
   async login(@Body() loginDto: LoginDto, @Request() req) {
+    console.log('🎯 AuthController.login 호출됨');
     return this.authService.login(req.user);
   }
 

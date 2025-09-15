@@ -30,6 +30,9 @@ import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { ScenarioImportService } from './application/services/scenario-import.service';
 
+// Application Layer - Use Cases
+import { CreateUserUseCase } from './application/use-cases/user/create-user.use-case';
+
 // Domain Layer - Entities
 import { User } from './domain/entities/user.entity';
 import { Scenario } from './domain/entities/scenario.entity';
@@ -107,6 +110,7 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     TeamsService,
     AdminService,
     ScenarioImportService,
+    // CreateUserUseCase, // 임시 비활성화 - Repository 주입 문제
     LocalStrategy,
     JwtStrategy,
     GoogleStrategy,

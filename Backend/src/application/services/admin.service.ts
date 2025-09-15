@@ -96,7 +96,10 @@ export class AdminService {
     return {
       totalMembers,
       activeMembers,
-      totalCompletedScenarios: parseInt(completedScenarios.total) || 0,
+      totalCompletedScenarios: (() => {
+        const parsed = parseInt(completedScenarios.total, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      })(),
     };
   }
 

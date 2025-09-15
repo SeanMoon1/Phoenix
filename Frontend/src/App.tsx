@@ -249,14 +249,15 @@ const HomePage: React.FC = () => {
   );
 };
 
-// 보호된 라우트 컴포넌트
+// 보호된 라우트 컴포넌트 (개발용 - 임시 비활성화)
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isAuthenticated } = useAuthStore();
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // 개발 중에는 인증 체크를 비활성화
+  // const { isAuthenticated } = useAuthStore();
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
   return <>{children}</>;
 };

@@ -34,11 +34,11 @@ export default new DataSource({
   migrations: ['src/database/migrations/*{.ts,.js}'],
   synchronize: process.env.NODE_ENV === 'development', // 개발 환경에서만 true
   logging: process.env.NODE_ENV === 'development',
-  // 연결 풀 설정
+  // 연결 풀 설정 (올바른 위치)
+  acquireTimeout: 60000,
+  timeout: 60000,
   extra: {
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
   },
   // SSL 설정 (AWS RDS 사용 시)
   ssl:

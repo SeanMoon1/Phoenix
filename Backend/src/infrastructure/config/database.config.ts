@@ -41,7 +41,8 @@ export const getDatabaseConfig = (
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     synchronize: isDevelopment,
     logging: isDevelopment,
-    // 연결 풀 설정
+    // 연결 풀 설정 (올바른 위치)
+    acquireTimeout: 60000,
     extra: {
       connectionLimit: 10,
     },

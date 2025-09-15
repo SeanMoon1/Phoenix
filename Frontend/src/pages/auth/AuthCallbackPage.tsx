@@ -10,7 +10,6 @@ const AuthCallbackPage: React.FC = () => {
 
   useEffect(() => {
     const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
     const error = searchParams.get('error');
 
     if (error) {
@@ -20,27 +19,46 @@ const AuthCallbackPage: React.FC = () => {
       return;
     }
 
-    if (token && userParam) {
+    if (token) {
       try {
-        // URL 디코딩 및 JSON 파싱
-        const user = JSON.parse(decodeURIComponent(userParam));
+        // 토큰만으로 사용자 정보 조회
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-        // 인증 상태 설정
-        setAuth({
-          token,
-          user,
-          isAuthenticated: true,
-        });
+        fetch(`${apiBaseUrl}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.data) {
+              // 인증 상태 설정
+              setAuth({
+                token,
+                user: data.data,
+                isAuthenticated: true,
+              });
 
-        // 메인페이지로 리다이렉트
-        navigate('/');
+              // 메인페이지로 리다이렉트
+              navigate('/');
+            } else {
+              throw new Error(
+                data.error || '사용자 정보를 가져올 수 없습니다.'
+              );
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch user data:', error);
+            navigate('/login?error=invalid_token');
+          });
       } catch (error) {
-        console.error('Failed to parse user data:', error);
+        console.error('Failed to process token:', error);
         navigate('/login?error=invalid_callback');
       }
     } else {
-      // 토큰이나 사용자 정보가 없는 경우
-      navigate('/login?error=missing_callback_data');
+      // 토큰이 없는 경우
+      navigate('/login?error=missing_token');
     }
   }, [searchParams, navigate, setAuth]);
 
@@ -48,8 +66,8 @@ const AuthCallbackPage: React.FC = () => {
     <Layout>
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-orange-600 rounded-full animate-spin"></div>
+          <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
             로그인 처리 중...
           </h2>
           <p className="text-gray-600 dark:text-gray-300">

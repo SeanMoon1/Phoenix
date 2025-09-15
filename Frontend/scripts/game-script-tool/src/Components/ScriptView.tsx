@@ -1,14 +1,13 @@
-import React from "react";
-import styled from "styled-components";
-import { useBlockListStore, useAppStateStore } from "../Stores/atom";
-import ScriptBlock from "../Components/Partials/ScriptBlock";
-import type { ScriptBlock as ScriptBlockType } from "../types";
+import styled from 'styled-components';
+import { useBlockListStore, useAppStateStore } from '../Stores/atom';
+import ScriptBlock from '../Components/Partials/ScriptBlock';
+import type { ScriptBlock as ScriptBlockType } from '../types';
 
 const Container = styled.div`
   padding: 5px 0px;
 `;
 
-const ScriptView: React.FC = () => {
+const ScriptView = () => {
   const { blockList, setBlockList, updateBlock } = useBlockListStore();
   const { openSceneForm } = useAppStateStore();
 
@@ -38,7 +37,7 @@ const ScriptView: React.FC = () => {
   };
 
   const removeBlock = (sceneId: string): void => {
-    if (!window.confirm("삭제한 후 되돌릴 수 없습니다. 삭제하시겠습니까?"))
+    if (!window.confirm('삭제한 후 되돌릴 수 없습니다. 삭제하시겠습니까?'))
       return;
 
     const updatedBlockList = blockList.filter(
@@ -54,7 +53,7 @@ const ScriptView: React.FC = () => {
   // 완료 블록은 관리자에게 보이지 않도록 필터링
   const visibleBlocks = blockList.filter(
     (block: ScriptBlockType) =>
-      !block.sceneId || !block.sceneId.startsWith("#ending-")
+      !block.sceneId || !block.sceneId.startsWith('#ending-')
   );
 
   return (

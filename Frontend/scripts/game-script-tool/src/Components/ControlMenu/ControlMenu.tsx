@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { useAppStateStore } from '../../Stores/atom';
 
@@ -52,7 +51,7 @@ const Button = styled.button`
   }
 `;
 
-const ControlMenu: React.FC = () => {
+const ControlMenu = () => {
   const { openSceneForm } = useAppStateStore();
 
   const onAddSceneBlockClick = () => {

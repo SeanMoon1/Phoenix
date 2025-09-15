@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   getAvailableSceneIds,
@@ -90,13 +90,13 @@ const NewSceneIndicator = styled.span`
   margin-left: 8px;
 `;
 
-const SceneIdSelector: React.FC<SceneIdSelectorProps> = ({
+const SceneIdSelector = ({
   value,
   onChange,
   existingSceneIds,
   placeholder = '장면 ID를 선택하세요',
   disabled = false,
-}) => {
+}: SceneIdSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

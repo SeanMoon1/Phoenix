@@ -128,7 +128,7 @@ const SectionDivider = styled.div`
   border-bottom: 1px solid #e9ecef;
 `;
 
-const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
+const NextSceneSelector = ({
   value,
   onChange,
   availableScenes,
@@ -136,7 +136,7 @@ const NextSceneSelector: React.FC<NextSceneSelectorProps> = ({
   allowEnding = true,
   placeholder = '다음 장면을 선택하세요',
   disabled = false,
-}) => {
+}: NextSceneSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

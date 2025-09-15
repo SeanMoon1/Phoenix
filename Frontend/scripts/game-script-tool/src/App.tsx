@@ -8,7 +8,7 @@
  *
  * 실제 훈련은 별도의 Training Dashboard에서 진행됩니다.
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ControlMenu from './Components/ControlMenu/ControlMenu';
 import ScriptView from './Components/ScriptView';
@@ -240,7 +240,7 @@ const ActionButton = styled.button<{ $primary?: boolean }>`
   }
 `;
 
-const App: React.FC = () => {
+const App = () => {
   const { setBlockList } = useBlockListSelector();
   const { appState, closeSceneForm } = useAppStateStore();
 

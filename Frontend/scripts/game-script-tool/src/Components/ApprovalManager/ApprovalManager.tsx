@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { APPROVAL_STATUS_INFO, USER_ROLES } from '../ScriptInput/constants';
 import {
@@ -156,11 +156,11 @@ interface ApprovalManagerProps {
   currentUser: User;
 }
 
-const ApprovalManager: React.FC<ApprovalManagerProps> = ({
+const ApprovalManager = ({
   blockList,
   onApprovalUpdate,
   currentUser,
-}) => {
+}: ApprovalManagerProps) => {
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
     blockId: string | null;

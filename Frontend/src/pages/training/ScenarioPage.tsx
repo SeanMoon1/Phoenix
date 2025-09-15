@@ -25,7 +25,6 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
 
-const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
@@ -110,7 +109,6 @@ export default function ScenarioPage() {
           completedAt: new Date().toISOString(),
         };
 
-        // ✅ api.saveResult → api.post로 변경
         const response = await api.post('/training-results', resultData);
 
         if (response.success) {
@@ -122,7 +120,7 @@ export default function ScenarioPage() {
     } catch (error) {
       console.error('Failed to save training result:', error);
 
-      // ✅ 실패 시 로컬스토리지에 백업 저장
+      // 실패 시 로컬스토리지에 백업 저장
       if (user) {
         const backupData = {
           userId: user.id,

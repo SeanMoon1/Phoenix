@@ -6,18 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
+  publicDir: 'public',
   server: {
-    host: '0.0.0.0',
-    port: 3001,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_URL || 'http://43.203.112.213:3000',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    port: 3000,
+    open: true,
   },
 });

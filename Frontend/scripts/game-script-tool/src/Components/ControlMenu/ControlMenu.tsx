@@ -1,56 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useAppStateStore } from '../../Stores/atom';
-
-const Container = styled.div`
-  display: flex;
-  gap: 10px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  flex-wrap: wrap;
-`;
-
-const Button = styled.button`
-  padding: 10px 20px;
-  border: 1px solid #007bff;
-  background: white;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #007bff;
-    color: white;
-  }
-
-  &.primary {
-    background: #007bff;
-    color: white;
-  }
-
-  &.warning {
-    border-color: #ffc107;
-    color: #ffc107;
-
-    &:hover {
-      background: #ffc107;
-      color: white;
-    }
-  }
-
-  &.danger {
-    border-color: #dc3545;
-    color: #dc3545;
-
-    &:hover {
-      background: #dc3545;
-      color: white;
-    }
-  }
-`;
 
 const ControlMenu: React.FC = () => {
   const { openSceneForm } = useAppStateStore();
@@ -80,7 +29,7 @@ const ControlMenu: React.FC = () => {
             );
             alert('파일이 성공적으로 import되었습니다!');
             window.location.reload();
-          } catch {
+          } catch (error) {
             alert('파일 형식이 올바르지 않습니다.');
           }
         };
@@ -96,9 +45,7 @@ const ControlMenu: React.FC = () => {
 
     // 완료 블록이 없는 경우 자동으로 추가
     const hasEndingBlock = currentBlocks.some(
-      (block: Record<string, unknown>) =>
-        typeof block.sceneId === 'string' &&
-        block.sceneId.startsWith('#ending-')
+      (block: any) => block.sceneId && block.sceneId.startsWith('#ending-')
     );
 
     let blocksToExport = currentBlocks;
@@ -152,16 +99,44 @@ const ControlMenu: React.FC = () => {
   };
 
   return (
-    <Container>
-      <Button className="primary" onClick={onAddSceneBlockClick}>
-        ➕ 시나리오 생성
-      </Button>
-      <Button onClick={onImportClick}>📥 시나리오 가져오기</Button>
-      <Button onClick={onExportClick}>📤 시나리오 내보내기</Button>
-      <Button className="danger" onClick={onClearClick}>
-        🗑️ 모든 시나리오 삭제
-      </Button>
-    </Container>
+    <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl border border-gray-200 dark:border-gray-600 p-6">
+      <div className="flex flex-col space-y-3">
+        {/* 첫 번째 행 */}
+        <div className="flex space-x-3">
+          <button
+            onClick={onAddSceneBlockClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white font-medium rounded-lg hover:from-orange-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[80px]"
+          >
+            <span className="text-xl">➕</span>
+            <span className="text-xs text-center">시나리오 생성</span>
+          </button>
+          <button
+            onClick={onImportClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">📥</span>
+            <span className="text-xs text-center">시나리오 가져오기</span>
+          </button>
+        </div>
+        {/* 두 번째 행 */}
+        <div className="flex space-x-3">
+          <button
+            onClick={onExportClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">📤</span>
+            <span className="text-xs text-center">시나리오 내보내기</span>
+          </button>
+          <button
+            onClick={onClearClick}
+            className="flex-1 flex flex-col items-center justify-center space-y-2 px-3 py-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 min-h-[80px]"
+          >
+            <span className="text-xl">🗑️</span>
+            <span className="text-xs text-center">모든 시나리오 삭제</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

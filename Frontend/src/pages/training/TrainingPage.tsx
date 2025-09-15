@@ -24,91 +24,55 @@ const TrainingPage: React.FC = () => {
     color: 'red',
     content: (
       <div className="space-y-8">
-        {/* 훈련 정보 카드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 훈련 개요 */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 개요
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-red-600 dark:text-red-400 text-sm">
-                    1
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    화재 감지 및 신고
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    화재 발생 시 즉시 감지하고 신고하는 방법을 학습합니다.
-                  </p>
-                </div>
+        {/* 훈련 개요 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            훈련 개요
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-red-600 dark:text-red-400 text-sm">
+                  1
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-red-600 dark:text-red-400 text-sm">
-                    2
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    안전한 대피
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    연기와 불길을 피해 안전한 경로로 대피하는 방법을 익힙니다.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-red-600 dark:text-red-400 text-sm">
-                    3
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    초기 진화
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    소화기 사용법과 초기 화재 진화 요령을 실습합니다.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  화재 감지 및 신고
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  화재 발생 시 즉시 감지하고 신고하는 방법을 학습합니다.
+                </p>
               </div>
             </div>
-          </div>
-
-          {/* 훈련 통계 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 통계
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  완료한 훈련
-                </span>
-                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  12회
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-red-600 dark:text-red-400 text-sm">
+                  2
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  평균 점수
-                </span>
-                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  87점
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  안전한 대피
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  연기와 불길을 피해 안전한 경로로 대피하는 방법을 익힙니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-red-600 dark:text-red-400 text-sm">
+                  3
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  최고 점수
-                </span>
-                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  95점
-                </span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  초기 진화
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  소화기 사용법과 초기 화재 진화 요령을 실습합니다.
+                </p>
               </div>
             </div>
           </div>
@@ -133,92 +97,55 @@ const TrainingPage: React.FC = () => {
     color: 'yellow',
     content: (
       <div className="space-y-8">
-        {/* 훈련 정보 카드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 훈련 개요 */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 개요
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-yellow-600 dark:text-yellow-400 text-sm">
-                    1
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    지진 감지 및 대응
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    지진 발생 시 즉시 대응하는 방법을 학습합니다.
-                  </p>
-                </div>
+        {/* 훈련 개요 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            훈련 개요
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-yellow-600 dark:text-yellow-400 text-sm">
+                  1
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-yellow-600 dark:text-yellow-400 text-sm">
-                    2
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    안전한 대피
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    건물 붕괴 위험을 피해 안전한 장소로 대피하는 방법을
-                    익힙니다.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-yellow-600 dark:text-yellow-400 text-sm">
-                    3
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    생존 요령
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    지진 후 생존을 위한 필수 요령을 실습합니다.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  지진 감지 및 대응
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  지진 발생 시 즉시 대응하는 방법을 학습합니다.
+                </p>
               </div>
             </div>
-          </div>
-
-          {/* 훈련 통계 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 통계
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  완료한 훈련
-                </span>
-                <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  8회
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-yellow-600 dark:text-yellow-400 text-sm">
+                  2
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  평균 점수
-                </span>
-                <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  88점
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  안전한 대피
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  건물 붕괴 위험을 피해 안전한 장소로 대피하는 방법을 익힙니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-yellow-600 dark:text-yellow-400 text-sm">
+                  3
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  최고 점수
-                </span>
-                <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  92점
-                </span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  생존 요령
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  지진 후 생존을 위한 필수 요령을 실습합니다.
+                </p>
               </div>
             </div>
           </div>
@@ -243,92 +170,56 @@ const TrainingPage: React.FC = () => {
     color: 'green',
     content: (
       <div className="space-y-8">
-        {/* 훈련 정보 카드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 훈련 개요 */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 개요
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    1
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    심폐소생술 (CPR)
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    심정지 환자에 대한 심폐소생술을 올바르게 수행하는 방법을
-                    학습합니다.
-                  </p>
-                </div>
+        {/* 훈련 개요 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            훈련 개요
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-green-600 dark:text-green-400 text-sm">
+                  1
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    2
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    지혈 응급처치
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    출혈 상황에서 적절한 지혈 방법을 익힙니다.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    3
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    응급상황 대응
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    다양한 응급상황에 대한 대응 방법을 실습합니다.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  심폐소생술 (CPR)
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  심정지 환자에 대한 심폐소생술을 올바르게 수행하는 방법을
+                  학습합니다.
+                </p>
               </div>
             </div>
-          </div>
-
-          {/* 훈련 통계 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 통계
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  완료한 훈련
-                </span>
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  15회
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-green-600 dark:text-green-400 text-sm">
+                  2
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  평균 점수
-                </span>
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  92점
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  지혈 응급처치
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  출혈 상황에서 적절한 지혈 방법을 익힙니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-green-600 dark:text-green-400 text-sm">
+                  3
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  최고 점수
-                </span>
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  98점
-                </span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  응급상황 대응
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  다양한 응급상황에 대한 대응 방법을 실습합니다.
+                </p>
               </div>
             </div>
           </div>
@@ -353,93 +244,57 @@ const TrainingPage: React.FC = () => {
     color: 'blue',
     content: (
       <div className="space-y-8">
-        {/* 훈련 정보 카드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 훈련 개요 */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 개요
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">
-                    1
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    사고 현장 안전 확보
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    교통사고 발생 시 현장 안전을 확보하고 2차 사고를 방지하는
-                    방법을 학습합니다.
-                  </p>
-                </div>
+        {/* 훈련 개요 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            훈련 개요
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">
+                  1
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">
-                    2
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    응급 신고 및 구조
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    신속한 신고와 부상자 구조를 위한 올바른 절차를 익힙니다.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">
-                    3
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    응급처치 및 대응
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    교통사고 부상자에 대한 응급처치와 상황별 대응 방법을
-                    실습합니다.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  사고 현장 안전 확보
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  교통사고 발생 시 현장 안전을 확보하고 2차 사고를 방지하는
+                  방법을 학습합니다.
+                </p>
               </div>
             </div>
-          </div>
-
-          {/* 훈련 통계 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              훈련 통계
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  완료한 훈련
-                </span>
-                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  6회
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">
+                  2
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  평균 점수
-                </span>
-                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  76점
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  응급 신고 및 구조
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  신속한 신고와 부상자 구조를 위한 올바른 절차를 익힙니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <span className="text-blue-600 dark:text-blue-400 text-sm">
+                  3
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">
-                  최고 점수
-                </span>
-                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  82점
-                </span>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  응급처치 및 대응
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  교통사고 부상자에 대한 응급처치와 상황별 대응 방법을
+                  실습합니다.
+                </p>
               </div>
             </div>
           </div>

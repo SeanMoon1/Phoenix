@@ -40,13 +40,11 @@
 
 ### Backend
 
-- **NestJS** + **TypeScript** (Clean Architecture)
+- **NestJS** + **TypeScript**
 - **TypeORM** (ORM)
 - **MySQL** (데이터베이스)
 - **JWT** (인증)
 - **Swagger** (API 문서)
-- **Clean Architecture** (도메인 중심 설계)
-- **AOP** (관점 지향 프로그래밍)
 
 ### DevOps
 
@@ -84,88 +82,27 @@ Phoenix/
 │   ├── tailwind.config.js
 │   └── vite.config.ts
 │
-├── 📁 Backend/                     # NestJS 애플리케이션 (Clean Architecture)
+├── 📁 Backend/                     # NestJS 애플리케이션
 │   ├── 📁 src/
-│   │   ├── 📁 domain/              # 🏛️ 도메인 계층 (비즈니스 로직)
-│   │   │   ├── 📁 entities/        # 도메인 엔티티
-│   │   │   │   ├── user.entity.ts
-│   │   │   │   ├── scenario.entity.ts
-│   │   │   │   ├── training-session.entity.ts
-│   │   │   │   └── team.entity.ts
-│   │   │   ├── 📁 repositories/    # 리포지토리 인터페이스
-│   │   │   │   ├── user.repository.ts
-│   │   │   │   └── scenario.repository.ts
-│   │   │   ├── 📁 services/        # 도메인 서비스
-│   │   │   │   ├── user-domain.service.ts
-│   │   │   │   └── scenario-domain.service.ts
-│   │   │   └── 📁 value-objects/   # 값 객체
-│   │   │       ├── user-id.vo.ts
-│   │   │       ├── scenario-id.vo.ts
-│   │   │       └── team-code.vo.ts
-│   │   ├── 📁 application/         # 🎯 애플리케이션 계층 (유스케이스)
-│   │   │   ├── 📁 services/        # 애플리케이션 서비스
-│   │   │   │   ├── auth.service.ts
-│   │   │   │   ├── users.service.ts
-│   │   │   │   ├── scenarios.service.ts
-│   │   │   │   ├── training.service.ts
-│   │   │   │   └── teams.service.ts
-│   │   │   ├── 📁 use-cases/       # 유스케이스
-│   │   │   │   ├── 📁 user/
-│   │   │   │   │   └── create-user.use-case.ts
-│   │   │   │   └── 📁 scenario/
-│   │   │   │       └── get-scenario.use-case.ts
-│   │   │   └── 📁 interfaces/      # 인터페이스
-│   │   │       └── repositories.ts
-│   │   ├── 📁 presentation/        # 🎨 프레젠테이션 계층 (API)
-│   │   │   ├── 📁 controllers/     # API 컨트롤러
-│   │   │   │   ├── auth.controller.ts
-│   │   │   │   ├── users.controller.ts
-│   │   │   │   ├── scenarios.controller.ts
-│   │   │   │   ├── training.controller.ts
-│   │   │   │   ├── teams.controller.ts
-│   │   │   │   └── admin.controller.ts
-│   │   │   ├── 📁 dto/             # 데이터 전송 객체
-│   │   │   │   ├── login.dto.ts
-│   │   │   │   ├── register.dto.ts
-│   │   │   │   ├── create-*.dto.ts
-│   │   │   │   └── update-*.dto.ts
-│   │   │   └── 📁 decorators/      # 프레젠테이션 데코레이터
-│   │   │       ├── api-response.decorator.ts
-│   │   │       └── roles.decorator.ts
-│   │   ├── 📁 infrastructure/      # 🔧 인프라 계층 (외부 의존성)
-│   │   │   ├── 📁 database/        # 데이터베이스
-│   │   │   │   └── 📁 entities/
-│   │   │   │       └── training-participant.entity.ts
-│   │   │   ├── 📁 config/          # 설정
-│   │   │   │   ├── database.config.ts
-│   │   │   │   └── app.config.ts
-│   │   │   └── 📁 external/        # 외부 서비스
-│   │   │       ├── email.service.ts
-│   │   │       └── notification.service.ts
-│   │   ├── 📁 shared/              # 🤝 공통 계층 (공유 모듈)
-│   │   │   ├── 📁 decorators/      # 공통 데코레이터
-│   │   │   │   ├── cache.decorator.ts
-│   │   │   │   ├── logging.decorator.ts
-│   │   │   │   ├── public.decorator.ts
-│   │   │   │   └── roles.decorator.ts
-│   │   │   ├── 📁 filters/         # 예외 필터
-│   │   │   │   └── http-exception.filter.ts
-│   │   │   ├── 📁 guards/          # 가드
-│   │   │   │   ├── jwt-auth.guard.ts
-│   │   │   │   ├── local-auth.guard.ts
-│   │   │   │   └── roles.guard.ts
-│   │   │   ├── 📁 interceptors/    # 인터셉터
-│   │   │   │   └── logging.interceptor.ts
-│   │   │   └── 📁 pipes/           # 파이프
-│   │   │       └── validation.pipe.ts
-│   │   ├── 📁 modules_backup/      # 📦 기존 모듈 백업
-│   │   ├── 📁 utils/               # 유틸리티
-│   │   │   ├── date.util.ts
-│   │   │   └── password.util.ts
-│   │   ├── app.module.ts           # 메인 모듈
-│   │   ├── app.controller.ts
-│   │   ├── app.service.ts
-│   │   └── main.ts
+│   │   ├── 📁 modules/             # 기능별 모듈
+│   │   │   ├── 📁 auth/            # 인증 모듈
+│   │   │   ├── 📁 users/           # 사용자 관리
+│   │   │   ├── 📁 teams/           # 팀 관리
+│   │   │   ├── 📁 scenarios/       # 시나리오 관리
+│   │   │   ├── 📁 training/        # 훈련 관리
+│   │   │   ├── 📁 training-results/ # 훈련 결과
+│   │   │   ├── 📁 user-progress/   # 사용자 진행상황
+│   │   │   ├── 📁 support/         # 지원 시스템
+│   │   │   ├── 📁 codes/           # 코드 관리
+│   │   │   ├── 📁 admin/           # 관리자 기능
+│   │   │   └── 📁 common/          # 공통 모듈
+│   │   ├── 📁 database/            # 데이터베이스 관련
+│   │   │   ├── 📁 entities/        # TypeORM 엔티티
+│   │   │   ├── 📁 migrations/      # 마이그레이션
+│   │   │   └── 📁 seeds/           # 시드 데이터
+│   │   ├── 📁 config/              # 환경 설정
+│   │   ├── 📁 shared/              # 공유 모듈
+│   │   └── 📁 utils/               # 유틸리티
 │   ├── package.json
 │   ├── ormconfig.ts                # TypeORM 설정
 │   └── ecosystem.config.js         # PM2 설정
@@ -188,49 +125,64 @@ Phoenix/
 └── package.json                    # 루트 패키지
 ```
 
-## 🏗️ Backend 아키텍처 (Clean Architecture)
-
-### 계층별 구조
-
-#### 🏛️ Domain Layer (도메인 계층)
-
-- **비즈니스 로직의 핵심**: 엔티티, 값 객체, 도메인 서비스
-- **외부 의존성 없음**: 순수한 비즈니스 규칙만 포함
-- **테스트 용이성**: 독립적인 단위 테스트 가능
-
-#### 🎯 Application Layer (애플리케이션 계층)
-
-- **유스케이스 구현**: 비즈니스 시나리오별 처리 로직
-- **애플리케이션 서비스**: 도메인과 인프라를 연결
-- **인터페이스 정의**: 의존성 역전 원칙 적용
-
-#### 🎨 Presentation Layer (프레젠테이션 계층)
-
-- **API 컨트롤러**: HTTP 요청/응답 처리
-- **DTO**: 데이터 전송 객체
-- **데코레이터**: API 문서화 및 검증
-
-#### 🔧 Infrastructure Layer (인프라 계층)
-
-- **데이터베이스**: TypeORM 엔티티 및 설정
-- **외부 서비스**: 이메일, 알림 등
-- **설정 관리**: 환경별 설정
-
-#### 🤝 Shared Layer (공통 계층)
-
-- **공통 모듈**: 가드, 필터, 인터셉터, 파이프
-- **유틸리티**: 재사용 가능한 헬퍼 함수
-
-### 아키텍처 원칙
-
-- **의존성 방향**: Presentation → Application → Domain ← Infrastructure
-- **의존성 역전**: 상위 계층이 하위 계층의 인터페이스에 의존
-- **단일 책임**: 각 계층은 명확한 책임을 가짐
-- **테스트 용이성**: 계층별 독립적인 테스트 가능
-
 ## 🚀 빠른 시작
 
-### 1. 개발 환경 설정
+### 1. 환경 변수 설정
+
+#### Backend 환경 변수 (.env 파일 생성)
+
+```bash
+# Backend/.env 파일 생성
+cd Backend
+cp .env.example .env  # 또는 직접 생성
+```
+
+**필수 환경 변수:**
+
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_DATABASE=phoenix
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=7d
+
+# Google OAuth (Google Cloud Console에서 발급)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# Frontend URL
+FRONTEND_URL=http://localhost:5173
+
+# Server
+PORT=3000
+NODE_ENV=development
+```
+
+#### Frontend 환경 변수 (.env 파일 생성)
+
+```bash
+# Frontend/.env 파일 생성
+cd Frontend
+cp .env.example .env  # 또는 직접 생성
+```
+
+**필수 환경 변수:**
+
+```env
+# API URL
+VITE_API_URL=http://localhost:3000
+
+# Environment
+VITE_NODE_ENV=development
+```
+
+### 2. 개발 환경 설정
 
 ```bash
 # 저장소 클론
@@ -242,7 +194,7 @@ chmod +x Frontend/scripts/setup/setup.sh
 ./Frontend/scripts/setup/setup.sh
 ```
 
-### 2. 개발 서버 실행
+### 3. 개발 서버 실행
 
 ```bash
 # Backend 서버 시작
@@ -254,7 +206,7 @@ cd Frontend
 npm run dev
 ```
 
-### 3. 접속 확인
+### 4. 접속 확인
 
 - **Frontend**: http://localhost:3001
 - **Backend API**: http://localhost:3000
@@ -329,8 +281,6 @@ npm run build
 - **VS Code**: 코드 에디터
 - **MySQL Workbench**: 데이터베이스 관리
 - **Postman**: API 테스트
-- **NestJS CLI**: NestJS 프로젝트 관리
-- **TypeORM CLI**: 데이터베이스 마이그레이션
 
 ## 📊 모니터링
 

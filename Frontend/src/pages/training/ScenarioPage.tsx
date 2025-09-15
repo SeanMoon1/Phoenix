@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { trainingResultApi } from '@/services/api';
+import { api } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ScenarioOption } from '@/types/scenario';
 
@@ -112,11 +112,37 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           completedAt: new Date().toISOString(),
         };
 
-        await trainingResultApi.saveResult(resultData);
-        console.log('Training result saved:', resultData);
+        // ✅ api.saveResult → api.post로 변경
+        const response = await api.post('/training-results', resultData);
+
+        if (response.success) {
+          console.log('Training result saved successfully:', resultData);
+        } else {
+          console.error('Failed to save training result:', response.error);
+        }
       }
     } catch (error) {
       console.error('Failed to save training result:', error);
+
+      // ✅ 실패 시 로컬스토리지에 백업 저장
+      if (user) {
+        const backupData = {
+          userId: user.id,
+          scenarioType,
+          completedAt: new Date().toISOString(),
+          failed: gameState.failedThisRun,
+          totalCorrect: expSystem.totalCorrect,
+          totalScenarios: gameState.scenarios.length,
+        };
+
+        const existingBackup = JSON.parse(
+          localStorage.getItem('training_backup') || '[]'
+        );
+        existingBackup.push(backupData);
+        localStorage.setItem('training_backup', JSON.stringify(existingBackup));
+
+        console.log('Training result saved to backup:', backupData);
+      }
     }
   };
 
@@ -184,7 +210,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="w-auto h-24 mx-auto mb-4 animate-pulse"
+            className="h-24 w-auto mx-auto mb-4 animate-pulse"
           />
           <p className="text-xl">시나리오 로딩 중...</p>
         </div>
@@ -199,7 +225,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="w-auto h-24 mx-auto mb-4"
+            className="h-24 w-auto mx-auto mb-4"
           />
           <p className="text-xl">시나리오를 불러올 수 없습니다.</p>
         </div>
@@ -253,7 +279,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               onPrev={handlePrev}
               onNext={handleNext}
             />
-            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
+            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
               <PlayMoreButton to="/training" />
             </div>
           </main>

@@ -2,17 +2,15 @@
  * 로깅 유틸리티
  */
 
-import chalk from 'chalk';
+import chalk from "chalk";
 
-export const LogLevel = {
-  INFO: 'info',
-  WARN: 'warn',
-  ERROR: 'error',
-  SUCCESS: 'success',
-  DEBUG: 'debug',
-} as const;
-
-export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
+export enum LogLevel {
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
+  SUCCESS = "success",
+  DEBUG = "debug",
+}
 
 export class Logger {
   private verbose: boolean;
@@ -31,11 +29,11 @@ export class Logger {
 
   private getPrefix(level: LogLevel): string {
     const prefixes = {
-      [LogLevel.INFO]: chalk.blue('📝'),
-      [LogLevel.WARN]: chalk.yellow('⚠️'),
-      [LogLevel.ERROR]: chalk.red('❌'),
-      [LogLevel.SUCCESS]: chalk.green('✅'),
-      [LogLevel.DEBUG]: chalk.gray('🔍'),
+      [LogLevel.INFO]: chalk.blue("📝"),
+      [LogLevel.WARN]: chalk.yellow("⚠️"),
+      [LogLevel.ERROR]: chalk.red("❌"),
+      [LogLevel.SUCCESS]: chalk.green("✅"),
+      [LogLevel.DEBUG]: chalk.gray("🔍"),
     };
     return prefixes[level];
   }
@@ -56,13 +54,13 @@ export class Logger {
     console.log(this.formatMessage(chalk.green(message), LogLevel.SUCCESS));
   }
 
-  debugLog(message: string): void {
+  debug(message: string): void {
     if (this.debug) {
       console.log(this.formatMessage(chalk.gray(message), LogLevel.DEBUG));
     }
   }
 
-  verboseLog(message: string): void {
+  verbose(message: string): void {
     if (this.verbose) {
       this.info(message);
     }
@@ -77,14 +75,16 @@ export class Logger {
     console.log(chalk.cyan(`\n--- ${message} ---`));
   }
 
-  list(items: string[], prefix = '•'): void {
-    items.forEach(item => {
+  list(items: string[], prefix = "•"): void {
+    items.forEach((item) => {
       console.log(chalk.gray(`${prefix} ${item}`));
     });
   }
 
-  table(data: Record<string, unknown>): void {
-    const maxKeyLength = Math.max(...Object.keys(data).map(key => key.length));
+  table(data: Record<string, any>): void {
+    const maxKeyLength = Math.max(
+      ...Object.keys(data).map((key) => key.length)
+    );
     Object.entries(data).forEach(([key, value]) => {
       const paddedKey = key.padEnd(maxKeyLength);
       console.log(chalk.gray(`${paddedKey}: ${value}`));
@@ -96,6 +96,6 @@ export class Logger {
   }
 
   clearProgress(): void {
-    process.stdout.write('\r' + ' '.repeat(50) + '\r');
+    process.stdout.write("\r" + " ".repeat(50) + "\r");
   }
 }

@@ -1,8 +1,8 @@
-/* eslint-disable */
-import React from "react";
-import styled from "styled-components";
-import { APPROVAL_STATUS_INFO } from "../ScriptInput/constants";
-import { ScriptBlock as ScriptBlockType, ApprovalStatus } from "../../types";
+/* eslint-disable jsx-a11y/accessible-emoji */
+import React from 'react';
+import styled from 'styled-components';
+import { APPROVAL_STATUS_INFO } from '../ScriptInput/constants';
+import { ScriptBlock as ScriptBlockType, ApprovalStatus } from '../../types';
 
 const Container = styled.div`
   background-color: #efefef;
@@ -53,7 +53,7 @@ const StatusBadge = styled.span<{ color: string }>`
   font-size: 11px;
   font-weight: bold;
   color: white;
-  background-color: ${(props) => props.color};
+  background-color: ${props => props.color};
 `;
 
 const CreatorInfo = styled.div`
@@ -106,31 +106,31 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
 }) => {
   const getDisasterEmoji = (type: string): string => {
     switch (type) {
-      case "fire":
-        return "🔥";
-      case "earthquake":
-        return "🌋";
-      case "emergency":
-        return "🚑";
-      case "flood":
-        return "🌊";
-      case "complex":
-        return "⚠️";
+      case 'fire':
+        return '🔥';
+      case 'earthquake':
+        return '🌋';
+      case 'emergency':
+        return '🚑';
+      case 'flood':
+        return '🌊';
+      case 'complex':
+        return '⚠️';
       default:
-        return "❓";
+        return '❓';
     }
   };
 
   const getDifficultyEmoji = (difficulty: string): string => {
     switch (difficulty) {
-      case "easy":
-        return "🟢";
-      case "medium":
-        return "🟡";
-      case "hard":
-        return "🔴";
+      case 'easy':
+        return '🟢';
+      case 'medium':
+        return '🟡';
+      case 'hard':
+        return '🔴';
       default:
-        return "⚪";
+        return '⚪';
     }
   };
 
@@ -162,19 +162,19 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
       <SceneID onClick={() => modifyBlock(block.sceneId)}>
         Scene {block.sceneId}
         <small>
-          (순서: {block.order}, 작성:{" "}
+          (순서: {block.order}, 작성:{' '}
           {new Date(block.createdAt).toLocaleDateString()})
         </small>
       </SceneID>
 
       <DisasterInfo>
         <InfoItem>
-          {getDisasterEmoji(block.disasterType || "unknown")}{" "}
-          {block.disasterType || "재난 유형"}
+          {getDisasterEmoji(block.disasterType || 'unknown')}{' '}
+          {block.disasterType || '재난 유형'}
         </InfoItem>
         <InfoItem>
-          {getDifficultyEmoji(block.difficulty || "medium")}{" "}
-          {block.difficulty || "난이도"}
+          {getDifficultyEmoji(block.difficulty || 'medium')}{' '}
+          {block.difficulty || '난이도'}
         </InfoItem>
       </DisasterInfo>
 
@@ -182,15 +182,15 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
 
       {block.options && block.options.length > 0 && (
         <OptionGroup>
-          {block.options.map((option) => (
+          {block.options.map(option => (
             <OptionItem key={option.answerId}>
-              <div style={{ marginBottom: "5px" }}>
+              <div style={{ marginBottom: '5px' }}>
                 <strong>{option.answerId}</strong>: {option.answer}
               </div>
-              <div style={{ marginBottom: "5px", color: "#666" }}>
+              <div style={{ marginBottom: '5px', color: '#666' }}>
                 → {option.reaction}
               </div>
-              <div style={{ fontSize: "12px", color: "#888" }}>
+              <div style={{ fontSize: '12px', color: '#888' }}>
                 다음 장면: {option.nextId}
               </div>
               {option.points && (
@@ -206,19 +206,17 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
         </OptionGroup>
       )}
 
-      <div style={{ marginTop: "10px", textAlign: "right" }}>
+      <div style={{ marginTop: '10px', textAlign: 'right' }}>
         <button
           onClick={() => moveBlockBy(block.sceneId, -1)}
-          disabled={
-            blockList.findIndex((b) => b.sceneId === block.sceneId) === 0
-          }
+          disabled={blockList.findIndex(b => b.sceneId === block.sceneId) === 0}
         >
           ⬆️ 위로
         </button>
         <button
           onClick={() => moveBlockBy(block.sceneId, 1)}
           disabled={
-            blockList.findIndex((b) => b.sceneId === block.sceneId) ===
+            blockList.findIndex(b => b.sceneId === block.sceneId) ===
             blockList.length - 1
           }
         >

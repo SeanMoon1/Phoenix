@@ -15,8 +15,8 @@ export class PasswordUtil {
   }
 
   static validatePassword(password: string): boolean {
-    // 최소 12자, 소문자와 숫자 포함 (길이 중심의 비밀번호 정책)
-    const passwordRegex = /^(?=.*[a-z])(?=.*\d)[a-z\d]{12,}$/;
+    // 최소 6자, 소문자와 숫자 포함
+    const passwordRegex = /^(?=.*[a-z])(?=.*\d).{6,}$/;
     return passwordRegex.test(password);
   }
 
@@ -31,7 +31,7 @@ export class PasswordUtil {
     return password;
   }
 
-  // 비밀번호 강도 검사 (길이 중심)
+  // 비밀번호 강도 검사 (6자 이상, 소문자와 숫자 포함)
   static getPasswordStrength(password: string): {
     score: number;
     feedback: string[];
@@ -39,12 +39,12 @@ export class PasswordUtil {
     const feedback: string[] = [];
     let score = 0;
 
-    // 길이 기반 점수 (가장 중요)
-    if (password.length >= 12) score += 2;
-    else feedback.push('최소 12자 이상이어야 합니다.');
+    // 길이 기반 점수 (최소 6자)
+    if (password.length >= 6) score += 2;
+    else feedback.push('최소 6자 이상이어야 합니다.');
 
-    if (password.length >= 16) score += 2;
-    if (password.length >= 20) score += 1;
+    if (password.length >= 8) score += 1;
+    if (password.length >= 12) score += 1;
 
     // 소문자 포함 (필수)
     if (/[a-z]/.test(password)) score += 1;
@@ -57,7 +57,6 @@ export class PasswordUtil {
     // 선택적 요소들 (보너스 점수)
     if (/[A-Z]/.test(password)) score += 1; // 대문자 (선택사항)
     if (/[@$!%*?&]/.test(password)) score += 1; // 특수문자 (선택사항)
-    if (/[^A-Za-z0-9@$!%*?&]/.test(password)) score += 1; // 기타 특수문자 (선택사항)
 
     return { score, feedback };
   }

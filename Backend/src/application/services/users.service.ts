@@ -4,34 +4,54 @@ import { Repository } from 'typeorm';
 import { User } from '../../domain/entities/user.entity';
 import { CreateUserDto } from '../../presentation/dto/create-user.dto';
 import { UpdateUserDto } from '../../presentation/dto/update-user.dto';
-import { CreateUserUseCase } from '../use-cases/user/create-user.use-case';
+import { PasswordUtil } from '../../utils/password.util';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private createUserUseCase: CreateUserUseCase,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // UseCase를 사용하여 사용자 생성 (비즈니스 로직 포함)
-    const result = await this.createUserUseCase.execute({
-      email: createUserDto.email,
-      password: createUserDto.password,
-      name: createUserDto.name,
-      teamId: createUserDto.teamId,
-      userCode: createUserDto.userCode,
+    // 이메일 중복 확인
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
     });
-
-    // UseCase 결과를 User 엔티티로 변환하여 반환
-    const user = await this.usersRepository.findOne({
-      where: { id: result.id },
-    });
-    if (!user) {
-      throw new Error('사용자 생성 후 조회 실패');
+    if (existingUser) {
+      throw new Error('User with this email already exists');
     }
-    return user;
+
+    // loginId 중복 확인
+    const existingLoginId = await this.usersRepository.findOne({
+      where: { loginId: createUserDto.loginId },
+    });
+    if (existingLoginId) {
+      throw new Error('User with this loginId already exists');
+    }
+
+    // 사용자 생성
+    const user = new User();
+    user.loginId = createUserDto.loginId;
+    user.email = createUserDto.email;
+    user.password = createUserDto.password || '';
+    user.name = createUserDto.name;
+    user.teamId = createUserDto.teamId || null; // 임시로 기본 팀 ID 설정
+    user.userCode = createUserDto.userCode || `USER${Date.now()}`; // 임시로 고유한 사용자 코드 생성
+    user.oauthProvider = createUserDto.oauthProvider || null;
+    user.oauthProviderId = createUserDto.oauthProviderId || null;
+    user.profileImageUrl = createUserDto.profileImageUrl || null;
+    user.useYn = createUserDto.useYn || 'Y';
+    user.userLevel = createUserDto.userLevel || 1;
+    user.userExp = createUserDto.userExp || 0;
+    user.totalScore = createUserDto.totalScore || 0;
+    user.completedScenarios = createUserDto.completedScenarios || 0;
+    user.currentTier = createUserDto.currentTier || '초급자';
+    user.levelProgress = createUserDto.levelProgress || 0.0;
+    user.nextLevelExp = createUserDto.nextLevelExp || 100;
+    user.isActive = createUserDto.isActive !== undefined ? createUserDto.isActive : true;
+
+    return await this.usersRepository.save(user);
   }
 
   async findAll(): Promise<User[]> {

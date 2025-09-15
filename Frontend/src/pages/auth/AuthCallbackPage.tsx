@@ -32,8 +32,8 @@ const AuthCallbackPage: React.FC = () => {
           isAuthenticated: true,
         });
 
-        // 대시보드로 리다이렉트
-        navigate('/dashboard');
+        // 메인페이지로 리다이렉트
+        navigate('/');
       } catch (error) {
         console.error('Failed to parse user data:', error);
         navigate('/login?error=invalid_callback');

@@ -46,6 +46,8 @@ export const useAuthStore = create<AuthStore>()(
               name: string;
               userLevel: number;
               currentTier: string;
+              isAdmin?: boolean;
+              adminLevel?: string;
             };
           }>('/auth/login', credentials);
 
@@ -68,6 +70,9 @@ export const useAuthStore = create<AuthStore>()(
               isActive: true,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
+              // 관리자 정보 추가
+              isAdmin: response.data.user.isAdmin || false,
+              adminLevel: response.data.user.adminLevel || 'USER',
             };
 
             set({

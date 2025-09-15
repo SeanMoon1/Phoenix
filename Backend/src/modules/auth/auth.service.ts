@@ -18,8 +18,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(loginId: string, password: string): Promise<any> {
+    const user = await this.usersService.findByLoginId(loginId);
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
       return result;
@@ -29,6 +29,10 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
+
+    // 관리자 권한 확인
+    const isAdmin = user.userLevel >= 100; // userLevel 100 이상을 관리자로 간주
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
@@ -37,6 +41,8 @@ export class AuthService {
         name: user.name,
         userLevel: user.userLevel,
         currentTier: user.currentTier,
+        isAdmin: isAdmin,
+        adminLevel: isAdmin ? 'ADMIN' : 'USER',
       },
     };
   }
@@ -111,6 +117,10 @@ export class AuthService {
 
       // 4. JWT 토큰 생성
       const payload = { email: user.email, sub: user.id };
+
+      // 관리자 권한 확인
+      const isAdmin = user.userLevel >= 100; // userLevel 100 이상을 관리자로 간주
+
       return {
         access_token: this.jwtService.sign(payload),
         user: {
@@ -119,6 +129,8 @@ export class AuthService {
           name: user.name,
           userLevel: user.userLevel,
           currentTier: user.currentTier,
+          isAdmin: isAdmin,
+          adminLevel: isAdmin ? 'ADMIN' : 'USER',
         },
       };
     } catch (error) {

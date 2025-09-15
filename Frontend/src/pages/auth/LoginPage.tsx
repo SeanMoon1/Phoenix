@@ -8,10 +8,10 @@ import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 
 const loginSchema = yup.object({
-  email: yup
+  loginId: yup
     .string()
-    .email('올바른 이메일을 입력해주세요.')
-    .required('이메일을 입력해주세요.'),
+    .min(3, '아이디는 최소 3자 이상이어야 합니다.')
+    .required('아이디를 입력해주세요.'),
   password: yup
     .string()
     .min(6, '비밀번호는 최소 6자 이상이어야 합니다.')
@@ -54,10 +54,12 @@ const LoginPage: React.FC = () => {
     try {
       await login(data);
       navigate('/mypage');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : '로그인에 실패했습니다.';
       setError('root', {
         type: 'manual',
-        message: error.message || '로그인에 실패했습니다.',
+        message: errorMessage,
       });
     }
   };
@@ -107,13 +109,11 @@ const LoginPage: React.FC = () => {
             >
               <div className="space-y-3 sm:space-y-4">
                 <Input
-                  label="이메일"
-                  type="email"
-                  placeholder={
-                    isAdminMode ? 'admin@example.com' : 'your@email.com'
-                  }
-                  error={errors.email?.message}
-                  {...register('email')}
+                  label="아이디"
+                  type="text"
+                  placeholder={isAdminMode ? 'admin' : 'your_id'}
+                  error={errors.loginId?.message}
+                  {...register('loginId')}
                 />
 
                 <Input

@@ -27,11 +27,15 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 관리자 관련 정보
+  isAdmin?: boolean;
+  adminLevel?: string;
+  adminPermissions?: string[];
 }
 
 // 인증 관련 타입
 export interface LoginCredentials {
-  email: string;
+  loginId: string;
   password: string;
 }
 

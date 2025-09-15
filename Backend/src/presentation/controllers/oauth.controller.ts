@@ -27,14 +27,34 @@ export class OAuthController {
   @ApiResponse({ status: 302, description: '로그인 성공/실패에 따른 리디렉션' })
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     try {
+      console.log('🔍 OAuth 콜백 시작');
       const user = req.user as any;
+      console.log(
+        '👤 OAuth 사용자 정보:',
+        user ? '사용자 정보 존재' : '사용자 정보 없음',
+      );
 
       if (!user) {
+        console.log('❌ OAuth 사용자 정보 없음');
         return res.redirect(
           `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=user_not_found`,
         );
       }
 
+      // 필수 정보 검증
+      if (!user.email || !user.name || !user.provider || !user.providerId) {
+        console.log('❌ OAuth 사용자 정보 불완전:', {
+          email: !!user.email,
+          name: !!user.name,
+          provider: !!user.provider,
+          providerId: !!user.providerId,
+        });
+        return res.redirect(
+          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=incomplete_user_info`,
+        );
+      }
+
+      console.log('🔄 OAuth 사용자 등록/로그인 처리 시작');
       // OAuth 사용자 등록/로그인 처리
       const result = await this.authService.oauthRegisterAndLogin({
         email: user.email,
@@ -44,19 +64,28 @@ export class OAuthController {
         profileImage: user.profileImage,
       });
 
+      console.log('🔍 OAuth 처리 결과:', result ? '성공' : '실패');
+      console.log('🔑 JWT 토큰 존재:', !!(result && result.access_token));
+
       if (result && result.access_token) {
         // 성공 시 JWT 토큰과 함께 프론트엔드로 리디렉션
         const successUrl = `${this.configService.get<string>('OAUTH_SUCCESS_REDIRECT')}?token=${result.access_token}`;
+        console.log('✅ OAuth 로그인 성공, 리디렉션:', successUrl);
         return res.redirect(successUrl);
       } else {
+        console.log('❌ OAuth 인증 실패 - 토큰 생성 실패');
         return res.redirect(
           `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=authentication_failed`,
         );
       }
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      console.error('❌ OAuth callback error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
       return res.redirect(
-        `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=server_error`,
+        `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=server_error&details=${encodeURIComponent(error.message)}`,
       );
     }
   }
@@ -80,5 +109,52 @@ export class OAuthController {
       successRedirect: this.configService.get<string>('OAUTH_SUCCESS_REDIRECT'),
       failureRedirect: this.configService.get<string>('OAUTH_FAILURE_REDIRECT'),
     };
+  }
+
+  @Get('debug/test-oauth')
+  @ApiOperation({ summary: 'OAuth 디버그 테스트 (개발용)' })
+  @ApiResponse({ status: 200, description: 'OAuth 테스트 결과' })
+  async testOAuthFlow() {
+    try {
+      // 테스트용 OAuth 데이터로 사용자 생성 테스트
+      const testOAuthData = {
+        email: 'test@example.com',
+        name: 'Test User',
+        provider: 'google',
+        providerId: 'test123456',
+        profileImage: 'https://example.com/avatar.jpg',
+      };
+
+      console.log('🧪 OAuth 테스트 시작:', testOAuthData);
+
+      const result =
+        await this.authService.oauthRegisterAndLogin(testOAuthData);
+
+      console.log('✅ OAuth 테스트 성공:', {
+        hasToken: !!result.access_token,
+        userId: result.user.id,
+      });
+
+      return {
+        success: true,
+        message: 'OAuth 테스트 성공',
+        data: {
+          hasToken: !!result.access_token,
+          userId: result.user.id,
+          email: result.user.email,
+        },
+      };
+    } catch (error) {
+      console.error('❌ OAuth 테스트 실패:', {
+        message: error.message,
+        stack: error.stack,
+      });
+
+      return {
+        success: false,
+        message: 'OAuth 테스트 실패',
+        error: error.message,
+      };
+    }
   }
 }

@@ -4,15 +4,31 @@ import { config } from 'dotenv';
 // 환경 변수 로드
 config();
 
+// 환경별 DB 설정
+const isDevelopment = process.env.NODE_ENV === 'development';
+const dbConfig = {
+  host: isDevelopment
+    ? process.env.DB_HOST_DEV || 'localhost'
+    : process.env.DB_HOST_PROD || process.env.DB_HOST || 'localhost',
+  port: isDevelopment
+    ? parseInt(process.env.DB_PORT_DEV, 10) || 3306
+    : parseInt(process.env.DB_PORT_PROD || process.env.DB_PORT, 10) || 3306,
+  username: isDevelopment
+    ? process.env.DB_USERNAME_DEV || 'root'
+    : process.env.DB_USERNAME_PROD || process.env.DB_USERNAME || 'root',
+  password: isDevelopment
+    ? process.env.DB_PASSWORD_DEV || ''
+    : process.env.DB_PASSWORD_PROD || process.env.DB_PASSWORD || '',
+  database: isDevelopment
+    ? process.env.DB_DATABASE_DEV || 'phoenix'
+    : process.env.DB_DATABASE_PROD || process.env.DB_DATABASE || 'phoenix',
+};
+
 export default new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST || '43.203.112.213',
-  port: parseInt(process.env.DB_PORT, 10) || 3306,
-  username: process.env.DB_USERNAME || 'admin',
-  password: process.env.DB_PASSWORD || 'F12oGsLp4y6T6fJyrRW9',
-  database: process.env.DB_DATABASE || 'phoenix',
+  ...dbConfig,
   entities: [
-    'src/**/*.entity{.ts,.js}',
+    'src/domain/entities/*.entity{.ts,.js}',
     'src/database/entities/*.entity{.ts,.js}',
   ],
   migrations: ['src/database/migrations/*{.ts,.js}'],

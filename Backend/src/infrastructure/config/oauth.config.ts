@@ -2,13 +2,12 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('oauth', () => ({
   // 공통 OAuth 설정
-  redirectBase: process.env.OAUTH_REDIRECT_BASE || 'http://43.203.112.213:3000',
-  successRedirect:
-    process.env.OAUTH_SUCCESS_REDIRECT ||
-    'https://www.phoenix-4.com/oauth/success',
-  failureRedirect:
-    process.env.OAUTH_FAILURE_REDIRECT ||
-    'https://www.phoenix-4.com/login?error=oauth',
+  redirectBase:
+    process.env.NODE_ENV === 'development'
+      ? process.env.OAUTH_REDIRECT_BASE_DEV
+      : process.env.OAUTH_REDIRECT_BASE,
+  successRedirect: process.env.OAUTH_SUCCESS_REDIRECT,
+  failureRedirect: process.env.OAUTH_FAILURE_REDIRECT,
 
   // Google OAuth 설정
   google: {

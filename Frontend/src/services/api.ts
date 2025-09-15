@@ -195,4 +195,16 @@ export const trainingResultApi = {
       }>;
     }>(`/training-results/team-member-stats/${teamId}`);
   },
+
+  /**
+   * 훈련 결과 저장
+   * @param resultData 훈련 결과 데이터
+   * @returns 저장 결과
+   */
+  saveResult: async (resultData: any) => {
+    return api.post<{
+      success: boolean;
+      message: string;
+    }>('/training-results', resultData);
+  },
 };

@@ -11,13 +11,12 @@ import Layout from './components/layout/Layout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
-import DashboardPage from './pages/admin/DashboardPage';
+import AdminPage from './pages/admin/AdminPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
 import TrafficAccidentScenarioPage from '@/pages/training/TrafficAccidentScenarioPage';
-import AdminLayout from './components/layout/AdminLayout';
 
 // 새로 생성한 페이지들 import
 import ManualPage from './pages/manual/ManualPage';
@@ -313,29 +312,7 @@ function App() {
             path="/admin"
             element={
               <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/scenarios"
-            element={
-              <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedAdminRoute>
-                <AdminLayout>
-                  <DashboardPage />
-                </AdminLayout>
+                <AdminPage />
               </ProtectedAdminRoute>
             }
           />

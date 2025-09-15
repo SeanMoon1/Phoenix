@@ -3,6 +3,7 @@ import Layout from '../../components/layout/Layout';
 
 const SupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('faq');
+  const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
   const tabs = [
     { id: 'faq', name: 'FAQ', icon: '❓', color: 'blue' },
@@ -46,35 +47,47 @@ const SupportPage: React.FC = () => {
               category: '회원가입/로그인',
               question: '회원가입은 어떻게 하나요?',
               answer:
-                '홈페이지 상단의 "회원가입" 버튼을 클릭하신 후, 필요한 정보를 입력하시면 됩니다. 팀 코드가 필요하시면 팀 관리자에게 문의하세요.',
+                'Phoenix 재난훈련 시스템에 가입하려면 먼저 팀 관리자로부터 팀 코드를 받아야 합니다. 팀 코드를 받으신 후 홈페이지 상단의 "회원가입" 버튼을 클릭하여 개인정보를 입력하고 팀 코드를 입력하시면 됩니다. 가입 과정에서 이메일 인증이 필요하며, 인증 완료 후 즉시 서비스를 이용하실 수 있습니다.',
             },
             {
               id: 2,
               category: '훈련 관련',
               question: '훈련은 어떻게 시작하나요?',
               answer:
-                '메인 메뉴의 "훈련하기"에서 원하는 훈련 유형을 선택하신 후, 시나리오를 선택하여 훈련을 시작할 수 있습니다.',
+                '로그인 후 메인 대시보드에서 "훈련 시작하기" 버튼을 클릭하세요. 다양한 재난 시나리오 중에서 원하는 훈련을 선택할 수 있습니다. 각 시나리오는 지진, 화재, 교통사고, 응급처치 등으로 구성되어 있으며, 난이도별로 구분되어 있습니다. 훈련 시작 전 간단한 안전 수칙을 확인하고, 준비가 되면 "훈련 시작" 버튼을 눌러 실제 상황과 유사한 환경에서 훈련을 진행하세요.',
             },
             {
               id: 3,
               category: '훈련 관련',
               question: '훈련 점수는 어떻게 계산되나요?',
               answer:
-                '훈련 점수는 정확도, 속도, 완성도를 종합하여 계산됩니다. 각 시나리오마다 다른 가중치가 적용됩니다.',
+                '훈련 점수는 정확도(40%), 속도(30%), 완성도(30%)의 가중치를 적용하여 계산됩니다. 정확도는 올바른 응답과 행동의 비율을, 속도는 제한 시간 내 완료 여부를, 완성도는 전체 시나리오 완주 여부를 평가합니다. 각 시나리오마다 다른 배점과 보너스 점수가 있으며, 연속으로 정답을 맞추면 콤보 보너스가 추가됩니다. 최종 점수는 100점 만점으로 표시되며, 80점 이상이면 우수, 60점 이상이면 보통, 60점 미만이면 재훈련을 권장합니다.',
             },
             {
               id: 4,
               category: '기술 지원',
               question: '모바일에서도 이용할 수 있나요?',
               answer:
-                '네, 모바일 브라우저에서도 이용 가능합니다. 최적의 경험을 위해 최신 브라우저 사용을 권장합니다.',
+                '네, Phoenix 재난훈련 시스템은 반응형 웹 디자인으로 제작되어 스마트폰, 태블릿, 데스크톱 등 모든 기기에서 이용 가능합니다. 모바일에서는 터치 인터페이스로 최적화되어 있으며, 훈련 중 발생하는 상황에 대한 선택지도 터치로 쉽게 선택할 수 있습니다. 최적의 경험을 위해 iOS Safari 14+, Android Chrome 90+ 이상의 최신 브라우저 사용을 권장하며, 인터넷 연결이 안정적인 환경에서 이용하시기 바랍니다.',
+            },
+            {
+              id: 5,
+              category: '훈련 관련',
+              question: '훈련 중 문제가 발생했을 때 어떻게 해야 하나요?',
+              answer:
+                '훈련 중 기술적 문제나 오류가 발생하면 즉시 "일시정지" 버튼을 눌러 훈련을 중단하세요. 진행 상황은 자동으로 저장되므로 걱정하지 마세요. 문제 해결 후 "훈련 재개" 버튼을 눌러 이어서 진행할 수 있습니다. 만약 문제가 지속되면 훈련을 완전히 종료하고 고객지원팀에 문의하세요. 문의 시 훈련 ID와 발생한 오류 메시지를 함께 전달해주시면 빠른 해결이 가능합니다. 모든 훈련 기록은 서버에 안전하게 보관되므로 데이터 손실 걱정은 하지 않으셔도 됩니다.',
             },
           ].map(faq => (
             <div
               key={faq.id}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
             >
-              <button className="w-full px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+              <button
+                className="w-full px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                onClick={() =>
+                  setOpenFaqId(openFaqId === faq.id ? null : faq.id)
+                }
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
@@ -88,7 +101,9 @@ const SupportPage: React.FC = () => {
                   </div>
                   <div className="ml-4">
                     <svg
-                      className="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200"
+                      className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
+                        openFaqId === faq.id ? 'rotate-180' : ''
+                      }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -101,6 +116,17 @@ const SupportPage: React.FC = () => {
                   </div>
                 </div>
               </button>
+
+              {/* 답변 영역 */}
+              {openFaqId === faq.id && (
+                <div className="px-6 pb-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="pt-4">
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -110,38 +136,22 @@ const SupportPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
             추가 도움이 필요하신가요?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📧</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                이메일 문의
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                support@disaster-training.com
-              </p>
-              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200">
-                이메일 보내기
-              </button>
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">💬</span>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">💬</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                문의하기
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                온라인 문의 양식을 통해 문의하세요
-              </p>
-              <button
-                onClick={() => setActiveTab('contact')}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
-              >
-                문의하기
-              </button>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              문의하기
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              온라인 문의 양식을 통해 문의하세요
+            </p>
+            <button
+              onClick={() => setActiveTab('contact')}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+            >
+              문의하기
+            </button>
           </div>
         </div>
       </div>

@@ -4,9 +4,15 @@ type Props = {
   options: ScenarioOption[];
   selected?: ScenarioOption | null;
   onSelect: (opt: ScenarioOption) => void;
+  disabled?: boolean;
 };
 
-export default function OptionsList({ options, selected, onSelect }: Props) {
+export default function OptionsList({
+  options,
+  selected,
+  onSelect,
+  disabled = false,
+}: Props) {
   return (
     <section className="flex flex-col gap-3 mb-6">
       {options.map(opt => {
@@ -16,9 +22,10 @@ export default function OptionsList({ options, selected, onSelect }: Props) {
             key={opt.answerId}
             className={`w-full rounded-xl px-6 py-4 text-lg shadow-md transition
               ${isSelected ? 'ring-2 ring-amber-400' : ''}
-              bg-rose-500 hover:bg-rose-400 text-white
-              dark:bg-rose-600 dark:hover:bg-rose-500`}
-            onClick={() => onSelect(opt)}
+              bg-rose-500 hover:bg-rose-400 text-white dark:bg-rose-600 dark:hover:bg-rose-500
+              ${disabled ? 'cursor-default' : 'cursor-pointer'}
+            `}
+            onClick={() => !disabled && onSelect(opt)}
           >
             {opt.answer}
           </button>

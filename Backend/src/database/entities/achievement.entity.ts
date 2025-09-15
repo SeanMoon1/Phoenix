@@ -8,8 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../modules/users/entities/user.entity';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { User } from './user.entity';
+import { Team } from './team.entity';
 
 @Entity('achievement')
 export class Achievement {
@@ -43,7 +43,7 @@ export class Achievement {
     type: 'decimal',
     precision: 5,
     scale: 2,
-    default: 0,
+    default: 0.0,
   })
   progress: number;
 

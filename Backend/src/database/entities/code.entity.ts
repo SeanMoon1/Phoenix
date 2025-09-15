@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { Team } from './team.entity';
 
 @Entity('code')
 export class Code {
@@ -16,10 +16,7 @@ export class Code {
   @PrimaryGeneratedColumn({ name: 'code_id' })
   id: number;
 
-  @ApiProperty({
-    description: '팀 ID (NULL이면 시스템 공통 코드)',
-    required: false,
-  })
+  @ApiProperty({ description: '팀 ID', required: false })
   @Column({ name: 'team_id', nullable: true })
   teamId?: number;
 

@@ -1,18 +1,14 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
-import AdminPage from './pages/admin/AdminPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
+import AdminPage from './pages/admin/AdminPage';
+
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
@@ -44,16 +40,16 @@ const FeatureCard: React.FC<{
   <AnimatedText
     delay={delay}
     animation="fadeIn"
-    className="p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600 h-full w-full flex flex-col"
+    className="flex flex-col w-full h-full p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600"
   >
-    <div className="text-center flex flex-col h-full">
+    <div className="flex flex-col h-full text-center">
       <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl">
         {icon}
       </div>
       <h3 className="mb-3 text-xl font-bold text-gray-800 dark:text-gray-100">
         {title}
       </h3>
-      <p className="leading-relaxed text-gray-700 dark:text-gray-200 flex-grow">
+      <p className="flex-grow leading-relaxed text-gray-700 dark:text-gray-200">
         {description}
       </p>
     </div>
@@ -62,11 +58,7 @@ const FeatureCard: React.FC<{
 
 // 홈 페이지 컴포넌트
 const HomePage: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
-
-  if (isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   return (
     <Layout>
@@ -92,26 +84,50 @@ const HomePage: React.FC = () => {
                 className="mb-4 sm:mb-6"
               >
                 <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl md:text-4xl dark:text-gray-100">
-                  재난 대응 훈련 시스템
+                  {isAuthenticated
+                    ? `안녕하세요, ${user?.name}님!`
+                    : '재난 대응 훈련 시스템'}
                 </h2>
               </AnimatedText>
 
               <AnimatedText delay={1000} animation="slideUp" className="mb-8">
                 <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-700 sm:text-xl dark:text-gray-200 lg:mx-0 lg:text-left">
-                  가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을
-                  향상시키는 혁신적인 훈련 플랫폼입니다.
+                  {isAuthenticated
+                    ? '가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을 향상시켜보세요. 지금 바로 훈련을 시작할 수 있습니다!'
+                    : '가상현실과 시뮬레이션을 통해 재난 상황에 대한 대응 능력을 향상시키는 혁신적인 훈련 플랫폼입니다.'}
                 </p>
               </AnimatedText>
 
               <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row lg:justify-start sm:space-y-0 sm:space-x-4">
-                <AnimatedButton
-                  href="/login"
-                  variant="primary"
-                  delay={1500}
-                  className="w-full sm:w-auto"
-                >
-                  훈련 시작하기
-                </AnimatedButton>
+                {isAuthenticated ? (
+                  <>
+                    <AnimatedButton
+                      href="/training"
+                      variant="primary"
+                      delay={1500}
+                      className="w-full sm:w-auto"
+                    >
+                      훈련 시작하기
+                    </AnimatedButton>
+                    <AnimatedButton
+                      href="/mypage"
+                      variant="outline"
+                      delay={1700}
+                      className="w-full sm:w-auto"
+                    >
+                      마이페이지
+                    </AnimatedButton>
+                  </>
+                ) : (
+                  <AnimatedButton
+                    href="/login"
+                    variant="primary"
+                    delay={1500}
+                    className="w-full sm:w-auto"
+                  >
+                    훈련 시작하기
+                  </AnimatedButton>
+                )}
               </div>
             </div>
 
@@ -151,7 +167,7 @@ const HomePage: React.FC = () => {
             </p>
           </AnimatedText>
 
-          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+          <div className="grid items-stretch grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon="🎮"
               title="가상현실 훈련"
@@ -233,14 +249,25 @@ const HomePage: React.FC = () => {
           </AnimatedText>
 
           <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-            <AnimatedButton
-              href="/login"
-              variant="primary"
-              delay={200}
-              className="w-full sm:w-auto"
-            >
-              훈련 시작하기
-            </AnimatedButton>
+            {isAuthenticated ? (
+              <AnimatedButton
+                href="/training"
+                variant="primary"
+                delay={200}
+                className="w-full sm:w-auto"
+              >
+                훈련 시작하기
+              </AnimatedButton>
+            ) : (
+              <AnimatedButton
+                href="/login"
+                variant="primary"
+                delay={200}
+                className="w-full sm:w-auto"
+              >
+                훈련 시작하기
+              </AnimatedButton>
+            )}
           </div>
         </div>
       </div>
@@ -248,31 +275,18 @@ const HomePage: React.FC = () => {
   );
 };
 
-// 보호된 라우트 컴포넌트 (개발용 - 임시 비활성화)
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  // 개발 중에는 인증 체크를 비활성화
-  // const { isAuthenticated } = useAuthStore();
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
-
-  return <>{children}</>;
-};
-
 // 관리자 라우트 보호 컴포넌트 (개발용 - 임시 비활성화)
-const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  // 개발 중에는 인증 체크를 비활성화
-  // const { isAuthenticated } = useAuthStore();
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
+// const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({
+//   children,
+// }) => {
+//   // 개발 중에는 인증 체크를 비활성화
+//   // const { isAuthenticated } = useAuthStore();
+//   // if (!isAuthenticated) {
+//   //   return <Navigate to="/login" replace />;
+//   // }
 
-  return <>{children}</>;
-};
+//   return <>{children}</>;
+// };
 
 function App() {
   return (
@@ -290,32 +304,18 @@ function App() {
           {/* 훈련하기 */}
           <Route path="/manual" element={<ManualPage />} />
           <Route path="/training" element={<TrainingPage />} />
-          <Route path="/training/fire" element={<FireScenarioPage />} />
-          <Route path="/training/fire/game" element={<FireScenarioPage />} />
-          <Route path="/home/training/fire" element={<FireScenarioPage />} />
 
           {/* 마이페이지 */}
-          <Route
-            path="/mypage"
-            element={
-              <ProtectedRoute>
-                <MyPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/mypage" element={<MyPage />} />
 
           {/* 고객지원 */}
           <Route path="/support" element={<SupportPage />} />
 
           {/* 관리자페이지 */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedAdminRoute>
-                <AdminPage />
-              </ProtectedAdminRoute>
-            }
-          />
+          <Route path="/admin" element={<AdminPage />} />
+
+          {/* 화재 훈련 */}
+          <Route path="/training/fire" element={<FireScenarioPage />} />
 
           {/* 지진 훈련 */}
           <Route

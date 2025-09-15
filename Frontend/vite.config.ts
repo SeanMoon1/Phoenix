@@ -9,4 +9,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 3001,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_URL || 'http://43.203.112.213:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { TrainingResult } from './training-result.entity';
-import { DecisionEvent } from './decision-event.entity';
+import { ScenarioEvent } from './scenario-event.entity';
 import { ChoiceOption } from './choice-option.entity';
 
 @Entity('user_choice_log')
@@ -43,7 +43,7 @@ export class UserChoiceLog {
   isCorrect: boolean;
 
   @ApiProperty({ description: '선택 시간' })
-  @Column({ name: 'selected_at', type: 'datetime' })
+  @CreateDateColumn({ name: 'selected_at' })
   selectedAt: Date;
 
   @ApiProperty({ description: '수정자 ID', required: false })
@@ -71,9 +71,9 @@ export class UserChoiceLog {
   @JoinColumn({ name: 'result_id' })
   result: TrainingResult;
 
-  @ManyToOne(() => DecisionEvent)
+  @ManyToOne(() => ScenarioEvent)
   @JoinColumn({ name: 'event_id' })
-  event: DecisionEvent;
+  event: ScenarioEvent;
 
   @ManyToOne(() => ChoiceOption)
   @JoinColumn({ name: 'choice_id' })

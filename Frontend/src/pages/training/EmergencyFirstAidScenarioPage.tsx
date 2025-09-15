@@ -1,13 +1,13 @@
 import ScenarioPage from './ScenarioPage';
-import { fetchFirstAidScenario } from '@/services/scenarioService';
+import { fetchEmergencyScenario } from '@/services/scenarioService';
 
 export default function EmergencyFirstAidScenarioPage() {
   return (
     <ScenarioPage
-      scenarioSetName="응급처치 대응"
-      fetchScenarios={fetchFirstAidScenario}
-      nextScenarioPath="/training/traffic-accident"
-      persistKey="phoenix_training_state"
+      scenarioSetName="응급처치 훈련"
+      fetchScenarios={fetchEmergencyScenario}
+      nextScenarioPath="/training"
+      persistKey="phoenix_emergency_training"
     />
   );
 }

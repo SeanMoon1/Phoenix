@@ -58,6 +58,7 @@ export const useAuthStore = create<AuthStore>()(
               userCode: '',
               loginId: '',
               email: response.data.user.email,
+              //role: response.data.user.role || 'user', // ✅ Backend에서 제공하는 role 사용
               name: response.data.user.name,
               useYn: 'Y',
               userLevel: response.data.user.userLevel,

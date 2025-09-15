@@ -6,10 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { Team } from './team.entity';
 import { AdminLevel } from './admin-level.entity';
+import { Inquiry } from './inquiry.entity';
 
 @Entity('admin')
 export class Admin {
@@ -32,11 +34,11 @@ export class Admin {
   @Column({ name: 'password', length: 255 })
   password: string;
 
-  @ApiProperty({ description: '관리자명' })
+  @ApiProperty({ description: '관리자 이름' })
   @Column({ name: 'name', length: 100 })
   name: string;
 
-  @ApiProperty({ description: '이메일' })
+  @ApiProperty({ description: '이메일 주소' })
   @Column({ name: 'email', length: 200 })
   email: string;
 
@@ -44,7 +46,7 @@ export class Admin {
   @Column({ name: 'phone', length: 20 })
   phone: string;
 
-  @ApiProperty({ description: '추가 권한 정보 (JSON)', required: false })
+  @ApiProperty({ description: '추가 권한 정보 (JSON 형태)', required: false })
   @Column({ name: 'permissions', type: 'text', nullable: true })
   permissions?: string;
 
@@ -84,4 +86,7 @@ export class Admin {
   @ManyToOne(() => AdminLevel)
   @JoinColumn({ name: 'admin_level_id' })
   adminLevel: AdminLevel;
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.responder)
+  respondedInquiries: Inquiry[];
 }

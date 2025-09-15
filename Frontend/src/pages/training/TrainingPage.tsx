@@ -78,10 +78,10 @@ const TrainingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 훈련 시작 버튼 */}
+        {/* 훈련 시작 버튼 - FireScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
-            onClick={() => navigate('/home/training/fire')}
+            onClick={() => navigate('/training/fire')}
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             화재 대응 훈련 시작하기
@@ -151,9 +151,12 @@ const TrainingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 훈련 시작 버튼 */}
+        {/* 훈련 시작 버튼 - EarthquakeScenarioPage로 연결 */}
         <div className="mt-24 text-center">
-          <button className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
+          <button
+            onClick={() => navigate('/training/earthquake')}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+          >
             지진 대응 훈련 시작하기
           </button>
         </div>
@@ -222,9 +225,12 @@ const TrainingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 훈련 시작 버튼 */}
+        {/* 훈련 시작 버튼 - EmergencyFirstAidScenarioPage로 연결 */}
         <div className="mt-24 text-center">
-          <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
+          <button
+            onClick={() => navigate('/training/first-aid')}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+          >
             응급처치 훈련 시작하기
           </button>
         </div>
@@ -294,7 +300,7 @@ const TrainingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 훈련 시작 버튼 */}
+        {/* 훈련 시작 버튼 - TrafficAccidentScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
             onClick={() => navigate('/training/traffic-accident')}

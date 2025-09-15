@@ -6,9 +6,17 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from '../../teams/entities/team.entity';
+import { Team } from './team.entity';
+import { TrainingParticipant } from './training-participant.entity';
+import { TrainingResult } from './training-result.entity';
+import { UserProgress } from './user-progress.entity';
+import { Achievement } from './achievement.entity';
+import { UserScenarioStats } from './user-scenario-stats.entity';
+import { UserLevelHistory } from './user-level-history.entity';
+import { Inquiry } from './inquiry.entity';
 
 @Entity('user')
 export class User {
@@ -16,13 +24,13 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   id: number;
 
-  @ApiProperty({ description: '팀 ID' })
-  @Column({ name: 'team_id' })
-  teamId: number;
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
 
-  @ApiProperty({ description: '사용자 코드' })
-  @Column({ name: 'user_code', length: 50 })
-  userCode: string;
+  @ApiProperty({ description: '사용자 코드', required: false })
+  @Column({ name: 'user_code', length: 50, nullable: true })
+  userCode?: string;
 
   @ApiProperty({ description: '로그인 ID' })
   @Column({ name: 'login_id', length: 50, unique: true })
@@ -38,6 +46,19 @@ export class User {
   @ApiProperty({ description: '이메일 주소' })
   @Column({ name: 'email', length: 200 })
   email: string;
+
+  // OAuth 관련 필드들
+  @ApiProperty({ description: 'OAuth 제공자', required: false })
+  @Column({ name: 'oauth_provider', length: 50, nullable: true })
+  oauthProvider?: string;
+
+  @ApiProperty({ description: 'OAuth 제공자 사용자 ID', required: false })
+  @Column({ name: 'oauth_provider_id', length: 100, nullable: true })
+  oauthProviderId?: string;
+
+  @ApiProperty({ description: '프로필 이미지 URL', required: false })
+  @Column({ name: 'profile_image_url', length: 500, nullable: true })
+  profileImageUrl?: string;
 
   @ApiProperty({ description: '사용 여부' })
   @Column({ name: 'use_yn', length: 1, default: 'Y' })
@@ -102,4 +123,25 @@ export class User {
   @ManyToOne(() => Team)
   @JoinColumn({ name: 'team_id' })
   team: Team;
+
+  @OneToMany(() => TrainingParticipant, (participant) => participant.user)
+  trainingParticipants: TrainingParticipant[];
+
+  @OneToMany(() => TrainingResult, (result) => result.user)
+  trainingResults: TrainingResult[];
+
+  @OneToMany(() => UserProgress, (progress) => progress.user)
+  progress: UserProgress[];
+
+  @OneToMany(() => Achievement, (achievement) => achievement.user)
+  achievements: Achievement[];
+
+  @OneToMany(() => UserScenarioStats, (stats) => stats.user)
+  scenarioStats: UserScenarioStats[];
+
+  @OneToMany(() => UserLevelHistory, (history) => history.user)
+  levelHistory: UserLevelHistory[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
+  inquiries: Inquiry[];
 }

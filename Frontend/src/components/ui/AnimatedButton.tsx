@@ -5,7 +5,7 @@ interface AnimatedButtonProps {
   children: React.ReactNode;
   delay?: number;
   href?: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'outline';
   className?: string;
   onClick?: () => void;
 }
@@ -28,6 +28,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       'bg-orange-500 dark:bg-orange-600 text-white hover:bg-orange-600 dark:hover:bg-orange-500 shadow-lg hover:shadow-xl hover:shadow-orange-500/25 dark:hover:shadow-orange-400/25',
     secondary:
       'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500',
+    outline:
+      'bg-transparent text-orange-600 dark:text-orange-400 border-2 border-orange-500 dark:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-600 dark:hover:border-orange-300',
   };
 
   const animationClasses = isVisible

@@ -4,8 +4,16 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from './user.entity';
+import { Admin } from './admin.entity';
+import { Scenario } from './scenario.entity';
+import { TrainingSession } from './training-session.entity';
+import { Code } from './code.entity';
+import { Inquiry } from './inquiry.entity';
+import { Faq } from './faq.entity';
 
 @Entity('team')
 export class Team {
@@ -52,4 +60,26 @@ export class Team {
   @ApiProperty({ description: '수정일시' })
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  // Relations
+  @OneToMany(() => User, (user) => user.team)
+  users: User[];
+
+  @OneToMany(() => Admin, (admin) => admin.team)
+  admins: Admin[];
+
+  @OneToMany(() => Scenario, (scenario) => scenario.team)
+  scenarios: Scenario[];
+
+  @OneToMany(() => TrainingSession, (session) => session.team)
+  trainingSessions: TrainingSession[];
+
+  @OneToMany(() => Code, (code) => code.team)
+  codes: Code[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.team)
+  inquiries: Inquiry[];
+
+  @OneToMany(() => Faq, (faq) => faq.team)
+  faqs: Faq[];
 }

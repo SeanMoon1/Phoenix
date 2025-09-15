@@ -8,8 +8,8 @@ export default function SituationCard({ title, content, sceneScript }: Props) {
       </section>
 
       <section className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-5 md:p-6 mb-6 leading-relaxed">
-        <p className="text-lg mb-3">
-          <strong>상황:</strong> {content}
+        <p className="text-lg mb-3 whitespace-pre-line leading-loose">
+          {content}
         </p>
         <p className="text-base opacity-90">{sceneScript}</p>
       </section>

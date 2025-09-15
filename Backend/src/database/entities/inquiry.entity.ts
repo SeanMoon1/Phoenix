@@ -8,8 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from '../../modules/teams/entities/team.entity';
-import { User } from '../../modules/users/entities/user.entity';
+import { Team } from './team.entity';
+import { User } from './user.entity';
 import { Admin } from './admin.entity';
 
 @Entity('inquiry')

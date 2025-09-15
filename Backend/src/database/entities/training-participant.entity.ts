@@ -6,12 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { TrainingSession } from '../../modules/training/entities/training-session.entity';
-import { User } from '../../modules/users/entities/user.entity';
-import { Scenario } from '../../modules/scenarios/entities/scenario.entity';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { TrainingSession } from './training-session.entity';
+import { Team } from './team.entity';
+import { Scenario } from './scenario.entity';
+import { User } from './user.entity';
+import { TrainingResult } from './training-result.entity';
 
 @Entity('training_participant')
 export class TrainingParticipant {
@@ -40,7 +42,7 @@ export class TrainingParticipant {
   participantCode: string;
 
   @ApiProperty({ description: '참가 시간' })
-  @Column({ name: 'joined_at', type: 'datetime' })
+  @CreateDateColumn({ name: 'joined_at' })
   joinedAt: Date;
 
   @ApiProperty({ description: '완료 시간', required: false })
@@ -87,4 +89,7 @@ export class TrainingParticipant {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => TrainingResult, (result) => result.participant)
+  results: TrainingResult[];
 }

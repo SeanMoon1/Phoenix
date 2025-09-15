@@ -105,4 +105,106 @@ export const teamApi = {
       message?: string;
     }>(`/teams/validate-code/${teamCode}`);
   },
+
+  /**
+   * 새 팀 생성
+   * @param teamData 팀 생성 데이터
+   * @returns 팀 생성 결과
+   */
+  createTeam: async (teamData: { teamName: string; description?: string }) => {
+    return api.post<{
+      id: number;
+      name: string;
+      description?: string;
+      teamCode: string;
+    }>('/teams', teamData);
+  },
+};
+
+// 시나리오 관련 API 함수들
+export const scenarioApi = {
+  /**
+   * 파일에서 시나리오 임포트
+   * @param file 업로드할 JSON 파일
+   * @returns 임포트 결과
+   */
+  importFromFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return api.post<{
+      success: boolean;
+      message: string;
+    }>('/scenarios/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  /**
+   * JSON 데이터에서 시나리오 동기화
+   * @param jsonData 시나리오 JSON 데이터
+   * @returns 동기화 결과
+   */
+  syncFromJson: async (jsonData: any) => {
+    return api.post<{
+      success: boolean;
+      message: string;
+    }>('/scenarios/sync', jsonData);
+  },
+};
+
+// 훈련 관련 API 함수들
+export const trainingApi = {
+  /**
+   * 팀 통계 조회
+   * @param teamId 팀 ID
+   * @returns 팀 통계 데이터
+   */
+  getTeamStats: async (teamId: number) => {
+    return api.get<{
+      totalSessions: number;
+      activeSessions: number;
+      totalParticipants: number;
+      completedParticipants: number;
+    }>(`/training/team-stats/${teamId}`);
+  },
+};
+
+// 훈련 결과 관련 API 함수들
+export const trainingResultApi = {
+  /**
+   * 팀원별 통계 조회
+   * @param teamId 팀 ID
+   * @returns 팀원별 통계 데이터
+   */
+  getTeamMemberStats: async (teamId: number) => {
+    return api.get<{
+      memberStats: Array<{
+        userId: number;
+        userName: string;
+        userCode: string;
+        totalTrainings: number;
+        totalScore: number;
+        averageScore: number;
+        bestScore: number;
+        currentLevel: number;
+        currentTier: string;
+        lastTrainingAt?: Date;
+      }>;
+    }>(`/training-results/team-member-stats/${teamId}`);
+  },
+
+  /**
+   * 훈련 결과 저장
+   * @param resultData 훈련 결과 데이터
+   * @returns 저장 결과
+   */
+  saveResult: async (resultData: any) => {
+    return api.post<{
+      success: boolean;
+      message: string;
+    }>('/training-results', resultData);
+  },
 };

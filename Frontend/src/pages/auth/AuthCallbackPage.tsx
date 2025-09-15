@@ -32,8 +32,8 @@ const AuthCallbackPage: React.FC = () => {
           isAuthenticated: true,
         });
 
-        // 대시보드로 리다이렉트
-        navigate('/dashboard');
+        // 메인페이지로 리다이렉트
+        navigate('/');
       } catch (error) {
         console.error('Failed to parse user data:', error);
         navigate('/login?error=invalid_callback');
@@ -47,28 +47,14 @@ const AuthCallbackPage: React.FC = () => {
   return (
     <Layout>
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-200 dark:border-orange-800 mx-auto mb-6"></div>
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-600 border-t-transparent absolute top-0 left-1/2 transform -translate-x-1/2 mb-6"></div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             로그인 처리 중...
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            Google 계정 정보를 확인하고 있습니다.
+          <p className="text-gray-600 dark:text-gray-300">
+            잠시만 기다려주세요.
           </p>
-          <div className="flex justify-center space-x-1">
-            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
-            <div
-              className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-              style={{ animationDelay: '0.1s' }}
-            ></div>
-            <div
-              className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-              style={{ animationDelay: '0.2s' }}
-            ></div>
-          </div>
         </div>
       </div>
     </Layout>

@@ -206,7 +206,7 @@ export default function ScenarioPage() {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="h-24 w-auto mx-auto mb-4 animate-pulse"
+            className="w-auto h-24 mx-auto mb-4 animate-pulse"
           />
           <p className="text-xl">시나리오 로딩 중...</p>
         </div>
@@ -221,7 +221,7 @@ export default function ScenarioPage() {
           <img
             src={phoenixImg}
             alt="Phoenix"
-            className="h-24 w-auto mx-auto mb-4"
+            className="w-auto h-24 mx-auto mb-4"
           />
           <p className="text-xl">시나리오를 불러올 수 없습니다.</p>
         </div>
@@ -275,7 +275,7 @@ export default function ScenarioPage() {
               onPrev={handlePrev}
               onNext={handleNext}
             />
-            <div className="w-full md:max-w-screen-lg mx-auto px-3 md:px-4">
+            <div className="w-full px-3 mx-auto md:max-w-screen-lg md:px-4">
               <PlayMoreButton to="/training" />
             </div>
           </main>

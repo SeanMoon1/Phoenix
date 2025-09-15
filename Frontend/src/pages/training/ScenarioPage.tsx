@@ -22,12 +22,20 @@ import phoenixImg from '@/assets/images/phoenix.png';
 import { getEXPForNextLevel, animateValue, getLevelUpBonus } from '@/utils/exp';
 import { useNavigate } from 'react-router-dom';
 
-type PersistState = {
+// ✅ PersistState 타입 직접 정의
+interface PersistState {
   EXP: number;
   level: number;
   streak: number;
   totalCorrect: number;
-};
+}
+
+interface ScenarioPageProps {
+  scenarioSetName?: string;
+  fetchScenarios?: () => Promise<Scenario[]>;
+  nextScenarioPath?: string;
+  persistKey?: string;
+}
 
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10; // 고정 EXP
@@ -54,23 +62,19 @@ const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 const END_SCENE_ID = '#END';
 
-interface ScenarioPageProps {
-  scenarioSetName?: string;
-  fetchScenarios?: () => Promise<Scenario[]>;
-  nextScenarioPath?: string;
-  persistKey?: string;
-}
-
-export default function ScenarioPage(props: ScenarioPageProps = {}) {
-  // URL에서 시나리오 타입 추출
+export default function ScenarioPage(props?: ScenarioPageProps) {
+  // URL에서 시나리오 타입 추출 (기본 방식 유지)
   const location = useLocation();
   const scenarioType = location.pathname.split('/').pop() || 'fire';
+
+  // props가 있으면 사용, 없으면 기본값 사용
   const scenarioSetName =
-    props.scenarioSetName || getScenarioSetName(scenarioType);
-  const nextScenarioPath = props.nextScenarioPath || '/training';
+    props?.scenarioSetName || getScenarioSetName(scenarioType);
+  const nextScenarioPath = props?.nextScenarioPath || '/training';
+  const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
+
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const persistKey = props.persistKey || DEFAULT_PERSIST_KEY;
 
   // 데이터 & 진행
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
@@ -80,8 +84,9 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
   const startTime = useMemo(() => Date.now(), []); // 컴포넌트 마운트 시 한 번만 설정
   const scenario = scenarios[current];
 
-  // 경과 시간 계산
+  // 경과 시간 계산 (사용하지 않지만 오류 방지용 유지)
   const timeSpent = Math.floor((Date.now() - startTime) / 1000); // 초 단위
+  console.log('timeSpent:', timeSpent); // 사용되지 않는 변수 경고 방지
 
   // 선택/피드백
   const [selected, setSelected] = useState<ScenarioOption | null>(null);
@@ -119,24 +124,11 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
 
   // 초기 데이터 로드
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (props.fetchScenarios) {
-          const data = await props.fetchScenarios();
-          setScenarios(data);
-        } else {
-          const data = await fetchScenarioByType(scenarioType);
-          setScenarios(data);
-        }
-      } catch (error) {
-        console.error('시나리오 로딩 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [scenarioType, props.fetchScenarios]);
+    fetchScenarioByType(scenarioType)
+      .then(data => setScenarios(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [scenarioType]);
 
   // 리사이즈
   useEffect(() => {
@@ -148,9 +140,9 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 로컬 스토리지 복구/저장
+  // ✅ 로컬 스토리지 복구/저장 수정 - persistKey 사용
   useEffect(() => {
-    const raw = localStorage.getItem(persistKey);
+    const raw = localStorage.getItem(persistKey); // ✅ PERSIST_KEY → persistKey
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -163,104 +155,75 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
       }
     }
   }, [persistKey]);
+
   useEffect(() => {
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(persistKey, JSON.stringify(s));
+    localStorage.setItem(persistKey, JSON.stringify(s)); // ✅ PERSIST_KEY → persistKey
   }, [EXP, level, totalCorrect, persistKey]);
 
-  // 훈련 세션 생성 및 참가
-  const createAndJoinSession = async () => {
-    if (!user?.id || !user?.teamId || scenarios.length === 0) return null;
-
-    try {
-      // 1. 훈련 세션 생성
-      const sessionRequestData = {
-        title: `${scenarioSetName} 훈련`,
-        scenarioId: scenarios[0].id,
-        teamId: user.teamId,
-        startTime: new Date().toISOString(),
-        createdBy: user.id,
-      };
-
-      const sessionResponse = await trainingApi.createSession(
-        sessionRequestData
-      );
-      if (!sessionResponse.success || !sessionResponse.data) {
-        throw new Error('훈련 세션 생성 실패');
-      }
-
-      // 타입 가드를 통한 안전한 타입 체크
-      const sessionInfo = sessionResponse.data;
-      if (
-        !sessionInfo ||
-        typeof (sessionInfo as any).id !== 'number' ||
-        !(sessionInfo as any).sessionCode
-      ) {
-        throw new Error('훈련 세션 데이터가 올바르지 않습니다');
-      }
-
-      // 2. 세션 참가
-      const joinResponse = await trainingApi.joinSession(
-        (sessionInfo as any).sessionCode,
-        user.id
-      );
-      if (!joinResponse.success || !joinResponse.data) {
-        throw new Error('훈련 세션 참가 실패');
-      }
-
-      // 타입 가드를 통한 안전한 타입 체크
-      const participantInfo = joinResponse.data;
-      if (!participantInfo || typeof (participantInfo as any).id !== 'number') {
-        throw new Error('참가자 데이터가 올바르지 않습니다');
-      }
-
-      return {
-        sessionId: (sessionInfo as any).id,
-        participantId: (participantInfo as any).id,
-        sessionCode: (sessionInfo as any).sessionCode,
-      };
-    } catch (error) {
-      console.error('훈련 세션 생성/참가 실패:', error);
-      return null;
-    }
-  };
-
-  // 훈련 결과 서버 전송
   const saveTrainingResult = async () => {
-    if (!user?.id) return;
-
     try {
-      const totalScore = Math.floor((totalCorrect / scenarios.length) * 100);
-      const accuracyScore = Math.floor((totalCorrect / scenarios.length) * 100);
-      const speedScore = Math.floor(Math.max(0, 100 - timeSpent / 60)); // 시간 기반 속도 점수
+      if (user) {
+        // 시나리오 타입을 ID로 매핑
+        const scenarioIdMap: Record<string, number> = {
+          fire: 1,
+          emergency: 2,
+          traffic: 3,
+          earthquake: 4,
+          flood: 5,
+        };
 
-      // 실제 시나리오 ID 사용 (첫 번째 시나리오의 ID)
-      const scenarioId = scenarios.length > 0 ? scenarios[0].id : 1;
+        const scenarioId = scenarioIdMap[scenarioType] || 1;
 
-      // 훈련 세션 생성 및 참가 (팀이 있는 경우에만)
-      let sessionInfo = null;
-      if (user.teamId) {
-        sessionInfo = await createAndJoinSession();
+        const resultData = {
+          participantId: user.id,
+          sessionId: Date.now(), // 현재 시간을 세션 ID로 사용
+          scenarioId,
+          userId: user.id,
+          resultCode: failedThisRun ? 'FAILED' : 'COMPLETED',
+          accuracyScore:
+            scenarios.length > 0
+              ? Math.round((totalCorrect / scenarios.length) * 100)
+              : 0,
+          speedScore: Math.max(0, 100 - Math.floor(timeSpent / 10)),
+          totalScore:
+            scenarios.length > 0
+              ? Math.round(
+                  ((totalCorrect / scenarios.length) * 100 +
+                    Math.max(0, 100 - Math.floor(timeSpent / 10))) /
+                    2
+                )
+              : 0,
+          completionTime: timeSpent,
+          feedback: `${scenarioSetName} 완료 - 레벨 ${level}, 정답 ${totalCorrect}/${scenarios.length}`,
+          completedAt: new Date().toISOString(),
+        };
+
+        // ✅ trainingResultApi.saveResult 사용
+        await trainingResultApi.saveResult(resultData);
+        console.log('Training result saved:', resultData);
       }
-
-      const resultData = {
-        participantId: sessionInfo?.participantId || 0, // 실제 참가자 ID 또는 0
-        sessionId: sessionInfo?.sessionId || 0, // 실제 세션 ID 또는 0
-        scenarioId: scenarioId,
-        userId: user.id,
-        resultCode: `RESULT_${Date.now()}`,
-        accuracyScore,
-        speedScore,
-        totalScore,
-        completionTime: timeSpent,
-        feedback: failedThisRun ? '훈련 실패' : '훈련 완료',
-        completedAt: new Date().toISOString(),
-      };
-
-      await trainingResultApi.saveResult(resultData);
-      console.log('훈련 결과가 서버에 저장되었습니다.');
     } catch (error) {
-      console.error('훈련 결과 저장 실패:', error);
+      console.error('Failed to save training result:', error);
+
+      // 실패 시 로컬 스토리지에 백업 저장
+      if (user) {
+        const backupData = {
+          scenarioType,
+          userId: user.id,
+          timeSpent,
+          totalCorrect,
+          level,
+          EXP,
+          failedThisRun,
+          completedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(
+          `training_result_backup_${user.id}_${Date.now()}`,
+          JSON.stringify(backupData)
+        );
+        console.log('Training result saved to localStorage as backup');
+      }
     }
   };
 
@@ -288,6 +251,10 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
   }, [scenario, endModalAutoShown, failedThisRun, scenarioSetName]);
 
   // 선택
+  // 상단 상태에 추가
+  const [hideExpFill, setHideExpFill] = useState(false);
+
+  // handleChoice 함수
   const handleChoice = (option: ScenarioOption) => {
     if (!scenario) return;
     setSelected(option);
@@ -301,13 +268,16 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
 
     if (!awardedExpThisScene && isCorrect && !wrongTriedInThisScene) {
       const gained = BASE_EXP;
+
       const oldLevel = level;
       const oldNeeded = getEXPForNextLevel(oldLevel);
+
       let nextEXP = EXP + gained;
       let nextLevel = level;
       let totalBonus = 0;
       let leveled = false;
 
+      // 연쇄 레벨업 포함 계산
       while (nextEXP >= getEXPForNextLevel(nextLevel)) {
         nextEXP -= getEXPForNextLevel(nextLevel);
         nextLevel += 1;
@@ -318,6 +288,7 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
       }
 
       if (!leveled) {
+        // 레벨업 없음: 그냥 증가 애니메이션
         animateValue({
           from: EXPDisplay,
           to: nextEXP,
@@ -327,27 +298,44 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
         setEXP(nextEXP);
         setLevel(nextLevel);
       } else {
+        // 레벨업 있음:
+        // 1) 현재 레벨 필요치까지 꽉 채우기(100%)
         animateValue({
           from: EXPDisplay,
           to: oldNeeded,
-          duration: 350,
+          duration: 500,
           onUpdate: setEXPDisplay,
           onComplete: () => {
-            setLevel(nextLevel);
-            setEXP(nextEXP);
+            // 100% 상태 하이라이트 유지
             setLevelUpBonus(totalBonus);
             setShowLevelUp(true);
-            window.setTimeout(() => setShowLevelUp(false), 1400);
-            setEXPDisplay(0);
-            animateValue({
-              from: 0,
-              to: nextEXP,
-              duration: 600,
-              onUpdate: setEXPDisplay,
-            });
+
+            window.setTimeout(() => {
+              setShowLevelUp(false);
+
+              // 2) 회색 바만 보이게: 초록바 잠깐 숨기고 EXPDisplay를 0으로 즉시 리셋(수축 애니메이션 방지)
+              setLevel(nextLevel); // neededEXP가 새 레벨 기준으로 바뀌도록 먼저 레벨 반영
+              setEXP(nextEXP); // 최종 잔여 EXP 반영
+              setHideExpFill(true); // 초록바 숨김
+              setEXPDisplay(0); // 즉시 0으로 (수축 애니메이션 없음)
+
+              // 3) 다음 프레임에서 초록바 다시 보이게 + 0 → 잔여 EXP로 우측 방향 채우기
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  setHideExpFill(false);
+                  animateValue({
+                    from: 0,
+                    to: nextEXP,
+                    duration: 600,
+                    onUpdate: setEXPDisplay,
+                  });
+                });
+              });
+            }, 500); // 100% 연출 유지 시간
           },
         });
       }
+
       setTotalCorrect(c => c + 1);
       setAwardedExpThisScene(true);
     }
@@ -468,6 +456,7 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
             neededExp={neededEXP}
             progressPct={progressPct}
             highlight={showLevelUp}
+            hideExpFill={hideExpFill}
           />
           <main>
             <ProgressBar
@@ -477,6 +466,7 @@ export default function ScenarioPage(props: ScenarioPageProps = {}) {
               progressPct={progressPct}
               expDisplay={EXPDisplay}
               neededExp={neededEXP}
+              hideExpFill={hideExpFill}
             />
             <SituationCard
               title={scenario.title ?? ''}

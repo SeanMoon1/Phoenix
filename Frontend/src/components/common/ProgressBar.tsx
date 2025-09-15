@@ -1,12 +1,14 @@
+// src/components/common/ProgressBar.tsx
 import phoenixImg from '@/assets/images/phoenix.png';
 
 type Props = {
   currentIndex: number;
   total: number;
   level: number;
-  progressPct: number;
-  expDisplay: number;
-  neededExp: number;
+  progressPct: number; // EXP 진행도(모바일표시)
+  expDisplay: number; // EXP 수치(모바일표시)
+  neededExp: number; // 다음 레벨 필요치(모바일표시)
+  hideExpFill?: boolean; // 레벨업 리셋 연출 시 초록바 잠깐 숨김
 };
 
 export default function ProgressBar({
@@ -16,6 +18,7 @@ export default function ProgressBar({
   progressPct,
   expDisplay,
   neededExp,
+  hideExpFill = false,
 }: Props) {
   const percentAll = Math.round(((currentIndex + 1) / total) * 100);
 
@@ -34,7 +37,7 @@ export default function ProgressBar({
         />
       </div>
 
-      {/* 모바일 전용 캐릭터 + 레벨 */}
+      {/* 모바일 전용 캐릭터 + 레벨 + EXP 바 */}
       <div className="md:hidden mt-4 grid grid-cols-1 gap-4">
         <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
           <img
@@ -50,8 +53,13 @@ export default function ProgressBar({
             <div className="mt-2">
               <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-500"
-                  style={{ width: `${progressPct}%` }}
+                  className={
+                    'h-full bg-emerald-500 dark:bg-emerald-400 ' +
+                    (hideExpFill
+                      ? 'opacity-0 w-0 transition-none'
+                      : 'transition-[width] duration-500')
+                  }
+                  style={{ width: hideExpFill ? 0 : `${progressPct}%` }}
                 />
               </div>
               <p className="mt-1 text-xs opacity-80">

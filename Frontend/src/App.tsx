@@ -13,6 +13,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import AdminPage from './pages/admin/AdminPage';
+
 import FireScenarioPage from '@/pages/training/FireScenarioPage';
 import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
 import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
@@ -277,9 +278,6 @@ function App() {
           {/* 훈련하기 */}
           <Route path="/manual" element={<ManualPage />} />
           <Route path="/training" element={<TrainingPage />} />
-          <Route path="/training/fire" element={<FireScenarioPage />} />
-          <Route path="/training/fire/game" element={<FireScenarioPage />} />
-          <Route path="/home/training/fire" element={<FireScenarioPage />} />
 
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
@@ -289,6 +287,9 @@ function App() {
 
           {/* 관리자페이지 */}
           <Route path="/admin" element={<AdminPage />} />
+
+          {/* 화재 훈련 */}
+          <Route path="/training/fire" element={<FireScenarioPage />} />
 
           {/* 지진 훈련 */}
           <Route

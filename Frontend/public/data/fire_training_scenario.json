@@ -26,7 +26,7 @@
         "answerId": "answer2",
         "answer": "문을 바로 열고 복도로 나간다.",
         "reaction": "뜨거운 불길이 복도로부터 밀려든다. 유독가스가 급격히 유입된다. (오답)",
-        "nextId": "#1-2-fail",
+        "nextId": "#1-2",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -62,7 +62,7 @@
         "answerId": "answer2",
         "answer": "전화하지 않고 구조대가 오기를 기다린다.",
         "reaction": "신고가 늦어 구조대가 정확한 위치를 파악하기 어렵다. (오답)",
-        "nextId": "#1-3-fail",
+        "nextId": "#1-3",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -98,7 +98,7 @@
         "answerId": "answer2",
         "answer": "문을 계속 두드리며 외부 도움을 기다린다.",
         "reaction": "틈새로 연기가 급격히 들어와 호흡이 어려워진다. (오답)",
-        "nextId": "#1-4-fail",
+        "nextId": "#1-4",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -134,7 +134,7 @@
         "answerId": "answer2",
         "answer": "계단",
         "reaction": "계단은 연기가 심하지 않다면 안전한 대피로가 될 수 있다. (오답)",
-        "nextId": "#1-5-fail",
+        "nextId": "#1-5",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -170,7 +170,7 @@
         "answerId": "answer2",
         "answer": "환기를 위해 창문을 크게 연다.",
         "reaction": "불길이 빠르게 유입되어 화재가 확대될 수 있다. (오답)",
-        "nextId": "#1-6-fail",
+        "nextId": "#1-6",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -206,7 +206,7 @@
         "answerId": "answer2",
         "answer": "소리를 따라가며 문을 열어본다.",
         "reaction": "정체불명의 소리는 환청이나 붕괴음일 수 있다. (오답)",
-        "nextId": "#1-7-fail",
+        "nextId": "#1-7",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -242,7 +242,7 @@
         "answerId": "answer2",
         "answer": "방 안에서 계속 대기하며 소리치지 않는다.",
         "reaction": "구조대가 위치를 확인하기 어렵다. (오답)",
-        "nextId": "#1-8-fail",
+        "nextId": "#1-8",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -278,7 +278,7 @@
         "answerId": "answer2",
         "answer": "바로 창가로 달려가 구조대를 향해 손을 흔든다.",
         "reaction": "파편에 부상을 입을 수 있다. (오답)",
-        "nextId": "#1-9-fail",
+        "nextId": "#1-9",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -314,7 +314,7 @@
         "answerId": "answer2",
         "answer": "당신이 먼저 사다리로 뛰어내린다.",
         "reaction": "아이를 남겨두고 이동하면 위험이 커진다. (오답)",
-        "nextId": "#1-10-fail",
+        "nextId": "#1-10",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -350,7 +350,7 @@
         "answerId": "answer2",
         "answer": "지체 없이 사다리에 몸을 던진다.",
         "reaction": "급하게 움직이다 사다리와 건물 사이에 부딪칠 수 있다. (오답)",
-        "nextId": "#1-11-fail",
+        "nextId": "#1-11",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -386,7 +386,7 @@
         "answerId": "answer2",
         "answer": "곧바로 사다리를 붙잡고 올라탄다.",
         "reaction": "주변의 불길과 파편에 부딪칠 위험이 있다. (오답)",
-        "nextId": "#1-12-fail",
+        "nextId": "#1-12",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -422,7 +422,7 @@
         "answerId": "answer2",
         "answer": "사다리에서 몸을 빼고 뛰어내린다.",
         "reaction": "추락으로 큰 부상을 입을 수 있다. (오답)",
-        "nextId": "#1-13-fail",
+        "nextId": "#1-13",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -458,7 +458,7 @@
         "answerId": "answer2",
         "answer": "빠르게 내려가기 위해 난간을 느슨히 잡는다.",
         "reaction": "균형을 잃고 추락할 위험이 있다. (오답)",
-        "nextId": "#1-14-fail",
+        "nextId": "#1-14",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -494,7 +494,7 @@
         "answerId": "answer2",
         "answer": "현장을 벗어나 집으로 바로 돌아간다.",
         "reaction": "숨은 부상이나 연기 흡입으로 위험해질 수 있다. (오답)",
-        "nextId": "#1-15-fail",
+        "nextId": "#1-15",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -530,7 +530,7 @@
         "answerId": "answer2",
         "answer": "가까운 집으로 이동해 휴식을 취한다.",
         "reaction": "안전 확인이 되지 않아 2차 피해 위험이 있다. (오답)",
-        "nextId": "#1-16-fail",
+        "nextId": "#1-16",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -566,7 +566,7 @@
         "answerId": "answer2",
         "answer": "불길이 거의 꺼졌으니 집으로 돌아간다.",
         "reaction": "남은 불씨가 새로운 위험이 될 수 있다. (오답)",
-        "nextId": "#END-fail",
+        "nextId": "#END",
         "points": {
           "speed": 0,
           "accuracy": 0
@@ -591,7 +591,7 @@
         "answerId": "review",
         "answer": "훈련 내용을 복습하기",
         "reaction": "처음 문제부터 다시 시작합니다.",
-        "nextId": "#END",
+        "nextId": "#REVIEW",
         "points": {
           "speed": 10,
           "accuracy": 10

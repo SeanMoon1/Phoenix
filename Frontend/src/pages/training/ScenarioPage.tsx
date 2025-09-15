@@ -122,6 +122,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const [levelUpBonus, setLevelUpBonus] = useState(0);
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
 
+  // ✅ 추가: 선택 완료 상태
+  const [choiceDisabled, setChoiceDisabled] = useState(false);
+
   // 초기 데이터 로드
   useEffect(() => {
     fetchScenarioByType(scenarioType)
@@ -256,7 +259,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // handleChoice 함수
   const handleChoice = (option: ScenarioOption) => {
-    if (!scenario) return;
+    // ✅ 이미 선택했으면 무시
+    if (choiceDisabled || !scenario) return;
+
+    // ✅ 선택 즉시 비활성화
+    setChoiceDisabled(true);
+
     setSelected(option);
     setFeedback(option.reaction || null);
 
@@ -288,7 +296,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       }
 
       if (!leveled) {
-        // 레벨업 없음: 그냥 증가 애니메이션
         animateValue({
           from: EXPDisplay,
           to: nextEXP,
@@ -298,28 +305,22 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         setEXP(nextEXP);
         setLevel(nextLevel);
       } else {
-        // 레벨업 있음:
-        // 1) 현재 레벨 필요치까지 꽉 채우기(100%)
         animateValue({
           from: EXPDisplay,
           to: oldNeeded,
           duration: 500,
           onUpdate: setEXPDisplay,
           onComplete: () => {
-            // 100% 상태 하이라이트 유지
             setLevelUpBonus(totalBonus);
             setShowLevelUp(true);
 
             window.setTimeout(() => {
               setShowLevelUp(false);
+              setLevel(nextLevel);
+              setEXP(nextEXP);
+              setHideExpFill(true);
+              setEXPDisplay(0);
 
-              // 2) 회색 바만 보이게: 초록바 잠깐 숨기고 EXPDisplay를 0으로 즉시 리셋(수축 애니메이션 방지)
-              setLevel(nextLevel); // neededEXP가 새 레벨 기준으로 바뀌도록 먼저 레벨 반영
-              setEXP(nextEXP); // 최종 잔여 EXP 반영
-              setHideExpFill(true); // 초록바 숨김
-              setEXPDisplay(0); // 즉시 0으로 (수축 애니메이션 없음)
-
-              // 3) 다음 프레임에서 초록바 다시 보이게 + 0 → 잔여 EXP로 우측 방향 채우기
               requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                   setHideExpFill(false);
@@ -331,7 +332,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
                   });
                 });
               });
-            }, 500); // 100% 연출 유지 시간
+            }, 500);
           },
         });
       }
@@ -358,6 +359,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       setClearMsg(null);
       setFailMsg(null);
       setEndModalAutoShown(false);
+      setChoiceDisabled(false);
       return;
     }
     if (nextId === TOKEN_SCENARIO_SELECT) {
@@ -375,6 +377,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       setFeedback(null);
       setWrongTriedInThisScene(false);
       setAwardedExpThisScene(false);
+      setChoiceDisabled(false);
     };
 
     if (nextIndex !== -1) {
@@ -394,6 +397,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     setFeedback(null);
     setWrongTriedInThisScene(false);
     setAwardedExpThisScene(false);
+    setChoiceDisabled(false);
   };
 
   // 모달 시 스크롤 잠금
@@ -477,6 +481,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               options={scenario.options ?? []}
               selected={selected}
               onSelect={handleChoice}
+              disabled={choiceDisabled}
             />
             {feedback && <FeedbackBanner text={feedback} tone={tone} />}
             <NavButtons
@@ -515,6 +520,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               setWrongTriedInThisScene(false);
               setAwardedExpThisScene(false);
               setEndModalAutoShown(false);
+              setChoiceDisabled(false);
             }}
           />
         )}

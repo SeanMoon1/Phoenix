@@ -14,9 +14,6 @@ const Header: React.FC = () => {
   // 관리자 페이지 여부 확인
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  // 관리자 권한 확인 (userLevel이 100 이상이거나 isAdmin이 true인 경우)
-  const isAdmin = user?.isAdmin || (user?.userLevel && user.userLevel >= 100);
-
   // 다크모드 상태를 로컬스토리지와 동기화
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -106,7 +103,11 @@ const Header: React.FC = () => {
               {/* 행동메뉴얼 */}
               <Link
                 to="/manual"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  location.pathname === '/manual'
+                    ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold shadow-sm'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                }`}
               >
                 행동메뉴얼
               </Link>
@@ -114,35 +115,23 @@ const Header: React.FC = () => {
               {/* 훈련하기 */}
               <Link
                 to="/training"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  location.pathname === '/training'
+                    ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold shadow-sm'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                }`}
               >
                 훈련하기
               </Link>
 
-              {/* 마이페이지 - 일반 사용자에게만 표시 */}
-              {isAuthenticated && !isAdmin && (
-                <Link
-                  to="/mypage"
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                >
-                  마이페이지
-                </Link>
-              )}
-
-              {/* 관리자페이지 - 관리자에게만 표시 */}
-              {isAuthenticated && isAdmin && (
-                <Link
-                  to="/admin"
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                >
-                  관리자페이지
-                </Link>
-              )}
-
               {/* 고객지원 */}
               <Link
                 to="/support"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  location.pathname === '/support'
+                    ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold shadow-sm'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                }`}
               >
                 고객지원
               </Link>
@@ -258,7 +247,11 @@ const Header: React.FC = () => {
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <Link
                     to="/manual"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
+                      location.pathname === '/manual'
+                        ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     행동메뉴얼
@@ -269,44 +262,26 @@ const Header: React.FC = () => {
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <Link
                     to="/training"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
+                      location.pathname === '/training'
+                        ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     훈련하기
                   </Link>
                 </div>
 
-                {/* 마이페이지 - 일반 사용자에게만 표시 */}
-                {isAuthenticated && !isAdmin && (
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                    <Link
-                      to="/mypage"
-                      className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      마이페이지
-                    </Link>
-                  </div>
-                )}
-
-                {/* 관리자페이지 - 관리자에게만 표시 */}
-                {isAuthenticated && isAdmin && (
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
-                    <Link
-                      to="/admin"
-                      className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      관리자페이지
-                    </Link>
-                  </div>
-                )}
-
                 {/* 고객지원 */}
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
                   <Link
                     to="/support"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
+                      location.pathname === '/support'
+                        ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     고객지원

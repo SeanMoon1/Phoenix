@@ -111,7 +111,7 @@ const LoginPage: React.FC = () => {
                 <Input
                   label="아이디"
                   type="text"
-                  placeholder={isAdminMode ? 'admin' : 'your_id'}
+                  placeholder="이메일의 @ 앞부분 (예: user123)"
                   error={errors.loginId?.message}
                   {...register('loginId')}
                 />

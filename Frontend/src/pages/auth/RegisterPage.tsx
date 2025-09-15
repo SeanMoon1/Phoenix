@@ -206,7 +206,7 @@ const RegisterPage: React.FC = () => {
 
                 <Input
                   label="로그인 ID"
-                  placeholder="user001"
+                  placeholder="이메일의 @ 앞부분 (예: user123)"
                   error={errors.loginId?.message}
                   {...register('loginId')}
                 />

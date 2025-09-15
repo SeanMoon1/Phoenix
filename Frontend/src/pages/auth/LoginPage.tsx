@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
@@ -23,7 +23,9 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
 
   const {
     register,
@@ -35,10 +37,23 @@ const LoginPage: React.FC = () => {
     resolver: yupResolver(loginSchema),
   });
 
+  // URL 파라미터에서 에러 메시지 처리
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      const errorMessages: { [key: string]: string } = {
+        google_auth_failed: 'Google 로그인에 실패했습니다. 다시 시도해주세요.',
+        invalid_callback: '로그인 처리 중 오류가 발생했습니다.',
+        missing_callback_data: '로그인 정보를 받아오지 못했습니다.',
+      };
+      setUrlError(errorMessages[error] || '알 수 없는 오류가 발생했습니다.');
+    }
+  }, [searchParams]);
+
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
-      navigate('/dashboard');
+      navigate('/mypage');
     } catch (error: any) {
       setError('root', {
         type: 'manual',
@@ -110,6 +125,29 @@ const LoginPage: React.FC = () => {
                 />
               </div>
 
+              {/* URL 파라미터 에러 메시지 */}
+              {urlError && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+                  <div className="flex items-center">
+                    <svg
+                      className="w-5 h-5 text-red-400 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="text-red-600 dark:text-red-400 text-sm">
+                      {urlError}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 폼 에러 메시지 */}
               {errors.root && (
                 <div className="text-red-600 dark:text-red-400 text-xs sm:text-sm text-center">
                   {errors.root.message}
@@ -161,31 +199,6 @@ const LoginPage: React.FC = () => {
                     <span>Google로 로그인</span>
                   </Button>
                 </>
-              )}
-
-              {/* 개발용 임시 접속 버튼 (관리자 모드에서만 표시) */}
-              {isAdminMode && (
-                <div className="mt-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                        개발용
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Link
-                      to="/admin"
-                      className="w-full flex items-center justify-center px-4 py-3 border border-dashed border-orange-300 dark:border-orange-600 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors duration-200 text-sm font-medium"
-                    >
-                      <span className="mr-2">🚀</span>
-                      관리자페이지 임시접속
-                    </Link>
-                  </div>
-                </div>
               )}
 
               {!isAdminMode && (

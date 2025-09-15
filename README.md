@@ -127,7 +127,62 @@ Phoenix/
 
 ## 🚀 빠른 시작
 
-### 1. 개발 환경 설정
+### 1. 환경 변수 설정
+
+#### Backend 환경 변수 (.env 파일 생성)
+
+```bash
+# Backend/.env 파일 생성
+cd Backend
+cp .env.example .env  # 또는 직접 생성
+```
+
+**필수 환경 변수:**
+
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_DATABASE=phoenix
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=7d
+
+# Google OAuth (Google Cloud Console에서 발급)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# Frontend URL
+FRONTEND_URL=http://localhost:5173
+
+# Server
+PORT=3000
+NODE_ENV=development
+```
+
+#### Frontend 환경 변수 (.env 파일 생성)
+
+```bash
+# Frontend/.env 파일 생성
+cd Frontend
+cp .env.example .env  # 또는 직접 생성
+```
+
+**필수 환경 변수:**
+
+```env
+# API URL
+VITE_API_URL=http://localhost:3000
+
+# Environment
+VITE_NODE_ENV=development
+```
+
+### 2. 개발 환경 설정
 
 ```bash
 # 저장소 클론
@@ -139,7 +194,7 @@ chmod +x Frontend/scripts/setup/setup.sh
 ./Frontend/scripts/setup/setup.sh
 ```
 
-### 2. 개발 서버 실행
+### 3. 개발 서버 실행
 
 ```bash
 # Backend 서버 시작
@@ -151,7 +206,7 @@ cd Frontend
 npm run dev
 ```
 
-### 3. 접속 확인
+### 4. 접속 확인
 
 - **Frontend**: http://localhost:3001
 - **Backend API**: http://localhost:3000

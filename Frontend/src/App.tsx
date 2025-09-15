@@ -249,6 +249,18 @@ const HomePage: React.FC = () => {
   );
 };
 
+// 보호된 라우트 컴포넌트
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 // 관리자 라우트 보호 컴포넌트 (개발용 - 임시 비활성화)
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -283,7 +295,14 @@ function App() {
           <Route path="/home/training/fire" element={<FireScenarioPage />} />
 
           {/* 마이페이지 */}
-          <Route path="/mypage" element={<MyPage />} />
+          <Route
+            path="/mypage"
+            element={
+              <ProtectedRoute>
+                <MyPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 고객지원 */}
           <Route path="/support" element={<SupportPage />} />

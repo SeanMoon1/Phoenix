@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error: unknown) {
       setError('root', {
         type: 'manual',
@@ -66,7 +66,7 @@ const LoginPage: React.FC = () => {
       };
 
       await oauthLogin(mockUserData);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error: unknown) {
       console.error(`${provider} 로그인 실패:`, error);
       alert(`${provider} 로그인에 실패했습니다.`);

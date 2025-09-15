@@ -5,12 +5,14 @@
 --       (기본 스키마 + 개선사항 통합)
 -- =====================================================
 
--- 데이터베이스 생성 (선택사항)
--- CREATE DATABASE phoenix_training_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- USE phoenix_training_system;
+-- 1. 데이터베이스 생성 및 선택
+
+-- 데이터베이스 생성 및 선택
+CREATE DATABASE IF NOT EXISTS phoenix CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE phoenix;
 
 -- 1. 팀 정보 테이블 (단일 팀 구조)
-CREATE TABLE team (
+CREATE TABLE IF NOT EXISTS team (
     team_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '팀 ID',
     team_code VARCHAR(50) NOT NULL UNIQUE COMMENT '팀 코드 (예: TEAM001, TEAM002)',
     team_name VARCHAR(100) NOT NULL COMMENT '팀명',
@@ -25,7 +27,7 @@ CREATE TABLE team (
 );
 
 -- 2. 권한 레벨 정의 테이블 (단순화된 3단계)
-CREATE TABLE admin_level (
+CREATE TABLE IF NOT EXISTS admin_level (
     level_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '권한 레벨 ID',
     level_name VARCHAR(50) NOT NULL COMMENT '권한 레벨명',
     level_code VARCHAR(20) NOT NULL UNIQUE COMMENT '권한 레벨 코드',
@@ -42,7 +44,7 @@ CREATE TABLE admin_level (
 );
 
 -- 3. 관리자 테이블 (팀 중심 권한 관리)
-CREATE TABLE admin (
+CREATE TABLE IF NOT EXISTS admin (
     admin_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '관리자 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID (팀 단위 관리자)',
     admin_level_id INT NOT NULL COMMENT '권한 레벨 ID',
@@ -64,7 +66,7 @@ CREATE TABLE admin (
 );
 
 -- 4. 사용자 테이블 (팀 소속)
-CREATE TABLE user (
+CREATE TABLE IF NOT EXISTS user (
     user_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 ID',
     team_id BIGINT NULL COMMENT '팀 ID',
     user_code VARCHAR(50) NULL COMMENT '사용자 코드 (예: USER001, USER002)',
@@ -98,7 +100,7 @@ CREATE TABLE user (
 );
 
 -- 5. 코드 테이블
-CREATE TABLE code (
+CREATE TABLE IF NOT EXISTS code (
     code_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '코드 ID',
     team_id BIGINT COMMENT '팀 ID (NULL이면 시스템 공통 코드)',
     code_class VARCHAR(100) NOT NULL COMMENT '코드 분류',
@@ -117,7 +119,7 @@ CREATE TABLE code (
 );
 
 -- 6. 시나리오 테이블 (개선된 버전)
-CREATE TABLE scenario (
+CREATE TABLE IF NOT EXISTS scenario (
     scenario_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '시나리오 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID (생성 팀)',
     scenario_code VARCHAR(50) NOT NULL COMMENT '시나리오 코드 (예: SCEN001, SCEN002)',
@@ -145,7 +147,7 @@ CREATE TABLE scenario (
 );
 
 -- 7. 시나리오 씬 테이블 (새로 추가)
-CREATE TABLE scenario_scene (
+CREATE TABLE IF NOT EXISTS scenario_scene (
     scene_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '씬 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     scene_code VARCHAR(50) NOT NULL COMMENT '씬 코드 (예: #1-1, #1-2)',
@@ -169,7 +171,7 @@ CREATE TABLE scenario_scene (
 );
 
 -- 8. 의사결정 이벤트 테이블 (scenario_event로 이름 변경)
-CREATE TABLE scenario_event (
+CREATE TABLE IF NOT EXISTS scenario_event (
     event_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '이벤트 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     event_code VARCHAR(50) NOT NULL COMMENT '이벤트 코드 (예: EVENT001, EVENT002)',
@@ -187,7 +189,7 @@ CREATE TABLE scenario_event (
 );
 
 -- 9. 선택 옵션 테이블 (개선된 버전)
-CREATE TABLE choice_option (
+CREATE TABLE IF NOT EXISTS choice_option (
     choice_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '선택지 ID',
     event_id BIGINT NOT NULL COMMENT '이벤트 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
@@ -203,6 +205,7 @@ CREATE TABLE choice_option (
     score_weight INT NOT NULL COMMENT '점수 가중치',
     next_event_id BIGINT COMMENT '다음 이벤트 ID',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    created_by BIGINT COMMENT '생성자 ID',
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     updated_by BIGINT COMMENT '수정자 ID',
     deleted_at DATETIME NULL COMMENT '삭제일시',
@@ -217,7 +220,7 @@ CREATE TABLE choice_option (
 );
 
 -- 10. 훈련 세션 테이블
-CREATE TABLE training_session (
+CREATE TABLE IF NOT EXISTS training_session (
     session_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '세션 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID (생성 팀)',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
@@ -239,7 +242,7 @@ CREATE TABLE training_session (
 );
 
 -- 11. 훈련 참가자 테이블
-CREATE TABLE training_participant (
+CREATE TABLE IF NOT EXISTS training_participant (
     participant_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '참가자 ID',
     session_id BIGINT NOT NULL COMMENT '세션 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -262,7 +265,7 @@ CREATE TABLE training_participant (
 );
 
 -- 12. 훈련 결과 테이블
-CREATE TABLE training_result (
+CREATE TABLE IF NOT EXISTS training_result (
     result_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결과 ID',
     participant_id BIGINT NOT NULL COMMENT '참가자 ID',
     session_id BIGINT NOT NULL COMMENT '세션 ID',
@@ -288,7 +291,7 @@ CREATE TABLE training_result (
 );
 
 -- 13. 사용자 선택 로그 테이블
-CREATE TABLE user_choice_log (
+CREATE TABLE IF NOT EXISTS user_choice_log (
     log_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '로그 ID',
     result_id BIGINT NOT NULL COMMENT '결과 ID',
     event_id BIGINT NOT NULL COMMENT '이벤트 ID',
@@ -309,7 +312,7 @@ CREATE TABLE user_choice_log (
 );
 
 -- 14. 문의사항 테이블
-CREATE TABLE inquiry (
+CREATE TABLE IF NOT EXISTS inquiry (
     inquiry_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '문의 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
@@ -333,7 +336,7 @@ CREATE TABLE inquiry (
 );
 
 -- 15. FAQ 테이블
-CREATE TABLE faq (
+CREATE TABLE IF NOT EXISTS faq (
     faq_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'FAQ ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
     faq_code VARCHAR(50) NOT NULL COMMENT 'FAQ 코드 (예: FAQ001, FAQ002)',
@@ -353,7 +356,7 @@ CREATE TABLE faq (
 );
 
 -- 16. 사용자 진행 상황 테이블 (레벨업 시스템)
-CREATE TABLE user_progress (
+CREATE TABLE IF NOT EXISTS user_progress (
     progress_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '진행 상황 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -375,7 +378,7 @@ CREATE TABLE user_progress (
 );
 
 -- 17. 성취 시스템 테이블
-CREATE TABLE achievement (
+CREATE TABLE IF NOT EXISTS achievement (
     achievement_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '성취 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -396,7 +399,7 @@ CREATE TABLE achievement (
 );
 
 -- 18. 시나리오별 사용자 통계 테이블
-CREATE TABLE user_scenario_stats (
+CREATE TABLE IF NOT EXISTS user_scenario_stats (
     stats_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '통계 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -418,7 +421,7 @@ CREATE TABLE user_scenario_stats (
 );
 
 -- 19. 레벨업 히스토리 테이블
-CREATE TABLE user_level_history (
+CREATE TABLE IF NOT EXISTS user_level_history (
     history_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '히스토리 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     team_id BIGINT NOT NULL COMMENT '팀 ID',
@@ -894,17 +897,42 @@ INSERT INTO scenario_scene (scenario_id, scene_code, scene_order, title, content
 (2, '#2-3', 3, '대피 실행', '대피를 실행합니다.', '차근차근 대피하세요.', 1);
 
 -- 37. 샘플 선택 옵션 데이터 삽입
-INSERT INTO choice_option (scene_id, scenario_id, choice_code, choice_text, reaction_text, speed_points, accuracy_points, exp_points, is_correct, next_scene_code, created_by) VALUES
--- 화재 시나리오 씬 1의 선택지들
-(1, 1, 'FIR001_OPT001', '119에 신고한다', '신고를 완료했습니다. 소방서에서 출동한다고 합니다.', 10, 10, 50, 1, '#1-2', 1),
-(1, 1, 'FIR001_OPT002', '직접 진화한다', '위험합니다! 연기가 더 심해질 수 있습니다.', 5, 0, 10, 0, '#1-1', 1),
-(1, 1, 'FIR001_OPT003', '대피한다', '안전한 곳으로 대피하세요.', 8, 8, 30, 1, '#1-3', 1),
--- 화재 시나리오 씬 2의 선택지들
-(2, 1, 'FIR001_OPT004', '화재 위치 확인', '화재 위치를 확인했습니다. 3층에서 발생했습니다.', 10, 10, 50, 1, '#1-3', 1),
-(2, 1, 'FIR001_OPT005', '소화기 사용', '소화기를 사용해보세요.', 7, 5, 25, 0, '#1-2', 1),
--- 지진 시나리오 씬 1의 선택지들
-(4, 2, 'EAR001_OPT001', '책상 아래로 숨는다', '책상 아래로 숨었습니다. 안전합니다.', 10, 10, 50, 1, '#2-2', 1),
-(4, 2, 'EAR001_OPT002', '바로 밖으로 나간다', '위험합니다! 떨어지는 물건에 맞을 수 있습니다.', 3, 0, 5, 0, '#2-1', 1);
+-- 3. scenario_event 테이블에 이벤트 데이터 추가
+INSERT INTO scenario_event (scenario_id, event_code, event_order, event_description, event_type, created_by) VALUES
+-- 화재 시나리오 이벤트들
+(1, 'FIR001_EVT001', 1, '화재 발생 상황 - 초기 대응', 'FIRE', 1),
+(1, 'FIR001_EVT002', 2, '화재 진압 상황 - 소화기 사용', 'FIRE', 1),
+(1, 'FIR001_EVT003', 3, '화재 대피 상황 - 안전한 대피', 'FIRE', 1),
+-- 지진 시나리오 이벤트들
+(2, 'EAR001_EVT001', 1, '지진 발생 상황 - 초기 대응', 'EARTHQUAKE', 1),
+(2, 'EAR001_EVT002', 2, '지진 대피 상황 - 안전한 대피', 'EARTHQUAKE', 1),
+-- 교통사고 시나리오 이벤트들
+(3, 'TRA001_EVT001', 1, '교통사고 발생 상황 - 초기 대응', 'TRAFFIC', 1),
+(3, 'TRA001_EVT002', 2, '교통사고 응급처치 상황', 'TRAFFIC', 1),
+-- 응급처치 시나리오 이벤트들
+(4, 'EMR001_EVT001', 1, '응급상황 발생 - 초기 대응', 'EMERGENCY', 1),
+(4, 'EMR001_EVT002', 2, '응급처치 수행 상황', 'EMERGENCY', 1);
+
+-- 4. choice_option 테이블에 선택지 데이터 추가 (event_id, score_weight 포함)
+INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_text, reaction_text, speed_points, accuracy_points, exp_points, is_correct, next_scene_code, score_weight, created_by) VALUES
+-- 화재 시나리오 씬 1의 선택지들 (event_id: 1)
+(1, 1, 1, 'FIR001_OPT001', '119에 신고한다', '신고를 완료했습니다. 소방서에서 출동한다고 합니다.', 10, 10, 50, 1, '#1-2', 100, 1),
+(1, 1, 1, 'FIR001_OPT002', '직접 진화한다', '위험합니다! 연기가 더 심해질 수 있습니다.', 5, 0, 10, 0, '#1-1', 50, 1),
+(1, 1, 1, 'FIR001_OPT003', '대피한다', '안전한 곳으로 대피하세요.', 8, 8, 30, 1, '#1-3', 80, 1),
+-- 화재 시나리오 씬 2의 선택지들 (event_id: 2)
+(2, 2, 1, 'FIR001_OPT004', '화재 위치 확인', '화재 위치를 확인했습니다. 3층에서 발생했습니다.', 10, 10, 50, 1, '#1-3', 100, 1),
+(2, 2, 1, 'FIR001_OPT005', '소화기 사용', '소화기를 사용해보세요.', 7, 5, 25, 0, '#1-2', 60, 1),
+-- 지진 시나리오 씬 1의 선택지들 (event_id: 4)
+(4, 4, 2, 'EAR001_OPT001', '책상 아래로 숨는다', '책상 아래로 숨었습니다. 안전합니다.', 10, 10, 50, 1, '#2-2', 100, 1),
+(4, 4, 2, 'EAR001_OPT002', '바로 밖으로 나간다', '위험합니다! 떨어지는 물건에 맞을 수 있습니다.', 3, 0, 5, 0, '#2-1', 30, 1),
+-- 교통사고 시나리오 씬 1의 선택지들 (event_id: 6)
+(6, 5, 3, 'TRA001_OPT001', '119에 신고한다', '신고를 완료했습니다. 응급실에 연락했습니다.', 10, 10, 50, 1, '#3-2', 100, 1),
+(6, 5, 3, 'TRA001_OPT002', '직접 응급처치한다', '응급처치를 시도해보세요.', 7, 8, 35, 1, '#3-3', 80, 1),
+(6, 5, 3, 'TRA001_OPT003', '가만히 기다린다', '위험합니다! 신속한 대응이 필요합니다.', 2, 0, 5, 0, '#3-1', 20, 1),
+-- 응급처치 시나리오 씬 1의 선택지들 (event_id: 8)
+(8, 6, 4, 'EMR001_OPT001', '의식을 확인한다', '의식을 확인했습니다. 반응이 있습니다.', 10, 10, 50, 1, '#4-2', 100, 1),
+(8, 6, 4, 'EMR001_OPT002', '호흡을 확인한다', '호흡을 확인했습니다. 정상적으로 숨을 쉬고 있습니다.', 8, 8, 40, 1, '#4-3', 90, 1),
+(8, 6, 4, 'EMR001_OPT003', '가만히 기다린다', '위험합니다! 신속한 응급처치가 필요합니다.', 3, 0, 5, 0, '#4-1', 30, 1);
 
 -- =====================================================
 -- 완료 메시지

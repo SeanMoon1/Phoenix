@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
- export const getDatabaseConfig = (
+export const getDatabaseConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => ({
   type: 'mysql',
@@ -14,13 +14,12 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
     __dirname + '/../../domain/entities/*.entity{.ts,.js}',
     __dirname + '/../database/entities/*.entity{.ts,.js}',
   ],
+  migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   synchronize: configService.get('NODE_ENV') === 'development',
   logging: configService.get('NODE_ENV') === 'development',
   // 연결 풀 설정
   extra: {
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
   },
   // SSL 설정 (AWS RDS 사용 시)
   ssl:

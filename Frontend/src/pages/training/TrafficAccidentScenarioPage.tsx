@@ -6,7 +6,7 @@ export default function TrafficAccidentScenarioPage() {
 
   useEffect(() => {
     // traffic 타입으로 ScenarioPage로 리다이렉트
-    navigate('/training/scenario/traffic', { replace: true });
+    navigate('/training/traffic-accident', { replace: true });
   }, [navigate]);
 
   return (

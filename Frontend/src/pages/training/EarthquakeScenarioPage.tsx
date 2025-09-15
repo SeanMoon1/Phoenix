@@ -1,13 +1,11 @@
 import ScenarioPage from './ScenarioPage';
-import { fetchEarthquakeScenario } from '@/services/scenarioService';
 
 export default function EarthquakeScenarioPage() {
   return (
     <ScenarioPage
-      scenarioSetName="지진 대응 훈련"
-      fetchScenarios={fetchEarthquakeScenario}
+      scenarioSetName="지진 대응"
       nextScenarioPath="/training"
-      persistKey="phoenix_earthquake_training"
+      persistKey="earthquake_training_state"
     />
   );
 }

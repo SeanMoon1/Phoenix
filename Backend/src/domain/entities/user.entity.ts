@@ -6,9 +6,17 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Team } from './team.entity';
+import { TrainingParticipant } from './training-participant.entity';
+import { TrainingResult } from './training-result.entity';
+import { UserProgress } from './user-progress.entity';
+import { Achievement } from './achievement.entity';
+import { UserScenarioStats } from './user-scenario-stats.entity';
+import { UserLevelHistory } from './user-level-history.entity';
+import { Inquiry } from './inquiry.entity';
 
 @Entity('user')
 export class User {
@@ -115,4 +123,25 @@ export class User {
   @ManyToOne(() => Team)
   @JoinColumn({ name: 'team_id' })
   team: Team;
+
+  @OneToMany(() => TrainingParticipant, (participant) => participant.user)
+  trainingParticipants: TrainingParticipant[];
+
+  @OneToMany(() => TrainingResult, (result) => result.user)
+  trainingResults: TrainingResult[];
+
+  @OneToMany(() => UserProgress, (progress) => progress.user)
+  progress: UserProgress[];
+
+  @OneToMany(() => Achievement, (achievement) => achievement.user)
+  achievements: Achievement[];
+
+  @OneToMany(() => UserScenarioStats, (stats) => stats.user)
+  scenarioStats: UserScenarioStats[];
+
+  @OneToMany(() => UserLevelHistory, (history) => history.user)
+  levelHistory: UserLevelHistory[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
+  inquiries: Inquiry[];
 }

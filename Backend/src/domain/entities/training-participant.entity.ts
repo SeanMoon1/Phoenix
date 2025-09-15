@@ -9,15 +9,21 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { TrainingSession } from './training-session.entity';
 import { Team } from './team.entity';
 import { Scenario } from './scenario.entity';
-import { TrainingParticipant } from './training-participant.entity';
+import { User } from './user.entity';
+import { TrainingResult } from './training-result.entity';
 
-@Entity('training_session')
-export class TrainingSession {
-  @ApiProperty({ description: '세션 ID' })
-  @PrimaryGeneratedColumn({ name: 'session_id' })
+@Entity('training_participant')
+export class TrainingParticipant {
+  @ApiProperty({ description: '참가자 ID' })
+  @PrimaryGeneratedColumn({ name: 'participant_id' })
   id: number;
+
+  @ApiProperty({ description: '세션 ID' })
+  @Column({ name: 'session_id' })
+  sessionId: number;
 
   @ApiProperty({ description: '팀 ID' })
   @Column({ name: 'team_id' })
@@ -27,33 +33,25 @@ export class TrainingSession {
   @Column({ name: 'scenario_id' })
   scenarioId: number;
 
-  @ApiProperty({ description: '세션 코드' })
-  @Column({ name: 'session_code', length: 50 })
-  sessionCode: string;
+  @ApiProperty({ description: '사용자 ID' })
+  @Column({ name: 'user_id' })
+  userId: number;
 
-  @ApiProperty({ description: '세션명' })
-  @Column({ name: 'session_name', length: 255 })
-  sessionName: string;
+  @ApiProperty({ description: '참가자 코드' })
+  @Column({ name: 'participant_code', length: 50 })
+  participantCode: string;
 
-  @ApiProperty({ description: '시작 시간' })
-  @Column({ name: 'start_time', type: 'datetime' })
-  startTime: Date;
+  @ApiProperty({ description: '참가 시간' })
+  @CreateDateColumn({ name: 'joined_at' })
+  joinedAt: Date;
 
-  @ApiProperty({ description: '종료 시간', required: false })
-  @Column({ name: 'end_time', type: 'datetime', nullable: true })
-  endTime?: Date;
-
-  @ApiProperty({ description: '최대 참가자 수', required: false })
-  @Column({ name: 'max_participants', nullable: true })
-  maxParticipants?: number;
+  @ApiProperty({ description: '완료 시간', required: false })
+  @Column({ name: 'completed_at', type: 'datetime', nullable: true })
+  completedAt?: Date;
 
   @ApiProperty({ description: '상태' })
-  @Column({ name: 'status', length: 20, default: '준비중' })
+  @Column({ name: 'status', length: 20, default: '참여중' })
   status: string;
-
-  @ApiProperty({ description: '생성자 ID' })
-  @Column({ name: 'created_by' })
-  createdBy: number;
 
   @ApiProperty({ description: '수정자 ID', required: false })
   @Column({ name: 'updated_by', nullable: true })
@@ -76,6 +74,10 @@ export class TrainingSession {
   updatedAt: Date;
 
   // Relations
+  @ManyToOne(() => TrainingSession)
+  @JoinColumn({ name: 'session_id' })
+  session: TrainingSession;
+
   @ManyToOne(() => Team)
   @JoinColumn({ name: 'team_id' })
   team: Team;
@@ -84,6 +86,10 @@ export class TrainingSession {
   @JoinColumn({ name: 'scenario_id' })
   scenario: Scenario;
 
-  @OneToMany(() => TrainingParticipant, (participant) => participant.session)
-  participants: TrainingParticipant[];
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToMany(() => TrainingResult, (result) => result.participant)
+  results: TrainingResult[];
 }

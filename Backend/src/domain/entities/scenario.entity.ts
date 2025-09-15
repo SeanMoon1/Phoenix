@@ -6,9 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Team } from './team.entity';
+import { ScenarioScene } from './scenario-scene.entity';
+import { ScenarioEvent } from './scenario-event.entity';
+import { TrainingSession } from './training-session.entity';
+import { TrainingResult } from './training-result.entity';
 
 @Entity('scenario')
 export class Scenario {
@@ -104,4 +109,16 @@ export class Scenario {
   @ManyToOne(() => Team)
   @JoinColumn({ name: 'team_id' })
   team: Team;
+
+  @OneToMany(() => ScenarioScene, (scene) => scene.scenario)
+  scenes: ScenarioScene[];
+
+  @OneToMany(() => ScenarioEvent, (event) => event.scenario)
+  events: ScenarioEvent[];
+
+  @OneToMany(() => TrainingSession, (session) => session.scenario)
+  trainingSessions: TrainingSession[];
+
+  @OneToMany(() => TrainingResult, (result) => result.scenario)
+  trainingResults: TrainingResult[];
 }

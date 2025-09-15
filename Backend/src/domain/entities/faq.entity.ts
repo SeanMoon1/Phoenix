@@ -6,49 +6,39 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Team } from './team.entity';
-import { AdminLevel } from './admin-level.entity';
-import { Inquiry } from './inquiry.entity';
 
-@Entity('admin')
-export class Admin {
-  @ApiProperty({ description: '관리자 ID' })
-  @PrimaryGeneratedColumn({ name: 'admin_id' })
+@Entity('faq')
+export class Faq {
+  @ApiProperty({ description: 'FAQ ID' })
+  @PrimaryGeneratedColumn({ name: 'faq_id' })
   id: number;
 
   @ApiProperty({ description: '팀 ID' })
   @Column({ name: 'team_id' })
   teamId: number;
 
-  @ApiProperty({ description: '권한 레벨 ID' })
-  @Column({ name: 'admin_level_id' })
-  adminLevelId: number;
+  @ApiProperty({ description: 'FAQ 코드' })
+  @Column({ name: 'faq_code', length: 50 })
+  faqCode: string;
 
-  @ApiProperty({ description: '로그인 ID' })
-  @Column({ name: 'login_id', length: 50, unique: true })
-  loginId: string;
+  @ApiProperty({ description: '카테고리' })
+  @Column({ name: 'category', length: 100 })
+  category: string;
 
-  @Column({ name: 'password', length: 255 })
-  password: string;
+  @ApiProperty({ description: '질문' })
+  @Column({ name: 'question', type: 'text' })
+  question: string;
 
-  @ApiProperty({ description: '관리자 이름' })
-  @Column({ name: 'name', length: 100 })
-  name: string;
+  @ApiProperty({ description: '답변' })
+  @Column({ name: 'answer', type: 'text' })
+  answer: string;
 
-  @ApiProperty({ description: '이메일 주소' })
-  @Column({ name: 'email', length: 200 })
-  email: string;
-
-  @ApiProperty({ description: '연락처' })
-  @Column({ name: 'phone', length: 20 })
-  phone: string;
-
-  @ApiProperty({ description: '추가 권한 정보 (JSON 형태)', required: false })
-  @Column({ name: 'permissions', type: 'text', nullable: true })
-  permissions?: string;
+  @ApiProperty({ description: '정렬 순서' })
+  @Column({ name: 'order_num' })
+  orderNum: number;
 
   @ApiProperty({ description: '사용 여부' })
   @Column({ name: 'use_yn', length: 1, default: 'Y' })
@@ -82,11 +72,4 @@ export class Admin {
   @ManyToOne(() => Team)
   @JoinColumn({ name: 'team_id' })
   team: Team;
-
-  @ManyToOne(() => AdminLevel)
-  @JoinColumn({ name: 'admin_level_id' })
-  adminLevel: AdminLevel;
-
-  @OneToMany(() => Inquiry, (inquiry) => inquiry.responder)
-  respondedInquiries: Inquiry[];
 }

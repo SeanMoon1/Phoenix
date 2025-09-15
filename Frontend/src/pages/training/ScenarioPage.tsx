@@ -25,12 +25,6 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
 
-interface ScenarioPageProps {
-  scenarioSetName?: string;
-  nextScenarioPath?: string;
-  persistKey?: string;
-}
-
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 const TOKEN_REVIEW = '#REVIEW';
@@ -54,17 +48,21 @@ const getScenarioSetName = (type: string): string => {
   }
 };
 
-export default function ScenarioPage(props?: ScenarioPageProps) {
+// 시나리오 타입별 persistKey 자동 생성
+const getPersistKey = (type: string): string => {
+  return `${type}_training_state`;
+};
+
+export default function ScenarioPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName =
-    props?.scenarioSetName || getScenarioSetName(scenarioType);
-  const nextScenarioPath = props?.nextScenarioPath || '/training';
-  const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
+  const scenarioSetName = getScenarioSetName(scenarioType);
+  const nextScenarioPath = '/training';
+  const persistKey = getPersistKey(scenarioType);
 
   // 시작 시간
   const startTime = useMemo(() => Date.now(), []);

@@ -1,24 +1,19 @@
 {
-  "name": "phoenix-frontend",
+  "name": "phoenix",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": [
-    "scripts/game-script-tool"
-  ],
   "scripts": {
     "dev": "vite",
-    "dev:game-tool": "cd scripts/game-script-tool && npm run dev",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:game-tool\"",
+    "dev:scripts": "vite --config vite.scripts.config.ts",
     "build": "tsc -b && vite build",
-    "build:game-tool": "cd scripts/game-script-tool && npm run build",
-    "build:all": "npm run build && npm run build:game-tool",
+    "build:scripts": "tsc -b && vite build --config vite.scripts.config.ts",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:scripts": "vite preview --config vite.scripts.config.ts",
     "scenario:convert": "ts-node scripts/scenario-generator/src/convert-scenario.ts",
     "scenario:convert-all": "ts-node scripts/scenario-generator/src/convert-all.ts",
-    "scenario:validate": "ts-node scripts/scenario-generator/src/validate-data.ts",
-    "install:all": "npm install && cd scripts/game-script-tool && npm install"
+    "scenario:validate": "ts-node scripts/scenario-generator/src/validate-data.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -52,7 +47,6 @@
     "@typescript-eslint/parser": "^8.42.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.21",
-    "concurrently": "^8.2.2",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

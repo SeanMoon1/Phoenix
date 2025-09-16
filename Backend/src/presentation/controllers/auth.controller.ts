@@ -54,26 +54,6 @@ export class AuthController {
     return req.user;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '현재 사용자 정보 조회' })
-  @ApiResponse({ status: 200, description: '사용자 정보 조회 성공' })
-  async getMe(@Request() req) {
-    try {
-      const user = await this.authService.getUserById(req.user.id);
-      return {
-        success: true,
-        data: user,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || '사용자 정보를 가져올 수 없습니다.',
-      };
-    }
-  }
-
   @Post('oauth/register')
   @ApiOperation({ summary: 'OAuth 회원가입 및 로그인' })
   @ApiResponse({ status: 201, description: 'OAuth 회원가입 및 로그인 성공' })

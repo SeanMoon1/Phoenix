@@ -37,8 +37,6 @@ export type Scenario = {
   disasterType: string;
   description: string;
   riskLevel: string;
-  difficulty: string;
-  approvalStatus: string;
   occurrenceCondition?: string;
   status: string;
   approvalComment?: string;
@@ -52,7 +50,7 @@ export type Scenario = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // 추가 필드들 (Frontend 전용)
+  // 추가 필드들
   sceneId?: string;
   content?: string;
   sceneScript?: string;

@@ -458,9 +458,7 @@ const AdminPage: React.FC = () => {
                   game-script-tool을 사용하여 새로운 시나리오를 작성하세요.
                 </p>
                 <Button
-                  onClick={() =>
-                    window.open('/scripts/game-script-tool', '_blank')
-                  }
+                  onClick={() => (window.location.href = '/admin/script-tool')}
                   className="bg-primary-600 hover:bg-primary-700"
                 >
                   시나리오 도구 열기

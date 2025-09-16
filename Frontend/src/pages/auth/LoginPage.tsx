@@ -8,10 +8,10 @@ import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 
 const loginSchema = yup.object({
-  email: yup
+  loginId: yup
     .string()
-    .email('올바른 이메일을 입력해주세요.')
-    .required('이메일을 입력해주세요.'),
+    .min(3, '아이디는 최소 3자 이상이어야 합니다.')
+    .required('아이디를 입력해주세요.'),
   password: yup
     .string()
     .min(6, '비밀번호는 최소 6자 이상이어야 합니다.')
@@ -21,7 +21,7 @@ const loginSchema = yup.object({
 type LoginFormData = yup.InferType<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuthStore();
+  const { login, oauthLogin, isLoading } = useAuthStore();
   const navigate = useNavigate();
   const [isAdminMode, setIsAdminMode] = useState(false);
 
@@ -52,16 +52,21 @@ const LoginPage: React.FC = () => {
     reset();
   };
 
-  // OAuth 로그인 핸들러 - Google OAuth 리디렉션
+  // OAuth 로그인 핸들러 (데모용 - 실제로는 각 OAuth 제공자의 SDK 사용)
   const handleOAuthLogin = async (provider: string) => {
     try {
-      if (provider === 'google') {
-        // Google OAuth 리디렉션 URL로 이동
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-        window.location.href = `${apiBaseUrl}/auth/google`;
-      } else {
-        throw new Error(`${provider}는 아직 지원되지 않습니다.`);
-      }
+      // 실제 구현에서는 각 OAuth 제공자의 SDK를 사용하여 사용자 정보를 받아옴
+      // 여기서는 데모용으로 가상의 사용자 정보를 사용
+      const mockUserData = {
+        email: `user@${provider}.com`,
+        name: `${provider} 사용자`,
+        provider: provider,
+        providerId: `${provider}_${Date.now()}`,
+        profileImage: `https://via.placeholder.com/150?text=${provider}`,
+      };
+
+      await oauthLogin(mockUserData);
+      navigate('/');
     } catch (error: unknown) {
       console.error(`${provider} 로그인 실패:`, error);
       alert(`${provider} 로그인에 실패했습니다.`);
@@ -101,13 +106,11 @@ const LoginPage: React.FC = () => {
             >
               <div className="space-y-3 sm:space-y-4">
                 <Input
-                  label="이메일"
-                  type="email"
-                  placeholder={
-                    isAdminMode ? 'admin@example.com' : 'your@email.com'
-                  }
-                  error={errors.email?.message}
-                  {...register('email')}
+                  label="아이디"
+                  type="text"
+                  placeholder={isAdminMode ? 'admin' : 'your_id'}
+                  error={errors.loginId?.message}
+                  {...register('loginId')}
                 />
 
                 <Input
@@ -137,7 +140,7 @@ const LoginPage: React.FC = () => {
                       <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400">
+                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
                         또는
                       </span>
                     </div>
@@ -148,7 +151,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex items-center justify-center w-full space-x-2"
+                      className="w-full flex items-center justify-center space-x-2"
                       onClick={() => handleOAuthLogin('google')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -175,7 +178,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex items-center justify-center w-full space-x-2"
+                      className="w-full flex items-center justify-center space-x-2"
                       onClick={() => handleOAuthLogin('kakao')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -190,7 +193,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex items-center justify-center w-full space-x-2"
+                      className="w-full flex items-center justify-center space-x-2"
                       onClick={() => handleOAuthLogin('naver')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -203,31 +206,6 @@ const LoginPage: React.FC = () => {
                     </Button>
                   </div>
                 </>
-              )}
-
-              {/* 개발용 임시 접속 버튼 (관리자 모드에서만 표시) */}
-              {isAdminMode && (
-                <div className="mt-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="px-2 text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400">
-                        개발용
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Link
-                      to="/admin"
-                      className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-orange-600 transition-colors duration-200 border border-orange-300 border-dashed rounded-lg dark:border-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                    >
-                      <span className="mr-2">🚀</span>
-                      개발용 관리자 대시보드 임시접속
-                    </Link>
-                  </div>
-                </div>
               )}
 
               {!isAdminMode && (

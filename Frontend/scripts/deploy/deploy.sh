@@ -58,7 +58,7 @@ cd /var/www/phoenix/backend || handle_error "Backend 디렉토리 이동 실패"
 # 환경 변수 파일 생성
 cat > .env << EOF
 # Database Configuration
-DB_HOST=43.203.112.213
+DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=phoenix_user
 DB_PASSWORD=phoenix_password_2024
@@ -114,7 +114,7 @@ server {
 
     # Backend API
     location /api {
-        proxy_pass http://43.203.112.213:3000;
+        proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -127,7 +127,7 @@ server {
 
     # API 문서
     location /api-docs {
-        proxy_pass http://43.203.112.213:3000/api;
+        proxy_pass http://localhost:3000/api;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -152,8 +152,8 @@ sudo ufw --force enable || handle_error "방화벽 활성화 실패"
 # MySQL 데이터베이스 설정
 echo -e "${BLUE}🔧 MySQL 데이터베이스 설정...${NC}"
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS phoenix;" || handle_error "데이터베이스 생성 실패"
-sudo mysql -e "CREATE USER IF NOT EXISTS 'phoenix_user'@'%' IDENTIFIED BY 'phoenix_password_2024';" || handle_error "사용자 생성 실패"
-sudo mysql -e "GRANT ALL PRIVILEGES ON phoenix.* TO 'phoenix_user'@'%';" || handle_error "권한 부여 실패"
+sudo mysql -e "CREATE USER IF NOT EXISTS 'phoenix_user'@'localhost' IDENTIFIED BY 'phoenix_password_2024';" || handle_error "사용자 생성 실패"
+sudo mysql -e "GRANT ALL PRIVILEGES ON phoenix.* TO 'phoenix_user'@'localhost';" || handle_error "권한 부여 실패"
 sudo mysql -e "FLUSH PRIVILEGES;" || handle_error "권한 새로고침 실패"
 
 # SSL 인증서 설정 (Let's Encrypt)

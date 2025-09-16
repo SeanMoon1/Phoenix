@@ -37,7 +37,7 @@ export async function fetchEmergencyScenario(): Promise<Scenario[]> {
   return Array.isArray(data) ? data : [];
 }
 
-// 교통사고 시나리오 로드 (이미 올바름)
+// 교통사고 시나리오 로드
 export async function fetchTrafficScenario(): Promise<Scenario[]> {
   const res = await fetch('/data/traffic_accident_scenario.json', {
     headers: { 'Content-Type': 'application/json' },

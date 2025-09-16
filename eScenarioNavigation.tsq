@@ -1,0 +1,154 @@
+[33mcommit 0a948e726a72c6a30fb8e15a94ec2f3bb18ecc03[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev.gong[m[33m)[m
+Author: vello101 <vello101@naver.com>
+Date:   Fri Sep 5 14:05:16 2025 +0900
+
+    chore: Modularization
+
+[33mcommit 73ebf5f538f1c21bde90fbdac3f5fe37088a1d5b[m
+Author: vello101 <vello101@naver.com>
+Date:   Fri Sep 5 11:35:27 2025 +0900
+
+    fix: exp gauge
+
+[33mcommit 16d750aa7adeee565965a806d7783d04ab41b12d[m
+Author: vello101 <vello101@naver.com>
+Date:   Thu Sep 4 16:27:24 2025 +0900
+
+    mv gitignore to root folder
+
+[33mcommit faeb54baf903495152455cd1c6e580b3323f325a[m
+Author: vello101 <vello101@naver.com>
+Date:   Thu Sep 4 15:56:37 2025 +0900
+
+    merge
+
+[33mcommit 2aecdb3945a800178798fea77f0b086c8dfdce51[m
+Merge: 929a331 502951c
+Author: vello101 <vello101@naver.com>
+Date:   Thu Sep 4 15:56:03 2025 +0900
+
+    Merge branch 'dev.yong' of https://github.com/SeanMoon1/Phoenix into dev.gong
+
+[33mcommit 502951c0b900b515e5fb8fda9a1041b95250a901[m
+Author: yonghwan0688 <120708521+yonghwan0688@users.noreply.github.com>
+Date:   Wed Sep 3 16:37:26 2025 +0900
+
+    0902_2
+
+[33mcommit 929a33174090c8010eeef9d5d2cd3824c27c61bb[m
+Author: vello101 <vello101@naver.com>
+Date:   Wed Sep 3 15:21:11 2025 +0900
+
+    feat: add exp gauge & Level Up System, Character, Confetti Effect
+
+[33mcommit c1f39b7a3ba41c8a7b75f6d814b503b61760861e[m
+Author: yonghwan0688 <120708521+yonghwan0688@users.noreply.github.com>
+Date:   Tue Sep 2 17:09:40 2025 +0900
+
+    0902_1
+
+[33mcommit 9050f46c600866cd392da59f930d5e1d23a09dbf[m
+Merge: 9b6cb12 94bb90a
+Author: vello101 <vello101@naver.com>
+Date:   Tue Sep 2 16:42:25 2025 +0900
+
+    Merge branch 'dev.gong' of https://github.com/SeanMoon1/Phoenix into dev.gong
+
+[33mcommit 9b6cb12da99ec6096d94407998ccdf570a613b82[m
+Author: vello101 <vello101@naver.com>
+Date:   Tue Sep 2 16:42:08 2025 +0900
+
+    훈련 시나리오 레이아웃
+
+[33mcommit e78d1859e9803fb2a8e6d5aaf3e0c8ab4b3ef8c0[m
+Author: yonghwan0688 <120708521+yonghwan0688@users.noreply.github.com>
+Date:   Tue Sep 2 11:11:36 2025 +0900
+
+    Setup TailwindCSS and improve development environment
+    
+    - Add TailwindCSS configuration (postcss.config.js, tailwind.config.js)
+    - Install @tailwindcss/postcss plugin for compatibility
+    - Update React App.tsx with Phoenix project theme
+    - Add missing react.svg asset file
+    - Configure index.css with Tailwind directives
+    - All tests passing: TypeScript compilation, ESLint, and build successful
+
+[33mcommit 6c8d7dd2d5b1cef7ffa570173ee9d0fea4b67f00[m
+Merge: 5058e03 94bb90a
+Author: yonghwan0688 <120708521+yonghwan0688@users.noreply.github.com>
+Date:   Tue Sep 2 10:25:17 2025 +0900
+
+    Merge dev.gong: Frontend Vite React TypeScript setup
+
+[33mcommit 94bb90a66af88c9b858aa3629c0d57fa05ba77b8[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 16:44:05 2025 +0900
+
+    README.md 수정
+
+[33mcommit 01cfa20d8b8940977d03103f2343528075ad5ffc[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 16:08:26 2025 +0900
+
+    Delete Frontend/public/readme.md
+
+[33mcommit 5058e03bcb184f17434e79d9be654a2715853215[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 16:06:44 2025 +0900
+
+    Update README.md
+
+[33mcommit 5f51a5afbd2532031afd1aac5e49c9ad67b5e0c3[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 16:06:04 2025 +0900
+
+    Update readme.md
+
+[33mcommit 0f231aa97129af500e2e9a510f06a8d632d74677[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 16:04:41 2025 +0900
+
+    readme test file
+
+[33mcommit c4f64c8f8a0670023f1f54df9d02e4efa38a1b4e[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 15:59:44 2025 +0900
+
+    add gitkeep
+
+[33mcommit f3f8ae2d74b1dd75a6f19d10588a5ec6ed22b144[m
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 15:55:20 2025 +0900
+
+    second commit
+
+[33mcommit 7ac9645164fb92f9662184f897193e5cf88a6188[m
+Merge: 5d64704 b3fb7ae
+Author: vello101 <vello101@naver.com>
+Date:   Mon Sep 1 14:33:27 2025 +0900
+
+    Take README from origin/main during merge
+
+[33mcommit b3fb7aeab53cac0f0a1607221fdf235b49162daa[m[33m ([m[1;31morigin/dev.kh[m[33m)[m
+Author: SeungYeon Moon ( Sean ) <moonaki43@gmail.com>
+Date:   Mon Sep 1 14:08:52 2025 +0900
+
+    Folder_root
+
+[33mcommit 5d64704693aa6ade1a1bc87974095efbdec13086[m[33m ([m[1;32mmain[m[33m)[m
+Author: vello101 <vello101@naver.com>
+Date:   Thu Aug 28 15:06:13 2025 +0900
+
+    first commit
+
+[33mcommit 9bbaf9d2a832df4d063c42a0cc9b3a5a8acd80fc[m
+Author: SeungYeon Moon ( Sean ) <moonaki43@gmail.com>
+Date:   Thu Aug 28 14:48:45 2025 +0900
+
+    test_file_upload
+
+[33mcommit 67e31119ed987457fddefba7d43c491b1e6d0300[m
+Author: SeungYeon Moon ( Sean ) <moonaki43@gmail.com>
+Date:   Thu Aug 28 14:44:10 2025 +0900
+
+    Initial commit

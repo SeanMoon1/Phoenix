@@ -1,0 +1,120 @@
+# =============== Core Node/TypeScript ===============
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules/
+/.pnp
+.pnp.js
+*.tsbuildinfo
+
+# =============== Build Outputs ===============
+# production
+dist/
+build/
+out/
+
+# (프론트엔드 프레임워크별 캐시/산출물)
+.vite/
+.next/
+.nuxt/
+.svelte-kit/
+.storybook/
+storybook-static/
+.parcel-cache/
+.cache/
+.cache-loader/
+
+# =============== Testing & Coverage ===============
+# testing
+/coverage
+.nyc_output/
+cypress/screenshots/
+cypress/videos/
+playwright-report/
+test-results/
+
+# =============== Logs & Diagnostics ===============
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+debug.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# =============== Environment & Secrets ===============
+# misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# .env 변형들 모두 차단 (.env, .env.local, .env.production, ...)
+.env*
+*.env
+# 예시 파일은 허용 (순서 중요: 위 무시 규칙 아래에 위치)
+!.env.example
+!*.env.example
+
+# 인증서/키 (있다면)
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.csr
+*.der
+id_rsa
+id_ecdsa
+id_ed25519
+
+# 서비스 계정/클라우드 크리덴셜
+*serviceAccount*.json
+*ServiceAccount*.json
+*credentials*.json
+gcloud-*.json
+
+# =============== Docker / Serverless ===============
+# 도커 오버라이드/개발용 env
+docker-compose.override.yml
+.docker.env
+.env.docker
+
+# Serverless 패키지산출물
+.serverless/
+
+# =============== Databases (개발용 파일형 DB 등) ===============
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+# 팀 정책에 따라: 대용량 백업/덤프 위치가 있으면 폴더 단위로 제외
+Database/backups/
+
+# =============== Lint/Format Caches ===============
+.eslintcache
+.stylelintcache
+
+# =============== OS / IDE / Misc ===============
+# (옵션) VS Code 설정을 커밋하지 않을 때만 활성화
+#.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =============== Phoenix Project Specific ===============
+# 시나리오 데이터 파일들은 Git에 포함 (팀 공유 필요)
+# Scripts/data/*.json
+
+# 게임 스크립트 툴 관련 임시 파일들
+*.tmp
+*.temp
+.cache/

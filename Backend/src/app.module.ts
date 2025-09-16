@@ -148,18 +148,22 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     GetUserUseCase,
     UpdateUserUseCase,
     // Repository Implementations
+    TypeOrmUserRepository,
     {
       provide: 'UserRepository',
       useClass: TypeOrmUserRepository,
     },
+    TypeOrmScenarioRepository,
     {
       provide: 'ScenarioRepository',
       useClass: TypeOrmScenarioRepository,
     },
+    TypeOrmTeamRepository,
     {
       provide: 'TeamRepository',
       useClass: TypeOrmTeamRepository,
     },
+    TypeOrmTrainingSessionRepository,
     {
       provide: 'TrainingSessionRepository',
       useClass: TypeOrmTrainingSessionRepository,

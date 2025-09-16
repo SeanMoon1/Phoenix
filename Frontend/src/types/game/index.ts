@@ -3,16 +3,7 @@
 // Database 스키마 기준으로 정의된 타입들을 사용하세요.
 
 // 기존 코드와의 호환성을 위해 re-export
-export type {
-  User,
-  Scenario,
-  ScenarioEvent,
-  ChoiceOption,
-  TrainingResult,
-  UserProgress,
-  Achievement,
-  UserScenarioStats,
-} from '../index';
+export type { User, ScenarioEvent, UserScenarioStats } from '../index';
 
 export const UserRole = {
   ADMIN: 'ADMIN',

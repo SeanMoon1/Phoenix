@@ -14,12 +14,20 @@
 ### 🏢 팀 관리
 
 - **다중 팀 지원**: 조직별 독립적인 훈련 환경
+- **팀 코드 시스템**: 회원가입 후 팀 코드로 가입
 - **권한 관리**: 팀관리자, 팀운영자, 일반사용자 권한
 - **데이터 격리**: 팀별 완전한 데이터 분리
 
+### 🔐 인증 시스템
+
+- **다중 인증 방식**: 이메일/비밀번호, Google OAuth
+- **자동 사용자 코드 생성**: 시스템에서 자동 생성 및 관리
+- **팀 코드 기반 가입**: 회원가입 후 팀 코드로 팀 가입
+- **JWT 토큰 기반 인증**: 안전한 세션 관리
+
 ### 📚 시나리오 시스템
 
-- **다양한 재난 유형**: 화재, 지진, 응급처치, 침수/홍수
+- **다양한 재난 유형**: 화재, 지진, 응급처치, 교통사고
 - **의사결정 이벤트**: 선택형 및 순차형 이벤트
 - **실시간 피드백**: 즉시 결과 확인 및 학습
 
@@ -37,14 +45,18 @@
 - **Vite** (빌드 도구)
 - **TailwindCSS** (스타일링)
 - **Zustand** (상태 관리)
+- **React Hook Form** (폼 관리)
+- **React Router** (라우팅)
 
 ### Backend
 
-- **NestJS** + **TypeScript**
+- **NestJS** + **TypeScript** (Clean Architecture)
 - **TypeORM** (ORM)
 - **MySQL** (데이터베이스)
 - **JWT** (인증)
+- **Passport** (OAuth 인증)
 - **Swagger** (API 문서)
+- **Class Validator** (유효성 검사)
 
 ### DevOps
 
@@ -52,6 +64,42 @@
 - **Nginx** (리버스 프록시)
 - **AWS EC2** (클라우드 배포)
 - **GitHub Actions** (CI/CD)
+
+## 🏛️ Clean Architecture
+
+Phoenix Backend는 Clean Architecture 원칙을 따라 설계되었습니다:
+
+### 계층 구조
+
+1. **Domain Layer** (도메인 계층)
+
+   - 핵심 비즈니스 로직과 규칙
+   - 엔티티, 값 객체, 도메인 서비스
+   - 외부 의존성 없음
+
+2. **Application Layer** (애플리케이션 계층)
+
+   - 유스케이스 구현
+   - 애플리케이션 서비스
+   - 도메인 계층에만 의존
+
+3. **Infrastructure Layer** (인프라 계층)
+
+   - 데이터베이스, 외부 API 연동
+   - 도메인 인터페이스 구현
+   - 기술적 세부사항 처리
+
+4. **Presentation Layer** (프레젠테이션 계층)
+   - REST API 컨트롤러
+   - DTO 및 요청/응답 처리
+   - 사용자 인터페이스
+
+### 장점
+
+- **테스트 용이성**: 각 계층을 독립적으로 테스트 가능
+- **유지보수성**: 비즈니스 로직과 기술적 세부사항 분리
+- **확장성**: 새로운 기능 추가 시 기존 코드 영향 최소화
+- **의존성 역전**: 고수준 모듈이 저수준 모듈에 의존하지 않음
 
 ## 📁 프로젝트 구조
 
@@ -82,29 +130,41 @@ Phoenix/
 │   ├── tailwind.config.js
 │   └── vite.config.ts
 │
-├── 📁 Backend/                     # NestJS 애플리케이션
+├── 📁 Backend/                     # NestJS 애플리케이션 (Clean Architecture)
 │   ├── 📁 src/
-│   │   ├── 📁 modules/             # 기능별 모듈
-│   │   │   ├── 📁 auth/            # 인증 모듈
-│   │   │   ├── 📁 users/           # 사용자 관리
-│   │   │   ├── 📁 teams/           # 팀 관리
-│   │   │   ├── 📁 scenarios/       # 시나리오 관리
-│   │   │   ├── 📁 training/        # 훈련 관리
-│   │   │   ├── 📁 training-results/ # 훈련 결과
-│   │   │   ├── 📁 user-progress/   # 사용자 진행상황
-│   │   │   ├── 📁 support/         # 지원 시스템
-│   │   │   ├── 📁 codes/           # 코드 관리
-│   │   │   ├── 📁 admin/           # 관리자 기능
-│   │   │   └── 📁 common/          # 공통 모듈
+│   │   ├── 📁 application/         # 애플리케이션 계층
+│   │   │   ├── 📁 interfaces/      # 인터페이스 정의
+│   │   │   ├── 📁 services/        # 애플리케이션 서비스
+│   │   │   └── 📁 use-cases/       # 유스케이스 (비즈니스 로직)
+│   │   ├── 📁 domain/              # 도메인 계층 (핵심 비즈니스 로직)
+│   │   │   ├── 📁 entities/        # 도메인 엔티티
+│   │   │   ├── 📁 repositories/    # 리포지토리 인터페이스
+│   │   │   ├── 📁 services/        # 도메인 서비스
+│   │   │   └── 📁 value-objects/   # 값 객체
+│   │   ├── 📁 infrastructure/      # 인프라 계층
+│   │   │   ├── 📁 config/          # 설정 관리
+│   │   │   ├── 📁 database/        # 데이터베이스 구현
+│   │   │   └── 📁 external/        # 외부 서비스 연동
+│   │   ├── 📁 presentation/        # 프레젠테이션 계층
+│   │   │   ├── 📁 controllers/     # REST API 컨트롤러
+│   │   │   └── 📁 dto/             # 데이터 전송 객체
+│   │   ├── 📁 shared/              # 공유 계층
+│   │   │   ├── 📁 decorators/      # 커스텀 데코레이터
+│   │   │   ├── 📁 filters/         # 예외 필터
+│   │   │   ├── 📁 guards/          # 인증/인가 가드
+│   │   │   ├── 📁 interceptors/    # 인터셉터
+│   │   │   ├── 📁 pipes/           # 파이프
+│   │   │   └── 📁 strategies/      # 인증 전략
 │   │   ├── 📁 database/            # 데이터베이스 관련
 │   │   │   ├── 📁 entities/        # TypeORM 엔티티
 │   │   │   ├── 📁 migrations/      # 마이그레이션
 │   │   │   └── 📁 seeds/           # 시드 데이터
 │   │   ├── 📁 config/              # 환경 설정
-│   │   ├── 📁 shared/              # 공유 모듈
-│   │   └── 📁 utils/               # 유틸리티
+│   │   ├── 📁 utils/               # 유틸리티
+│   │   ├── app.module.ts           # 루트 모듈
+│   │   ├── main.ts                 # 애플리케이션 진입점
+│   │   └── ormconfig.ts            # TypeORM 설정
 │   ├── package.json
-│   ├── ormconfig.ts                # TypeORM 설정
 │   └── ecosystem.config.js         # PM2 설정
 │
 ├── 📁 Database/                    # SQL 스키마 및 백업 (운영용)
@@ -155,6 +215,11 @@ JWT_EXPIRES_IN=7d
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# OAuth 리다이렉션 설정
+OAUTH_REDIRECT_BASE=https://phoenix-4.com
+OAUTH_SUCCESS_REDIRECT=https://phoenix-4.com/auth/callback
+OAUTH_FAILURE_REDIRECT=https://phoenix-4.com/auth/callback
 
 # Frontend URL
 FRONTEND_URL=http://localhost:5173
@@ -208,7 +273,7 @@ npm run dev
 
 ### 4. 접속 확인
 
-- **Frontend**: http://localhost:3001
+- **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3000
 - **API 문서**: http://localhost:3000/api
 
@@ -261,6 +326,24 @@ npm run build
 
 # 수동 배포 단계는 Docs/deployment/README.md 참조
 ```
+
+## 🆕 최근 업데이트
+
+### v2.0.0 (2025.01.16)
+
+- **Clean Architecture 적용**: Backend 구조를 Clean Architecture로 전면 개편
+- **OAuth 로그인 지원**: Google OAuth 로그인 기능 추가
+- **팀 코드 시스템**: 회원가입 후 팀 코드로 팀 가입하는 방식으로 변경
+- **자동 사용자 코드 생성**: 시스템에서 사용자 코드 자동 생성 및 관리
+- **타입 안정성 향상**: TypeScript 타입 정의 개선 및 에러 수정
+- **UI/UX 개선**: 회원가입 폼 단순화 및 마이페이지 팀 가입 기능 추가
+
+### 주요 변경사항
+
+- 회원가입 시 팀 코드와 사용자 코드 입력 필드 제거
+- 로그인 후 마이페이지에서 팀 코드로 팀 가입 가능
+- Google OAuth 로그인 후 메인 페이지로 리다이렉션
+- Clean Architecture 기반의 유지보수성 향상
 
 ## 📚 문서
 

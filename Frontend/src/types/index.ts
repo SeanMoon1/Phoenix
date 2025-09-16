@@ -8,7 +8,7 @@ export interface ApiResponse<T = any> {
 
 // 사용자 타입 (Database 스키마 기준)
 export interface User {
-  id: number;
+  id: string;
   teamId?: number;
   userCode?: string;
   loginId: string;
@@ -38,6 +38,7 @@ export interface User {
   isAdmin?: boolean;
   adminLevel?: string;
   adminPermissions?: string[];
+  role?: string;
 }
 
 // 인증 관련 타입
@@ -92,6 +93,11 @@ export interface Scenario {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 게임에서 사용되는 추가 속성들
+  sceneId?: string;
+  content?: string;
+  sceneScript?: string;
+  options?: ChoiceOption[];
   // 관계 데이터 (선택적)
   scenes?: ScenarioScene[];
   events?: ScenarioEvent[];
@@ -178,6 +184,15 @@ export interface ChoiceOption {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 게임에서 사용되는 추가 속성들
+  answerId?: string;
+  answer?: string;
+  reaction?: string;
+  nextId?: string;
+  points?: {
+    speed: number;
+    accuracy: number;
+  };
 }
 
 // 훈련 참가자 타입 (Database 스키마 기준)

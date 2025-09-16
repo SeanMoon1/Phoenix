@@ -28,6 +28,9 @@ import { TrainingResultService } from './application/services/training-result.se
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 
+// Domain Layer - Services
+import { UserDomainService } from './domain/services/user-domain.service';
+
 // Application Layer - Use Cases
 import { CreateUserUseCase } from './application/use-cases/user/create-user.use-case';
 import { GetUserUseCase } from './application/use-cases/user/get-user.use-case';
@@ -138,6 +141,8 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     TrainingResultService,
     TeamsService,
     AdminService,
+    // Domain Services
+    UserDomainService,
     // Use Cases
     CreateUserUseCase,
     GetUserUseCase,

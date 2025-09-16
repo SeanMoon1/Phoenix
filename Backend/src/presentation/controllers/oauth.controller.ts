@@ -36,8 +36,11 @@ export class OAuthController {
 
       if (!user) {
         console.log('❌ OAuth 사용자 정보 없음');
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
         return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=user_not_found`,
+          `${redirectBase}/auth/callback?error=user_not_found`,
         );
       }
 
@@ -49,8 +52,11 @@ export class OAuthController {
           provider: !!user.provider,
           providerId: !!user.providerId,
         });
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
         return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=incomplete_user_info`,
+          `${redirectBase}/auth/callback?error=incomplete_user_info`,
         );
       }
 
@@ -68,14 +74,29 @@ export class OAuthController {
       console.log('🔑 JWT 토큰 존재:', !!(result && result.access_token));
 
       if (result && result.access_token) {
-        // 성공 시 JWT 토큰과 함께 프론트엔드로 리디렉션
-        const successUrl = `${this.configService.get<string>('OAUTH_SUCCESS_REDIRECT')}?token=${result.access_token}`;
+        // 성공 시 JWT 토큰과 사용자 정보를 함께 프론트엔드로 리디렉션
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
+        const userParam = encodeURIComponent(
+          JSON.stringify({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            provider: user.provider,
+            providerId: user.providerId,
+          }),
+        );
+        const successUrl = `${redirectBase}/auth/callback?token=${result.access_token}&user=${userParam}`;
         console.log('✅ OAuth 로그인 성공, 리디렉션:', successUrl);
         return res.redirect(successUrl);
       } else {
         console.log('❌ OAuth 인증 실패 - 토큰 생성 실패');
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
         return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=authentication_failed`,
+          `${redirectBase}/auth/callback?error=authentication_failed`,
         );
       }
     } catch (error) {
@@ -84,8 +105,11 @@ export class OAuthController {
         stack: error.stack,
         name: error.name,
       });
+      const redirectBase =
+        this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+        'https://phoenix-4.com';
       return res.redirect(
-        `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=server_error&details=${encodeURIComponent(error.message)}`,
+        `${redirectBase}/auth/callback?error=server_error&details=${encodeURIComponent(error.message)}`,
       );
     }
   }
@@ -99,6 +123,7 @@ export class OAuthController {
     const redirectBase = this.configService.get<string>('OAUTH_REDIRECT_BASE');
     const callbackPath = this.configService.get<string>('GOOGLE_CALLBACK_PATH');
 
+    const baseUrl = redirectBase || 'https://phoenix-4.com';
     return {
       configured: !!(clientId && clientSecret && redirectBase && callbackPath),
       clientId: clientId ? `${clientId.substring(0, 10)}...` : 'Not configured',
@@ -106,8 +131,8 @@ export class OAuthController {
         redirectBase && callbackPath
           ? `${redirectBase}${callbackPath}`
           : 'Not configured',
-      successRedirect: this.configService.get<string>('OAUTH_SUCCESS_REDIRECT'),
-      failureRedirect: this.configService.get<string>('OAUTH_FAILURE_REDIRECT'),
+      successRedirect: `${baseUrl}/auth/callback`,
+      failureRedirect: `${baseUrl}/auth/callback`,
     };
   }
 

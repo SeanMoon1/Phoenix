@@ -4,8 +4,6 @@ import type { User, AuthState, LoginCredentials } from '../types';
 import { api } from '../services/api';
 
 interface RegisterCredentials {
-  teamCode: string;
-  userCode: string;
   loginId: string;
   name: string;
   email: string;
@@ -54,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
 
           if (response.success && response.data) {
             const user: User = {
-              id: response.data.user.id,
+              id: response.data.user.id.toString(),
               teamId: 0,
               userCode: '',
               loginId: '',

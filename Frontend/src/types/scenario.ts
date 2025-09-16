@@ -12,4 +12,4 @@ export type {
 } from './index';
 
 // 레거시 호환성을 위한 타입 별칭
-export type ScenarioOption = ChoiceOption;
+export type ScenarioOption = import('./index').ChoiceOption;

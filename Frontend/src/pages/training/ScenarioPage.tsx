@@ -87,10 +87,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         };
 
         const resultData = {
-          participantId: user.id,
+          participantId: parseInt(user.id),
           sessionId: Date.now(),
           scenarioId: scenarioIdMap[scenarioType] || 1,
-          userId: user.id,
+          userId: parseInt(user.id),
           resultCode: gameState.failedThisRun ? 'FAILED' : 'COMPLETED',
           accuracyScore:
             gameState.scenarios.length > 0
@@ -112,7 +112,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           completedAt: new Date().toISOString(),
         };
 
-        await trainingResultApi.saveResult(resultData);
+        await trainingResultApi.save(resultData);
         console.log('Training result saved:', resultData);
       }
     } catch (error) {

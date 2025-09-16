@@ -18,7 +18,6 @@ import { useBlockListSelector } from '../../stores/game/selector';
 import { useScenarioEditor } from '../../hooks/useScenarioEditor.ts'; // ✅ .ts 명시
 import { loadBlockList, saveBlockList } from '../../utils/game/api';
 import { UserRole } from '../../types/game';
-import type { User } from '../../types/game';
 
 // 간소화된 styled components
 const Container = styled.div`
@@ -88,35 +87,11 @@ const ScriptToolPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('scenarios');
 
   // 관리자 사용자 정보
-  const currentUser: User = {
-    id: 'admin001',
+  const currentUser = {
     name: '시나리오 관리자',
     role: UserRole.ADMIN,
     user_level: 100,
-    user_exp: 999999,
-    total_score: 999999,
-    completed_scenarios: 999,
-    current_tier: '마스터',
-    level_progress: 100.0,
-    next_level_exp: 0,
-    scenario_stats: {
-      fire: { completed: 999, total_score: 999999, best_score: 100 },
-      earthquake: { completed: 999, total_score: 999999, best_score: 100 },
-      flood: { completed: 999, total_score: 999999, best_score: 100 },
-      emergency: { completed: 999, total_score: 999999, best_score: 100 },
-      chemical: { completed: 999, total_score: 999999, best_score: 100 },
-      nuclear: { completed: 999, total_score: 999999, best_score: 100 },
-      terrorism: { completed: 999, total_score: 999999, best_score: 100 },
-      pandemic: { completed: 999, total_score: 999999, best_score: 100 },
-      natural_disaster: {
-        completed: 999,
-        total_score: 999999,
-        best_score: 100,
-      },
-      complex: { completed: 999, total_score: 999999, best_score: 100 },
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    current_tier: 'MASTER',
   };
 
   // 컴포넌트 마운트 시 데이터 로드

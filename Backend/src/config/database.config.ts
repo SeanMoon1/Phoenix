@@ -27,6 +27,13 @@ export const getDatabaseConfig = (
     configService.get<string>('NODE_ENV') === 'production'
       ? { rejectUnauthorized: false }
       : false,
+  extra: {
+    // MySQL2 경고 해결을 위한 설정
+    acquireTimeoutMillis: 60000,
+    timeout: 60000,
+    reconnect: true,
+    charset: 'utf8mb4',
+  },
 });
 
 // TypeORM CLI용 DataSource

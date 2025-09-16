@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { fetchScenarioByType } from '@/services/scenarioService';
-import { trainingResultApi, trainingApi } from '@/services/api';
+import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { Scenario, ScenarioOption } from '@/types/scenario';
 import { useLocation } from 'react-router-dom';

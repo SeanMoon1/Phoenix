@@ -1,5 +1,4 @@
 import type { Scenario } from '@/types/scenario';
-import { scenarioApi } from './api';
 
 // 화재 시나리오 로드
 export async function fetchFireScenario(): Promise<Scenario[]> {

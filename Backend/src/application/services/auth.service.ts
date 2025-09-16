@@ -19,9 +19,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    console.log('🔍 validateUser 호출:', { email });
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(loginId: string, password: string): Promise<any> {
+    console.log('🔍 validateUser 호출:', { loginId });
+    const user = await this.usersService.findByLoginId(loginId);
     console.log('👤 사용자 조회 결과:', user ? '사용자 존재' : '사용자 없음');
 
     if (user) {

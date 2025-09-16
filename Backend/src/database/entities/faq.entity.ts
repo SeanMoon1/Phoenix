@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from './team.entity';
+import { Team } from '../../domain/entities/team.entity';
 
 @Entity('faq')
 export class Faq {

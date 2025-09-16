@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Scenario } from '../../modules/scenarios/entities/scenario.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 
 @Entity('decision_event')
 export class DecisionEvent {

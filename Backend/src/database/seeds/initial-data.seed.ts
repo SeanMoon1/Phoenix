@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
 import { AdminLevel } from '../entities/admin-level.entity';
 import { Code } from '../entities/code.entity';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { Team } from '../../domain/entities/team.entity';
 import { Admin } from '../entities/admin.entity';
-import { User } from '../../modules/users/entities/user.entity';
+import { User } from '../../domain/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 
 export class InitialDataSeed {

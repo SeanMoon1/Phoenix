@@ -59,9 +59,9 @@ export class OAuthController {
       const result = await this.authService.oauthRegisterAndLogin({
         email: user.email,
         name: user.name,
-        provider: user.provider,
-        providerId: user.providerId,
-        profileImage: user.profileImage,
+        oauthProvider: user.provider,
+        oauthProviderId: user.providerId,
+        profileImageUrl: user.profileImage,
       });
 
       console.log('🔍 OAuth 처리 결과:', result ? '성공' : '실패');
@@ -120,9 +120,9 @@ export class OAuthController {
       const testOAuthData = {
         email: 'test@example.com',
         name: 'Test User',
-        provider: 'google',
-        providerId: 'test123456',
-        profileImage: 'https://example.com/avatar.jpg',
+        oauthProvider: 'google',
+        oauthProviderId: 'test123456',
+        profileImageUrl: 'https://example.com/avatar.jpg',
       };
 
       console.log('🧪 OAuth 테스트 시작:', testOAuthData);

@@ -1,70 +1,15 @@
-export type ChoiceOption = {
-  id: number;
-  eventId: number;
-  scenarioCode: string;
-  choiceCode: string;
-  choiceText: string;
-  isCorrect: boolean;
-  scoreWeight: number;
-  nextEventId?: number;
-  updatedBy?: number;
-  deletedAt?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+// 이 파일은 더 이상 사용되지 않습니다.
+// 모든 타입 정의는 Frontend/src/types/index.ts로 통합되었습니다.
+// Database 스키마 기준으로 정의된 타입들을 사용하세요.
 
-export type DecisionEvent = {
-  id: number;
-  scenarioCode: string;
-  eventCode: string;
-  eventOrder: number;
-  eventDescription: string;
-  eventType: string;
-  createdBy: number;
-  updatedBy?: number;
-  deletedAt?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+// 기존 코드와의 호환성을 위해 re-export
+export type {
+  ChoiceOption,
+  ScenarioEvent as DecisionEvent,
+  Scenario,
+  ScenarioScene,
+  ScenarioEvent,
+} from './index';
 
-export type Scenario = {
-  id: number;
-  teamId: number;
-  scenarioCode: string;
-  title: string;
-  disasterType: string;
-  description: string;
-  riskLevel: string;
-  occurrenceCondition?: string;
-  status: string;
-  approvalComment?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  createdBy: number;
-  approvedAt?: string;
-  approvedBy?: number;
-  updatedBy?: number;
-  deletedAt?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  // 추가 필드들
-  sceneId?: string;
-  content?: string;
-  sceneScript?: string;
-  options?: ScenarioOption[];
-  events?: DecisionEvent[];
-};
-
-export type ScenarioOption = {
-  id: number;
-  answerId: string;
-  answer: string;
-  reaction: string;
-  nextId: string;
-  points?: {
-    accuracy: number;
-  };
-};
+// 레거시 호환성을 위한 타입 별칭
+export type ScenarioOption = ChoiceOption;

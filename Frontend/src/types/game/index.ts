@@ -1,35 +1,18 @@
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  user_level: number; // 사용자 레벨 (1-100)
-  user_exp: number; // 사용자 경험치
-  total_score: number; // 총점
-  completed_scenarios: number; // 완료한 시나리오 수
-  // 레벨업 시스템 상세 정보
-  current_tier: string; // 현재 등급 (초급자, 중급자, 고급자, 전문가, 마스터)
-  level_progress: number; // 현재 레벨에서의 진행도 (0-100%)
-  next_level_exp: number; // 다음 레벨까지 필요한 경험치
-  // 시나리오별 통계
-  scenario_stats: {
-    fire: { completed: number; total_score: number; best_score: number };
-    earthquake: { completed: number; total_score: number; best_score: number };
-    flood: { completed: number; total_score: number; best_score: number };
-    emergency: { completed: number; total_score: number; best_score: number };
-    chemical: { completed: number; total_score: number; best_score: number };
-    nuclear: { completed: number; total_score: number; best_score: number };
-    terrorism: { completed: number; total_score: number; best_score: number };
-    pandemic: { completed: number; total_score: number; best_score: number };
-    natural_disaster: {
-      completed: number;
-      total_score: number;
-      best_score: number;
-    };
-    complex: { completed: number; total_score: number; best_score: number };
-  };
-  created_at: string; // 계정 생성일
-  updated_at?: string; // 마지막 업데이트일
-}
+// 이 파일은 더 이상 사용되지 않습니다.
+// 모든 타입 정의는 Frontend/src/types/index.ts로 통합되었습니다.
+// Database 스키마 기준으로 정의된 타입들을 사용하세요.
+
+// 기존 코드와의 호환성을 위해 re-export
+export type {
+  User,
+  Scenario,
+  ScenarioEvent,
+  ChoiceOption,
+  TrainingResult,
+  UserProgress,
+  Achievement,
+  UserScenarioStats,
+} from '../index';
 
 export const UserRole = {
   ADMIN: 'ADMIN',

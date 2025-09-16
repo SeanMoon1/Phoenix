@@ -8,8 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../modules/users/entities/user.entity';
-import { Team } from '../../modules/teams/entities/team.entity';
+import { User } from '../../domain/entities/user.entity';
+import { Team } from '../../domain/entities/team.entity';
 
 @Entity('user_scenario_stats')
 export class UserScenarioStats {

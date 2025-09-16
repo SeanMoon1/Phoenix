@@ -148,7 +148,7 @@ const AdminPage: React.FC = () => {
 
     setCreatingTeam(true);
     try {
-      const response = await teamApi.createTeam({
+      const response = await teamApi.create({
         teamName: newTeamName,
         description: newTeamDescription,
       });
@@ -571,7 +571,7 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="flex justify-end mt-6 space-x-3">
               <Button
                 onClick={() => {
                   setShowCreateTeamModal(false);

@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Team } from './team.entity';
+import { Team } from '../../domain/entities/team.entity';
 import { AdminLevel } from './admin-level.entity';
 import { Inquiry } from './inquiry.entity';
 

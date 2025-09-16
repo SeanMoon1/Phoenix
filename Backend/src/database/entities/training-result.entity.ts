@@ -9,9 +9,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.entity';
-import { TrainingSession } from './training-session.entity';
-import { Scenario } from './scenario.entity';
+import { User } from '../../domain/entities/user.entity';
+import { TrainingSession } from '../../domain/entities/training-session.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 import { TrainingParticipant } from './training-participant.entity';
 import { UserChoiceLog } from './user-choice-log.entity';
 

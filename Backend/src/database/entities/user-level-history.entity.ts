@@ -8,9 +8,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.entity';
-import { Team } from './team.entity';
-import { Scenario } from './scenario.entity';
+import { User } from '../../domain/entities/user.entity';
+import { Team } from '../../domain/entities/team.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 
 @Entity('user_level_history')
 export class UserLevelHistory {

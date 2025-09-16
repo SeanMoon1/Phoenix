@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Scenario } from './scenario.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 import { ChoiceOption } from './choice-option.entity';
 
 @Entity('scenario_event')

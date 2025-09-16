@@ -4,8 +4,6 @@ import type { User, AuthState, LoginCredentials } from '../types';
 import { api } from '../services/api';
 
 interface RegisterCredentials {
-  teamCode: string;
-  userCode: string;
   loginId: string;
   name: string;
   email: string;
@@ -14,6 +12,7 @@ interface RegisterCredentials {
 
 interface AuthStore extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
+  oauthLogin: (userData: any) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
@@ -53,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
 
           if (response.success && response.data) {
             const user: User = {
-              id: response.data.user.id,
+              id: response.data.user.id.toString(),
               teamId: 0,
               userCode: '',
               loginId: '',
@@ -88,6 +87,44 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error: any) {
           set({ isLoading: false });
           throw new Error(error.message || '로그인에 실패했습니다.');
+        }
+      },
+
+      oauthLogin: async (userData: any) => {
+        set({ isLoading: true });
+        try {
+          // OAuth 로그인 처리
+          const user: User = {
+            id: userData.id || 0,
+            teamId: 0,
+            userCode: userData.userCode || '',
+            loginId: userData.loginId || '',
+            email: userData.email || '',
+            name: userData.name || '',
+            useYn: 'Y',
+            userLevel: userData.userLevel || 1,
+            userExp: userData.userExp || 0,
+            totalScore: userData.totalScore || 0,
+            completedScenarios: userData.completedScenarios || 0,
+            currentTier: userData.currentTier || 'BRONZE',
+            levelProgress: userData.levelProgress || 0,
+            nextLevelExp: userData.nextLevelExp || 100,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isAdmin: userData.isAdmin || false,
+            adminLevel: userData.adminLevel || 'USER',
+          };
+
+          set({
+            user,
+            token: userData.token || 'oauth-token',
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({ isLoading: false });
+          throw new Error(error.message || 'OAuth 로그인에 실패했습니다.');
         }
       },
 

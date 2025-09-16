@@ -35,7 +35,7 @@ export class AuthService {
       console.log('🔐 비밀번호 비교 결과:', isPasswordValid);
 
       if (isPasswordValid) {
-        const { password, ...result } = user;
+        const { password: _, ...result } = user;
         console.log('✅ 로그인 성공');
         return result;
       }
@@ -115,7 +115,7 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const { password, ...result } = user;
+      const { password: _, ...result } = user;
       return {
         success: true,
         message: '회원가입이 성공적으로 완료되었습니다.',
@@ -144,22 +144,22 @@ export class AuthService {
     try {
       console.log('🔄 OAuth 사용자 등록/로그인 시작:', {
         email: oauthRegisterDto.email,
-        provider: oauthRegisterDto.provider,
-        providerId: oauthRegisterDto.providerId,
+        oauthProvider: oauthRegisterDto.oauthProvider,
+        oauthProviderId: oauthRegisterDto.oauthProviderId,
       });
 
       // 입력 데이터 검증
       if (
         !oauthRegisterDto.email ||
         !oauthRegisterDto.name ||
-        !oauthRegisterDto.provider ||
-        !oauthRegisterDto.providerId
+        !oauthRegisterDto.oauthProvider ||
+        !oauthRegisterDto.oauthProviderId
       ) {
         console.log('❌ OAuth 입력 데이터 불완전:', {
           email: !!oauthRegisterDto.email,
           name: !!oauthRegisterDto.name,
-          provider: !!oauthRegisterDto.provider,
-          providerId: !!oauthRegisterDto.providerId,
+          oauthProvider: !!oauthRegisterDto.oauthProvider,
+          oauthProviderId: !!oauthRegisterDto.oauthProviderId,
         });
         throw new BadRequestException('OAuth 사용자 정보가 불완전합니다.');
       }
@@ -171,8 +171,8 @@ export class AuthService {
       if (!user) {
         // 2. OAuth 제공자 ID로도 확인
         user = await this.usersService.findByOAuthProvider(
-          oauthRegisterDto.provider,
-          oauthRegisterDto.providerId,
+          oauthRegisterDto.oauthProvider,
+          oauthRegisterDto.oauthProviderId,
         );
         console.log(
           '👤 OAuth 제공자 ID로 사용자 조회 결과:',
@@ -196,9 +196,9 @@ export class AuthService {
             password: '', // OAuth 사용자는 비밀번호 없음
             teamId: null, // 팀은 나중에 가입
             userCode: null, // 사용자 코드는 나중에 생성
-            oauthProvider: oauthRegisterDto.provider,
-            oauthProviderId: oauthRegisterDto.providerId,
-            profileImageUrl: oauthRegisterDto.profileImage,
+            oauthProvider: oauthRegisterDto.oauthProvider,
+            oauthProviderId: oauthRegisterDto.oauthProviderId,
+            profileImageUrl: oauthRegisterDto.profileImageUrl,
           });
           console.log('✅ 새 사용자 생성 완료:', {
             userId: user.id,
@@ -217,9 +217,9 @@ export class AuthService {
         // 4. 기존 사용자 정보 업데이트 (OAuth 정보 추가)
         console.log('🔄 기존 사용자 정보 업데이트 시작:', { userId: user.id });
         try {
-          user.oauthProvider = oauthRegisterDto.provider;
-          user.oauthProviderId = oauthRegisterDto.providerId;
-          user.profileImageUrl = oauthRegisterDto.profileImage;
+          user.oauthProvider = oauthRegisterDto.oauthProvider;
+          user.oauthProviderId = oauthRegisterDto.oauthProviderId;
+          user.profileImageUrl = oauthRegisterDto.profileImageUrl;
           user = await this.usersService.update(user.id, user);
           console.log('✅ 기존 사용자 정보 업데이트 완료');
         } catch (updateError) {

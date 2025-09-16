@@ -16,29 +16,6 @@ const SupportPage: React.FC = () => {
     color: 'blue',
     content: (
       <div className="space-y-8">
-        {/* 검색 및 필터 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="질문을 검색하세요..."
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div className="md:w-64">
-              <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>전체</option>
-                <option>회원가입/로그인</option>
-                <option>훈련 관련</option>
-                <option>결제/구독</option>
-                <option>기술 지원</option>
-                <option>기타</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         {/* FAQ 목록 */}
         <div className="space-y-4">
           {[
@@ -246,99 +223,41 @@ const SupportPage: React.FC = () => {
           </form>
         </div>
 
-        {/* 연락처 정보 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              연락처 정보
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    📧
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    이메일
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    support@disaster-training.com
-                  </p>
-                </div>
+        {/* 응답 시간 안내 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            응답 시간 안내
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <span className="text-green-600 dark:text-green-400 text-xs">
+                  ✓
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    ⏰
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    운영 시간
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    평일 09:00 - 18:00
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    토요일 09:00 - 13:00
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-green-600 dark:text-green-400 text-sm">
-                    📞
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
-                    전화
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    02-1234-5678
-                  </p>
-                </div>
-              </div>
+              <span className="text-gray-600 dark:text-gray-300">
+                일반 문의: 24시간 이내
+              </span>
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              응답 시간 안내
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 dark:text-green-400 text-xs">
-                    ✓
-                  </span>
-                </div>
-                <span className="text-gray-600 dark:text-gray-300">
-                  일반 문의: 24시간 이내
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                <span className="text-yellow-600 dark:text-yellow-400 text-xs">
+                  !
                 </span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-yellow-600 dark:text-yellow-400 text-xs">
-                    !
-                  </span>
-                </div>
-                <span className="text-gray-600 dark:text-gray-300">
-                  긴급 문의: 4시간 이내
+              <span className="text-gray-600 dark:text-gray-300">
+                긴급 문의: 4시간 이내
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 dark:text-blue-400 text-xs">
+                  🔧
                 </span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 dark:text-blue-400 text-xs">
-                    🔧
-                  </span>
-                </div>
-                <span className="text-gray-600 dark:text-gray-300">
-                  기술 문의: 48시간 이내
-                </span>
-              </div>
+              <span className="text-gray-600 dark:text-gray-300">
+                기술 문의: 48시간 이내
+              </span>
             </div>
           </div>
         </div>
@@ -427,7 +346,6 @@ const SupportPage: React.FC = () => {
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 자주 묻는 질문과 답변 확인</li>
-                      <li>• 카테고리별 필터링 및 검색</li>
                       <li>• 빠른 문제 해결 방법 안내</li>
                     </ul>
                   </div>
@@ -437,18 +355,8 @@ const SupportPage: React.FC = () => {
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 온라인 문의 양식 작성</li>
-                      <li>• 연락처 정보 및 운영시간</li>
+                      <li>• 문의 유형별 분류</li>
                       <li>• 응답 시간 안내 및 추적</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      📞 연락처
-                    </h3>
-                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 이메일: support@disaster-training.com</li>
-                      <li>• 전화: 02-1234-5678</li>
-                      <li>• 운영시간: 평일 09:00-18:00</li>
                     </ul>
                   </div>
                 </div>

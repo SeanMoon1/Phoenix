@@ -40,6 +40,16 @@ export class ScenariosController {
     return this.scenariosService.findAll();
   }
 
+  @Get('type/:disasterType')
+  @ApiOperation({ summary: '재난 유형별 시나리오 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '재난 유형별 시나리오 목록 조회 성공',
+  })
+  findByType(@Param('disasterType') disasterType: string) {
+    return this.scenariosService.findByDisasterType(disasterType);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: '특정 시나리오 조회' })
   @ApiResponse({ status: 200, description: '시나리오 조회 성공' })

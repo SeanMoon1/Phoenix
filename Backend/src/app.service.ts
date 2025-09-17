@@ -6,4 +6,3 @@ export class AppService {
     return 'Phoenix Training Platform Backend API';
   }
 }
-

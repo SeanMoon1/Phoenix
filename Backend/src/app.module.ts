@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { Repository, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 // Clean Architecture 구조에 맞는 새로운 app.module.ts
 import { AppController } from './app.controller';
@@ -63,7 +63,6 @@ import { Faq } from './domain/entities/faq.entity';
 
 // Infrastructure Layer - Database
 import { getDatabaseConfig } from './infrastructure/config/database.config';
-import { DatabaseModule } from './infrastructure/database/database.module';
 import oauthConfig from './infrastructure/config/oauth.config';
 
 // Shared Layer

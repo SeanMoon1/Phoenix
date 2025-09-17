@@ -1,12 +1,7 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
-import { LoginDto } from '../../presentation/dto/login.dto';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
 import { PasswordUtil } from '../../utils/password.util';

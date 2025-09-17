@@ -15,6 +15,10 @@ export const getDatabaseConfig = (
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     synchronize: false,
     logging: configService.get('NODE_ENV') === 'development',
+    // 데이터베이스 연결 실패 시에도 애플리케이션이 계속 실행되도록 설정
+    retryAttempts: 3,
+    retryDelay: 3000,
+    autoLoadEntities: true,
     extra: {
       connectTimeout: 10000,
       waitForConnections: true,

@@ -112,41 +112,43 @@ const ScriptToolPage: React.FC = () => {
     if (savedBlockList.length > 0) {
       setBlockList(savedBlockList);
       // 기존 블록 리스트를 시나리오 형태로 변환
-      const convertedScenarios: ScenarioGeneratorEvent[] = savedBlockList.map((block, index) => ({
-        id: index + 1,
-        teamId: 1,
-        scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
-        sceneId: block.sceneId,
-        title: block.title || '',
-        content: block.content || '',
-        sceneScript: block.sceneScript || '',
-        disasterType: block.disasterType,
-        riskLevel: 'MEDIUM',
-        difficulty: block.difficulty,
-        options: (block.options || []).map(opt => ({
-          id: 0,
-          eventId: 0,
-          scenarioId: 0,
-          choiceCode: opt.answerId,
-          choiceText: opt.answer,
-          isCorrect: opt.points.speed > 0 && opt.points.accuracy > 0,
-          speedPoints: opt.points.speed,
-          accuracyPoints: opt.points.accuracy,
-          expPoints: 0,
-          reactionText: opt.reaction,
-          nextEventId: opt.nextId ? parseInt(opt.nextId) : undefined,
-          scoreWeight: 1,
-          createdBy: 1,
+      const convertedScenarios: ScenarioGeneratorEvent[] = savedBlockList.map(
+        (block, index) => ({
+          id: index + 1,
+          teamId: 1,
+          scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
+          sceneId: block.sceneId,
+          title: block.title || '',
+          content: block.content || '',
+          sceneScript: block.sceneScript || '',
+          disasterType: block.disasterType,
+          riskLevel: 'MEDIUM',
+          difficulty: block.difficulty,
+          options: (block.options || []).map(opt => ({
+            id: 0,
+            eventId: 0,
+            scenarioId: 0,
+            choiceCode: opt.answerId,
+            choiceText: opt.answer,
+            isCorrect: opt.points.speed > 0 && opt.points.accuracy > 0,
+            speedPoints: opt.points.speed,
+            accuracyPoints: opt.points.accuracy,
+            expPoints: 0,
+            reactionText: opt.reaction,
+            nextEventId: opt.nextId || undefined,
+            scoreWeight: 1,
+            createdBy: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isActive: true,
+          })),
+          status: 'ACTIVE',
+          approvalStatus: 'APPROVED',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isActive: true,
-        })),
-        status: 'ACTIVE',
-        approvalStatus: 'APPROVED',
-        createdAt: new Date().toISOString(),
-        createdBy: 1,
-        order: index + 1,
-      }));
+          createdBy: 1,
+          order: index + 1,
+        })
+      );
       setScenarios(convertedScenarios);
     }
   }, [setBlockList]);
@@ -201,45 +203,46 @@ const ScriptToolPage: React.FC = () => {
           const importedBlocks = JSON.parse(e.target?.result as string);
           saveBlockList(importedBlocks);
           setBlockList(importedBlocks);
-          
+
           // 시나리오 데이터도 업데이트
-          const convertedScenarios: ScenarioGeneratorEvent[] = importedBlocks.map((block: any, index: number) => ({
-            id: index + 1,
-            teamId: 1,
-            scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
-            sceneId: block.sceneId,
-            title: block.title || '',
-            content: block.content || '',
-            sceneScript: block.sceneScript || '',
-            disasterType: block.disasterType,
-            riskLevel: 'MEDIUM',
-            difficulty: block.difficulty,
-            options: (block.options || []).map((opt: any) => ({
-              id: 0,
-              eventId: 0,
-              scenarioId: 0,
-              choiceCode: opt.answerId,
-              choiceText: opt.answer,
-              isCorrect: opt.points?.speed > 0 && opt.points?.accuracy > 0,
-              speedPoints: opt.points?.speed || 0,
-              accuracyPoints: opt.points?.accuracy || 0,
-              expPoints: 0,
-              reactionText: opt.reaction,
-              nextEventId: opt.nextId ? parseInt(opt.nextId) : undefined,
-              scoreWeight: 1,
-              createdBy: 1,
+          const convertedScenarios: ScenarioGeneratorEvent[] =
+            importedBlocks.map((block: any, index: number) => ({
+              id: index + 1,
+              teamId: 1,
+              scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
+              sceneId: block.sceneId,
+              title: block.title || '',
+              content: block.content || '',
+              sceneScript: block.sceneScript || '',
+              disasterType: block.disasterType,
+              riskLevel: 'MEDIUM',
+              difficulty: block.difficulty,
+              options: (block.options || []).map((opt: any) => ({
+                id: 0,
+                eventId: 0,
+                scenarioId: 0,
+                choiceCode: opt.answerId,
+                choiceText: opt.answer,
+                isCorrect: opt.points?.speed > 0 && opt.points?.accuracy > 0,
+                speedPoints: opt.points?.speed || 0,
+                accuracyPoints: opt.points?.accuracy || 0,
+                expPoints: 0,
+                reactionText: opt.reaction,
+                nextEventId: opt.nextId || undefined,
+                scoreWeight: 1,
+                createdBy: 1,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isActive: true,
+              })),
+              status: 'ACTIVE',
+              approvalStatus: 'APPROVED',
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              isActive: true,
-            })),
-            status: 'ACTIVE',
-            approvalStatus: 'APPROVED',
-            createdAt: new Date().toISOString(),
-            createdBy: 1,
-            order: index + 1,
-          }));
+              createdBy: 1,
+              order: index + 1,
+            }));
           setScenarios(convertedScenarios);
-          
+
           alert('시나리오를 성공적으로 가져왔습니다!');
         } catch (error) {
           alert('파일 형식이 올바르지 않습니다.');
@@ -332,7 +335,7 @@ const ScriptToolPage: React.FC = () => {
             scenarios={scenarios}
             onScenariosUpdate={handleScenariosUpdate}
           />
-          
+
           {/* 기존 관리자 패널 */}
           <AdminPanel
             currentUser={currentUser}

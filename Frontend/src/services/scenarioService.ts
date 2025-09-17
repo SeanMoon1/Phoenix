@@ -208,6 +208,8 @@ export async function fetchScenarioByType(type: string): Promise<Scenario[]> {
 // 정적 파일에서 시나리오 로드
 async function loadFromStaticFiles(type: string): Promise<Scenario[]> {
   const fileName = getScenarioFileName(type);
+  console.log(`[정적 파일 로딩] 파일명: ${fileName}, 타입: ${type}`);
+
   const response = await fetch(`/data/${fileName}`);
 
   if (!response.ok) {
@@ -215,7 +217,12 @@ async function loadFromStaticFiles(type: string): Promise<Scenario[]> {
   }
 
   const data = await response.json();
-  return convertJsonToScenarios(data, type);
+  console.log(`[정적 파일 로딩] 원본 데이터:`, data.slice(0, 2)); // 첫 2개만 로그
+
+  const converted = convertJsonToScenarios(data, type);
+  console.log(`[정적 파일 로딩] 변환된 데이터:`, converted.slice(0, 2)); // 첫 2개만 로그
+
+  return converted;
 }
 
 // API에서 시나리오 로드
@@ -261,6 +268,31 @@ function convertJsonToScenarios(
     isActive: true,
     createdAt: item.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    // 훈련 페이지에서 사용하는 필드들 추가
+    content: item.content || '내용 없음',
+    sceneScript: item.sceneScript || '질문 없음',
+    options: item.options
+      ? item.options.map((opt: any, optIndex: number) => ({
+          id: optIndex + 1,
+          eventId: optIndex + 1,
+          scenarioId: index + 1,
+          choiceCode: opt.answerId || `CHOICE_${optIndex + 1}`,
+          choiceText: opt.answer || '선택지 없음',
+          isCorrect:
+            (opt.points?.speed || 0) > 0 && (opt.points?.accuracy || 0) > 0,
+          speedPoints: opt.points?.speed || 0,
+          accuracyPoints: opt.points?.accuracy || 0,
+          expPoints: opt.exp || 0,
+          reactionText: opt.reaction || undefined,
+          nextEventId: opt.nextId || undefined,
+          scoreWeight: 1,
+          createdBy: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isActive: true,
+        }))
+      : [],
+    // 기존 events 구조도 유지 (호환성)
     events: item.options
       ? item.options.map((opt: any, optIndex: number) => ({
           id: optIndex + 1,
@@ -285,11 +317,9 @@ function convertJsonToScenarios(
                 (opt.points?.speed || 0) > 0 && (opt.points?.accuracy || 0) > 0,
               speedPoints: opt.points?.speed || 0,
               accuracyPoints: opt.points?.accuracy || 0,
-              expPoints: 0,
+              expPoints: opt.exp || 0,
               reactionText: opt.reaction || undefined,
-              nextEventId: opt.nextId
-                ? parseInt(opt.nextId.replace('#', ''))
-                : undefined,
+              nextEventId: opt.nextId || undefined,
               scoreWeight: 1,
               createdBy: 1,
               createdAt: new Date().toISOString(),

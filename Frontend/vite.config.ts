@@ -11,7 +11,8 @@ export default defineConfig({
   },
   publicDir: 'public',
   server: {
-    port: 3000,
+    port: 5173,
+    host: 'localhost',
     open: true,
   },
   build: {

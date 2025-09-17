@@ -177,7 +177,7 @@ export interface ChoiceOption {
   reactionText?: string;
   nextSceneCode?: string;
   scoreWeight: number;
-  nextEventId?: number;
+  nextEventId?: string;
   createdBy?: number;
   updatedBy?: number;
   deletedAt?: string;

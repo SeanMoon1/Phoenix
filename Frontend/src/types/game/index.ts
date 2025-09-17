@@ -1,35 +1,32 @@
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  user_level: number; // 사용자 레벨 (1-100)
-  user_exp: number; // 사용자 경험치
-  total_score: number; // 총점
-  completed_scenarios: number; // 완료한 시나리오 수
-  // 레벨업 시스템 상세 정보
-  current_tier: string; // 현재 등급 (초급자, 중급자, 고급자, 전문가, 마스터)
-  level_progress: number; // 현재 레벨에서의 진행도 (0-100%)
-  next_level_exp: number; // 다음 레벨까지 필요한 경험치
-  // 시나리오별 통계
-  scenario_stats: {
-    fire: { completed: number; total_score: number; best_score: number };
-    earthquake: { completed: number; total_score: number; best_score: number };
-    flood: { completed: number; total_score: number; best_score: number };
-    emergency: { completed: number; total_score: number; best_score: number };
-    chemical: { completed: number; total_score: number; best_score: number };
-    nuclear: { completed: number; total_score: number; best_score: number };
-    terrorism: { completed: number; total_score: number; best_score: number };
-    pandemic: { completed: number; total_score: number; best_score: number };
-    natural_disaster: {
-      completed: number;
-      total_score: number;
-      best_score: number;
-    };
-    complex: { completed: number; total_score: number; best_score: number };
-  };
-  created_at: string; // 계정 생성일
-  updated_at?: string; // 마지막 업데이트일
-}
+// 이 파일은 더 이상 사용되지 않습니다.
+// 모든 타입 정의는 Frontend/src/types/index.ts로 통합되었습니다.
+// Database 스키마 기준으로 정의된 타입들을 사용하세요.
+
+// 기존 코드와의 호환성을 위해 re-export
+export type {
+  User,
+  Scenario,
+  ScenarioEvent,
+  ScenarioScene,
+  ChoiceOption,
+  UserScenarioStats,
+  TrainingSession,
+  TrainingParticipant,
+  UserChoiceLog,
+  UserLevelHistory,
+  Inquiry,
+  Faq,
+  Code,
+  Team,
+  ScriptBlock,
+  AppState,
+} from '../index';
+
+export { ApprovalStatus } from '../index';
+export type { ApprovalStatus as ApprovalStatusType } from '../index';
+
+// ApprovalStatus 타입을 직접 import
+import type { ApprovalStatus } from '../index';
 
 export const UserRole = {
   ADMIN: 'ADMIN',
@@ -39,62 +36,7 @@ export const UserRole = {
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-// SQL 스키마 기반 새로운 인터페이스들
-export interface Scenario {
-  scenarioId: string;
-  teamId: string;
-  scenarioCode: string;
-  title: string;
-  disasterType: string;
-  description: string;
-  riskLevel: string;
-  occurrenceCondition?: string;
-  status: ScenarioStatus;
-  approvalComment?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  createdAt: string;
-  createdBy: string;
-  approvedAt?: string;
-  approvedBy?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-  events: DecisionEvent[];
-}
-
-export interface DecisionEvent {
-  eventId: string;
-  scenarioId: string;
-  eventCode: string;
-  eventOrder: number;
-  eventDescription: string;
-  eventType: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-  choices: ChoiceOption[];
-}
-
-export interface ChoiceOption {
-  choiceId: string;
-  eventId: string;
-  scenarioId: string;
-  choiceCode: string;
-  choiceText: string;
-  isCorrect: boolean;
-  scoreWeight: number;
-  nextEventId?: string;
-  createdAt: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
 export const ScenarioStatus = {
   DRAFT: '임시저장',
@@ -116,90 +58,9 @@ export const EventType = {
 
 export type EventType = (typeof EventType)[keyof typeof EventType];
 
-// 기존 ScriptBlock (하위 호환성을 위해 유지)
-export interface ScriptBlock {
-  sceneId: string;
-  title?: string;
-  content?: string;
-  sceneScript?: string;
-  approvalStatus: ApprovalStatus;
-  createdAt: string;
-  updatedAt?: string;
-  createdBy: string;
-  approvedBy?: string;
-  approvedAt?: string;
-  order: number;
-  disasterType?: string;
-  difficulty?: string;
-  rejectionReason?: string;
-  options?: Array<{
-    answerId: string;
-    answer: string;
-    reaction: string;
-    nextId: string;
-    points: {
-      speed: number;
-      accuracy: number;
-    };
-  }>;
-  sceneType?: string;
-  nextSceneId?: string;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
-export const ApprovalStatus = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  DRAFT: 'DRAFT',
-} as const;
-
-export type ApprovalStatus =
-  (typeof ApprovalStatus)[keyof typeof ApprovalStatus];
-
-export interface AppState {
-  isSceneFormOpened: boolean;
-  modifySceneId: string | null;
-  isScenarioFormOpened: boolean;
-  modifyScenarioId: string | null;
-}
-
-export interface TrainingResult {
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeSpent: number;
-  completedAt: string;
-  // 레벨업 시스템 관련 필드 추가
-  exp_gained: number; // 획득한 경험치
-  level_before: number; // 훈련 전 레벨
-  level_after: number; // 훈련 후 레벨
-  level_up: boolean; // 레벨업 여부
-  bonus_exp: number; // 보너스 경험치 (난이도, 빠른 완료 등)
-}
-
-// 레벨업 시스템을 위한 새로운 인터페이스
-export interface UserProgress {
-  user_id: string;
-  user_level: number;
-  user_exp: number;
-  total_score: number;
-  completed_scenarios: number;
-  current_streak: number; // 연속 완료 횟수
-  longest_streak: number; // 최장 연속 완료 횟수
-  achievements: Achievement[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Achievement {
-  achievement_id: string;
-  achievement_name: string;
-  achievement_description: string;
-  achievement_type: AchievementType;
-  unlocked_at: string;
-  progress: number; // 달성도 (0-100)
-  is_completed: boolean;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
 export const AchievementType = {
   LEVEL_UP: 'LEVEL_UP', // 레벨업 달성

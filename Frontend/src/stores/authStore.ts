@@ -4,8 +4,6 @@ import type { User, AuthState, LoginCredentials } from '../types';
 import { api } from '../services/api';
 
 interface RegisterCredentials {
-  teamCode: string;
-  userCode: string;
   loginId: string;
   name: string;
   email: string;

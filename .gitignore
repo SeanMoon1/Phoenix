@@ -54,6 +54,8 @@ pids/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+.env.example
 
 # .env 변형들 모두 차단 (.env, .env.local, .env.production, ...)
 .env*

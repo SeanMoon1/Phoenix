@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import type {
   ScriptBlock,
   Scenario,
-  DecisionEvent,
+  ScenarioEvent,
   ChoiceOption,
   AppState as AppStateType,
-} from '../../types/game';
+} from '../../types';
 
 // 기존 ScriptBlock 스토어 (하위 호환성)
 interface BlockListStore {
@@ -37,27 +37,27 @@ interface ScenarioStore {
   scenarios: Scenario[];
   setScenarios: (scenarios: Scenario[]) => void;
   addScenario: (scenario: Scenario) => void;
-  updateScenario: (scenarioId: string, updates: Partial<Scenario>) => void;
-  removeScenario: (scenarioId: string) => void;
-  addEvent: (scenarioId: string, event: DecisionEvent) => void;
+  updateScenario: (scenarioId: number, updates: Partial<Scenario>) => void;
+  removeScenario: (scenarioId: number) => void;
+  addEvent: (scenarioId: number, event: ScenarioEvent) => void;
   updateEvent: (
-    scenarioId: string,
-    eventId: string,
-    updates: Partial<DecisionEvent>
+    scenarioId: number,
+    eventId: number,
+    updates: Partial<ScenarioEvent>
   ) => void;
-  removeEvent: (scenarioId: string, eventId: string) => void;
+  removeEvent: (scenarioId: number, eventId: number) => void;
   addChoice: (
-    scenarioId: string,
-    eventId: string,
+    scenarioId: number,
+    eventId: number,
     choice: ChoiceOption
   ) => void;
   updateChoice: (
-    scenarioId: string,
-    eventId: string,
-    choiceId: string,
+    scenarioId: number,
+    eventId: number,
+    choiceId: number,
     updates: Partial<ChoiceOption>
   ) => void;
-  removeChoice: (scenarioId: string, eventId: string, choiceId: string) => void;
+  removeChoice: (scenarioId: number, eventId: number, choiceId: number) => void;
 }
 
 export const useScenarioStore = create<ScenarioStore>(set => ({
@@ -68,33 +68,29 @@ export const useScenarioStore = create<ScenarioStore>(set => ({
   updateScenario: (scenarioId, updates) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
-          ? { ...scenario, ...updates }
-          : scenario
+        scenario.id === scenarioId ? { ...scenario, ...updates } : scenario
       ),
     })),
   removeScenario: scenarioId =>
     set(state => ({
-      scenarios: state.scenarios.filter(
-        scenario => scenario.scenarioId !== scenarioId
-      ),
+      scenarios: state.scenarios.filter(scenario => scenario.id !== scenarioId),
     })),
   addEvent: (scenarioId, event) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
-          ? { ...scenario, events: [...scenario.events, event] }
+        scenario.id === scenarioId
+          ? { ...scenario, events: [...(scenario.events || []), event] }
           : scenario
       ),
     })),
   updateEvent: (scenarioId, eventId, updates) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
+        scenario.id === scenarioId
           ? {
               ...scenario,
-              events: scenario.events.map(event =>
-                event.eventId === eventId ? { ...event, ...updates } : event
+              events: (scenario.events || []).map(event =>
+                event.id === eventId ? { ...event, ...updates } : event
               ),
             }
           : scenario
@@ -103,11 +99,11 @@ export const useScenarioStore = create<ScenarioStore>(set => ({
   removeEvent: (scenarioId, eventId) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
+        scenario.id === scenarioId
           ? {
               ...scenario,
-              events: scenario.events.filter(
-                event => event.eventId !== eventId
+              events: (scenario.events || []).filter(
+                event => event.id !== eventId
               ),
             }
           : scenario
@@ -116,12 +112,12 @@ export const useScenarioStore = create<ScenarioStore>(set => ({
   addChoice: (scenarioId, eventId, choice) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
+        scenario.id === scenarioId
           ? {
               ...scenario,
-              events: scenario.events.map(event =>
-                event.eventId === eventId
-                  ? { ...event, choices: [...event.choices, choice] }
+              events: (scenario.events || []).map(event =>
+                event.id === eventId
+                  ? { ...event, choices: [...(event.choices || []), choice] }
                   : event
               ),
             }
@@ -131,15 +127,15 @@ export const useScenarioStore = create<ScenarioStore>(set => ({
   updateChoice: (scenarioId, eventId, choiceId, updates) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
+        scenario.id === scenarioId
           ? {
               ...scenario,
-              events: scenario.events.map(event =>
-                event.eventId === eventId
+              events: (scenario.events || []).map(event =>
+                event.id === eventId
                   ? {
                       ...event,
-                      choices: event.choices.map(choice =>
-                        choice.choiceId === choiceId
+                      choices: (event.choices || []).map(choice =>
+                        choice.id === choiceId
                           ? { ...choice, ...updates }
                           : choice
                       ),
@@ -153,15 +149,15 @@ export const useScenarioStore = create<ScenarioStore>(set => ({
   removeChoice: (scenarioId, eventId, choiceId) =>
     set(state => ({
       scenarios: state.scenarios.map(scenario =>
-        scenario.scenarioId === scenarioId
+        scenario.id === scenarioId
           ? {
               ...scenario,
-              events: scenario.events.map(event =>
-                event.eventId === eventId
+              events: (scenario.events || []).map(event =>
+                event.id === eventId
                   ? {
                       ...event,
-                      choices: event.choices.filter(
-                        choice => choice.choiceId !== choiceId
+                      choices: (event.choices || []).filter(
+                        choice => choice.id !== choiceId
                       ),
                     }
                   : event

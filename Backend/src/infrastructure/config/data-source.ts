@@ -5,9 +5,6 @@ import { Scenario } from '../../domain/entities/scenario.entity';
 import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { TrainingResult } from '../../domain/entities/training-result.entity';
 import { UserScenarioStats } from '../../domain/entities/user-scenario-stats.entity';
-import { Admin } from '../../domain/entities/admin.entity';
-import { AdminLevel } from '../../domain/entities/admin-level.entity';
-import { Code } from '../../domain/entities/code.entity';
 import { ScenarioScene } from '../../domain/entities/scenario-scene.entity';
 import { ScenarioEvent } from '../../domain/entities/scenario-event.entity';
 import { ChoiceOption } from '../../domain/entities/choice-option.entity';
@@ -49,9 +46,6 @@ export const AppDataSource = new DataSource({
     TrainingSession,
     TrainingResult,
     UserScenarioStats,
-    Admin,
-    AdminLevel,
-    Code,
     ScenarioScene,
     ScenarioEvent,
     ChoiceOption,

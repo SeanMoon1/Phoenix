@@ -30,6 +30,8 @@
 - **다양한 재난 유형**: 화재, 지진, 응급처치, 교통사고
 - **의사결정 이벤트**: 선택형 및 순차형 이벤트
 - **실시간 피드백**: 즉시 결과 확인 및 학습
+- **유연한 데이터 소스**: 정적 파일과 데이터베이스 API 모두 지원
+- **환경별 설정**: 개발/테스트/운영 환경에 맞는 데이터 소스 선택
 
 ### 📊 분석 및 리포팅
 
@@ -427,6 +429,67 @@ npm run build
 - 로그인 후 마이페이지에서 팀 코드로 팀 가입 가능
 - Google OAuth 로그인 후 메인 페이지로 리다이렉션
 - Clean Architecture 기반의 유지보수성 향상
+
+## 📊 시나리오 데이터 소스 설정
+
+Phoenix는 시나리오 데이터를 두 가지 방식으로 로드할 수 있습니다:
+
+### 🔧 데이터 소스 옵션
+
+1. **📁 정적 파일만** (`static`)
+
+   - `public/data` 폴더의 JSON 파일 사용
+   - 개발/테스트 환경에 적합
+   - 서버 없이도 작동
+
+2. **🌐 API만** (`api`)
+
+   - AWS Aurora/RDS 데이터베이스에서 조회
+   - 운영 환경에 적합
+   - 관리자가 생성한 시나리오 사용
+
+3. **🔄 자동 전환** (`auto`) - **기본값**
+   - 정적 파일 우선 로드
+   - 실패 시 API로 자동 전환
+   - 개발과 운영 환경 모두 지원
+
+### ⚙️ 설정 방법
+
+#### 1. 관리자 페이지에서 설정
+
+- 관리자 페이지 → 시나리오 관리 → 데이터 소스 설정
+- 버튼 클릭으로 즉시 전환 가능
+
+#### 2. 환경 변수로 설정
+
+```bash
+# Frontend/.env 파일
+VITE_SCENARIO_DATA_SOURCE=auto  # static, api, auto 중 선택
+```
+
+#### 3. 개발자 도구에서 설정
+
+```javascript
+// 브라우저 콘솔에서 실행
+ScenarioDataSource.setSource("api"); // API로 전환
+ScenarioDataSource.getStatus(); // 현재 상태 확인
+```
+
+### 📁 정적 파일 구조
+
+```
+Frontend/public/data/
+├── fire_training_scenario.json          # 화재 대응 시나리오
+├── earthquake_training_scenario.json    # 지진 대응 시나리오
+├── emergency_first_aid_scenario.json    # 응급처치 시나리오
+└── traffic_accident_scenario.json       # 교통사고 시나리오
+```
+
+### 🔄 데이터 동기화
+
+- 관리자가 시나리오를 생성하고 내보내기하면 JSON 파일로 다운로드
+- 이 파일을 `public/data` 폴더에 저장하면 정적 파일 방식으로 사용 가능
+- 또는 "기존 JSON 동기화" 버튼으로 데이터베이스에 자동 동기화
 
 ## 📚 문서
 

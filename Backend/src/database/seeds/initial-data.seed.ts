@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Team } from '../../domain/entities/team.entity';
 import { User } from '../../domain/entities/user.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 import * as bcrypt from 'bcryptjs';
 
 export class InitialDataSeed {
@@ -14,6 +15,9 @@ export class InitialDataSeed {
 
     // 2. 테스트 사용자 생성
     await this.seedTestUsers(team.id);
+
+    // 3. 기본 시나리오 생성
+    await this.seedDefaultScenarios(team.id);
 
     console.log('✅ 초기 데이터 시드 완료!');
   }
@@ -98,6 +102,75 @@ export class InitialDataSeed {
 
         await userRepository.save(user);
         console.log(`✅ 테스트 사용자 생성: ${userData.loginId} / user123!`);
+      }
+    }
+  }
+
+  private async seedDefaultScenarios(teamId: number): Promise<void> {
+    const scenarioRepository = this.dataSource.getRepository(Scenario);
+
+    const testScenarios = [
+      {
+        scenarioCode: 'FIRE001',
+        title: '화재 대응 시나리오',
+        disasterType: 'fire',
+        description: '건물 화재 발생 시 대응 절차를 학습하는 시나리오입니다.',
+        riskLevel: 'HIGH',
+        difficulty: 'medium',
+        approvalStatus: 'APPROVED',
+        status: 'ACTIVE',
+        createdBy: 1,
+      },
+      {
+        scenarioCode: 'EARTHQUAKE001',
+        title: '지진 대응 시나리오',
+        disasterType: 'earthquake',
+        description: '지진 발생 시 안전한 대피 절차를 학습하는 시나리오입니다.',
+        riskLevel: 'HIGH',
+        difficulty: 'easy',
+        approvalStatus: 'APPROVED',
+        status: 'ACTIVE',
+        createdBy: 1,
+      },
+      {
+        scenarioCode: 'EMERGENCY001',
+        title: '응급처치 시나리오',
+        disasterType: 'emergency',
+        description:
+          '응급상황 발생 시 기본적인 응급처치 방법을 학습하는 시나리오입니다.',
+        riskLevel: 'MEDIUM',
+        difficulty: 'easy',
+        approvalStatus: 'APPROVED',
+        status: 'ACTIVE',
+        createdBy: 1,
+      },
+      {
+        scenarioCode: 'TRAFFIC001',
+        title: '교통사고 대응 시나리오',
+        disasterType: 'traffic',
+        description:
+          '교통사고 발생 시 안전한 대응 절차를 학습하는 시나리오입니다.',
+        riskLevel: 'MEDIUM',
+        difficulty: 'medium',
+        approvalStatus: 'APPROVED',
+        status: 'ACTIVE',
+        createdBy: 1,
+      },
+    ];
+
+    for (const scenarioData of testScenarios) {
+      const existingScenario = await scenarioRepository.findOne({
+        where: { scenarioCode: scenarioData.scenarioCode },
+      });
+
+      if (!existingScenario) {
+        const scenario = scenarioRepository.create({
+          ...scenarioData,
+          teamId,
+        });
+
+        await scenarioRepository.save(scenario);
+        console.log(`✅ 기본 시나리오 생성: ${scenarioData.title}`);
       }
     }
   }

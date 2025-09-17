@@ -73,4 +73,11 @@ export class ScenariosController {
   remove(@Param('id') id: string) {
     return this.scenariosService.remove(+id);
   }
+
+  @Post('sync')
+  @ApiOperation({ summary: 'JSON 데이터에서 시나리오 동기화' })
+  @ApiResponse({ status: 200, description: '시나리오 동기화 성공' })
+  syncFromJson(@Body() jsonData: any) {
+    return this.scenariosService.syncFromJson(jsonData);
+  }
 }

@@ -120,14 +120,43 @@ const AdminPage: React.FC = () => {
     // 기존 JSON 파일들을 로드하여 임포트
     setImporting(true);
     try {
-      const fireResponse = await fetch(
-        '/scripts/data/fire_training_scenario.json'
-      );
-      const fireData = await fireResponse.json();
+      const scenarioFiles = [
+        { name: 'fire_training_scenario.json', type: 'fire' },
+        { name: 'earthquake_training_scenario.json', type: 'earthquake' },
+        { name: 'emergency_first_aid_scenario.json', type: 'emergency' },
+        { name: 'traffic_accident_scenario.json', type: 'traffic' },
+      ];
 
-      const response = await scenarioApi.syncFromJson(fireData);
-      if (response.success) {
-        alert('화재 시나리오가 성공적으로 동기화되었습니다.');
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of scenarioFiles) {
+        try {
+          const response = await fetch(`/data/${file.name}`);
+          const data = await response.json();
+
+          const syncResponse = await scenarioApi.syncFromJson(data);
+          if (syncResponse.success) {
+            successCount++;
+            console.log(`${file.type} 시나리오 동기화 성공`);
+          } else {
+            failCount++;
+            console.error(`${file.type} 시나리오 동기화 실패`);
+          }
+        } catch (error) {
+          failCount++;
+          console.error(`${file.type} 시나리오 로드 실패:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        alert(
+          `${successCount}개 시나리오가 성공적으로 동기화되었습니다.${
+            failCount > 0 ? ` (${failCount}개 실패)` : ''
+          }`
+        );
+        // 시나리오 목록 새로고침
+        window.location.reload();
       } else {
         alert('시나리오 동기화에 실패했습니다.');
       }

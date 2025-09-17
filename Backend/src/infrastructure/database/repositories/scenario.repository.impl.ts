@@ -69,4 +69,10 @@ export class TypeOrmScenarioRepository implements ScenarioRepository {
       where: { riskLevel },
     });
   }
+
+  async findByScenarioCode(scenarioCode: string): Promise<Scenario | null> {
+    return this.scenarioRepository.findOne({
+      where: { scenarioCode },
+    });
+  }
 }

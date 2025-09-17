@@ -1,8 +1,21 @@
-import type { Scenario } from '@/types';
 import { scenarioApi } from './api';
+import type { Scenario } from '@/types';
 
 // Database 스키마 기준 시나리오 서비스
 export class ScenarioService {
+  /**
+   * 재난 유형별 시나리오 조회
+   * @param disasterType 재난 유형
+   * @returns 시나리오 목록
+   */
+  static async getByType(disasterType: string): Promise<Scenario[]> {
+    const response = await scenarioApi.getByType(disasterType);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.error || '시나리오 조회에 실패했습니다.');
+  }
+
   /**
    * 모든 시나리오 조회
    * @returns 시나리오 목록
@@ -22,19 +35,6 @@ export class ScenarioService {
    */
   static async getById(id: number): Promise<Scenario> {
     const response = await scenarioApi.getById(id);
-    if (response.success && response.data) {
-      return response.data;
-    }
-    throw new Error(response.error || '시나리오 조회에 실패했습니다.');
-  }
-
-  /**
-   * 재난 유형별 시나리오 조회
-   * @param disasterType 재난 유형
-   * @returns 시나리오 목록
-   */
-  static async getByType(disasterType: string): Promise<Scenario[]> {
-    const response = await scenarioApi.getByType(disasterType);
     if (response.success && response.data) {
       return response.data;
     }

@@ -115,6 +115,16 @@ export class AuthService {
         password: hashedPassword,
       });
 
+      console.log('🔍 사용자 생성 결과:', { user });
+
+      if (!user) {
+        console.log('❌ 사용자 생성 실패: user가 undefined');
+        throw new BadRequestException({
+          message: '사용자 생성에 실패했습니다.',
+          error: 'User creation failed',
+        });
+      }
+
       const { password: _, ...result } = user;
       return {
         success: true,

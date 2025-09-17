@@ -30,11 +30,15 @@ export class CreateUserUseCase {
 
   async execute(request: CreateUserRequest): Promise<CreateUserResponse> {
     try {
+      console.log('🔍 CreateUserUseCase.execute 호출됨:', { request });
+
       // Validate email uniqueness
       const existingUserByEmail = await this.userDomainService.isEmailUnique(
         request.email,
       );
+      console.log('🔍 이메일 중복 확인 결과:', existingUserByEmail);
       if (!existingUserByEmail) {
+        console.log('❌ 이메일 중복됨');
         return {
           success: false,
           error: 'Email already exists',
@@ -44,7 +48,9 @@ export class CreateUserUseCase {
       // Validate login ID uniqueness
       const existingUserByLoginId =
         await this.userDomainService.isLoginIdUnique(request.loginId);
+      console.log('🔍 로그인 ID 중복 확인 결과:', existingUserByLoginId);
       if (!existingUserByLoginId) {
+        console.log('❌ 로그인 ID 중복됨');
         return {
           success: false,
           error: 'Login ID already exists',
@@ -52,6 +58,7 @@ export class CreateUserUseCase {
       }
 
       // Create user
+      console.log('🔍 사용자 생성 시작');
       const user = await this.userRepository.create({
         loginId: request.loginId,
         password: request.password,
@@ -72,12 +79,18 @@ export class CreateUserUseCase {
         nextLevelExp: 100,
         isActive: true,
       });
+      console.log('🔍 사용자 생성 완료:', { user });
 
       return {
         success: true,
         user,
       };
     } catch (error) {
+      console.error('❌ CreateUserUseCase 오류:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
       return {
         success: false,
         error: error.message || 'Failed to create user',

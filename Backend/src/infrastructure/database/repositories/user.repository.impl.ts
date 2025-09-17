@@ -45,8 +45,21 @@ export class TypeOrmUserRepository implements UserRepository {
   }
 
   async create(user: Partial<User>): Promise<User> {
-    const newUser = this.userRepository.create(user);
-    return this.userRepository.save(newUser);
+    console.log('🔍 TypeOrmUserRepository.create 호출됨:', { user });
+    try {
+      const newUser = this.userRepository.create(user);
+      console.log('🔍 생성된 엔티티:', { newUser });
+      const savedUser = await this.userRepository.save(newUser);
+      console.log('🔍 저장된 사용자:', { savedUser });
+      return savedUser;
+    } catch (error) {
+      console.error('❌ TypeOrmUserRepository.create 오류:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+      throw error;
+    }
   }
 
   async update(id: number, user: Partial<User>): Promise<User> {

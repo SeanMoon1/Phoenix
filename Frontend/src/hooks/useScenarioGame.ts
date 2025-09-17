@@ -67,6 +67,9 @@ export function useScenarioGame({
   const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
 
+  // 이미 푼 문제 상태
+  const [answered, setAnswered] = useState<number[]>([]);
+
   // 현재 시나리오
   const scenario = useMemo(
     () => scenarios[current] || null,
@@ -93,6 +96,7 @@ export function useScenarioGame({
     setAwardedExpThisScene(false);
     setEndModalAutoShown(false);
     setChoiceDisabled(false);
+    setAnswered([]);
   }, []);
 
   // 씬 플래그 리셋
@@ -107,9 +111,12 @@ export function useScenarioGame({
   // 선택 처리
   const handleChoice = useCallback(
     (option: ScenarioOption) => {
-      if (choiceDisabled || !scenario) return null;
-
-      setChoiceDisabled(true);
+      // 이미 선택한 문제라면 경험치 지급하지 않음
+      if (answered.includes(current)) {
+        setSelected(option);
+        return { shouldAwardExp: false, isCorrect: false };
+      }
+      setAnswered([...answered, current]);
       setSelected(option);
       setFeedback(option.reaction || null);
 
@@ -128,7 +135,14 @@ export function useScenarioGame({
 
       return { shouldAwardExp, isCorrect };
     },
-    [choiceDisabled, scenario, awardedExpThisScene, wrongTriedInThisScene]
+    [
+      answered,
+      current,
+      choiceDisabled,
+      scenario,
+      awardedExpThisScene,
+      wrongTriedInThisScene,
+    ]
   );
 
   return {

@@ -38,8 +38,8 @@ export default new DataSource({
   // 연결 풀 설정
   extra: {
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
+    acquireTimeout: 60000, // 60초
+    connectTimeout: 60000, // 60초
   },
   // SSL 설정 (AWS RDS 사용 시)
   ssl:

@@ -41,8 +41,8 @@ export const getDatabaseConfig = (
     // 연결 풀 설정
     extra: {
       connectionLimit: 10,
-      acquireTimeoutMillis: 60000, // 60초
-      timeout: 60000, // 60초
+      acquireTimeout: 60000, // 60초 (acquireTimeoutMillis 대신 acquireTimeout 사용)
+      connectTimeout: 60000, // 60초 (timeout 대신 connectTimeout 사용)
     },
     // SSL 설정 (AWS RDS 사용 시)
     ssl: !isDevelopment

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import type { ScenarioOption } from '@/types/scenario';
+import type { ChoiceOption } from '@/types';
 
 // 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
@@ -87,10 +87,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         };
 
         const resultData = {
-          participantId: parseInt(user.id),
+          participantId: user.id,
           sessionId: Date.now(),
           scenarioId: scenarioIdMap[scenarioType] || 1,
-          userId: parseInt(user.id),
+          userId: user.id,
           resultCode: gameState.failedThisRun ? 'FAILED' : 'COMPLETED',
           accuracyScore:
             gameState.scenarios.length > 0
@@ -131,7 +131,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   });
 
   // 선택 처리
-  const handleChoice = (option: ScenarioOption) => {
+  const handleChoice = (option: ChoiceOption) => {
     const result = gameState.handleChoice(option);
     if (result?.shouldAwardExp) {
       expSystem.awardExp(BASE_EXP);

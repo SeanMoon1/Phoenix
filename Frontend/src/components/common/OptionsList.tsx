@@ -1,9 +1,9 @@
-import type { ScenarioOption } from '@/types/scenario';
+import type { ChoiceOption } from '@/types';
 
 type Props = {
-  options: ScenarioOption[];
-  selected?: ScenarioOption | null;
-  onSelect: (opt: ScenarioOption) => void;
+  options: ChoiceOption[];
+  selected?: ChoiceOption | null;
+  onSelect: (opt: ChoiceOption) => void;
   disabled?: boolean;
 };
 

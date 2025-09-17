@@ -1,6 +1,6 @@
 // src/hooks/useModals.ts
 import { useState, useEffect } from 'react';
-import type { Scenario } from '@/types/scenario';
+import type { Scenario } from '@/types';
 
 const END_SCENE_ID = '#END';
 

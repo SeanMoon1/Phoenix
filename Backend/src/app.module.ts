@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { Repository, DataSource } from 'typeorm';
 
 // Clean Architecture 구조에 맞는 새로운 app.module.ts
 import { AppController } from './app.controller';
@@ -50,7 +51,6 @@ import { TrainingResult } from './domain/entities/training-result.entity';
 import { UserScenarioStats } from './domain/entities/user-scenario-stats.entity';
 import { Team } from './domain/entities/team.entity';
 import { TrainingParticipant } from './domain/entities/training-participant.entity';
-import { Admin } from './domain/entities/admin.entity';
 import { ScenarioScene } from './domain/entities/scenario-scene.entity';
 import { ScenarioEvent } from './domain/entities/scenario-event.entity';
 import { ChoiceOption } from './domain/entities/choice-option.entity';
@@ -58,13 +58,12 @@ import { UserChoiceLog } from './domain/entities/user-choice-log.entity';
 import { UserProgress } from './domain/entities/user-progress.entity';
 import { Achievement } from './domain/entities/achievement.entity';
 import { UserLevelHistory } from './domain/entities/user-level-history.entity';
-import { AdminLevel } from './domain/entities/admin-level.entity';
-import { Code } from './domain/entities/code.entity';
 import { Inquiry } from './domain/entities/inquiry.entity';
 import { Faq } from './domain/entities/faq.entity';
 
 // Infrastructure Layer - Database
 import { getDatabaseConfig } from './infrastructure/config/database.config';
+import { DatabaseModule } from './infrastructure/database/database.module';
 import oauthConfig from './infrastructure/config/oauth.config';
 
 // Shared Layer
@@ -95,7 +94,6 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
       UserScenarioStats,
       Team,
       TrainingParticipant,
-      Admin,
       ScenarioScene,
       ScenarioEvent,
       ChoiceOption,
@@ -103,11 +101,10 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
       UserProgress,
       Achievement,
       UserLevelHistory,
-      AdminLevel,
-      Code,
       Inquiry,
       Faq,
     ]),
+    // Database module with entities (removed - using TypeOrmModule.forFeature directly)
     // JWT and Passport modules
     PassportModule,
     JwtModule.registerAsync({
@@ -151,22 +148,28 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     TypeOrmUserRepository,
     {
       provide: 'UserRepository',
-      useClass: TypeOrmUserRepository,
+      useFactory: (dataSource: DataSource) => dataSource.getRepository(User),
+      inject: [DataSource],
     },
     TypeOrmScenarioRepository,
     {
       provide: 'ScenarioRepository',
-      useClass: TypeOrmScenarioRepository,
+      useFactory: (dataSource: DataSource) =>
+        dataSource.getRepository(Scenario),
+      inject: [DataSource],
     },
     TypeOrmTeamRepository,
     {
       provide: 'TeamRepository',
-      useClass: TypeOrmTeamRepository,
+      useFactory: (dataSource: DataSource) => dataSource.getRepository(Team),
+      inject: [DataSource],
     },
     TypeOrmTrainingSessionRepository,
     {
       provide: 'TrainingSessionRepository',
-      useClass: TypeOrmTrainingSessionRepository,
+      useFactory: (dataSource: DataSource) =>
+        dataSource.getRepository(TrainingSession),
+      inject: [DataSource],
     },
     // Strategies
     LocalStrategy,

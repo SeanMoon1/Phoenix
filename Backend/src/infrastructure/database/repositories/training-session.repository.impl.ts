@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Inject } from '@nestjs/common';
 import { Repository, Between } from 'typeorm';
 import { TrainingSessionRepository } from '../../../domain/repositories/training-session.repository';
 import { TrainingSession } from '../../../domain/entities/training-session.entity';
@@ -9,7 +8,7 @@ export class TypeOrmTrainingSessionRepository
   implements TrainingSessionRepository
 {
   constructor(
-    @InjectRepository(TrainingSession)
+    @Inject('TrainingSessionRepository')
     private readonly trainingSessionRepository: Repository<TrainingSession>,
   ) {}
 

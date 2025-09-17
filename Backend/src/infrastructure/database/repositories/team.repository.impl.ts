@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { TeamRepository } from '../../../domain/repositories/team.repository';
 import { Team } from '../../../domain/entities/team.entity';
@@ -7,7 +6,7 @@ import { Team } from '../../../domain/entities/team.entity';
 @Injectable()
 export class TypeOrmTeamRepository implements TeamRepository {
   constructor(
-    @InjectRepository(Team)
+    @Inject('TeamRepository')
     private readonly teamRepository: Repository<Team>,
   ) {}
 

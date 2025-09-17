@@ -34,16 +34,15 @@ export const getDatabaseConfig = (
       : configService.get('DB_DATABASE_PROD') ||
         configService.get('DB_DATABASE') ||
         'phoenix',
-    entities: [
-      __dirname + '/../../domain/entities/*.entity{.ts,.js}',
-      __dirname + '/../database/entities/*.entity{.ts,.js}',
-    ],
+    entities: [__dirname + '/../../domain/entities/*.entity.js'],
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     synchronize: isDevelopment,
-    logging: isDevelopment,
+    logging: true, // 모든 로그 활성화
     // 연결 풀 설정
     extra: {
       connectionLimit: 10,
+      acquireTimeoutMillis: 60000, // 60초
+      timeout: 60000, // 60초
     },
     // SSL 설정 (AWS RDS 사용 시)
     ssl: !isDevelopment

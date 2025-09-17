@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { User } from '../../../domain/entities/user.entity';
@@ -7,7 +6,7 @@ import { User } from '../../../domain/entities/user.entity';
 @Injectable()
 export class TypeOrmUserRepository implements UserRepository {
   constructor(
-    @InjectRepository(User)
+    @Inject('UserRepository')
     private readonly userRepository: Repository<User>,
   ) {}
 
@@ -29,9 +28,12 @@ export class TypeOrmUserRepository implements UserRepository {
     });
   }
 
-  async findByOAuthProvider(provider: string, providerId: string): Promise<User | null> {
+  async findByOAuthProvider(
+    provider: string,
+    providerId: string,
+  ): Promise<User | null> {
     return this.userRepository.findOne({
-      where: { 
+      where: {
         oauthProvider: provider,
         oauthProviderId: providerId,
       },

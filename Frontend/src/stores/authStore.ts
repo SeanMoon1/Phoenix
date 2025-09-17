@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthStore>()(
 
           if (response.success && response.data) {
             const user: User = {
-              id: response.data.user.id.toString(),
+              id: response.data.user.id,
               teamId: 0,
               userCode: '',
               loginId: '',

@@ -2,33 +2,33 @@
  * 시나리오 생성기 설정
  */
 
-import { ValidationConfig } from "./types";
+import type { ValidationConfig } from '../../types';
 
 export const config = {
-  dataDir: "../data",
-  outputDir: "./output/sql",
-  backupDir: "./output/backup",
+  dataDir: '../data',
+  outputDir: './output/sql',
+  backupDir: './output/backup',
   defaultTeamId: 1,
   defaultCreatedBy: 1,
-  defaultScenarioCode: "SCEN",
-  defaultEventCode: "EVENT",
-  defaultOptionCode: "OPT",
+  defaultScenarioCode: 'SCEN',
+  defaultEventCode: 'EVENT',
+  defaultOptionCode: 'OPT',
 };
 
 export const validationConfig: ValidationConfig = {
   // 필수 필드
-  required: ["sceneId", "title", "content", "options"],
+  required: ['sceneId', 'title', 'content', 'options'],
 
   // 필드 타입 검증
   types: {
-    sceneId: "string",
-    title: "string",
-    content: "string",
-    sceneScript: "string",
-    options: "array",
-    disasterType: "string",
-    difficulty: "string",
-    riskLevel: "string",
+    sceneId: 'string',
+    title: 'string',
+    content: 'string',
+    sceneScript: 'string',
+    options: 'array',
+    disasterType: 'string',
+    difficulty: 'string',
+    riskLevel: 'string',
   },
 
   // 필드 길이 제한
@@ -40,10 +40,10 @@ export const validationConfig: ValidationConfig = {
 
   // 허용된 값들
   allowedValues: {
-    disasterType: ["fire", "earthquake", "emergency", "flood", "complex"],
-    difficulty: ["easy", "medium", "hard", "expert"],
-    riskLevel: ["LOW", "MEDIUM", "HIGH", "VERY_HIGH"],
-    approvalStatus: ["DRAFT", "PENDING", "APPROVED", "REJECTED"],
+    disasterType: ['fire', 'earthquake', 'emergency', 'flood', 'complex'],
+    difficulty: ['easy', 'medium', 'hard', 'expert'],
+    riskLevel: ['LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH'],
+    approvalStatus: ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED'],
   },
 };
 

@@ -1,5 +1,5 @@
-import type { Scenario } from '@/types';
 import { scenarioApi } from './api';
+import type { Scenario } from '@/types';
 
 // 데이터 소스 설정
 const DATA_SOURCE = {
@@ -25,6 +25,19 @@ const DATA_SOURCE = {
 // Database 스키마 기준 시나리오 서비스
 export class ScenarioService {
   /**
+   * 재난 유형별 시나리오 조회
+   * @param disasterType 재난 유형
+   * @returns 시나리오 목록
+   */
+  static async getByType(disasterType: string): Promise<Scenario[]> {
+    const response = await scenarioApi.getByType(disasterType);
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.error || '시나리오 조회에 실패했습니다.');
+  }
+
+  /**
    * 모든 시나리오 조회
    * @returns 시나리오 목록
    */
@@ -43,19 +56,6 @@ export class ScenarioService {
    */
   static async getById(id: number): Promise<Scenario> {
     const response = await scenarioApi.getById(id);
-    if (response.success && response.data) {
-      return response.data;
-    }
-    throw new Error(response.error || '시나리오 조회에 실패했습니다.');
-  }
-
-  /**
-   * 재난 유형별 시나리오 조회
-   * @param disasterType 재난 유형
-   * @returns 시나리오 목록
-   */
-  static async getByType(disasterType: string): Promise<Scenario[]> {
-    const response = await scenarioApi.getByType(disasterType);
     if (response.success && response.data) {
       return response.data;
     }
@@ -217,12 +217,11 @@ async function loadFromStaticFiles(type: string): Promise<Scenario[]> {
   }
 
   const data = await response.json();
-  console.log(`[정적 파일 로딩] 원본 데이터:`, data.slice(0, 2)); // 첫 2개만 로그
-
-  const converted = convertJsonToScenarios(data, type);
-  console.log(`[정적 파일 로딩] 변환된 데이터:`, converted.slice(0, 2)); // 첫 2개만 로그
-
-  return converted;
+  // 배열 구조 보장
+  const scenarioArray = Array.isArray(data)
+    ? data
+    : data.scenarios || data.data || [];
+  return convertJsonToScenarios(scenarioArray, type);
 }
 
 // API에서 시나리오 로드
@@ -236,7 +235,9 @@ function getScenarioFileName(type: string): string {
     fire: 'fire_training_scenario.json',
     earthquake: 'earthquake_training_scenario.json',
     emergency: 'emergency_first_aid_scenario.json',
+    'first-aid': 'emergency_first_aid_scenario.json',
     traffic: 'traffic_accident_scenario.json',
+    'traffic-accident': 'traffic_accident_scenario.json',
   };
 
   return fileMap[type] || 'fire_training_scenario.json';

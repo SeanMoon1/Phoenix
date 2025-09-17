@@ -1,25 +1,32 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
-import AdminPage from './pages/admin/AdminPage';
-import ScriptToolPage from './pages/admin/ScriptToolPage';
 
-import FireScenarioPage from '@/pages/training/FireScenarioPage';
-import EarthquakeScenarioPage from '@/pages/training/EarthquakeScenarioPage';
-import EmergencyFirstAidScenarioPage from './pages/training/EmergencyFirstAidScenarioPage';
-import TrafficAccidentScenarioPage from '@/pages/training/TrafficAccidentScenarioPage';
-
-// 새로 생성한 페이지들 import
-import ManualPage from './pages/manual/ManualPage';
-import TrainingPage from './pages/training/TrainingPage';
-import MyPage from './pages/mypage/MyPage';
-import SupportPage from './pages/support/SupportPage';
+// 동적 import로 페이지 로딩 최적화
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
+const AdminPage = lazy(() => import('./pages/admin/AdminPage'));
+const ScriptToolPage = lazy(() => import('./pages/admin/ScriptToolPage'));
+const FireScenarioPage = lazy(
+  () => import('@/pages/training/FireScenarioPage')
+);
+const EarthquakeScenarioPage = lazy(
+  () => import('@/pages/training/EarthquakeScenarioPage')
+);
+const EmergencyFirstAidScenarioPage = lazy(
+  () => import('./pages/training/EmergencyFirstAidScenarioPage')
+);
+const TrafficAccidentScenarioPage = lazy(
+  () => import('@/pages/training/TrafficAccidentScenarioPage')
+);
+const ManualPage = lazy(() => import('./pages/manual/ManualPage'));
+const TrainingPage = lazy(() => import('./pages/training/TrainingPage'));
+const MyPage = lazy(() => import('./pages/mypage/MyPage'));
+const SupportPage = lazy(() => import('./pages/support/SupportPage'));
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -289,54 +296,63 @@ const HomePage: React.FC = () => {
 //   return <>{children}</>;
 // };
 
+// 로딩 컴포넌트
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="w-12 h-12 border-b-2 border-orange-600 rounded-full animate-spin"></div>
+  </div>
+);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Routes>
-          {/* 홈 */}
-          <Route path="/" element={<HomePage />} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* 홈 */}
+            <Route path="/" element={<HomePage />} />
 
-          {/* 로그인 */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            {/* 로그인 */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-          {/* 훈련하기 */}
-          <Route path="/manual" element={<ManualPage />} />
-          <Route path="/training" element={<TrainingPage />} />
+            {/* 훈련하기 */}
+            <Route path="/manual" element={<ManualPage />} />
+            <Route path="/training" element={<TrainingPage />} />
 
-          {/* 마이페이지 */}
-          <Route path="/mypage" element={<MyPage />} />
+            {/* 마이페이지 */}
+            <Route path="/mypage" element={<MyPage />} />
 
-          {/* 고객지원 */}
-          <Route path="/support" element={<SupportPage />} />
+            {/* 고객지원 */}
+            <Route path="/support" element={<SupportPage />} />
 
-          {/* 관리자페이지 */}
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/script-tool" element={<ScriptToolPage />} />
+            {/* 관리자페이지 */}
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/script-tool" element={<ScriptToolPage />} />
 
-          {/* 화재 훈련 */}
-          <Route path="/training/fire" element={<FireScenarioPage />} />
+            {/* 화재 훈련 */}
+            <Route path="/training/fire" element={<FireScenarioPage />} />
 
-          {/* 지진 훈련 */}
-          <Route
-            path="/training/earthquake"
-            element={<EarthquakeScenarioPage />}
-          />
+            {/* 지진 훈련 */}
+            <Route
+              path="/training/earthquake"
+              element={<EarthquakeScenarioPage />}
+            />
 
-          {/* 응급처치 훈련 */}
-          <Route
-            path="/training/first-aid"
-            element={<EmergencyFirstAidScenarioPage />}
-          />
+            {/* 응급처치 훈련 */}
+            <Route
+              path="/training/first-aid"
+              element={<EmergencyFirstAidScenarioPage />}
+            />
 
-          {/* 교통사고 훈련 */}
-          <Route
-            path="/training/traffic-accident"
-            element={<TrafficAccidentScenarioPage />}
-          />
-        </Routes>
+            {/* 교통사고 훈련 */}
+            <Route
+              path="/training/traffic-accident"
+              element={<TrafficAccidentScenarioPage />}
+            />
+          </Routes>
+        </Suspense>
       </Router>
     </QueryClientProvider>
   );

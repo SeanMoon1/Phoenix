@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { api } from '@/services/api';
+import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import type { ScenarioOption } from '@/types/scenario';
+import type { ChoiceOption } from '@/types';
 
 // 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
@@ -25,6 +25,13 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
 
+interface ScenarioPageProps {
+  scenarioSetName?: string;
+  nextScenarioPath?: string;
+  persistKey?: string;
+}
+
+const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
@@ -47,21 +54,17 @@ const getScenarioSetName = (type: string): string => {
   }
 };
 
-// 시나리오 타입별 persistKey 자동 생성
-const getPersistKey = (type: string): string => {
-  return `${type}_training_state`;
-};
-
-export default function ScenarioPage() {
+export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName = getScenarioSetName(scenarioType);
-  const nextScenarioPath = '/training';
-  const persistKey = getPersistKey(scenarioType);
+  const scenarioSetName =
+    props?.scenarioSetName || getScenarioSetName(scenarioType);
+  const nextScenarioPath = props?.nextScenarioPath || '/training';
+  const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
 
   // 시작 시간
   const startTime = useMemo(() => Date.now(), []);
@@ -109,36 +112,11 @@ export default function ScenarioPage() {
           completedAt: new Date().toISOString(),
         };
 
-        const response = await api.post('/training-results', resultData);
-
-        if (response.success) {
-          console.log('Training result saved successfully:', resultData);
-        } else {
-          console.error('Failed to save training result:', response.error);
-        }
+        await trainingResultApi.save(resultData);
+        console.log('Training result saved:', resultData);
       }
     } catch (error) {
       console.error('Failed to save training result:', error);
-
-      // 실패 시 로컬스토리지에 백업 저장
-      if (user) {
-        const backupData = {
-          userId: user.id,
-          scenarioType,
-          completedAt: new Date().toISOString(),
-          failed: gameState.failedThisRun,
-          totalCorrect: expSystem.totalCorrect,
-          totalScenarios: gameState.scenarios.length,
-        };
-
-        const existingBackup = JSON.parse(
-          localStorage.getItem('training_backup') || '[]'
-        );
-        existingBackup.push(backupData);
-        localStorage.setItem('training_backup', JSON.stringify(existingBackup));
-
-        console.log('Training result saved to backup:', backupData);
-      }
     }
   };
 
@@ -153,7 +131,7 @@ export default function ScenarioPage() {
   });
 
   // 선택 처리
-  const handleChoice = (option: ScenarioOption) => {
+  const handleChoice = (option: ChoiceOption) => {
     const result = gameState.handleChoice(option);
     if (result?.shouldAwardExp) {
       expSystem.awardExp(BASE_EXP);

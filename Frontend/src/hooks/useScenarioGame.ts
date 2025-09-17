@@ -1,7 +1,7 @@
 // src/hooks/useScenarioGame.ts
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { fetchScenarioByType } from '@/services/scenarioService';
-import type { Scenario, ScenarioOption } from '@/types/scenario';
+import type { Scenario, ChoiceOption } from '@/types';
 
 interface UseScenarioGameProps {
   scenarioType: string;
@@ -18,7 +18,7 @@ interface UseScenarioGameReturn {
   history: number[];
 
   // 선택 상태
-  selected: ScenarioOption | null;
+  selected: ChoiceOption | null;
   feedback: string | null;
   choiceDisabled: boolean;
 
@@ -30,7 +30,7 @@ interface UseScenarioGameReturn {
 
   // 액션
   handleChoice: (
-    option: ScenarioOption
+    option: ChoiceOption
   ) => { shouldAwardExp: boolean; isCorrect: boolean } | null;
   resetGame: () => void;
   resetSceneFlags: () => void;
@@ -38,7 +38,7 @@ interface UseScenarioGameReturn {
   // 세터들
   setCurrent: (value: number) => void;
   setHistory: (updater: (prev: number[]) => number[]) => void;
-  setSelected: (value: ScenarioOption | null) => void;
+  setSelected: (value: ChoiceOption | null) => void;
   setFeedback: (value: string | null) => void;
   setChoiceDisabled: (value: boolean) => void;
   setFailedThisRun: (value: boolean) => void;
@@ -57,7 +57,7 @@ export function useScenarioGame({
   const [history, setHistory] = useState<number[]>([]);
 
   // 선택/피드백
-  const [selected, setSelected] = useState<ScenarioOption | null>(null);
+  const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [choiceDisabled, setChoiceDisabled] = useState(false);
 
@@ -106,7 +106,7 @@ export function useScenarioGame({
 
   // 선택 처리
   const handleChoice = useCallback(
-    (option: ScenarioOption) => {
+    (option: ChoiceOption) => {
       if (choiceDisabled || !scenario) return null;
 
       setChoiceDisabled(true);

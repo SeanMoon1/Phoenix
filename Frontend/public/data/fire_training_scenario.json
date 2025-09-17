@@ -266,7 +266,11 @@
       {
         "answerId": "answer1",
         "answer": "아이를 보호하며 몸을 낮추고 파편 낙하가 멈출 때까지 대기한다.",
+<<<<<<< HEAD
+        "reaction": "정답! 갑작스러운 파편 낙하를 피할 수 있다. (정답)",
+=======
         "reaction": "갑작스러운 파편 낙하를 피할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-9",
         "points": {
           "speed": 10,
@@ -302,7 +306,11 @@
       {
         "answerId": "answer1",
         "answer": "구조대의 신호에 맞춰 아이를 먼저 안전하게 건넨다.",
+<<<<<<< HEAD
+        "reaction": "정답! 아이를 우선 구조해 위험을 최소화한다. (정답)",
+=======
         "reaction": "아이를 우선 구조해 위험을 최소화한다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-10",
         "points": {
           "speed": 10,
@@ -338,7 +346,11 @@
       {
         "answerId": "answer1",
         "answer": "사다리가 다시 안정될 때까지 기다린다.",
+<<<<<<< HEAD
+        "reaction": "정답! 사다리의 흔들림이 잠잠해진 뒤 이동하면 안전하다. (정답)",
+=======
         "reaction": "사다리의 흔들림이 잠잠해진 뒤 이동하면 안전하다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-11",
         "points": {
           "speed": 10,
@@ -374,7 +386,11 @@
       {
         "answerId": "answer1",
         "answer": "몸을 낮추고 주위를 확인한 뒤 사다리로 이동한다.",
+<<<<<<< HEAD
+        "reaction": "정답! 불길과 파편을 피하면서 안전하게 탈출할 수 있다. (정답)",
+=======
         "reaction": "불길과 파편을 피하면서 안전하게 탈출할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-12",
         "points": {
           "speed": 10,
@@ -410,7 +426,11 @@
       {
         "answerId": "answer1",
         "answer": "몸을 최대한 낮추고 구조대의 지시를 따른다.",
+<<<<<<< HEAD
+        "reaction": "정답! 불길과 파편으로부터 몸을 보호할 수 있다. (정답)",
+=======
         "reaction": "불길과 파편으로부터 몸을 보호할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-13",
         "points": {
           "speed": 10,
@@ -445,8 +465,13 @@
     "options": [
       {
         "answerId": "answer1",
+<<<<<<< HEAD
+        "answer": "구조대원의 손잡이나 난간을 두 손으로 단단히 잡는다.",
+        "reaction": "정답! 흔들림에도 균형을 유지할 수 있다. (정답)",
+=======
         "answer": "손잡이나 난간을 두 손으로 단단히 잡는다.",
         "reaction": "흔들림에도 균형을 유지할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-14",
         "points": {
           "speed": 10,
@@ -482,7 +507,11 @@
       {
         "answerId": "answer1",
         "answer": "의료진의 간단한 검진을 받고 아이의 상태를 확인한다.",
+<<<<<<< HEAD
+        "reaction": "정답! 화재로 인한 연기 흡입과 부상을 빠르게 확인할 수 있다. (정답)",
+=======
         "reaction": "화재로 인한 연기 흡입과 부상을 빠르게 확인할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-15",
         "points": {
           "speed": 10,
@@ -518,7 +547,11 @@
       {
         "answerId": "answer1",
         "answer": "당국의 현장 조사와 안전 확인이 끝날 때까지 대기한다.",
+<<<<<<< HEAD
+        "reaction": "정답! 잔불과 붕괴 위험을 피할 수 있다. (정답)",
+=======
         "reaction": "잔불과 붕괴 위험을 피할 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#1-16",
         "points": {
           "speed": 10,
@@ -554,7 +587,11 @@
       {
         "answerId": "answer1",
         "answer": "구조대의 안전 해제 지시가 있을 때까지 현장을 이탈하지 않는다.",
+<<<<<<< HEAD
+        "reaction": "정답! 아직 잠복 화재가 남아 있을 수 있다. (정답)",
+=======
         "reaction": "아직 잠복 화재가 남아 있을 수 있다. (정답)",
+>>>>>>> dev.gong
         "nextId": "#END",
         "points": {
           "speed": 10,
@@ -602,7 +639,11 @@
         "answerId": "next-scenario",
         "answer": "다음 시나리오로 넘어가기",
         "reaction": "다음 시나리오로 이동합니다.",
+<<<<<<< HEAD
+        "nextId": "#END",
+=======
         "nextId": "#SCENARIO_SELECT",
+>>>>>>> dev.gong
         "points": {
           "speed": 10,
           "accuracy": 10

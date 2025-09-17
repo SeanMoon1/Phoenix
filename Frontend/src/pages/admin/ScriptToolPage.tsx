@@ -13,12 +13,13 @@ import styled from 'styled-components';
 import ScriptView from '../../components/game/ScriptView';
 import AdminPanel from '../../components/game/Partials/AdminPanel';
 import ScenarioForm from '../../components/game/Partials/ScenarioForm.tsx'; // ✅ .tsx 명시
+import ScenarioGeneratorPanel from '../../components/admin/ScenarioGeneratorPanel';
 import { useAppStateStore } from '../../stores/game/atom';
 import { useBlockListSelector } from '../../stores/game/selector';
 import { useScenarioEditor } from '../../hooks/useScenarioEditor.ts'; // ✅ .ts 명시
 import { loadBlockList, saveBlockList } from '../../utils/game/api';
 import { UserRole } from '../../types/game';
-import type { User } from '../../types/game';
+import type { ScenarioGeneratorEvent } from '../../types';
 
 // 간소화된 styled components
 const Container = styled.div`
@@ -69,6 +70,15 @@ const LeftPanel = styled.div`
   overflow-y: auto;
 `;
 
+const RightPanel = styled.div`
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+`;
+
 const ScriptToolPage: React.FC = () => {
   const { setBlockList } = useBlockListSelector();
   const { appState } = useAppStateStore();
@@ -86,37 +96,14 @@ const ScriptToolPage: React.FC = () => {
   } = useScenarioEditor();
 
   const [activeTab, setActiveTab] = useState<string>('scenarios');
+  const [scenarios, setScenarios] = useState<ScenarioGeneratorEvent[]>([]);
 
   // 관리자 사용자 정보
-  const currentUser: User = {
-    id: 'admin001',
+  const currentUser = {
     name: '시나리오 관리자',
     role: UserRole.ADMIN,
     user_level: 100,
-    user_exp: 999999,
-    total_score: 999999,
-    completed_scenarios: 999,
-    current_tier: '마스터',
-    level_progress: 100.0,
-    next_level_exp: 0,
-    scenario_stats: {
-      fire: { completed: 999, total_score: 999999, best_score: 100 },
-      earthquake: { completed: 999, total_score: 999999, best_score: 100 },
-      flood: { completed: 999, total_score: 999999, best_score: 100 },
-      emergency: { completed: 999, total_score: 999999, best_score: 100 },
-      chemical: { completed: 999, total_score: 999999, best_score: 100 },
-      nuclear: { completed: 999, total_score: 999999, best_score: 100 },
-      terrorism: { completed: 999, total_score: 999999, best_score: 100 },
-      pandemic: { completed: 999, total_score: 999999, best_score: 100 },
-      natural_disaster: {
-        completed: 999,
-        total_score: 999999,
-        best_score: 100,
-      },
-      complex: { completed: 999, total_score: 999999, best_score: 100 },
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    current_tier: 'MASTER',
   };
 
   // 컴포넌트 마운트 시 데이터 로드
@@ -124,6 +111,43 @@ const ScriptToolPage: React.FC = () => {
     const savedBlockList = loadBlockList();
     if (savedBlockList.length > 0) {
       setBlockList(savedBlockList);
+      // 기존 블록 리스트를 시나리오 형태로 변환
+      const convertedScenarios: ScenarioGeneratorEvent[] = savedBlockList.map((block, index) => ({
+        id: index + 1,
+        teamId: 1,
+        scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
+        sceneId: block.sceneId,
+        title: block.title || '',
+        content: block.content || '',
+        sceneScript: block.sceneScript || '',
+        disasterType: block.disasterType,
+        riskLevel: 'MEDIUM',
+        difficulty: block.difficulty,
+        options: (block.options || []).map(opt => ({
+          id: 0,
+          eventId: 0,
+          scenarioId: 0,
+          choiceCode: opt.answerId,
+          choiceText: opt.answer,
+          isCorrect: opt.points.speed > 0 && opt.points.accuracy > 0,
+          speedPoints: opt.points.speed,
+          accuracyPoints: opt.points.accuracy,
+          expPoints: 0,
+          reactionText: opt.reaction,
+          nextEventId: opt.nextId ? parseInt(opt.nextId) : undefined,
+          scoreWeight: 1,
+          createdBy: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isActive: true,
+        })),
+        status: 'ACTIVE',
+        approvalStatus: 'APPROVED',
+        createdAt: new Date().toISOString(),
+        createdBy: 1,
+        order: index + 1,
+      }));
+      setScenarios(convertedScenarios);
     }
   }, [setBlockList]);
 
@@ -177,6 +201,45 @@ const ScriptToolPage: React.FC = () => {
           const importedBlocks = JSON.parse(e.target?.result as string);
           saveBlockList(importedBlocks);
           setBlockList(importedBlocks);
+          
+          // 시나리오 데이터도 업데이트
+          const convertedScenarios: ScenarioGeneratorEvent[] = importedBlocks.map((block: any, index: number) => ({
+            id: index + 1,
+            teamId: 1,
+            scenarioCode: `SCEN_${String(index + 1).padStart(3, '0')}`,
+            sceneId: block.sceneId,
+            title: block.title || '',
+            content: block.content || '',
+            sceneScript: block.sceneScript || '',
+            disasterType: block.disasterType,
+            riskLevel: 'MEDIUM',
+            difficulty: block.difficulty,
+            options: (block.options || []).map((opt: any) => ({
+              id: 0,
+              eventId: 0,
+              scenarioId: 0,
+              choiceCode: opt.answerId,
+              choiceText: opt.answer,
+              isCorrect: opt.points?.speed > 0 && opt.points?.accuracy > 0,
+              speedPoints: opt.points?.speed || 0,
+              accuracyPoints: opt.points?.accuracy || 0,
+              expPoints: 0,
+              reactionText: opt.reaction,
+              nextEventId: opt.nextId ? parseInt(opt.nextId) : undefined,
+              scoreWeight: 1,
+              createdBy: 1,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true,
+            })),
+            status: 'ACTIVE',
+            approvalStatus: 'APPROVED',
+            createdAt: new Date().toISOString(),
+            createdBy: 1,
+            order: index + 1,
+          }));
+          setScenarios(convertedScenarios);
+          
           alert('시나리오를 성공적으로 가져왔습니다!');
         } catch (error) {
           alert('파일 형식이 올바르지 않습니다.');
@@ -184,6 +247,35 @@ const ScriptToolPage: React.FC = () => {
       };
       reader.readAsText(file);
     }
+  };
+
+  const handleScenariosUpdate = (newScenarios: ScenarioGeneratorEvent[]) => {
+    setScenarios(newScenarios);
+    // 기존 블록 리스트 형태로도 변환하여 저장
+    const convertedBlocks = newScenarios.map(scenario => ({
+      sceneId: scenario.sceneId,
+      title: scenario.title,
+      content: scenario.content,
+      sceneScript: scenario.sceneScript,
+      disasterType: scenario.disasterType,
+      difficulty: scenario.difficulty,
+      options: scenario.options.map(opt => ({
+        answerId: opt.choiceCode,
+        answer: opt.choiceText,
+        reaction: opt.reactionText || '',
+        nextId: opt.nextEventId?.toString() || '',
+        points: {
+          speed: opt.speedPoints,
+          accuracy: opt.accuracyPoints,
+        },
+      })),
+      approvalStatus: 'APPROVED' as const,
+      createdAt: new Date().toISOString(),
+      createdBy: '1',
+      order: scenario.order || 1,
+    }));
+    saveBlockList(convertedBlocks);
+    setBlockList(convertedBlocks);
   };
 
   const handleDeleteAllScenarios = () => {
@@ -194,6 +286,7 @@ const ScriptToolPage: React.FC = () => {
     ) {
       saveBlockList([]);
       setBlockList([]);
+      setScenarios([]);
       alert('모든 시나리오가 삭제되었습니다.');
     }
   };
@@ -232,15 +325,24 @@ const ScriptToolPage: React.FC = () => {
           )}
         </LeftPanel>
 
-        {/* 우측 관리자 패널 */}
-        <AdminPanel
-          currentUser={currentUser}
-          stats={stats}
-          onCreateScenario={handleCreateScenario}
-          onExportScenarios={handleExportScenarios}
-          onImportScenarios={handleImportScenarios}
-          onDeleteAllScenarios={handleDeleteAllScenarios}
-        />
+        {/* 우측 패널 */}
+        <RightPanel>
+          {/* 시나리오 생성기 패널 */}
+          <ScenarioGeneratorPanel
+            scenarios={scenarios}
+            onScenariosUpdate={handleScenariosUpdate}
+          />
+          
+          {/* 기존 관리자 패널 */}
+          <AdminPanel
+            currentUser={currentUser}
+            stats={stats}
+            onCreateScenario={handleCreateScenario}
+            onExportScenarios={handleExportScenarios}
+            onImportScenarios={handleImportScenarios}
+            onDeleteAllScenarios={handleDeleteAllScenarios}
+          />
+        </RightPanel>
       </MainContent>
     </Container>
   );

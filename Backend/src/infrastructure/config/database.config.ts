@@ -19,8 +19,6 @@ export const getDatabaseConfig = (
       connectTimeout: 10000,
       waitForConnections: true,
       queueLimit: 0,
-      acquireTimeout: 60000,
-      timeout: 60000,
     },
     // Aurora RDS 연결을 위한 추가 설정
     ssl:

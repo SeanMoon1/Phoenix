@@ -215,7 +215,11 @@ async function loadFromStaticFiles(type: string): Promise<Scenario[]> {
   }
 
   const data = await response.json();
-  return convertJsonToScenarios(data, type);
+  // 배열 구조 보장
+  const scenarioArray = Array.isArray(data)
+    ? data
+    : data.scenarios || data.data || [];
+  return convertJsonToScenarios(scenarioArray, type);
 }
 
 // API에서 시나리오 로드
@@ -229,7 +233,9 @@ function getScenarioFileName(type: string): string {
     fire: 'fire_training_scenario.json',
     earthquake: 'earthquake_training_scenario.json',
     emergency: 'emergency_first_aid_scenario.json',
+    'first-aid': 'emergency_first_aid_scenario.json',
     traffic: 'traffic_accident_scenario.json',
+    'traffic-accident': 'traffic_accident_scenario.json',
   };
 
   return fileMap[type] || 'fire_training_scenario.json';

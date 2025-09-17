@@ -38,6 +38,7 @@ import { GetUserUseCase } from './application/use-cases/user/get-user.use-case';
 import { UpdateUserUseCase } from './application/use-cases/user/update-user.use-case';
 
 // Infrastructure Layer - Repository Implementations
+import { RepositoriesModule } from './infrastructure/database/repositories/repositories.module';
 import { TypeOrmUserRepository } from './infrastructure/database/repositories/user.repository.impl';
 import { TypeOrmScenarioRepository } from './infrastructure/database/repositories/scenario.repository.impl';
 import { TypeOrmTeamRepository } from './infrastructure/database/repositories/team.repository.impl';
@@ -84,6 +85,7 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
+    RepositoriesModule,
     // Domain entities registration
     TypeOrmModule.forFeature([
       User,
@@ -144,11 +146,11 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     GetUserUseCase,
     UpdateUserUseCase,
     // Repository Implementations
-    TypeOrmUserRepository,
     {
       provide: 'UserRepository',
-      useFactory: (dataSource: DataSource) => dataSource.getRepository(User),
-      inject: [DataSource],
+      useFactory: (typeOrmUserRepository: TypeOrmUserRepository) =>
+        typeOrmUserRepository,
+      inject: [TypeOrmUserRepository],
     },
     TypeOrmScenarioRepository,
     {

@@ -1,4 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { User } from '../../../domain/entities/user.entity';
@@ -6,7 +7,7 @@ import { User } from '../../../domain/entities/user.entity';
 @Injectable()
 export class TypeOrmUserRepository implements UserRepository {
   constructor(
-    @Inject('UserRepository')
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
@@ -22,7 +23,7 @@ export class TypeOrmUserRepository implements UserRepository {
     });
   }
 
-  async findByLoginId(loginId: string): Promise<User | null> {
+  async findByLoginId(loginId: string): Promise<User> {
     return this.userRepository.findOne({
       where: { loginId },
     });

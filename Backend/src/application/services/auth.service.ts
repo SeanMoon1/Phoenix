@@ -317,7 +317,11 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.log(error);
+      console.error('❌ 로그인 ID 확인 중 오류:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
       return {
         success: false,
         error: '로그인 ID 확인 중 오류가 발생했습니다.',

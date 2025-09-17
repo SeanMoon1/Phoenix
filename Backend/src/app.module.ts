@@ -77,7 +77,7 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'], // NODE_ENV 우선
       load: [oauthConfig],
     }),
     TypeOrmModule.forRootAsync({

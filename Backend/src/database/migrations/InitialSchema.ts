@@ -93,8 +93,7 @@ export class InitialSchema1700000000000 implements MigrationInterface {
         FOREIGN KEY (team_id) REFERENCES team(team_id),
         UNIQUE KEY uk_team_user_code (team_id, user_code),
         UNIQUE KEY uk_team_user_login (team_id, login_id),
-        UNIQUE KEY uk_team_email (team_id, email),
-        UNIQUE KEY uk_team_name (team_id, name)
+        UNIQUE KEY uk_team_email (team_id, email)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 

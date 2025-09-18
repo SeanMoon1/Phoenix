@@ -36,6 +36,13 @@ export const apiClient: AxiosInstance = axios.create({
 // 요청 인터셉터 - 토큰 추가
 apiClient.interceptors.request.use(
   config => {
+    console.log('📤 Frontend: API 요청', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      data: config.data,
+    });
+
     const token = localStorage.getItem('auth-storage')
       ? JSON.parse(localStorage.getItem('auth-storage')!).state.token
       : null;
@@ -46,6 +53,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   error => {
+    console.error('❌ Frontend: 요청 인터셉터 에러', error);
     return Promise.reject(error);
   }
 );
@@ -53,9 +61,22 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터 - 에러 처리
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
+    console.log('📥 Frontend: API 응답 성공', {
+      status: response.status,
+      url: response.config.url,
+      data: response.data,
+    });
     return response;
   },
   error => {
+    console.error('❌ Frontend: API 응답 에러', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      data: error.response?.data,
+      message: error.message,
+    });
+
     if (error.response?.status === 401) {
       // 인증 실패 시 로그아웃 처리
       localStorage.removeItem('auth-storage');

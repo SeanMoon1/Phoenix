@@ -13,10 +13,21 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(loginId: string, password: string): Promise<any> {
-    const user = await this.authService.validateUser(loginId, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    console.log('🔍 LocalStrategy.validate 호출:', {
+      loginId,
+      hasPassword: !!password,
+    });
+    try {
+      const user = await this.authService.validateUser(loginId, password);
+      if (!user) {
+        console.log('❌ LocalStrategy: 사용자 인증 실패');
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      console.log('✅ LocalStrategy: 사용자 인증 성공');
+      return user;
+    } catch (error) {
+      console.error('❌ LocalStrategy.validate 에러:', error);
+      throw error;
     }
-    return user;
   }
 }

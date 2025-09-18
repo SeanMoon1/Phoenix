@@ -33,9 +33,14 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
 
       login: async (credentials: LoginCredentials) => {
+        console.log('🚀 Frontend: 로그인 시작', {
+          loginId: credentials.loginId,
+          hasPassword: !!credentials.password,
+        });
         set({ isLoading: true });
         try {
           // 실제 API 호출
+          console.log('📡 Frontend: API 요청 전송', '/auth/login');
           const response = await api.post<{
             access_token: string;
             user: {
@@ -48,6 +53,8 @@ export const useAuthStore = create<AuthStore>()(
               adminLevel?: string;
             };
           }>('/auth/login', credentials);
+
+          console.log('📡 Frontend: API 응답 받음', response);
 
           if (response.success && response.data) {
             const user: User = {
@@ -84,6 +91,13 @@ export const useAuthStore = create<AuthStore>()(
             throw new Error(response.error || '로그인에 실패했습니다.');
           }
         } catch (error: any) {
+          console.error('❌ Frontend: 로그인 에러', error);
+          console.error('❌ Frontend: 에러 상세', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+            stack: error.stack,
+          });
           set({ isLoading: false });
           throw new Error(error.message || '로그인에 실패했습니다.');
         }

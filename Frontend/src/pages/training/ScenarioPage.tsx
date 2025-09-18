@@ -182,9 +182,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       (gameState.scenario?.sceneId ?? '').trim() === '#END' ||
       gameState.current >= gameState.scenarios.length - 1;
 
-    // NOTE: EXP 지급 로직는 '선택 시(handleChoice)'로 통일했습니다.
-    // 따라서 handleNext에서는 EXP 관련 코드를 제거하여 중복 지급을 방지합니다.
-
     // nextId 추출 (여러 필드 지원 + trim)
     const rawNext =
       (gameState.selected as any)?.nextId ??
@@ -304,6 +301,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
             progressPct={expSystem.progressPct}
             highlight={expSystem.showLevelUp}
             hideExpFill={expSystem.hideExpFill}
+            playerName={user?.name ?? user?.loginId ?? '플레이어 이름'}
           />
           <main>
             <ProgressBar

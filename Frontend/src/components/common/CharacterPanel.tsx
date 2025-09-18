@@ -6,8 +6,9 @@ type Props = {
   expDisplay: number;
   neededExp: number;
   progressPct: number;
-  highlight?: boolean; // 레벨업 순간 하이라이트
-  hideExpFill?: boolean; // 레벨업 리셋 연출 시 초록바 잠깐 숨김
+  highlight?: boolean;
+  hideExpFill?: boolean;
+  playerName?: string;
 };
 
 export default function CharacterPanel({
@@ -17,6 +18,7 @@ export default function CharacterPanel({
   progressPct,
   highlight = false,
   hideExpFill = false,
+  playerName = '플레이어 이름',
 }: Props) {
   return (
     <aside className="hidden md:flex md:flex-col md:gap-4">
@@ -30,7 +32,7 @@ export default function CharacterPanel({
 
       <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-4">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold">플레이어 이름</h2>
+          <h2 className="text-lg font-semibold">{playerName}</h2>
           <span
             className={`text-2xl font-bold inline-flex items-center px-2 rounded-lg transition-shadow ${
               highlight

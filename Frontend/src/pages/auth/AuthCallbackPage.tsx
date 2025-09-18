@@ -29,9 +29,16 @@ const AuthCallbackPage: React.FC = () => {
     const userParam = searchParams.get('user');
     const error = searchParams.get('error');
 
+    console.log('🔍 OAuth Callback Debug Info:', {
+      token: token ? `${token.substring(0, 20)}...` : 'No token',
+      userParam: userParam ? 'Present' : 'Missing',
+      error: error || 'No error',
+      allParams: Object.fromEntries(searchParams.entries()),
+    });
+
     if (error) {
       // OAuth 에러 처리
-      console.error('OAuth error:', error);
+      console.error('❌ OAuth error:', error);
       const errorMessage = getErrorMessage(error);
       navigate(`/login?error=${errorMessage}`);
       return;
@@ -41,6 +48,19 @@ const AuthCallbackPage: React.FC = () => {
       try {
         // URL 디코딩 및 JSON 파싱
         const userData = JSON.parse(decodeURIComponent(userParam));
+        console.log('👤 Parsed user data:', userData);
+
+        // 필수 필드 검증
+        if (!userData.id || !userData.email || !userData.name) {
+          console.error('❌ Missing required user data:', {
+            hasId: !!userData.id,
+            hasEmail: !!userData.email,
+            hasName: !!userData.name,
+            userData,
+          });
+          navigate('/login?error=incomplete_user_data');
+          return;
+        }
 
         // Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
         const user = {
@@ -68,6 +88,16 @@ const AuthCallbackPage: React.FC = () => {
           oauthProviderId: userData.providerId,
         };
 
+        console.log('✅ Setting auth state:', {
+          hasToken: !!token,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            oauthProvider: user.oauthProvider,
+          },
+        });
+
         // 인증 상태 설정
         setAuth({
           token,
@@ -75,14 +105,19 @@ const AuthCallbackPage: React.FC = () => {
           isAuthenticated: true,
         });
 
+        console.log('🚀 Redirecting to home page...');
         // 메인페이지로 리다이렉트
         navigate('/');
       } catch (error) {
-        console.error('Failed to parse user data:', error);
+        console.error('❌ Failed to parse user data:', error);
         navigate('/login?error=invalid_callback');
       }
     } else {
       // 토큰이나 사용자 정보가 없는 경우
+      console.error('❌ Missing callback data:', {
+        hasToken: !!token,
+        hasUserParam: !!userParam,
+      });
       navigate('/login?error=missing_callback_data');
     }
   }, [searchParams, navigate, setAuth]);
@@ -91,8 +126,8 @@ const AuthCallbackPage: React.FC = () => {
     <Layout>
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-orange-600 rounded-full animate-spin"></div>
+          <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
             로그인 처리 중...
           </h2>
           <p className="text-gray-600 dark:text-gray-300">

@@ -126,6 +126,14 @@ export class OAuthController {
       }
 
       console.log(`🔄 ${provider} OAuth 사용자 등록/로그인 처리 시작`);
+      console.log('📝 OAuth 사용자 데이터:', {
+        email: user.email,
+        name: user.name,
+        provider: user.provider,
+        providerId: user.providerId,
+        profileImage: user.profileImage,
+      });
+
       // OAuth 사용자 등록/로그인 처리
       const result = await this.authService.oauthRegisterAndLogin({
         email: user.email,
@@ -137,6 +145,16 @@ export class OAuthController {
 
       console.log(`🔍 ${provider} OAuth 처리 결과:`, result ? '성공' : '실패');
       console.log('🔑 JWT 토큰 존재:', !!(result && result.access_token));
+      console.log(
+        '👤 사용자 정보:',
+        result
+          ? {
+              userId: result.user?.id,
+              userEmail: result.user?.email,
+              userName: result.user?.name,
+            }
+          : 'No user data',
+      );
 
       if (result && result.access_token) {
         // 성공 시 JWT 토큰과 사용자 정보를 함께 프론트엔드로 리디렉션

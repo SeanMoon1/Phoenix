@@ -87,19 +87,19 @@ const Header: React.FC = () => {
             : 'relative'
         }`}
       >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 relative">
+        <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="relative flex items-center justify-between h-16">
             {/* 로고 */}
             <div className="flex items-center">
               <Link to="/" className="flex items-center group">
-                <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent dark:from-orange-400 dark:to-red-400">
+                <span className="text-2xl font-bold text-transparent bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text dark:from-orange-400 dark:to-red-400">
                   재난훈련ON
                 </span>
               </Link>
             </div>
 
             {/* 네비게이션 - 데스크톱 */}
-            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 relative">
+            <nav className="relative items-center hidden space-x-1 lg:flex xl:space-x-2">
               {/* 행동메뉴얼 */}
               <Link
                 to="/manual"
@@ -136,11 +136,25 @@ const Header: React.FC = () => {
                 고객지원
               </Link>
 
+              {/* 마이페이지 - 로그인한 사용자만 표시 */}
+              {isAuthenticated && (
+                <Link
+                  to="/mypage"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    location.pathname === '/mypage'
+                      ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                  }`}
+                >
+                  마이페이지
+                </Link>
+              )}
+
               {/* 관리자 페이지 링크 - 관리자 페이지에서만 표시 */}
               {isAdminPage && (
                 <Link
                   to="/admin"
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg whitespace-nowrap dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                 >
                   관리자페이지
                 </Link>
@@ -152,7 +166,7 @@ const Header: React.FC = () => {
               {/* 다크모드 토글 버튼 */}
               <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                className="p-2 text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg dark:bg-gray-800 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400"
                 aria-label="다크모드 토글"
               >
                 {isDarkMode ? (
@@ -181,14 +195,14 @@ const Header: React.FC = () => {
               {/* 사용자 메뉴 */}
               {isAuthenticated ? (
                 <div className="flex items-center space-x-3">
-                  <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="hidden text-sm font-medium text-gray-700 sm:block dark:text-gray-300">
                     {user?.name}님
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 hover:text-red-600 dark:hover:text-red-400"
+                    className="text-gray-700 border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-600 hover:text-red-600 dark:hover:text-red-400"
                   >
                     로그아웃
                   </Button>
@@ -199,7 +213,7 @@ const Header: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300"
+                      className="text-gray-700 border-gray-300 dark:border-gray-500 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300"
                     >
                       로그인
                     </Button>
@@ -210,7 +224,7 @@ const Header: React.FC = () => {
               {/* 모바일 햄버거 메뉴 버튼 */}
               <button
                 onClick={toggleMobileMenu}
-                className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                className="p-2 text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg lg:hidden dark:bg-gray-800 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400"
                 aria-label="모바일 메뉴"
               >
                 <svg
@@ -241,10 +255,10 @@ const Header: React.FC = () => {
 
           {/* 모바일 햄버거 메뉴 */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 py-4">
+            <div className="py-4 border-t border-gray-200 lg:hidden dark:border-gray-700">
               <nav className="space-y-2">
                 {/* 행동메뉴얼 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/manual"
                     className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
@@ -259,7 +273,7 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* 훈련하기 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/training"
                     className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
@@ -274,7 +288,7 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* 고객지원 */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                   <Link
                     to="/support"
                     className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
@@ -288,11 +302,28 @@ const Header: React.FC = () => {
                   </Link>
                 </div>
 
+                {/* 마이페이지 - 로그인한 사용자만 표시 */}
+                {isAuthenticated && (
+                  <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
+                    <Link
+                      to="/mypage"
+                      className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
+                        location.pathname === '/mypage'
+                          ? 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 font-semibold'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      마이페이지
+                    </Link>
+                  </div>
+                )}
+
                 {/* 관리자 섹션 - 관리자 페이지에서만 표시 */}
                 {isAdminPage && (
                   <Link
                     to="/admin"
-                    className="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     관리자페이지

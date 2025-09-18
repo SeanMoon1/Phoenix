@@ -98,13 +98,13 @@ const LoginPage: React.FC = () => {
       // 각 OAuth 제공자별 엔드포인트로 리다이렉트
       switch (provider) {
         case 'google':
-          window.location.href = `${apiBaseUrl}/auth/google`;
+          window.location.href = `${apiBaseUrl}/api/auth/google`;
           break;
         case 'kakao':
-          window.location.href = `${apiBaseUrl}/auth/kakao`;
+          window.location.href = `${apiBaseUrl}/api/auth/kakao`;
           break;
         case 'naver':
-          window.location.href = `${apiBaseUrl}/auth/naver`;
+          window.location.href = `${apiBaseUrl}/api/auth/naver`;
           break;
         default:
           console.error(`지원하지 않는 OAuth 제공자: ${provider}`);
@@ -172,7 +172,7 @@ const LoginPage: React.FC = () => {
               )}
 
               {oauthError && (
-                <div className="p-3 text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-lg dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
+                <div className="p-3 text-xs text-center text-red-600 border border-red-200 rounded-lg bg-red-50 dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
                   {oauthError}
                 </div>
               )}

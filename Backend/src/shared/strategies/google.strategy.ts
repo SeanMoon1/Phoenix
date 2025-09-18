@@ -20,16 +20,62 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { name, emails, photos, id } = profile;
-    const user = {
-      email: emails[0].value,
-      name: `${name.givenName} ${name.familyName}`.trim(),
-      profileImage: photos[0]?.value,
-      provider: 'google',
-      providerId: id,
-      accessToken,
-      refreshToken,
-    };
-    done(null, user);
+    try {
+      console.log('🔍 Google OAuth Profile 정보:', {
+        id: profile.id,
+        displayName: profile.displayName,
+        emails: profile.emails,
+        name: profile.name,
+        photos: profile.photos,
+      });
+
+      const { name, emails, photos, id, displayName } = profile;
+
+      // 이메일 정보 안전하게 추출
+      const email = emails && emails.length > 0 ? emails[0].value : null;
+
+      // 이름 정보 안전하게 추출
+      let fullName = '';
+      if (name) {
+        if (name.givenName && name.familyName) {
+          fullName = `${name.givenName} ${name.familyName}`.trim();
+        } else if (name.givenName) {
+          fullName = name.givenName;
+        } else if (name.familyName) {
+          fullName = name.familyName;
+        }
+      }
+
+      // displayName이 있으면 우선 사용
+      if (displayName && !fullName) {
+        fullName = displayName;
+      }
+
+      // 프로필 이미지 안전하게 추출
+      const profileImage = photos && photos.length > 0 ? photos[0].value : null;
+
+      const user = {
+        email,
+        name: fullName,
+        profileImage,
+        provider: 'google',
+        providerId: id,
+        accessToken,
+        refreshToken,
+      };
+
+      console.log('✅ Google OAuth 사용자 정보 파싱 완료:', {
+        email: !!user.email,
+        name: !!user.name,
+        provider: user.provider,
+        providerId: !!user.providerId,
+        profileImage: !!user.profileImage,
+      });
+
+      done(null, user);
+    } catch (error) {
+      console.error('❌ Google OAuth 사용자 정보 파싱 실패:', error);
+      done(error, null);
+    }
   }
 }

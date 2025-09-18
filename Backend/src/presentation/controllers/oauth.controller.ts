@@ -99,6 +99,18 @@ export class OAuthController {
         user ? '사용자 정보 존재' : '사용자 정보 없음',
       );
 
+      if (user) {
+        console.log('📝 받은 사용자 데이터 상세:', {
+          email: user.email,
+          name: user.name,
+          provider: user.provider,
+          providerId: user.providerId,
+          profileImage: user.profileImage,
+          hasAccessToken: !!user.accessToken,
+          hasRefreshToken: !!user.refreshToken,
+        });
+      }
+
       if (!user) {
         console.log(`❌ ${provider} OAuth 사용자 정보 없음`);
         const redirectBase =

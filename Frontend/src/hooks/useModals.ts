@@ -62,14 +62,8 @@ export function useModals({
 
   // 엔딩 모달 처리
   useEffect(() => {
-    console.log('[useModals] effect run', {
-      scenarioId: scenario?.sceneId,
-      endModalAutoShown,
-      failedThisRun,
-    });
     if (!scenario || endModalAutoShown) return;
     if ((scenario.sceneId ?? '').trim() === END_SCENE_ID) {
-      console.log('[useModals] detected END scene -> showing modal');
       setEndModalAutoShown(true);
       // onSaveResult는 비동기지만 에러를 흘리지 않도록 처리
       onSaveResult().catch(err =>
@@ -114,11 +108,9 @@ export function useModals({
   }, [_clearMsg, _failMsg, showConfetti]);
 
   const setClearMsg = (msg: string | null) => {
-    console.log('[useModals] setClearMsg ->', msg);
     _setClearMsg(msg); // if you rename internal setter, else use existing setClearMsg
   };
   const setFailMsg = (msg: string | null) => {
-    console.log('[useModals] setFailMsg ->', msg);
     _setFailMsg(msg);
   };
 

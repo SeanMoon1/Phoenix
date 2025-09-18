@@ -94,14 +94,6 @@ export function useScenarioGame({
           const clonedScene = { ...scene, options: shuffledOpts };
           return clonedScene;
         });
-        // console.log(
-        //   '[useScenarioGame] loaded scenarios; sample options order:',
-        //   shuffled
-        //     .map(s =>
-        //       s.options.map(o => o.choiceCode ?? o.choiceText ?? '(no-id)')
-        //     )
-        //     .slice(0, 3)
-        // );
         setScenarios(shuffled);
       })
       .catch(err => {

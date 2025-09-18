@@ -153,17 +153,10 @@ export async function fetchTrafficScenario(): Promise<Scenario[]> {
 }
 
 export async function fetchScenarioByType(type: string): Promise<Scenario[]> {
-  console.log(
-    `[시나리오 로딩] 타입: ${type}, 데이터 소스: ${DATA_SOURCE.source}`
-  );
-
   // 1. 정적 파일 사용이 활성화된 경우
   if (DATA_SOURCE.useStaticFiles()) {
     try {
       const scenarios = await loadFromStaticFiles(type);
-      console.log(
-        `[시나리오 로딩] 정적 파일에서 ${scenarios.length}개 시나리오 로드 성공`
-      );
       return scenarios;
     } catch (error) {
       console.warn(`[시나리오 로딩] 정적 파일 로드 실패 (${type}):`, error);
@@ -183,9 +176,6 @@ export async function fetchScenarioByType(type: string): Promise<Scenario[]> {
   if (DATA_SOURCE.useApi()) {
     try {
       const scenarios = await loadFromApi(type);
-      console.log(
-        `[시나리오 로딩] API에서 ${scenarios.length}개 시나리오 로드 성공`
-      );
       return scenarios;
     } catch (error) {
       console.error(`[시나리오 로딩] API 로드 실패 (${type}):`, error);
@@ -208,8 +198,6 @@ export async function fetchScenarioByType(type: string): Promise<Scenario[]> {
 // 정적 파일에서 시나리오 로드
 async function loadFromStaticFiles(type: string): Promise<Scenario[]> {
   const fileName = getScenarioFileName(type);
-  console.log(`[정적 파일 로딩] 파일명: ${fileName}, 타입: ${type}`);
-
   const response = await fetch(`/data/${fileName}`);
 
   if (!response.ok) {
@@ -341,7 +329,6 @@ export const ScenarioDataSource = {
   // 데이터 소스 변경 (런타임에서도 가능)
   setSource: (source: 'static' | 'api' | 'auto') => {
     DATA_SOURCE.source = source;
-    console.log(`[시나리오 데이터 소스] 변경됨: ${source}`);
   },
 
   // 정적 파일 사용 여부 확인
@@ -362,10 +349,6 @@ export const ScenarioDataSource = {
 // 개발자 도구에서 사용할 수 있는 전역 함수 (개발 환경에서만)
 if (import.meta.env.DEV) {
   (window as any).ScenarioDataSource = ScenarioDataSource;
-  console.log('[개발자 도구] ScenarioDataSource가 전역에서 사용 가능합니다.');
-  console.log(
-    '사용법: ScenarioDataSource.setSource("api") 또는 ScenarioDataSource.getStatus()'
-  );
 }
 
 // 레거시 함수들 (하위 호환성을 위해 유지)

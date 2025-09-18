@@ -82,18 +82,30 @@ export function useScenarioGame({
 
   // 초기 데이터 로드
   useEffect(() => {
-    console.log(`[useScenarioGame] 시나리오 타입: ${scenarioType}`);
     setLoading(true);
     fetchScenarioByType(scenarioType)
       .then(data => {
-        console.log(
-          `[useScenarioGame] 로드된 시나리오 수: ${data.length}`,
-          data.slice(0, 2)
-        );
-        setScenarios(data);
+        // 깊은 복사(참조 문제 방지) 후 옵션 섞기
+        const shuffled = (data || []).map(scene => {
+          const opts = Array.isArray(scene.options)
+            ? scene.options.map(o => ({ ...o })) // shallow clone each option
+            : [];
+          const shuffledOpts = shuffleArray(opts);
+          const clonedScene = { ...scene, options: shuffledOpts };
+          return clonedScene;
+        });
+        // console.log(
+        //   '[useScenarioGame] loaded scenarios; sample options order:',
+        //   shuffled
+        //     .map(s =>
+        //       s.options.map(o => o.choiceCode ?? o.choiceText ?? '(no-id)')
+        //     )
+        //     .slice(0, 3)
+        // );
+        setScenarios(shuffled);
       })
-      .catch(error => {
-        console.error(`[useScenarioGame] 시나리오 로드 실패:`, error);
+      .catch(err => {
+        console.error('[useScenarioGame] fetchScenarioByType failed', err);
       })
       .finally(() => setLoading(false));
   }, [scenarioType]);
@@ -188,4 +200,15 @@ export function useScenarioGame({
     // newly exposed
     answered,
   };
+}
+
+// 유틸: Fisher-Yates 랜덤 셔플 (비파괴: 새 배열 반환)
+function shuffleArray<T>(arr?: T[] | null): T[] {
+  if (!arr || !arr.length) return [];
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }

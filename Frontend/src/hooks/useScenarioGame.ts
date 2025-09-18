@@ -46,6 +46,9 @@ interface UseScenarioGameReturn {
 
   choiceDisabled: boolean;
   setChoiceDisabled: (value: boolean) => void;
+
+  // 이미 풀었던 문제 인덱스 목록
+  answered: number[];
 }
 
 export function useScenarioGame({
@@ -120,36 +123,28 @@ export function useScenarioGame({
   // 선택 처리
   const handleChoice = useCallback(
     (option: ChoiceOption) => {
-      if (answered.includes(current)) {
-        setSelected(option);
-        return { shouldAwardExp: false, isCorrect: false };
-      }
-      setAnswered([...answered, current]);
+      const isCorrect = (option.accuracyPoints || 0) > 0;
+      const alreadyAnswered = answered.includes(current);
+
+      // 항상 선택은 적용(피드백 등)
       setSelected(option);
       setFeedback(option.reactionText || null);
 
-      const isCorrect = (option.accuracyPoints || 0) > 0;
-      console.log(
-        `[handleChoice] 정답 여부:`,
-        isCorrect,
-        `정확도 포인트:`,
-        option.accuracyPoints
-      );
+      if (alreadyAnswered) {
+        // 이미 답한 문제: 경험치 지급 대상 아님
+        return { shouldAwardExp: false, isCorrect };
+      }
 
-      // 오답을 선택해도 실패 상태를 즉시 업데이트하지 않음
-      // 마지막 선택이 정답이면 경험치를 지급하도록 함
+      // 첫 응답인 경우 marked
+      setAnswered(prev => [...prev, current]);
 
-      // EXP 지급은 다음 버튼에서 처리하므로 여기서는 제거
-      return { shouldAwardExp: false, isCorrect };
+      // 첫 응답이고 정답이면 경험치 지급 대상일 수 있음
+      const shouldAwardExp =
+        isCorrect && !awardedExpThisScene && !wrongTriedInThisScene;
+      // NOTE: 실제 awardedExpThisScene 플래그는 ScenarioPage에서 EXP 지급 시 설정하도록 유지(중복 방지)
+      return { shouldAwardExp, isCorrect };
     },
-    [
-      answered,
-      current,
-      choiceDisabled,
-      scenario,
-      awardedExpThisScene,
-      wrongTriedInThisScene,
-    ]
+    [answered, current, scenario, awardedExpThisScene, wrongTriedInThisScene]
   );
 
   return {
@@ -189,5 +184,8 @@ export function useScenarioGame({
 
     choiceDisabled,
     setChoiceDisabled,
+
+    // newly exposed
+    answered,
   };
 }

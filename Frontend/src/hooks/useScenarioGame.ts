@@ -43,6 +43,12 @@ interface UseScenarioGameReturn {
   setWrongTriedInThisScene: (value: boolean) => void;
   setAwardedExpThisScene: (value: boolean) => void;
   setEndModalAutoShown: (value: boolean) => void;
+
+  choiceDisabled: boolean;
+  setChoiceDisabled: (value: boolean) => void;
+
+  // 이미 풀었던 문제 인덱스 목록
+  answered: number[];
 }
 
 export function useScenarioGame({
@@ -57,12 +63,16 @@ export function useScenarioGame({
   // 선택/피드백
   const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [choiceDisabled, setChoiceDisabled] = useState(false); // choiceDisabled 선언 추가
 
   // 게임 진행 상태
   const [failedThisRun, setFailedThisRun] = useState(false);
   const [wrongTriedInThisScene, setWrongTriedInThisScene] = useState(false);
   const [awardedExpThisScene, setAwardedExpThisScene] = useState(false);
   const [endModalAutoShown, setEndModalAutoShown] = useState(false);
+
+  // 이미 푼 문제 상태
+  const [answered, setAnswered] = useState<number[]>([]);
 
   // 현재 시나리오
   const scenario = useMemo(
@@ -72,18 +82,30 @@ export function useScenarioGame({
 
   // 초기 데이터 로드
   useEffect(() => {
-    console.log(`[useScenarioGame] 시나리오 타입: ${scenarioType}`);
     setLoading(true);
     fetchScenarioByType(scenarioType)
       .then(data => {
-        console.log(
-          `[useScenarioGame] 로드된 시나리오 수: ${data.length}`,
-          data.slice(0, 2)
-        );
-        setScenarios(data);
+        // 깊은 복사(참조 문제 방지) 후 옵션 섞기
+        const shuffled = (data || []).map(scene => {
+          const opts = Array.isArray(scene.options)
+            ? scene.options.map(o => ({ ...o })) // shallow clone each option
+            : [];
+          const shuffledOpts = shuffleArray(opts);
+          const clonedScene = { ...scene, options: shuffledOpts };
+          return clonedScene;
+        });
+        // console.log(
+        //   '[useScenarioGame] loaded scenarios; sample options order:',
+        //   shuffled
+        //     .map(s =>
+        //       s.options.map(o => o.choiceCode ?? o.choiceText ?? '(no-id)')
+        //     )
+        //     .slice(0, 3)
+        // );
+        setScenarios(shuffled);
       })
-      .catch(error => {
-        console.error(`[useScenarioGame] 시나리오 로드 실패:`, error);
+      .catch(err => {
+        console.error('[useScenarioGame] fetchScenarioByType failed', err);
       })
       .finally(() => setLoading(false));
   }, [scenarioType]);
@@ -98,6 +120,8 @@ export function useScenarioGame({
     setWrongTriedInThisScene(false);
     setAwardedExpThisScene(false);
     setEndModalAutoShown(false);
+    setChoiceDisabled(false);
+    setAnswered([]);
   }, []);
 
   // 씬 플래그 리셋
@@ -111,29 +135,28 @@ export function useScenarioGame({
   // 선택 처리
   const handleChoice = useCallback(
     (option: ChoiceOption) => {
-      if (!scenario) return null;
+      const isCorrect = (option.accuracyPoints || 0) > 0;
+      const alreadyAnswered = answered.includes(current);
 
-      console.log(`[handleChoice] 선택된 옵션:`, option);
-
-      // 선택된 옵션과 피드백만 업데이트
+      // 항상 선택은 적용(피드백 등)
       setSelected(option);
       setFeedback(option.reactionText || null);
 
-      const isCorrect = (option.accuracyPoints || 0) > 0;
-      console.log(
-        `[handleChoice] 정답 여부:`,
-        isCorrect,
-        `정확도 포인트:`,
-        option.accuracyPoints
-      );
+      if (alreadyAnswered) {
+        // 이미 답한 문제: 경험치 지급 대상 아님
+        return { shouldAwardExp: false, isCorrect };
+      }
 
-      // 오답을 선택해도 실패 상태를 즉시 업데이트하지 않음
-      // 마지막 선택이 정답이면 경험치를 지급하도록 함
+      // 첫 응답인 경우 marked
+      setAnswered(prev => [...prev, current]);
 
-      // EXP 지급은 다음 버튼에서 처리하므로 여기서는 제거
-      return { shouldAwardExp: false, isCorrect };
+      // 첫 응답이고 정답이면 경험치 지급 대상일 수 있음
+      const shouldAwardExp =
+        isCorrect && !awardedExpThisScene && !wrongTriedInThisScene;
+      // NOTE: 실제 awardedExpThisScene 플래그는 ScenarioPage에서 EXP 지급 시 설정하도록 유지(중복 방지)
+      return { shouldAwardExp, isCorrect };
     },
-    [scenario]
+    [answered, current, scenario, awardedExpThisScene, wrongTriedInThisScene]
   );
 
   return {
@@ -170,5 +193,22 @@ export function useScenarioGame({
     setWrongTriedInThisScene,
     setAwardedExpThisScene,
     setEndModalAutoShown,
+
+    choiceDisabled,
+    setChoiceDisabled,
+
+    // newly exposed
+    answered,
   };
+}
+
+// 유틸: Fisher-Yates 랜덤 셔플 (비파괴: 새 배열 반환)
+function shuffleArray<T>(arr?: T[] | null): T[] {
+  if (!arr || !arr.length) return [];
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }

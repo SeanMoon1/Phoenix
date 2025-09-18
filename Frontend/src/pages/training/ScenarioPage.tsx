@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import type { ChoiceOption } from '@/types';
+import type { ChoiceOption } from '@/types/index';
 
 // 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
@@ -33,17 +33,15 @@ interface ScenarioPageProps {
 
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
-const TOKEN_REVIEW = '#REVIEW';
-const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
 
 // 시나리오 타입별 이름 매핑
 const getScenarioSetName = (type: string): string => {
   switch (type) {
     case 'fire':
       return '화재 대응';
-    case 'emergency':
+    case 'first-aid':
       return '응급처치';
-    case 'traffic':
+    case 'traffic-accident':
       return '교통사고 대응';
     case 'earthquake':
       return '지진 대응';
@@ -130,66 +128,126 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     onSaveResult: saveTrainingResult,
   });
 
+  // 엔딩 모달 자동 표시 처리
+  useEffect(() => {
+    if (!gameState.scenario) return;
+    const isEndScene =
+      (gameState.scenario.sceneId ?? '').trim() === '#END' ||
+      gameState.current >= gameState.scenarios.length - 1;
+    if (!isEndScene) return;
+    if (gameState.endModalAutoShown || modals.clearMsg || modals.failMsg)
+      return;
+    gameState.setEndModalAutoShown(true);
+    if (gameState.failedThisRun) {
+      modals.setFailMsg(
+        `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
+      );
+    } else {
+      modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
+      modals.setShowConfetti(true);
+    }
+  }, [
+    gameState.scenario,
+    gameState.current,
+    gameState.scenarios.length,
+    gameState.endModalAutoShown,
+    gameState.failedThisRun,
+    modals.clearMsg,
+    modals.failMsg,
+    scenarioSetName,
+  ]);
+
   // 선택 처리
   const handleChoice = (option: ChoiceOption) => {
-    gameState.handleChoice(option);
+    // 이전에 이미 답한 문제인지(ANSWERED 기준) 확인 -> 경험치 지급 방지
+    if (gameState.answered?.includes(gameState.current)) {
+      gameState.handleChoice(option); // 선택/피드백만 처리
+      return;
+    }
+
+    const result = gameState.handleChoice(option);
+    if (result?.shouldAwardExp) {
+      expSystem.awardExp(BASE_EXP);
+      expSystem.incrementTotalCorrect();
+      // 지급한 것을 훅에도 알려 중복 지급 방지
+      gameState.setAwardedExpThisScene(true);
+    }
   };
 
   // 네비게이션 처리
   const handleNext = () => {
     if (!gameState.selected || !gameState.scenario) return;
 
-    // 다음 버튼을 눌렀을 때 마지막 선택이 정답이었는지 확인하고 EXP 지급
-    const isCorrect = (gameState.selected.accuracyPoints || 0) > 0;
-    const shouldAwardExp = !gameState.awardedExpThisScene && isCorrect;
+    // 마지막 씬 여부 계산
+    const isLastScene =
+      (gameState.scenario?.sceneId ?? '').trim() === '#END' ||
+      gameState.current >= gameState.scenarios.length - 1;
 
-    console.log(`[네비게이션] 선택된 옵션:`, gameState.selected);
-    console.log(`[네비게이션] 정답 여부:`, isCorrect);
-    console.log(`[네비게이션] EXP 지급 여부:`, shouldAwardExp);
+    // NOTE: EXP 지급 로직는 '선택 시(handleChoice)'로 통일했습니다.
+    // 따라서 handleNext에서는 EXP 관련 코드를 제거하여 중복 지급을 방지합니다.
 
-    if (shouldAwardExp) {
-      expSystem.awardExp(BASE_EXP);
-      expSystem.incrementTotalCorrect();
-      gameState.setAwardedExpThisScene(true);
-    }
+    // nextId 추출 (여러 필드 지원 + trim)
+    const rawNext =
+      (gameState.selected as any)?.nextId ??
+      (gameState.selected as any)?.nextSceneCode ??
+      (gameState.selected as any)?.next_scene_code ??
+      (gameState.selected as any)?.nextEventId ??
+      (gameState.selected as any)?.next_event_id ??
+      null;
 
-    const nextId = gameState.selected.nextEventId ?? null;
-    console.log(`[네비게이션] nextId:`, nextId);
+    const nextId = typeof rawNext === 'string' ? rawNext.trim() : rawNext;
 
-    if (nextId && nextId === TOKEN_REVIEW) {
+    // 특수 토큰 처리
+    const normalizeToken = (v: any) =>
+      typeof v === 'string' ? v.trim().replace(/^#+/, '').toUpperCase() : null;
+    const token = normalizeToken(nextId);
+    if (token === 'REVIEW') {
       gameState.resetGame();
       modals.setClearMsg(null);
       modals.setFailMsg(null);
       modals.setShowConfetti(false);
       return;
     }
-    if (nextId && nextId === TOKEN_SCENARIO_SELECT) {
+    if (token === 'SCENARIO_SELECT') {
       navigate(nextScenarioPath);
       return;
     }
 
+    // 명시적 nextId가 있으면 해당 씬으로
     const nextIndex = nextId
-      ? gameState.scenarios.findIndex(s => s.scenarioCode === nextId)
+      ? gameState.scenarios.findIndex(s => (s as any).sceneId === nextId)
       : -1;
-
-    console.log(`[네비게이션] 다음 인덱스:`, nextIndex);
 
     if (nextIndex !== -1) {
       gameState.resetSceneFlags();
       gameState.setHistory(h => [...h, gameState.current]);
       gameState.setCurrent(nextIndex);
-    } else {
-      // 다음 시나리오가 없으면 순차적으로 다음으로 이동
-      const nextIndex = gameState.current + 1;
-      if (nextIndex < gameState.scenarios.length) {
-        gameState.resetSceneFlags();
-        gameState.setHistory(h => [...h, gameState.current]);
-        gameState.setCurrent(nextIndex);
-      } else {
-        // 마지막 시나리오인 경우 완료 처리
-        console.log(`[네비게이션] 마지막 시나리오 완료`);
-        // 여기서 완료 모달을 표시하거나 다음 액션을 수행
+      return;
+    }
+
+    // 순차 이동
+    const seqNextIndex = gameState.current + 1;
+    if (seqNextIndex < gameState.scenarios.length) {
+      gameState.resetSceneFlags();
+      gameState.setHistory(h => [...h, gameState.current]);
+      gameState.setCurrent(seqNextIndex);
+      return;
+    }
+
+    // 마지막 문제에서 Next 누른 경우: 모달 처리(이미 다른 곳에서 자동처리중이면 중복 주의)
+    if (isLastScene) {
+      if (!gameState.endModalAutoShown && !modals.clearMsg && !modals.failMsg) {
+        gameState.setEndModalAutoShown(true);
+        if (gameState.failedThisRun) {
+          modals.setFailMsg(
+            `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
+          );
+        } else {
+          modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
+          modals.setShowConfetti(true);
+        }
       }
+      return;
     }
   };
 
@@ -236,9 +294,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const tone: 'good' | 'ok' | 'bad' =
     acc >= 10 ? 'good' : acc > 0 ? 'ok' : 'bad';
 
-  console.log(`[피드백] 선택된 옵션:`, gameState.selected);
-  console.log(`[피드백] 정확도 포인트:`, acc, `톤:`, tone);
-
   return (
     <Layout>
       <div className="min-h-screen w-full overflow-x-hidden py-8 md:py-10 bg-white text-neutral-900 dark:bg-[#111827] dark:text-white">
@@ -270,7 +325,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}
               onSelect={handleChoice}
-              disabled={false}
+              disabled={gameState.choiceDisabled ?? false}
             />
             {gameState.feedback && (
               <FeedbackBanner text={gameState.feedback} tone={tone} />

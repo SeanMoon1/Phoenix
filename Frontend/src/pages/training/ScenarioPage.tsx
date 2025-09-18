@@ -111,7 +111,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         };
 
         await trainingResultApi.save(resultData);
-        console.log('Training result saved:', resultData);
       }
     } catch (error) {
       console.error('Failed to save training result:', error);

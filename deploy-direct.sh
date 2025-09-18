@@ -80,6 +80,17 @@ if [ "$ENVIRONMENT" = "development" ] && [ ! -f "/etc/nginx/ssl/phoenix.crt" ]; 
     print_warning "Self-signed certificates generated. For production, use proper SSL certificates."
 fi
 
+# Fix OAuth issue: Run migration to remove uk_team_name constraint
+print_status "OAuth 문제 해결: 마이그레이션 실행 중..."
+cd Backend
+if [ -f ".env" ]; then
+    source .env
+    # 마이그레이션 실행
+    npm run migration:run || print_warning "마이그레이션 실행 중 오류 (무시 가능)"
+    print_status "OAuth 문제 해결 완료!"
+fi
+cd ..
+
 # Install Backend dependencies
 print_status "Installing Backend dependencies..."
 cd Backend

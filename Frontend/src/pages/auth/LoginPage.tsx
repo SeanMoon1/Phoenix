@@ -98,13 +98,13 @@ const LoginPage: React.FC = () => {
       // 각 OAuth 제공자별 엔드포인트로 리다이렉트
       switch (provider) {
         case 'google':
-          window.location.href = `${apiBaseUrl}/api/auth/google`;
+          window.location.href = `${apiBaseUrl}/auth/google`;
           break;
         case 'kakao':
-          window.location.href = `${apiBaseUrl}/api/auth/kakao`;
+          window.location.href = `${apiBaseUrl}/auth/kakao`;
           break;
         case 'naver':
-          window.location.href = `${apiBaseUrl}/api/auth/naver`;
+          window.location.href = `${apiBaseUrl}/auth/naver`;
           break;
         default:
           console.error(`지원하지 않는 OAuth 제공자: ${provider}`);

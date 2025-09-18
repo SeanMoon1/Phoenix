@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { api } from '@/services/api';
+import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import type { ScenarioOption } from '@/types/scenario';
+import type { ChoiceOption } from '@/types';
 
 // 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
@@ -25,6 +25,13 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
 
+interface ScenarioPageProps {
+  scenarioSetName?: string;
+  nextScenarioPath?: string;
+  persistKey?: string;
+}
+
+const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 const TOKEN_REVIEW = '#REVIEW';
 const TOKEN_SCENARIO_SELECT = '#SCENARIO_SELECT';
@@ -47,21 +54,17 @@ const getScenarioSetName = (type: string): string => {
   }
 };
 
-// 시나리오 타입별 persistKey 자동 생성
-const getPersistKey = (type: string): string => {
-  return `${type}_training_state`;
-};
-
-export default function ScenarioPage() {
+export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
-  const scenarioSetName = getScenarioSetName(scenarioType);
-  const nextScenarioPath = '/training';
-  const persistKey = getPersistKey(scenarioType);
+  const scenarioSetName =
+    props?.scenarioSetName || getScenarioSetName(scenarioType);
+  const nextScenarioPath = props?.nextScenarioPath || '/training';
+  const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
 
   // 시작 시간
   const startTime = useMemo(() => Date.now(), []);
@@ -109,36 +112,11 @@ export default function ScenarioPage() {
           completedAt: new Date().toISOString(),
         };
 
-        const response = await api.post('/training-results', resultData);
-
-        if (response.success) {
-          console.log('Training result saved successfully:', resultData);
-        } else {
-          console.error('Failed to save training result:', response.error);
-        }
+        await trainingResultApi.save(resultData);
+        console.log('Training result saved:', resultData);
       }
     } catch (error) {
       console.error('Failed to save training result:', error);
-
-      // 실패 시 로컬스토리지에 백업 저장
-      if (user) {
-        const backupData = {
-          userId: user.id,
-          scenarioType,
-          completedAt: new Date().toISOString(),
-          failed: gameState.failedThisRun,
-          totalCorrect: expSystem.totalCorrect,
-          totalScenarios: gameState.scenarios.length,
-        };
-
-        const existingBackup = JSON.parse(
-          localStorage.getItem('training_backup') || '[]'
-        );
-        existingBackup.push(backupData);
-        localStorage.setItem('training_backup', JSON.stringify(existingBackup));
-
-        console.log('Training result saved to backup:', backupData);
-      }
     }
   };
 
@@ -169,29 +147,58 @@ export default function ScenarioPage() {
   // 네비게이션 처리
   const handleNext = () => {
     if (!gameState.selected || !gameState.scenario) return;
-    const nextId = gameState.selected.nextId ?? null;
 
-    if (nextId === TOKEN_REVIEW) {
+    // 다음 버튼을 눌렀을 때 마지막 선택이 정답이었는지 확인하고 EXP 지급
+    const isCorrect = (gameState.selected.accuracyPoints || 0) > 0;
+    const shouldAwardExp = !gameState.awardedExpThisScene && isCorrect;
+
+    console.log(`[네비게이션] 선택된 옵션:`, gameState.selected);
+    console.log(`[네비게이션] 정답 여부:`, isCorrect);
+    console.log(`[네비게이션] EXP 지급 여부:`, shouldAwardExp);
+
+    if (shouldAwardExp) {
+      expSystem.awardExp(BASE_EXP);
+      expSystem.incrementTotalCorrect();
+      gameState.setAwardedExpThisScene(true);
+    }
+
+    const nextId = gameState.selected.nextEventId ?? null;
+    console.log(`[네비게이션] nextId:`, nextId);
+
+    if (nextId && nextId === TOKEN_REVIEW) {
       gameState.resetGame();
       modals.setClearMsg(null);
       modals.setFailMsg(null);
       modals.setShowConfetti(false);
       return;
     }
-    if (nextId === TOKEN_SCENARIO_SELECT) {
+    if (nextId && nextId === TOKEN_SCENARIO_SELECT) {
       navigate(nextScenarioPath);
       return;
     }
 
-    const nextIndex =
-      typeof nextId === 'string'
-        ? gameState.scenarios.findIndex(s => s.sceneId === nextId)
-        : -1;
+    const nextIndex = nextId
+      ? gameState.scenarios.findIndex(s => s.scenarioCode === nextId)
+      : -1;
+
+    console.log(`[네비게이션] 다음 인덱스:`, nextIndex);
 
     if (nextIndex !== -1) {
       gameState.resetSceneFlags();
       gameState.setHistory(h => [...h, gameState.current]);
       gameState.setCurrent(nextIndex);
+    } else {
+      // 다음 시나리오가 없으면 순차적으로 다음으로 이동
+      const nextIndex = gameState.current + 1;
+      if (nextIndex < gameState.scenarios.length) {
+        gameState.resetSceneFlags();
+        gameState.setHistory(h => [...h, gameState.current]);
+        gameState.setCurrent(nextIndex);
+      } else {
+        // 마지막 시나리오인 경우 완료 처리
+        console.log(`[네비게이션] 마지막 시나리오 완료`);
+        // 여기서 완료 모달을 표시하거나 다음 액션을 수행
+      }
     }
   };
 
@@ -234,9 +241,12 @@ export default function ScenarioPage() {
     );
   }
 
-  const acc = gameState.selected?.points?.accuracy ?? 0;
+  const acc = gameState.selected?.accuracyPoints ?? 0;
   const tone: 'good' | 'ok' | 'bad' =
     acc >= 10 ? 'good' : acc > 0 ? 'ok' : 'bad';
+
+  console.log(`[피드백] 선택된 옵션:`, gameState.selected);
+  console.log(`[피드백] 정확도 포인트:`, acc, `톤:`, tone);
 
   return (
     <Layout>
@@ -269,7 +279,7 @@ export default function ScenarioPage() {
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}
               onSelect={handleChoice}
-              disabled={gameState.choiceDisabled}
+              disabled={false}
             />
             {gameState.feedback && (
               <FeedbackBanner text={gameState.feedback} tone={tone} />

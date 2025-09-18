@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -6,20 +6,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
-import { teamApi } from '../../services/api';
+import { authApi } from '../../services/api';
 
-// 회원가입 스키마
+// 회원가입 스키마 (팀 코드와 사용자 코드 제거)
 const registerSchema = yup.object({
-  teamCode: yup
-    .string()
-    .required('팀 코드를 입력해주세요.')
-    .min(3, '팀 코드는 최소 3자 이상이어야 합니다.')
-    .max(20, '팀 코드는 최대 20자까지 입력 가능합니다.'),
-  userCode: yup
-    .string()
-    .required('사용자 코드를 입력해주세요.')
-    .min(2, '사용자 코드는 최소 2자 이상이어야 합니다.')
-    .max(20, '사용자 코드는 최대 20자까지 입력 가능합니다.'),
   loginId: yup
     .string()
     .required('로그인 ID를 입력해주세요.')
@@ -46,19 +36,18 @@ const registerSchema = yup.object({
 
 type RegisterFormData = yup.InferType<typeof registerSchema>;
 
-interface TeamInfo {
-  id: number;
-  name: string;
-  description?: string;
-  teamCode: string;
-}
-
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isLoading } = useAuthStore();
   const navigate = useNavigate();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null);
-  const [isValidatingTeam, setIsValidatingTeam] = useState(false);
-  const [teamValidationError, setTeamValidationError] = useState<string>('');
+  const [loginIdStatus, setLoginIdStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({
+    checking: false,
+    available: null,
+    message: '',
+  });
 
   const {
     register,
@@ -70,63 +59,53 @@ const RegisterPage: React.FC = () => {
     resolver: yupResolver(registerSchema),
   });
 
-  const teamCode = watch('teamCode');
+  const watchedLoginId = watch('loginId');
 
-  // 팀 코드 실시간 검증
-  const validateTeamCode = async (code: string) => {
-    if (!code || code.length < 3) {
-      setTeamInfo(null);
-      setTeamValidationError('');
-      return;
-    }
-
-    setIsValidatingTeam(true);
-    setTeamValidationError('');
-
-    try {
-      const response = await teamApi.validateTeamCode(code);
-
-      if (response.success && response.data?.valid) {
-        setTeamInfo(response.data.team || null);
-        setTeamValidationError('');
-      } else {
-        setTeamInfo(null);
-        setTeamValidationError(
-          response.data?.message || '유효하지 않은 팀 코드입니다.'
-        );
+  // 실시간 ID 중복검증
+  useEffect(() => {
+    const checkLoginId = async () => {
+      if (!watchedLoginId || watchedLoginId.length < 3) {
+        setLoginIdStatus({
+          checking: false,
+          available: null,
+          message: '',
+        });
+        return;
       }
-    } catch (error) {
-      setTeamInfo(null);
-      setTeamValidationError('팀 코드 검증 중 오류가 발생했습니다.');
-    } finally {
-      setIsValidatingTeam(false);
-    }
-  };
 
-  // 팀 코드 변경 시 검증
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (teamCode) {
-        validateTeamCode(teamCode);
+      setLoginIdStatus(prev => ({ ...prev, checking: true }));
+
+      try {
+        const response = await authApi.checkLoginId(watchedLoginId);
+        if (response.success && response.data) {
+          setLoginIdStatus({
+            checking: false,
+            available: response.data.available,
+            message: response.data.message || '',
+          });
+        } else {
+          setLoginIdStatus({
+            checking: false,
+            available: false,
+            message: 'ID 확인 중 오류가 발생했습니다.',
+          });
+        }
+      } catch (error) {
+        setLoginIdStatus({
+          checking: false,
+          available: false,
+          message: 'ID 확인 중 오류가 발생했습니다.',
+        });
       }
-    }, 500); // 500ms 디바운스
+    };
 
+    const timeoutId = setTimeout(checkLoginId, 500); // 500ms 디바운스
     return () => clearTimeout(timeoutId);
-  }, [teamCode]);
+  }, [watchedLoginId]);
 
   const onSubmit = async (data: RegisterFormData) => {
-    if (!teamInfo) {
-      setError('teamCode', {
-        type: 'manual',
-        message: '유효한 팀 코드를 입력해주세요.',
-      });
-      return;
-    }
-
     try {
       await registerUser({
-        teamCode: data.teamCode,
-        userCode: data.userCode,
         loginId: data.loginId,
         name: data.name,
         email: data.email,
@@ -147,69 +126,47 @@ const RegisterPage: React.FC = () => {
     <Layout>
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center px-3 sm:px-6 lg:px-8 py-8 sm:py-16">
         <div className="w-full max-w-sm sm:max-w-md">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+          <div className="mb-6 text-center sm:mb-8">
+            <h2 className="text-xl font-extrabold text-gray-900 sm:text-2xl md:text-3xl dark:text-white">
               회원가입
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-              팀 코드를 입력하여 재난훈련ON에 가입하세요
+            <p className="mt-2 text-xs text-gray-600 sm:text-sm dark:text-gray-300">
+              재난훈련ON에 가입하여 안전한 미래를 만들어가세요
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm dark:shadow-lg p-4 sm:p-6 md:p-8">
+          <div className="p-4 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-600 rounded-xl dark:shadow-lg sm:p-6 md:p-8">
             <form
               className="space-y-4 sm:space-y-6"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* 팀 코드 입력 및 검증 */}
-              <div className="space-y-2">
-                <Input
-                  label="팀 코드"
-                  placeholder="TEAM001"
-                  error={errors.teamCode?.message || teamValidationError}
-                  {...register('teamCode')}
-                />
-
-                {/* 팀 코드 검증 상태 표시 */}
-                {isValidatingTeam && (
-                  <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                    팀 코드를 확인하는 중...
-                  </div>
-                )}
-
-                {teamInfo && !isValidatingTeam && (
-                  <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <div className="flex items-center text-sm text-green-800 dark:text-green-200">
-                      <span className="mr-2">✅</span>
-                      <div>
-                        <div className="font-medium">{teamInfo.name}</div>
-                        {teamInfo.description && (
-                          <div className="text-xs text-green-600 dark:text-green-300 mt-1">
-                            {teamInfo.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* 사용자 정보 입력 */}
               <div className="space-y-3 sm:space-y-4">
-                <Input
-                  label="사용자 코드"
-                  placeholder="USER001"
-                  error={errors.userCode?.message}
-                  {...register('userCode')}
-                />
-
-                <Input
-                  label="로그인 ID"
-                  placeholder="이메일의 @ 앞부분 (예: user123)"
-                  error={errors.loginId?.message}
-                  {...register('loginId')}
-                />
+                <div>
+                  <Input
+                    label="로그인 ID"
+                    placeholder="user123"
+                    error={errors.loginId?.message}
+                    {...register('loginId')}
+                  />
+                  {watchedLoginId && watchedLoginId.length >= 3 && (
+                    <div className="mt-2 text-xs">
+                      {loginIdStatus.checking ? (
+                        <span className="text-blue-500 dark:text-blue-400">
+                          🔍 ID 확인 중...
+                        </span>
+                      ) : loginIdStatus.available === true ? (
+                        <span className="text-green-500 dark:text-green-400">
+                          ✅ {loginIdStatus.message}
+                        </span>
+                      ) : loginIdStatus.available === false ? (
+                        <span className="text-red-500 dark:text-red-400">
+                          ❌ {loginIdStatus.message}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
 
                 <Input
                   label="이름"
@@ -226,13 +183,23 @@ const RegisterPage: React.FC = () => {
                   {...register('email')}
                 />
 
-                <Input
-                  label="비밀번호"
-                  type="password"
-                  placeholder="••••••••"
-                  error={errors.password?.message}
-                  {...register('password')}
-                />
+                <div>
+                  <Input
+                    label="비밀번호"
+                    type="password"
+                    placeholder="••••••••"
+                    error={errors.password?.message}
+                    {...register('password')}
+                  />
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mb-1">비밀번호 요구사항:</p>
+                    <ul className="list-disc list-inside space-y-0.5">
+                      <li>최소 6자 이상</li>
+                      <li>소문자 포함 (필수)</li>
+                      <li>숫자 포함 (필수)</li>
+                    </ul>
+                  </div>
+                </div>
 
                 <Input
                   label="비밀번호 확인"
@@ -244,24 +211,19 @@ const RegisterPage: React.FC = () => {
               </div>
 
               {errors.root && (
-                <div className="text-red-600 dark:text-red-400 text-xs sm:text-sm text-center">
+                <div className="text-xs text-center text-red-600 dark:text-red-400 sm:text-sm">
                   {errors.root.message}
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                isLoading={isLoading}
-                disabled={!teamInfo || isValidatingTeam}
-              >
+              <Button type="submit" className="w-full" isLoading={isLoading}>
                 회원가입
               </Button>
 
               <div className="text-center">
                 <Link
                   to="/login"
-                  className="text-xs sm:text-sm text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300"
+                  className="text-xs text-orange-600 sm:text-sm dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300"
                 >
                   이미 계정이 있으신가요? 로그인
                 </Link>

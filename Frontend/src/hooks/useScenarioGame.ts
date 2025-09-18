@@ -1,7 +1,7 @@
 // src/hooks/useScenarioGame.ts
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { fetchScenarioByType } from '@/services/scenarioService';
-import type { Scenario, ScenarioOption } from '@/types/scenario';
+import type { Scenario, ChoiceOption } from '@/types';
 
 interface UseScenarioGameProps {
   scenarioType: string;
@@ -18,9 +18,8 @@ interface UseScenarioGameReturn {
   history: number[];
 
   // 선택 상태
-  selected: ScenarioOption | null;
+  selected: ChoiceOption | null;
   feedback: string | null;
-  choiceDisabled: boolean;
 
   // 게임 상태
   failedThisRun: boolean;
@@ -30,7 +29,7 @@ interface UseScenarioGameReturn {
 
   // 액션
   handleChoice: (
-    option: ScenarioOption
+    option: ChoiceOption
   ) => { shouldAwardExp: boolean; isCorrect: boolean } | null;
   resetGame: () => void;
   resetSceneFlags: () => void;
@@ -38,9 +37,8 @@ interface UseScenarioGameReturn {
   // 세터들
   setCurrent: (value: number) => void;
   setHistory: (updater: (prev: number[]) => number[]) => void;
-  setSelected: (value: ScenarioOption | null) => void;
+  setSelected: (value: ChoiceOption | null) => void;
   setFeedback: (value: string | null) => void;
-  setChoiceDisabled: (value: boolean) => void;
   setFailedThisRun: (value: boolean) => void;
   setWrongTriedInThisScene: (value: boolean) => void;
   setAwardedExpThisScene: (value: boolean) => void;
@@ -57,9 +55,8 @@ export function useScenarioGame({
   const [history, setHistory] = useState<number[]>([]);
 
   // 선택/피드백
-  const [selected, setSelected] = useState<ScenarioOption | null>(null);
+  const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [choiceDisabled, setChoiceDisabled] = useState(false);
 
   // 게임 진행 상태
   const [failedThisRun, setFailedThisRun] = useState(false);
@@ -78,10 +75,19 @@ export function useScenarioGame({
 
   // 초기 데이터 로드
   useEffect(() => {
+    console.log(`[useScenarioGame] 시나리오 타입: ${scenarioType}`);
     setLoading(true);
     fetchScenarioByType(scenarioType)
-      .then(data => setScenarios(data))
-      .catch(console.error)
+      .then(data => {
+        console.log(
+          `[useScenarioGame] 로드된 시나리오 수: ${data.length}`,
+          data.slice(0, 2)
+        );
+        setScenarios(data);
+      })
+      .catch(error => {
+        console.error(`[useScenarioGame] 시나리오 로드 실패:`, error);
+      })
       .finally(() => setLoading(false));
   }, [scenarioType]);
 
@@ -105,7 +111,6 @@ export function useScenarioGame({
     setFeedback(null);
     setWrongTriedInThisScene(false);
     setAwardedExpThisScene(false);
-    setChoiceDisabled(false);
   }, []);
 
   // 선택 처리
@@ -118,22 +123,21 @@ export function useScenarioGame({
       }
       setAnswered([...answered, current]);
       setSelected(option);
-      setFeedback(option.reaction || null);
+      setFeedback(option.reactionText || null);
 
-      const isCorrect = (option.points?.accuracy || 0) > 0;
-      if (!isCorrect) {
-        setWrongTriedInThisScene(true);
-        setFailedThisRun(true);
-      }
+      const isCorrect = (option.accuracyPoints || 0) > 0;
+      console.log(
+        `[handleChoice] 정답 여부:`,
+        isCorrect,
+        `정확도 포인트:`,
+        option.accuracyPoints
+      );
 
-      // EXP 지급 여부 결정
-      const shouldAwardExp =
-        !awardedExpThisScene && isCorrect && !wrongTriedInThisScene;
-      if (shouldAwardExp) {
-        setAwardedExpThisScene(true);
-      }
+      // 오답을 선택해도 실패 상태를 즉시 업데이트하지 않음
+      // 마지막 선택이 정답이면 경험치를 지급하도록 함
 
-      return { shouldAwardExp, isCorrect };
+      // EXP 지급은 다음 버튼에서 처리하므로 여기서는 제거
+      return { shouldAwardExp: false, isCorrect };
     },
     [
       answered,
@@ -158,7 +162,6 @@ export function useScenarioGame({
     // 선택 상태
     selected,
     feedback,
-    choiceDisabled,
 
     // 게임 상태
     failedThisRun,
@@ -176,7 +179,6 @@ export function useScenarioGame({
     setHistory,
     setSelected,
     setFeedback,
-    setChoiceDisabled,
     setFailedThisRun,
     setWrongTriedInThisScene,
     setAwardedExpThisScene,

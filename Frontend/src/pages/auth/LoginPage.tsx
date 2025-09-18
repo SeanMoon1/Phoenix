@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 
 const loginSchema = yup.object({
-  email: yup
+  loginId: yup
     .string()
-    .email('올바른 이메일을 입력해주세요.')
-    .required('이메일을 입력해주세요.'),
+    .min(3, '아이디는 최소 3자 이상이어야 합니다.')
+    .required('아이디를 입력해주세요.'),
   password: yup
     .string()
     .min(6, '비밀번호는 최소 6자 이상이어야 합니다.')
@@ -21,9 +21,11 @@ const loginSchema = yup.object({
 type LoginFormData = yup.InferType<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, oauthLogin, isLoading } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const {
     register,
@@ -34,6 +36,40 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
   });
+
+  // OAuth 에러 메시지 처리
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      const errorMessage = getOAuthErrorMessage(error);
+      setOauthError(errorMessage);
+      // URL에서 에러 파라미터 제거
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('error');
+      const newUrl = `${window.location.pathname}${
+        newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''
+      }`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
+
+  // OAuth 에러 메시지 매핑 함수
+  const getOAuthErrorMessage = (error: string): string => {
+    switch (error) {
+      case 'oauth_user_not_found':
+        return 'OAuth 사용자 정보를 찾을 수 없습니다.';
+      case 'oauth_incomplete_info':
+        return 'OAuth 사용자 정보가 불완전합니다.';
+      case 'oauth_auth_failed':
+        return 'OAuth 인증에 실패했습니다.';
+      case 'oauth_server_error':
+        return '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      case 'oauth_unknown_error':
+        return '알 수 없는 오류가 발생했습니다.';
+      default:
+        return 'OAuth 로그인 중 오류가 발생했습니다.';
+    }
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -52,21 +88,28 @@ const LoginPage: React.FC = () => {
     reset();
   };
 
-  // OAuth 로그인 핸들러 (데모용 - 실제로는 각 OAuth 제공자의 SDK 사용)
+  // OAuth 로그인 핸들러 - 실제 OAuth 엔드포인트로 리다이렉트
   const handleOAuthLogin = async (provider: string) => {
     try {
-      // 실제 구현에서는 각 OAuth 제공자의 SDK를 사용하여 사용자 정보를 받아옴
-      // 여기서는 데모용으로 가상의 사용자 정보를 사용
-      const mockUserData = {
-        email: `user@${provider}.com`,
-        name: `${provider} 사용자`,
-        provider: provider,
-        providerId: `${provider}_${Date.now()}`,
-        profileImage: `https://via.placeholder.com/150?text=${provider}`,
-      };
+      // API 기본 URL 가져오기
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-      await oauthLogin(mockUserData);
-      navigate('/dashboard');
+      // 각 OAuth 제공자별 엔드포인트로 리다이렉트
+      switch (provider) {
+        case 'google':
+          window.location.href = `${apiBaseUrl}/auth/google`;
+          break;
+        case 'kakao':
+          window.location.href = `${apiBaseUrl}/auth/kakao`;
+          break;
+        case 'naver':
+          window.location.href = `${apiBaseUrl}/auth/naver`;
+          break;
+        default:
+          console.error(`지원하지 않는 OAuth 제공자: ${provider}`);
+          alert(`${provider} 로그인은 아직 지원되지 않습니다.`);
+      }
     } catch (error: unknown) {
       console.error(`${provider} 로그인 실패:`, error);
       alert(`${provider} 로그인에 실패했습니다.`);
@@ -106,13 +149,11 @@ const LoginPage: React.FC = () => {
             >
               <div className="space-y-3 sm:space-y-4">
                 <Input
-                  label="이메일"
-                  type="email"
-                  placeholder={
-                    isAdminMode ? 'admin@example.com' : 'your@email.com'
-                  }
-                  error={errors.email?.message}
-                  {...register('email')}
+                  label="아이디"
+                  type="text"
+                  placeholder={isAdminMode ? 'admin' : 'your_id'}
+                  error={errors.loginId?.message}
+                  {...register('loginId')}
                 />
 
                 <Input
@@ -130,6 +171,12 @@ const LoginPage: React.FC = () => {
                 </div>
               )}
 
+              {oauthError && (
+                <div className="p-3 text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-lg dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
+                  {oauthError}
+                </div>
+              )}
+
               <Button type="submit" className="w-full" isLoading={isLoading}>
                 {isAdminMode ? '관리자 로그인' : '로그인'}
               </Button>
@@ -142,7 +189,7 @@ const LoginPage: React.FC = () => {
                       <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      <span className="px-2 text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400">
                         또는
                       </span>
                     </div>
@@ -153,7 +200,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('google')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -180,7 +227,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('kakao')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -195,7 +242,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('naver')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">

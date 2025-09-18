@@ -1,5 +1,5 @@
-import { Controller, Get, Query, Res, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Res, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -17,7 +17,7 @@ export class OAuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth 로그인 시작' })
   @ApiResponse({ status: 302, description: 'Google OAuth 페이지로 리디렉션' })
-  async googleAuth(@Req() req: Request) {
+  async googleAuth(@Req() _req: Request) {
     // Passport가 자동으로 Google OAuth 페이지로 리디렉션
   }
 
@@ -26,68 +26,7 @@ export class OAuthController {
   @ApiOperation({ summary: 'Google OAuth 콜백 처리' })
   @ApiResponse({ status: 302, description: '로그인 성공/실패에 따른 리디렉션' })
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    try {
-      console.log('🔍 OAuth 콜백 시작');
-      const user = req.user as any;
-      console.log(
-        '👤 OAuth 사용자 정보:',
-        user ? '사용자 정보 존재' : '사용자 정보 없음',
-      );
-
-      if (!user) {
-        console.log('❌ OAuth 사용자 정보 없음');
-        return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=user_not_found`,
-        );
-      }
-
-      // 필수 정보 검증
-      if (!user.email || !user.name || !user.provider || !user.providerId) {
-        console.log('❌ OAuth 사용자 정보 불완전:', {
-          email: !!user.email,
-          name: !!user.name,
-          provider: !!user.provider,
-          providerId: !!user.providerId,
-        });
-        return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=incomplete_user_info`,
-        );
-      }
-
-      console.log('🔄 OAuth 사용자 등록/로그인 처리 시작');
-      // OAuth 사용자 등록/로그인 처리
-      const result = await this.authService.oauthRegisterAndLogin({
-        email: user.email,
-        name: user.name,
-        provider: user.provider,
-        providerId: user.providerId,
-        profileImage: user.profileImage,
-      });
-
-      console.log('🔍 OAuth 처리 결과:', result ? '성공' : '실패');
-      console.log('🔑 JWT 토큰 존재:', !!(result && result.access_token));
-
-      if (result && result.access_token) {
-        // 성공 시 JWT 토큰과 함께 프론트엔드로 리디렉션
-        const successUrl = `${this.configService.get<string>('OAUTH_SUCCESS_REDIRECT')}?token=${result.access_token}`;
-        console.log('✅ OAuth 로그인 성공, 리디렉션:', successUrl);
-        return res.redirect(successUrl);
-      } else {
-        console.log('❌ OAuth 인증 실패 - 토큰 생성 실패');
-        return res.redirect(
-          `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=authentication_failed`,
-        );
-      }
-    } catch (error) {
-      console.error('❌ OAuth callback error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
-      return res.redirect(
-        `${this.configService.get<string>('OAUTH_FAILURE_REDIRECT')}?error=server_error&details=${encodeURIComponent(error.message)}`,
-      );
-    }
+    return this.handleOAuthCallback(req, res, 'google');
   }
 
   @Get('google/status')
@@ -99,6 +38,7 @@ export class OAuthController {
     const redirectBase = this.configService.get<string>('OAUTH_REDIRECT_BASE');
     const callbackPath = this.configService.get<string>('GOOGLE_CALLBACK_PATH');
 
+    const baseUrl = redirectBase || 'https://phoenix-4.com';
     return {
       configured: !!(clientId && clientSecret && redirectBase && callbackPath),
       clientId: clientId ? `${clientId.substring(0, 10)}...` : 'Not configured',
@@ -106,9 +46,155 @@ export class OAuthController {
         redirectBase && callbackPath
           ? `${redirectBase}${callbackPath}`
           : 'Not configured',
-      successRedirect: this.configService.get<string>('OAUTH_SUCCESS_REDIRECT'),
-      failureRedirect: this.configService.get<string>('OAUTH_FAILURE_REDIRECT'),
+      successRedirect: `${baseUrl}/auth/callback`,
+      failureRedirect: `${baseUrl}/auth/callback`,
     };
+  }
+
+  // Naver OAuth 엔드포인트
+  @Get('naver')
+  @UseGuards(AuthGuard('naver'))
+  @ApiOperation({ summary: 'Naver OAuth 로그인 시작' })
+  @ApiResponse({ status: 302, description: 'Naver OAuth 페이지로 리디렉션' })
+  async naverAuth(@Req() _req: Request) {
+    // Passport가 자동으로 Naver OAuth 페이지로 리디렉션
+  }
+
+  @Get('naver/callback')
+  @UseGuards(AuthGuard('naver'))
+  @ApiOperation({ summary: 'Naver OAuth 콜백 처리' })
+  @ApiResponse({ status: 302, description: '로그인 성공/실패에 따른 리디렉션' })
+  async naverAuthCallback(@Req() req: Request, @Res() res: Response) {
+    return this.handleOAuthCallback(req, res, 'naver');
+  }
+
+  // Kakao OAuth 엔드포인트
+  @Get('kakao')
+  @UseGuards(AuthGuard('kakao'))
+  @ApiOperation({ summary: 'Kakao OAuth 로그인 시작' })
+  @ApiResponse({ status: 302, description: 'Kakao OAuth 페이지로 리디렉션' })
+  async kakaoAuth(@Req() _req: Request) {
+    // Passport가 자동으로 Kakao OAuth 페이지로 리디렉션
+  }
+
+  @Get('kakao/callback')
+  @UseGuards(AuthGuard('kakao'))
+  @ApiOperation({ summary: 'Kakao OAuth 콜백 처리' })
+  @ApiResponse({ status: 302, description: '로그인 성공/실패에 따른 리디렉션' })
+  async kakaoAuthCallback(@Req() req: Request, @Res() res: Response) {
+    return this.handleOAuthCallback(req, res, 'kakao');
+  }
+
+  // 공통 OAuth 콜백 처리 메서드
+  private async handleOAuthCallback(
+    req: Request,
+    res: Response,
+    provider: string,
+  ) {
+    try {
+      console.log(`🔍 ${provider} OAuth 콜백 시작`);
+      const user = req.user as any;
+      console.log(
+        `👤 ${provider} OAuth 사용자 정보:`,
+        user ? '사용자 정보 존재' : '사용자 정보 없음',
+      );
+
+      if (!user) {
+        console.log(`❌ ${provider} OAuth 사용자 정보 없음`);
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
+        return res.redirect(
+          `${redirectBase}/auth/callback?error=user_not_found`,
+        );
+      }
+
+      // 필수 정보 검증
+      if (!user.email || !user.name || !user.provider || !user.providerId) {
+        console.log(`❌ ${provider} OAuth 사용자 정보 불완전:`, {
+          email: !!user.email,
+          name: !!user.name,
+          provider: !!user.provider,
+          providerId: !!user.providerId,
+        });
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
+        return res.redirect(
+          `${redirectBase}/auth/callback?error=incomplete_user_info`,
+        );
+      }
+
+      console.log(`🔄 ${provider} OAuth 사용자 등록/로그인 처리 시작`);
+      console.log('📝 OAuth 사용자 데이터:', {
+        email: user.email,
+        name: user.name,
+        provider: user.provider,
+        providerId: user.providerId,
+        profileImage: user.profileImage,
+      });
+
+      // OAuth 사용자 등록/로그인 처리
+      const result = await this.authService.oauthRegisterAndLogin({
+        email: user.email,
+        name: user.name,
+        oauthProvider: user.provider,
+        oauthProviderId: user.providerId,
+        profileImageUrl: user.profileImage,
+      });
+
+      console.log(`🔍 ${provider} OAuth 처리 결과:`, result ? '성공' : '실패');
+      console.log('🔑 JWT 토큰 존재:', !!(result && result.access_token));
+      console.log(
+        '👤 사용자 정보:',
+        result
+          ? {
+              userId: result.user?.id,
+              userEmail: result.user?.email,
+              userName: result.user?.name,
+            }
+          : 'No user data',
+      );
+
+      if (result && result.access_token) {
+        // 성공 시 JWT 토큰과 사용자 정보를 함께 프론트엔드로 리디렉션
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
+        const userParam = encodeURIComponent(
+          JSON.stringify({
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name,
+            provider: user.provider,
+            providerId: user.providerId,
+          }),
+        );
+        const successUrl = `${redirectBase}/auth/callback?token=${result.access_token}&user=${userParam}`;
+        console.log(`✅ ${provider} OAuth 로그인 성공, 리디렉션:`, successUrl);
+        return res.redirect(successUrl);
+      } else {
+        console.log(`❌ ${provider} OAuth 인증 실패 - 토큰 생성 실패`);
+        const redirectBase =
+          this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+          'https://phoenix-4.com';
+        return res.redirect(
+          `${redirectBase}/auth/callback?error=authentication_failed`,
+        );
+      }
+    } catch (error) {
+      console.error(`❌ ${provider} OAuth callback error:`, {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+      const redirectBase =
+        this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
+        'https://phoenix-4.com';
+      return res.redirect(
+        `${redirectBase}/auth/callback?error=server_error&details=${encodeURIComponent(error.message)}`,
+      );
+    }
   }
 
   @Get('debug/test-oauth')
@@ -120,9 +206,9 @@ export class OAuthController {
       const testOAuthData = {
         email: 'test@example.com',
         name: 'Test User',
-        provider: 'google',
-        providerId: 'test123456',
-        profileImage: 'https://example.com/avatar.jpg',
+        oauthProvider: 'google',
+        oauthProviderId: 'test123456',
+        profileImageUrl: 'https://example.com/avatar.jpg',
       };
 
       console.log('🧪 OAuth 테스트 시작:', testOAuthData);

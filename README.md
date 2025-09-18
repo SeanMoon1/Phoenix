@@ -14,14 +14,24 @@
 ### 🏢 팀 관리
 
 - **다중 팀 지원**: 조직별 독립적인 훈련 환경
+- **팀 코드 시스템**: 회원가입 후 팀 코드로 가입
 - **권한 관리**: 팀관리자, 팀운영자, 일반사용자 권한
 - **데이터 격리**: 팀별 완전한 데이터 분리
 
+### 🔐 인증 시스템
+
+- **다중 인증 방식**: 이메일/비밀번호, Google OAuth
+- **자동 사용자 코드 생성**: 시스템에서 자동 생성 및 관리
+- **팀 코드 기반 가입**: 회원가입 후 팀 코드로 팀 가입
+- **JWT 토큰 기반 인증**: 안전한 세션 관리
+
 ### 📚 시나리오 시스템
 
-- **다양한 재난 유형**: 화재, 지진, 응급처치, 침수/홍수
+- **다양한 재난 유형**: 화재, 지진, 응급처치, 교통사고
 - **의사결정 이벤트**: 선택형 및 순차형 이벤트
 - **실시간 피드백**: 즉시 결과 확인 및 학습
+- **유연한 데이터 소스**: 정적 파일과 데이터베이스 API 모두 지원
+- **환경별 설정**: 개발/테스트/운영 환경에 맞는 데이터 소스 선택
 
 ### 📊 분석 및 리포팅
 
@@ -37,14 +47,18 @@
 - **Vite** (빌드 도구)
 - **TailwindCSS** (스타일링)
 - **Zustand** (상태 관리)
+- **React Hook Form** (폼 관리)
+- **React Router** (라우팅)
 
 ### Backend
 
-- **NestJS** + **TypeScript**
+- **NestJS** + **TypeScript** (Clean Architecture)
 - **TypeORM** (ORM)
 - **MySQL** (데이터베이스)
 - **JWT** (인증)
+- **Passport** (OAuth 인증)
 - **Swagger** (API 문서)
+- **Class Validator** (유효성 검사)
 
 ### DevOps
 
@@ -53,6 +67,42 @@
 - **AWS EC2** (클라우드 배포)
 - **GitHub Actions** (CI/CD)
 
+## 🏛️ Clean Architecture
+
+Phoenix Backend는 Clean Architecture 원칙을 따라 설계되었습니다:
+
+### 계층 구조
+
+1. **Domain Layer** (도메인 계층)
+
+   - 핵심 비즈니스 로직과 규칙
+   - 엔티티, 값 객체, 도메인 서비스
+   - 외부 의존성 없음
+
+2. **Application Layer** (애플리케이션 계층)
+
+   - 유스케이스 구현
+   - 애플리케이션 서비스
+   - 도메인 계층에만 의존
+
+3. **Infrastructure Layer** (인프라 계층)
+
+   - 데이터베이스, 외부 API 연동
+   - 도메인 인터페이스 구현
+   - 기술적 세부사항 처리
+
+4. **Presentation Layer** (프레젠테이션 계층)
+   - REST API 컨트롤러
+   - DTO 및 요청/응답 처리
+   - 사용자 인터페이스
+
+### 장점
+
+- **테스트 용이성**: 각 계층을 독립적으로 테스트 가능
+- **유지보수성**: 비즈니스 로직과 기술적 세부사항 분리
+- **확장성**: 새로운 기능 추가 시 기존 코드 영향 최소화
+- **의존성 역전**: 고수준 모듈이 저수준 모듈에 의존하지 않음
+
 ## 📁 프로젝트 구조
 
 ```
@@ -60,51 +110,74 @@ Phoenix/
 ├── 📁 Frontend/                    # React 애플리케이션
 │   ├── 📁 src/
 │   │   ├── 📁 components/          # 재사용 가능한 컴포넌트
+│   │   │   ├── 📁 admin/           # 관리자 전용 컴포넌트
+│   │   │   │   └── ScenarioGeneratorPanel.tsx  # 시나리오 생성기 패널
+│   │   │   ├── 📁 common/          # 공통 컴포넌트
+│   │   │   ├── 📁 game/            # 게임 관련 컴포넌트
+│   │   │   │   ├── 📁 Partials/    # 시나리오 편집기 컴포넌트
+│   │   │   │   └── ScriptView.tsx  # 시나리오 뷰어
 │   │   │   ├── 📁 layout/          # 레이아웃 컴포넌트
 │   │   │   └── 📁 ui/              # UI 컴포넌트
 │   │   ├── 📁 pages/               # 페이지 컴포넌트
-│   │   │   ├── 📁 auth/            # 인증 관련
 │   │   │   ├── 📁 admin/           # 관리자 기능
-│   │   │   ├── 📁 scenario/        # 시나리오 관리
+│   │   │   │   └── ScriptToolPage.tsx  # 시나리오 관리 도구 페이지
+│   │   │   ├── 📁 auth/            # 인증 관련
 │   │   │   ├── 📁 training/        # 훈련 관련
 │   │   │   └── 📁 user/            # 사용자 기능
 │   │   ├── 📁 services/            # API 통신 서비스
+│   │   │   └── scenarioGeneratorService.ts  # 시나리오 생성기 서비스
 │   │   ├── 📁 stores/              # 상태 관리
 │   │   ├── 📁 types/               # TypeScript 타입
+│   │   │   └── scenario.ts         # 시나리오 관련 타입 정의
+│   │   ├── 📁 utils/               # 유틸리티 함수
+│   │   │   └── 📁 scenario-generator/  # 시나리오 생성기 유틸리티
+│   │   │       ├── config.ts       # 설정 파일
+│   │   │       ├── converter.ts    # 데이터 변환기
+│   │   │       ├── logger.ts       # 로깅 유틸리티
+│   │   │       └── validator.ts    # 데이터 검증기
 │   │   └── 📁 hooks/               # 커스텀 훅
-│   ├── 📁 scripts/                 # 시나리오 스크립트 도구
-│   │   ├── 📁 game-script-tool/    # 게임 스크립트 생성 도구
-│   │   ├── 📁 scenario-generator/  # 시나리오 변환 스크립트
-│   │   ├── 📁 data/                # 샘플 시나리오 데이터
+│   ├── 📁 scripts/                 # 빌드 및 배포 스크립트
 │   │   ├── 📁 deploy/              # 배포 스크립트
 │   │   └── 📁 setup/               # 개발 환경 설정
 │   ├── package.json
 │   ├── tailwind.config.js
 │   └── vite.config.ts
 │
-├── 📁 Backend/                     # NestJS 애플리케이션
+├── 📁 Backend/                     # NestJS 애플리케이션 (Clean Architecture)
 │   ├── 📁 src/
-│   │   ├── 📁 modules/             # 기능별 모듈
-│   │   │   ├── 📁 auth/            # 인증 모듈
-│   │   │   ├── 📁 users/           # 사용자 관리
-│   │   │   ├── 📁 teams/           # 팀 관리
-│   │   │   ├── 📁 scenarios/       # 시나리오 관리
-│   │   │   ├── 📁 training/        # 훈련 관리
-│   │   │   ├── 📁 training-results/ # 훈련 결과
-│   │   │   ├── 📁 user-progress/   # 사용자 진행상황
-│   │   │   ├── 📁 support/         # 지원 시스템
-│   │   │   ├── 📁 codes/           # 코드 관리
-│   │   │   ├── 📁 admin/           # 관리자 기능
-│   │   │   └── 📁 common/          # 공통 모듈
+│   │   ├── 📁 application/         # 애플리케이션 계층
+│   │   │   ├── 📁 interfaces/      # 인터페이스 정의
+│   │   │   ├── 📁 services/        # 애플리케이션 서비스
+│   │   │   └── 📁 use-cases/       # 유스케이스 (비즈니스 로직)
+│   │   ├── 📁 domain/              # 도메인 계층 (핵심 비즈니스 로직)
+│   │   │   ├── 📁 entities/        # 도메인 엔티티
+│   │   │   ├── 📁 repositories/    # 리포지토리 인터페이스
+│   │   │   ├── 📁 services/        # 도메인 서비스
+│   │   │   └── 📁 value-objects/   # 값 객체
+│   │   ├── 📁 infrastructure/      # 인프라 계층
+│   │   │   ├── 📁 config/          # 설정 관리
+│   │   │   ├── 📁 database/        # 데이터베이스 구현
+│   │   │   └── 📁 external/        # 외부 서비스 연동
+│   │   ├── 📁 presentation/        # 프레젠테이션 계층
+│   │   │   ├── 📁 controllers/     # REST API 컨트롤러
+│   │   │   └── 📁 dto/             # 데이터 전송 객체
+│   │   ├── 📁 shared/              # 공유 계층
+│   │   │   ├── 📁 decorators/      # 커스텀 데코레이터
+│   │   │   ├── 📁 filters/         # 예외 필터
+│   │   │   ├── 📁 guards/          # 인증/인가 가드
+│   │   │   ├── 📁 interceptors/    # 인터셉터
+│   │   │   ├── 📁 pipes/           # 파이프
+│   │   │   └── 📁 strategies/      # 인증 전략
 │   │   ├── 📁 database/            # 데이터베이스 관련
 │   │   │   ├── 📁 entities/        # TypeORM 엔티티
 │   │   │   ├── 📁 migrations/      # 마이그레이션
 │   │   │   └── 📁 seeds/           # 시드 데이터
 │   │   ├── 📁 config/              # 환경 설정
-│   │   ├── 📁 shared/              # 공유 모듈
-│   │   └── 📁 utils/               # 유틸리티
+│   │   ├── 📁 utils/               # 유틸리티
+│   │   ├── app.module.ts           # 루트 모듈
+│   │   ├── main.ts                 # 애플리케이션 진입점
+│   │   └── ormconfig.ts            # TypeORM 설정
 │   ├── package.json
-│   ├── ormconfig.ts                # TypeORM 설정
 │   └── ecosystem.config.js         # PM2 설정
 │
 ├── 📁 Database/                    # SQL 스키마 및 백업 (운영용)
@@ -121,7 +194,7 @@ Phoenix/
 │
 ├── .gitignore
 ├── README.md
-├── docker-compose.yml              # 로컬 개발용
+├── deploy-direct.sh                # 직접 실행 배포 스크립트
 └── package.json                    # 루트 패키지
 ```
 
@@ -134,34 +207,48 @@ Phoenix/
 ```bash
 # Backend/.env 파일 생성
 cd Backend
-cp .env.example .env  # 또는 직접 생성
+cp ../env.example .env  # 또는 직접 생성
 ```
 
 **필수 환경 변수:**
 
 ```env
 # Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=password
+DB_HOST=your_database_host
+DB_PORT=3306
+DB_USERNAME=your_database_username
+DB_PASSWORD=your_secure_password_here
 DB_DATABASE=phoenix
 
 # JWT
 JWT_SECRET=your-super-secret-jwt-key-here
 JWT_EXPIRES_IN=7d
 
-# Google OAuth (Google Cloud Console에서 발급)
+# OAuth 설정
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+GOOGLE_CALLBACK_URL=https://your-domain.com/auth/google/callback
 
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
+KAKAO_CLIENT_ID=your-kakao-client-id
+KAKAO_CLIENT_SECRET=your-kakao-client-secret
+KAKAO_CALLBACK_URL=https://your-domain.com/auth/kakao/callback
+
+NAVER_CLIENT_ID=your-naver-client-id
+NAVER_CLIENT_SECRET=your-naver-client-secret
+NAVER_CALLBACK_URL=https://your-domain.com/auth/naver/callback
+
+# OAuth 리다이렉션 설정
+OAUTH_REDIRECT_BASE=https://your-domain.com
+OAUTH_SUCCESS_REDIRECT=https://your-domain.com/auth/callback
+OAUTH_FAILURE_REDIRECT=https://your-domain.com/login?error=oauth
+
+# API URL
+API_URL=https://api.your-domain.com
+FRONTEND_URL=https://your-domain.com
 
 # Server
 PORT=3000
-NODE_ENV=development
+NODE_ENV=production
 ```
 
 #### Frontend 환경 변수 (.env 파일 생성)
@@ -176,72 +263,143 @@ cp .env.example .env  # 또는 직접 생성
 
 ```env
 # API URL
-VITE_API_URL=http://localhost:3000
+VITE_API_BASE_URL=https://api.your-domain.com
 
 # Environment
-VITE_NODE_ENV=development
+VITE_SCENARIO_DATA_SOURCE=auto
 ```
 
-### 2. 개발 환경 설정
+### 2. 프로덕션 배포
+
+#### 자동 배포 (권장)
 
 ```bash
 # 저장소 클론
 git clone <repository-url>
 cd Phoenix
 
-# 개발 환경 자동 설정 (Linux/Mac)
-chmod +x Frontend/scripts/setup/setup.sh
-./Frontend/scripts/setup/setup.sh
+# 배포 스크립트 실행
+chmod +x deploy-direct.sh
+./deploy-direct.sh production
 ```
 
-### 3. 개발 서버 실행
+#### 수동 배포
 
 ```bash
-# Backend 서버 시작
+# 1. Backend 빌드 및 실행
 cd Backend
-npm run start:dev
+npm install --production
+npm run build
+pm2 start dist/main.js --name phoenix-backend --env production
 
-# Frontend 서버 시작 (새 터미널)
-cd Frontend
-npm run dev
+# 2. Frontend 빌드 및 배포
+cd ../Frontend
+npm install
+npm run build
+sudo cp -r dist/* /var/www/html/
+
+# 3. nginx 설정 및 재시작
+sudo cp nginx/nginx.conf /etc/nginx/nginx.conf
+sudo nginx -t
+sudo systemctl restart nginx
 ```
 
-### 4. 접속 확인
+### 3. 접속 확인
 
-- **Frontend**: http://localhost:3001
-- **Backend API**: http://localhost:3000
-- **API 문서**: http://localhost:3000/api
+- **Frontend**: https://www.phoenix-4.com
+- **Backend API**: https://api.phoenix-4.com
+- **API 문서**: https://api.phoenix-4.com/api
 
-## 🎯 시나리오 생성 도구
+## 🎯 시나리오 관리 도구
 
-### 게임 스크립트 도구
+Phoenix 시스템에는 강력한 시나리오 생성 및 관리 도구가 통합되어 있습니다. 이 도구는 [game-script-tool](https://github.com/1000ship/game-script-tool)을 기반으로 개발되었으며, 재난 대응 훈련에 특화되도록 수정되었습니다.
 
-- **위치**: `Frontend/scripts/game-script-tool/`
-- **출처**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
-- **라이선스**: 자유 사용 허가 (제작자: 1000ship)
-- **용도**: 재난 대응 훈련 시나리오 데이터 생성
-- **접근**: 관리자 페이지에서 웹 인터페이스로 접근 가능
-- **설명**: 게임 스크립트 형식의 시나리오를 Phoenix 시스템용 데이터로 변환하는 도구
+### 🔧 통합된 시나리오 생성기
 
-### 시나리오 생성기
+#### 원본 출처 및 라이선스
 
-- **위치**: `Frontend/scripts/scenario-generator/`
-- **용도**: 기존 시나리오 데이터를 Phoenix 시스템 형식으로 변환
-- **기능**: JSON 형식의 시나리오를 MySQL INSERT 문으로 변환
+- **원본 프로젝트**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
+- **라이선스**: 원본 개발자로부터 사용 허가를 받아 수정하여 사용
+- **수정 사항**: 재난 대응 훈련 시스템에 맞게 커스터마이징
 
-### 생성되는 시나리오 유형
+#### 주요 기능
 
-- 🔥 **화재 재난 시나리오**
-- 🌋 **지진 재난 시나리오**
-- 🚑 **응급처치 상황 시나리오**
-- 🌊 **침수/홍수 시나리오**
-- ⚡ **복합 재난 시나리오**
+##### 1. 블록 기반 시나리오 편집기
 
-### 데이터 변환 프로세스
+- **직관적인 편집**: 드래그 앤 드롭으로 시나리오 블록 구성
+- **실시간 미리보기**: 작성 중인 시나리오를 실시간으로 확인
+- **다양한 재난 유형 지원**: 화재, 지진, 응급처치, 홍수, 복합 재난
+
+##### 2. 데이터 관리 시스템
+
+- **JSON 내보내기/가져오기**: 시나리오 데이터 백업 및 공유
+- **SQL 변환**: 데이터베이스 직접 삽입을 위한 SQL 생성
+- **데이터 검증**: 시나리오 데이터 유효성 자동 검사
+- **통계 생성**: 시나리오별 상세 통계 및 분석
+
+##### 3. 관리자 인터페이스
+
+- **웹 기반 편집기**: 브라우저에서 직접 시나리오 편집
+- **시각적 편집**: 블록 기반의 직관적인 시나리오 구성
+- **선택지 관리**: 각 상황별 선택지 및 결과 설정
+- **점수 시스템**: 속도와 정확도 기반 점수 설정
+
+#### 접근 방법
+
+1. **관리자 로그인**: 관리자 계정으로 시스템 로그인
+2. **시나리오 도구 접근**: 관리자 페이지 → "시나리오 도구" 탭
+3. **시나리오 생성**: 블록 기반으로 새로운 시나리오 작성
+4. **데이터 관리**: JSON/SQL 형태로 데이터 내보내기/가져오기
+
+### 📊 시나리오 데이터 구조
+
+```typescript
+interface ScenarioGeneratorEvent {
+  id: number;
+  teamId: number;
+  scenarioCode: string;
+  sceneId: string;
+  title: string;
+  content: string;
+  sceneScript: string;
+  disasterType: "fire" | "earthquake" | "emergency" | "flood" | "complex";
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+  difficulty: "easy" | "medium" | "hard" | "expert";
+  options: ChoiceOption[];
+  status: "ACTIVE" | "INACTIVE";
+  approvalStatus: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  createdBy: number;
+  order: number;
+}
+```
+
+### 🎮 생성되는 시나리오 유형
+
+- 🔥 **화재 재난 시나리오**: 건물 화재, 산불, 화학물질 화재 등
+- 🌋 **지진 재난 시나리오**: 지진 발생, 건물 붕괴, 대피 상황 등
+- 🚑 **응급처치 상황**: 심폐소생술, 출혈 응급처치, 골절 응급처치 등
+- 🌊 **침수/홍수 시나리오**: 홍수 대피, 침수 지역 대응 등
+- ⚡ **복합 재난 시나리오**: 여러 재난이 동시에 발생하는 복합 상황
+
+### 🔄 데이터 변환 프로세스
 
 ```
-게임 스크립트 → JSON 형식 → MySQL INSERT 문 → Phoenix 데이터베이스
+게임 스크립트 형식 → JSON 데이터 → MySQL INSERT 문 → Phoenix 데이터베이스
 ```
+
+1. **시나리오 작성**: 웹 기반 블록 편집기에서 시나리오 구성
+2. **데이터 검증**: 자동 유효성 검사로 데이터 품질 보장
+3. **형식 변환**: JSON 형태로 내보내기 또는 SQL로 직접 변환
+4. **데이터베이스 적용**: 생성된 SQL을 데이터베이스에 적용
+
+### 🛠️ 기술적 특징
+
+- **TypeScript 기반**: 타입 안전성 보장
+- **React 통합**: 기존 Phoenix Frontend와 완전 통합
+- **실시간 검증**: 작성 중 실시간 데이터 유효성 검사
+- **모듈화 설계**: 재사용 가능한 컴포넌트 구조
+- **확장성**: 새로운 재난 유형 쉽게 추가 가능
 
 ## 🔧 배포
 
@@ -261,6 +419,97 @@ npm run build
 
 # 수동 배포 단계는 Docs/deployment/README.md 참조
 ```
+
+## 🆕 최근 업데이트
+
+### v2.1.0 (2025.01.16)
+
+- **시나리오 관리 도구 통합**: [game-script-tool](https://github.com/1000ship/game-script-tool) 기반 시나리오 생성기 완전 통합
+- **블록 기반 시나리오 편집기**: 드래그 앤 드롭으로 직관적인 시나리오 작성
+- **데이터 관리 시스템**: JSON/SQL 형태로 시나리오 데이터 내보내기/가져오기
+- **실시간 데이터 검증**: 시나리오 작성 중 자동 유효성 검사
+- **관리자 인터페이스 개선**: 웹 기반 시나리오 편집 도구 추가
+
+### v2.0.0 (2025.01.16)
+
+- **Clean Architecture 적용**: Backend 구조를 Clean Architecture로 전면 개편
+- **OAuth 로그인 지원**: Google OAuth 로그인 기능 추가
+- **팀 코드 시스템**: 회원가입 후 팀 코드로 팀 가입하는 방식으로 변경
+- **자동 사용자 코드 생성**: 시스템에서 사용자 코드 자동 생성 및 관리
+- **타입 안정성 향상**: TypeScript 타입 정의 개선 및 에러 수정
+- **UI/UX 개선**: 회원가입 폼 단순화 및 마이페이지 팀 가입 기능 추가
+
+### 주요 변경사항
+
+- **시나리오 관리 도구**: 관리자 페이지에서 시나리오 생성/편집 가능
+- **원본 출처 명시**: game-script-tool 기반으로 개발되었음을 명시
+- **재난 유형 확장**: 화재, 지진, 응급처치, 홍수, 복합 재난 시나리오 지원
+- **데이터 변환 기능**: 게임 스크립트 → JSON → SQL 변환 프로세스
+- 회원가입 시 팀 코드와 사용자 코드 입력 필드 제거
+- 로그인 후 마이페이지에서 팀 코드로 팀 가입 가능
+- Google OAuth 로그인 후 메인 페이지로 리다이렉션
+- Clean Architecture 기반의 유지보수성 향상
+
+## 📊 시나리오 데이터 소스 설정
+
+Phoenix는 시나리오 데이터를 두 가지 방식으로 로드할 수 있습니다:
+
+### 🔧 데이터 소스 옵션
+
+1. **📁 정적 파일만** (`static`)
+
+   - `public/data` 폴더의 JSON 파일 사용
+   - 개발/테스트 환경에 적합
+   - 서버 없이도 작동
+
+2. **🌐 API만** (`api`)
+
+   - AWS Aurora/RDS 데이터베이스에서 조회
+   - 운영 환경에 적합
+   - 관리자가 생성한 시나리오 사용
+
+3. **🔄 자동 전환** (`auto`) - **기본값**
+   - 정적 파일 우선 로드
+   - 실패 시 API로 자동 전환
+   - 개발과 운영 환경 모두 지원
+
+### ⚙️ 설정 방법
+
+#### 1. 관리자 페이지에서 설정
+
+- 관리자 페이지 → 시나리오 관리 → 데이터 소스 설정
+- 버튼 클릭으로 즉시 전환 가능
+
+#### 2. 환경 변수로 설정
+
+```bash
+# Frontend/.env 파일
+VITE_SCENARIO_DATA_SOURCE=auto  # static, api, auto 중 선택
+```
+
+#### 3. 개발자 도구에서 설정
+
+```javascript
+// 브라우저 콘솔에서 실행
+ScenarioDataSource.setSource("api"); // API로 전환
+ScenarioDataSource.getStatus(); // 현재 상태 확인
+```
+
+### 📁 정적 파일 구조
+
+```
+Frontend/public/data/
+├── fire_training_scenario.json          # 화재 대응 시나리오
+├── earthquake_training_scenario.json    # 지진 대응 시나리오
+├── emergency_first_aid_scenario.json    # 응급처치 시나리오
+└── traffic_accident_scenario.json       # 교통사고 시나리오
+```
+
+### 🔄 데이터 동기화
+
+- 관리자가 시나리오를 생성하고 내보내기하면 JSON 파일로 다운로드
+- 이 파일을 `public/data` 폴더에 저장하면 정적 파일 방식으로 사용 가능
+- 또는 "기존 JSON 동기화" 버튼으로 데이터베이스에 자동 동기화
 
 ## 📚 문서
 

@@ -1,12 +1,7 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
-import { LoginDto } from '../../presentation/dto/login.dto';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
 import { PasswordUtil } from '../../utils/password.util';
@@ -19,9 +14,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    console.log('🔍 validateUser 호출:', { email });
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(loginId: string, password: string): Promise<any> {
+    console.log('🔍 validateUser 호출:', { loginId });
+    const user = await this.usersService.findByLoginId(loginId);
     console.log('👤 사용자 조회 결과:', user ? '사용자 존재' : '사용자 없음');
 
     if (user) {
@@ -35,7 +30,7 @@ export class AuthService {
       console.log('🔐 비밀번호 비교 결과:', isPasswordValid);
 
       if (isPasswordValid) {
-        const { password, ...result } = user;
+        const { password: _, ...result } = user;
         console.log('✅ 로그인 성공');
         return result;
       }
@@ -115,7 +110,17 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const { password, ...result } = user;
+      console.log('🔍 사용자 생성 결과:', { user });
+
+      if (!user) {
+        console.log('❌ 사용자 생성 실패: user가 undefined');
+        throw new BadRequestException({
+          message: '사용자 생성에 실패했습니다.',
+          error: 'User creation failed',
+        });
+      }
+
+      const { password: _, ...result } = user;
       return {
         success: true,
         message: '회원가입이 성공적으로 완료되었습니다.',
@@ -144,22 +149,22 @@ export class AuthService {
     try {
       console.log('🔄 OAuth 사용자 등록/로그인 시작:', {
         email: oauthRegisterDto.email,
-        provider: oauthRegisterDto.provider,
-        providerId: oauthRegisterDto.providerId,
+        oauthProvider: oauthRegisterDto.oauthProvider,
+        oauthProviderId: oauthRegisterDto.oauthProviderId,
       });
 
       // 입력 데이터 검증
       if (
         !oauthRegisterDto.email ||
         !oauthRegisterDto.name ||
-        !oauthRegisterDto.provider ||
-        !oauthRegisterDto.providerId
+        !oauthRegisterDto.oauthProvider ||
+        !oauthRegisterDto.oauthProviderId
       ) {
         console.log('❌ OAuth 입력 데이터 불완전:', {
           email: !!oauthRegisterDto.email,
           name: !!oauthRegisterDto.name,
-          provider: !!oauthRegisterDto.provider,
-          providerId: !!oauthRegisterDto.providerId,
+          oauthProvider: !!oauthRegisterDto.oauthProvider,
+          oauthProviderId: !!oauthRegisterDto.oauthProviderId,
         });
         throw new BadRequestException('OAuth 사용자 정보가 불완전합니다.');
       }
@@ -171,8 +176,8 @@ export class AuthService {
       if (!user) {
         // 2. OAuth 제공자 ID로도 확인
         user = await this.usersService.findByOAuthProvider(
-          oauthRegisterDto.provider,
-          oauthRegisterDto.providerId,
+          oauthRegisterDto.oauthProvider,
+          oauthRegisterDto.oauthProviderId,
         );
         console.log(
           '👤 OAuth 제공자 ID로 사용자 조회 결과:',
@@ -196,9 +201,9 @@ export class AuthService {
             password: '', // OAuth 사용자는 비밀번호 없음
             teamId: null, // 팀은 나중에 가입
             userCode: null, // 사용자 코드는 나중에 생성
-            oauthProvider: oauthRegisterDto.provider,
-            oauthProviderId: oauthRegisterDto.providerId,
-            profileImageUrl: oauthRegisterDto.profileImage,
+            oauthProvider: oauthRegisterDto.oauthProvider,
+            oauthProviderId: oauthRegisterDto.oauthProviderId,
+            profileImageUrl: oauthRegisterDto.profileImageUrl,
           });
           console.log('✅ 새 사용자 생성 완료:', {
             userId: user.id,
@@ -217,9 +222,9 @@ export class AuthService {
         // 4. 기존 사용자 정보 업데이트 (OAuth 정보 추가)
         console.log('🔄 기존 사용자 정보 업데이트 시작:', { userId: user.id });
         try {
-          user.oauthProvider = oauthRegisterDto.provider;
-          user.oauthProviderId = oauthRegisterDto.providerId;
-          user.profileImageUrl = oauthRegisterDto.profileImage;
+          user.oauthProvider = oauthRegisterDto.oauthProvider;
+          user.oauthProviderId = oauthRegisterDto.oauthProviderId;
+          user.profileImageUrl = oauthRegisterDto.profileImageUrl;
           user = await this.usersService.update(user.id, user);
           console.log('✅ 기존 사용자 정보 업데이트 완료');
         } catch (updateError) {
@@ -312,6 +317,7 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log(error);
       return {
         success: false,
         error: '로그인 ID 확인 중 오류가 발생했습니다.',

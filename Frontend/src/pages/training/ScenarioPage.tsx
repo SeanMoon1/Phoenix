@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-import type { ChoiceOption } from '@/types';
+import type { ChoiceOption } from '@/types/index';
 
 // 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
@@ -131,7 +131,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   });
 
   // 선택 처리
-  const handleChoice = (option: ScenarioOption) => {
+  const handleChoice = (option: ChoiceOption) => {
     // 이미 푼 문제라면 경험치 지급하지 않음
     if (gameState.history.includes(gameState.current)) {
       gameState.handleChoice(option); // 선택은 처리

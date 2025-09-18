@@ -43,6 +43,9 @@ interface UseScenarioGameReturn {
   setWrongTriedInThisScene: (value: boolean) => void;
   setAwardedExpThisScene: (value: boolean) => void;
   setEndModalAutoShown: (value: boolean) => void;
+
+  choiceDisabled: boolean;
+  setChoiceDisabled: (value: boolean) => void;
 }
 
 export function useScenarioGame({
@@ -57,6 +60,7 @@ export function useScenarioGame({
   // 선택/피드백
   const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [choiceDisabled, setChoiceDisabled] = useState(false); // choiceDisabled 선언 추가
 
   // 게임 진행 상태
   const [failedThisRun, setFailedThisRun] = useState(false);
@@ -115,8 +119,7 @@ export function useScenarioGame({
 
   // 선택 처리
   const handleChoice = useCallback(
-    (option: ScenarioOption) => {
-      // 이미 선택한 문제라면 경험치 지급하지 않음
+    (option: ChoiceOption) => {
       if (answered.includes(current)) {
         setSelected(option);
         return { shouldAwardExp: false, isCorrect: false };
@@ -183,5 +186,8 @@ export function useScenarioGame({
     setWrongTriedInThisScene,
     setAwardedExpThisScene,
     setEndModalAutoShown,
+
+    choiceDisabled,
+    setChoiceDisabled,
   };
 }

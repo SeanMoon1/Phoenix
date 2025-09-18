@@ -72,6 +72,8 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 import { LocalStrategy } from './shared/strategies/local.strategy';
 import { JwtStrategy } from './shared/strategies/jwt.strategy';
 import { GoogleStrategy } from './shared/strategies/google.strategy';
+import { NaverStrategy } from './shared/strategies/naver.strategy';
+import { KakaoStrategy } from './shared/strategies/kakao.strategy';
 
 @Module({
   imports: [
@@ -176,6 +178,8 @@ import { GoogleStrategy } from './shared/strategies/google.strategy';
     LocalStrategy,
     JwtStrategy,
     GoogleStrategy,
+    NaverStrategy,
+    KakaoStrategy,
     // Global Filters and Interceptors
     {
       provide: APP_FILTER,

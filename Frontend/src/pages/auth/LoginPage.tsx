@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
@@ -23,7 +23,9 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const {
     register,
@@ -34,6 +36,40 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
   });
+
+  // OAuth 에러 메시지 처리
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      const errorMessage = getOAuthErrorMessage(error);
+      setOauthError(errorMessage);
+      // URL에서 에러 파라미터 제거
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('error');
+      const newUrl = `${window.location.pathname}${
+        newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''
+      }`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
+
+  // OAuth 에러 메시지 매핑 함수
+  const getOAuthErrorMessage = (error: string): string => {
+    switch (error) {
+      case 'oauth_user_not_found':
+        return 'OAuth 사용자 정보를 찾을 수 없습니다.';
+      case 'oauth_incomplete_info':
+        return 'OAuth 사용자 정보가 불완전합니다.';
+      case 'oauth_auth_failed':
+        return 'OAuth 인증에 실패했습니다.';
+      case 'oauth_server_error':
+        return '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      case 'oauth_unknown_error':
+        return '알 수 없는 오류가 발생했습니다.';
+      default:
+        return 'OAuth 로그인 중 오류가 발생했습니다.';
+    }
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -132,6 +168,12 @@ const LoginPage: React.FC = () => {
               {errors.root && (
                 <div className="text-xs text-center text-red-600 dark:text-red-400 sm:text-sm">
                   {errors.root.message}
+                </div>
+              )}
+
+              {oauthError && (
+                <div className="p-3 text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-lg dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
+                  {oauthError}
                 </div>
               )}
 

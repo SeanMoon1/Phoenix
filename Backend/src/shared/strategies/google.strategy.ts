@@ -65,11 +65,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       };
 
       console.log('✅ Google OAuth 사용자 정보 파싱 완료:', {
-        email: !!user.email,
-        name: !!user.name,
+        email: user.email || 'undefined',
+        name: user.name || 'undefined',
         provider: user.provider,
-        providerId: !!user.providerId,
-        profileImage: !!user.profileImage,
+        providerId: user.providerId || 'undefined',
+        profileImage: user.profileImage || 'undefined',
+        emailType: typeof user.email,
+        nameType: typeof user.name,
+        providerIdType: typeof user.providerId,
       });
 
       done(null, user);

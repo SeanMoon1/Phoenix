@@ -124,10 +124,14 @@ export class OAuthController {
       // 필수 정보 검증
       if (!user.email || !user.name || !user.provider || !user.providerId) {
         console.log(`❌ ${provider} OAuth 사용자 정보 불완전:`, {
-          email: !!user.email,
-          name: !!user.name,
-          provider: !!user.provider,
-          providerId: !!user.providerId,
+          email: user.email || 'undefined',
+          name: user.name || 'undefined',
+          provider: user.provider || 'undefined',
+          providerId: user.providerId || 'undefined',
+          emailType: typeof user.email,
+          nameType: typeof user.name,
+          providerType: typeof user.provider,
+          providerIdType: typeof user.providerId,
         });
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||

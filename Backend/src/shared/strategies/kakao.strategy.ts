@@ -19,16 +19,52 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, username, _json } = profile;
-    const user = {
-      email: _json?.kakao_account?.email,
-      name: username || _json?.kakao_account?.profile?.nickname,
-      profileImage: _json?.kakao_account?.profile?.profile_image_url,
-      provider: 'kakao',
-      providerId: id,
-      accessToken,
-      refreshToken,
-    };
-    done(null, user);
+    try {
+      console.log('🔍 Kakao OAuth Profile 정보:', {
+        id: profile.id,
+        username: profile.username,
+        _json: profile._json,
+      });
+
+      const { id, username, _json } = profile;
+
+      // 이메일 정보 안전하게 추출
+      const email = _json?.kakao_account?.email || null;
+
+      // 이름 정보 안전하게 추출
+      let fullName = '';
+      if (username) {
+        fullName = username;
+      } else if (_json?.kakao_account?.profile?.nickname) {
+        fullName = _json.kakao_account.profile.nickname;
+      }
+
+      // 프로필 이미지 안전하게 추출
+      const profileImage =
+        _json?.kakao_account?.profile?.profile_image_url || null;
+
+      const user = {
+        email,
+        name: fullName,
+        profileImage,
+        provider: 'kakao',
+        providerId: id,
+        accessToken,
+        refreshToken,
+      };
+
+      console.log('✅ Kakao OAuth 사용자 정보 파싱 완료:', {
+        email: !!user.email,
+        name: !!user.name,
+        provider: user.provider,
+        providerId: !!user.providerId,
+        profileImage: !!user.profileImage,
+      });
+
+      done(null, user);
+    } catch (error) {
+      console.error('❌ Kakao OAuth 사용자 정보 파싱 실패:', error);
+      done(error, null);
+    }
   }
 }

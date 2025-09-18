@@ -30,6 +30,8 @@
 - **다양한 재난 유형**: 화재, 지진, 응급처치, 교통사고
 - **의사결정 이벤트**: 선택형 및 순차형 이벤트
 - **실시간 피드백**: 즉시 결과 확인 및 학습
+- **유연한 데이터 소스**: 정적 파일과 데이터베이스 API 모두 지원
+- **환경별 설정**: 개발/테스트/운영 환경에 맞는 데이터 소스 선택
 
 ### 📊 분석 및 리포팅
 
@@ -108,22 +110,33 @@ Phoenix/
 ├── 📁 Frontend/                    # React 애플리케이션
 │   ├── 📁 src/
 │   │   ├── 📁 components/          # 재사용 가능한 컴포넌트
+│   │   │   ├── 📁 admin/           # 관리자 전용 컴포넌트
+│   │   │   │   └── ScenarioGeneratorPanel.tsx  # 시나리오 생성기 패널
+│   │   │   ├── 📁 common/          # 공통 컴포넌트
+│   │   │   ├── 📁 game/            # 게임 관련 컴포넌트
+│   │   │   │   ├── 📁 Partials/    # 시나리오 편집기 컴포넌트
+│   │   │   │   └── ScriptView.tsx  # 시나리오 뷰어
 │   │   │   ├── 📁 layout/          # 레이아웃 컴포넌트
 │   │   │   └── 📁 ui/              # UI 컴포넌트
 │   │   ├── 📁 pages/               # 페이지 컴포넌트
-│   │   │   ├── 📁 auth/            # 인증 관련
 │   │   │   ├── 📁 admin/           # 관리자 기능
-│   │   │   ├── 📁 scenario/        # 시나리오 관리
+│   │   │   │   └── ScriptToolPage.tsx  # 시나리오 관리 도구 페이지
+│   │   │   ├── 📁 auth/            # 인증 관련
 │   │   │   ├── 📁 training/        # 훈련 관련
 │   │   │   └── 📁 user/            # 사용자 기능
 │   │   ├── 📁 services/            # API 통신 서비스
+│   │   │   └── scenarioGeneratorService.ts  # 시나리오 생성기 서비스
 │   │   ├── 📁 stores/              # 상태 관리
 │   │   ├── 📁 types/               # TypeScript 타입
+│   │   │   └── scenario.ts         # 시나리오 관련 타입 정의
+│   │   ├── 📁 utils/               # 유틸리티 함수
+│   │   │   └── 📁 scenario-generator/  # 시나리오 생성기 유틸리티
+│   │   │       ├── config.ts       # 설정 파일
+│   │   │       ├── converter.ts    # 데이터 변환기
+│   │   │       ├── logger.ts       # 로깅 유틸리티
+│   │   │       └── validator.ts    # 데이터 검증기
 │   │   └── 📁 hooks/               # 커스텀 훅
-│   ├── 📁 scripts/                 # 시나리오 스크립트 도구
-│   │   ├── 📁 game-script-tool/    # 게임 스크립트 생성 도구
-│   │   ├── 📁 scenario-generator/  # 시나리오 변환 스크립트
-│   │   ├── 📁 data/                # 샘플 시나리오 데이터
+│   ├── 📁 scripts/                 # 빌드 및 배포 스크립트
 │   │   ├── 📁 deploy/              # 배포 스크립트
 │   │   └── 📁 setup/               # 개발 환경 설정
 │   ├── package.json
@@ -277,36 +290,96 @@ npm run dev
 - **Backend API**: http://localhost:3000
 - **API 문서**: http://localhost:3000/api
 
-## 🎯 시나리오 생성 도구
+## 🎯 시나리오 관리 도구
 
-### 게임 스크립트 도구
+Phoenix 시스템에는 강력한 시나리오 생성 및 관리 도구가 통합되어 있습니다. 이 도구는 [game-script-tool](https://github.com/1000ship/game-script-tool)을 기반으로 개발되었으며, 재난 대응 훈련에 특화되도록 수정되었습니다.
 
-- **위치**: `Frontend/scripts/game-script-tool/`
-- **출처**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
-- **라이선스**: 자유 사용 허가 (제작자: 1000ship)
-- **용도**: 재난 대응 훈련 시나리오 데이터 생성
-- **접근**: 관리자 페이지에서 웹 인터페이스로 접근 가능
-- **설명**: 게임 스크립트 형식의 시나리오를 Phoenix 시스템용 데이터로 변환하는 도구
+### 🔧 통합된 시나리오 생성기
 
-### 시나리오 생성기
+#### 원본 출처 및 라이선스
 
-- **위치**: `Frontend/scripts/scenario-generator/`
-- **용도**: 기존 시나리오 데이터를 Phoenix 시스템 형식으로 변환
-- **기능**: JSON 형식의 시나리오를 MySQL INSERT 문으로 변환
+- **원본 프로젝트**: [1000ship/game-script-tool](https://github.com/1000ship/game-script-tool)
+- **라이선스**: 원본 개발자로부터 사용 허가를 받아 수정하여 사용
+- **수정 사항**: 재난 대응 훈련 시스템에 맞게 커스터마이징
 
-### 생성되는 시나리오 유형
+#### 주요 기능
 
-- 🔥 **화재 재난 시나리오**
-- 🌋 **지진 재난 시나리오**
-- 🚑 **응급처치 상황 시나리오**
-- 🌊 **침수/홍수 시나리오**
-- ⚡ **복합 재난 시나리오**
+##### 1. 블록 기반 시나리오 편집기
 
-### 데이터 변환 프로세스
+- **직관적인 편집**: 드래그 앤 드롭으로 시나리오 블록 구성
+- **실시간 미리보기**: 작성 중인 시나리오를 실시간으로 확인
+- **다양한 재난 유형 지원**: 화재, 지진, 응급처치, 홍수, 복합 재난
+
+##### 2. 데이터 관리 시스템
+
+- **JSON 내보내기/가져오기**: 시나리오 데이터 백업 및 공유
+- **SQL 변환**: 데이터베이스 직접 삽입을 위한 SQL 생성
+- **데이터 검증**: 시나리오 데이터 유효성 자동 검사
+- **통계 생성**: 시나리오별 상세 통계 및 분석
+
+##### 3. 관리자 인터페이스
+
+- **웹 기반 편집기**: 브라우저에서 직접 시나리오 편집
+- **시각적 편집**: 블록 기반의 직관적인 시나리오 구성
+- **선택지 관리**: 각 상황별 선택지 및 결과 설정
+- **점수 시스템**: 속도와 정확도 기반 점수 설정
+
+#### 접근 방법
+
+1. **관리자 로그인**: 관리자 계정으로 시스템 로그인
+2. **시나리오 도구 접근**: 관리자 페이지 → "시나리오 도구" 탭
+3. **시나리오 생성**: 블록 기반으로 새로운 시나리오 작성
+4. **데이터 관리**: JSON/SQL 형태로 데이터 내보내기/가져오기
+
+### 📊 시나리오 데이터 구조
+
+```typescript
+interface ScenarioGeneratorEvent {
+  id: number;
+  teamId: number;
+  scenarioCode: string;
+  sceneId: string;
+  title: string;
+  content: string;
+  sceneScript: string;
+  disasterType: "fire" | "earthquake" | "emergency" | "flood" | "complex";
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+  difficulty: "easy" | "medium" | "hard" | "expert";
+  options: ChoiceOption[];
+  status: "ACTIVE" | "INACTIVE";
+  approvalStatus: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  createdBy: number;
+  order: number;
+}
+```
+
+### 🎮 생성되는 시나리오 유형
+
+- 🔥 **화재 재난 시나리오**: 건물 화재, 산불, 화학물질 화재 등
+- 🌋 **지진 재난 시나리오**: 지진 발생, 건물 붕괴, 대피 상황 등
+- 🚑 **응급처치 상황**: 심폐소생술, 출혈 응급처치, 골절 응급처치 등
+- 🌊 **침수/홍수 시나리오**: 홍수 대피, 침수 지역 대응 등
+- ⚡ **복합 재난 시나리오**: 여러 재난이 동시에 발생하는 복합 상황
+
+### 🔄 데이터 변환 프로세스
 
 ```
-게임 스크립트 → JSON 형식 → MySQL INSERT 문 → Phoenix 데이터베이스
+게임 스크립트 형식 → JSON 데이터 → MySQL INSERT 문 → Phoenix 데이터베이스
 ```
+
+1. **시나리오 작성**: 웹 기반 블록 편집기에서 시나리오 구성
+2. **데이터 검증**: 자동 유효성 검사로 데이터 품질 보장
+3. **형식 변환**: JSON 형태로 내보내기 또는 SQL로 직접 변환
+4. **데이터베이스 적용**: 생성된 SQL을 데이터베이스에 적용
+
+### 🛠️ 기술적 특징
+
+- **TypeScript 기반**: 타입 안전성 보장
+- **React 통합**: 기존 Phoenix Frontend와 완전 통합
+- **실시간 검증**: 작성 중 실시간 데이터 유효성 검사
+- **모듈화 설계**: 재사용 가능한 컴포넌트 구조
+- **확장성**: 새로운 재난 유형 쉽게 추가 가능
 
 ## 🔧 배포
 
@@ -329,6 +402,14 @@ npm run build
 
 ## 🆕 최근 업데이트
 
+### v2.1.0 (2025.01.16)
+
+- **시나리오 관리 도구 통합**: [game-script-tool](https://github.com/1000ship/game-script-tool) 기반 시나리오 생성기 완전 통합
+- **블록 기반 시나리오 편집기**: 드래그 앤 드롭으로 직관적인 시나리오 작성
+- **데이터 관리 시스템**: JSON/SQL 형태로 시나리오 데이터 내보내기/가져오기
+- **실시간 데이터 검증**: 시나리오 작성 중 자동 유효성 검사
+- **관리자 인터페이스 개선**: 웹 기반 시나리오 편집 도구 추가
+
 ### v2.0.0 (2025.01.16)
 
 - **Clean Architecture 적용**: Backend 구조를 Clean Architecture로 전면 개편
@@ -340,10 +421,75 @@ npm run build
 
 ### 주요 변경사항
 
+- **시나리오 관리 도구**: 관리자 페이지에서 시나리오 생성/편집 가능
+- **원본 출처 명시**: game-script-tool 기반으로 개발되었음을 명시
+- **재난 유형 확장**: 화재, 지진, 응급처치, 홍수, 복합 재난 시나리오 지원
+- **데이터 변환 기능**: 게임 스크립트 → JSON → SQL 변환 프로세스
 - 회원가입 시 팀 코드와 사용자 코드 입력 필드 제거
 - 로그인 후 마이페이지에서 팀 코드로 팀 가입 가능
 - Google OAuth 로그인 후 메인 페이지로 리다이렉션
 - Clean Architecture 기반의 유지보수성 향상
+
+## 📊 시나리오 데이터 소스 설정
+
+Phoenix는 시나리오 데이터를 두 가지 방식으로 로드할 수 있습니다:
+
+### 🔧 데이터 소스 옵션
+
+1. **📁 정적 파일만** (`static`)
+
+   - `public/data` 폴더의 JSON 파일 사용
+   - 개발/테스트 환경에 적합
+   - 서버 없이도 작동
+
+2. **🌐 API만** (`api`)
+
+   - AWS Aurora/RDS 데이터베이스에서 조회
+   - 운영 환경에 적합
+   - 관리자가 생성한 시나리오 사용
+
+3. **🔄 자동 전환** (`auto`) - **기본값**
+   - 정적 파일 우선 로드
+   - 실패 시 API로 자동 전환
+   - 개발과 운영 환경 모두 지원
+
+### ⚙️ 설정 방법
+
+#### 1. 관리자 페이지에서 설정
+
+- 관리자 페이지 → 시나리오 관리 → 데이터 소스 설정
+- 버튼 클릭으로 즉시 전환 가능
+
+#### 2. 환경 변수로 설정
+
+```bash
+# Frontend/.env 파일
+VITE_SCENARIO_DATA_SOURCE=auto  # static, api, auto 중 선택
+```
+
+#### 3. 개발자 도구에서 설정
+
+```javascript
+// 브라우저 콘솔에서 실행
+ScenarioDataSource.setSource("api"); // API로 전환
+ScenarioDataSource.getStatus(); // 현재 상태 확인
+```
+
+### 📁 정적 파일 구조
+
+```
+Frontend/public/data/
+├── fire_training_scenario.json          # 화재 대응 시나리오
+├── earthquake_training_scenario.json    # 지진 대응 시나리오
+├── emergency_first_aid_scenario.json    # 응급처치 시나리오
+└── traffic_accident_scenario.json       # 교통사고 시나리오
+```
+
+### 🔄 데이터 동기화
+
+- 관리자가 시나리오를 생성하고 내보내기하면 JSON 파일로 다운로드
+- 이 파일을 `public/data` 폴더에 저장하면 정적 파일 방식으로 사용 가능
+- 또는 "기존 JSON 동기화" 버튼으로 데이터베이스에 자동 동기화
 
 ## 📚 문서
 

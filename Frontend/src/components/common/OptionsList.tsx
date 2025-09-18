@@ -1,9 +1,9 @@
-import type { ScenarioOption } from '@/types/scenario';
+import type { ChoiceOption } from '@/types';
 
 type Props = {
-  options: ScenarioOption[];
-  selected?: ScenarioOption | null;
-  onSelect: (opt: ScenarioOption) => void;
+  options: ChoiceOption[];
+  selected?: ChoiceOption | null;
+  onSelect: (opt: ChoiceOption) => void;
   disabled?: boolean;
 };
 
@@ -16,10 +16,10 @@ export default function OptionsList({
   return (
     <section className="flex flex-col gap-3 mb-6">
       {options.map(opt => {
-        const isSelected = selected?.answerId === opt.answerId;
+        const isSelected = selected?.choiceCode === opt.choiceCode;
         return (
           <button
-            key={opt.answerId}
+            key={opt.choiceCode}
             className={`w-full rounded-xl px-6 py-4 text-lg shadow-md transition
               ${isSelected ? 'ring-2 ring-amber-400' : ''}
               bg-rose-500 hover:bg-rose-400 text-white dark:bg-rose-600 dark:hover:bg-rose-500
@@ -27,7 +27,7 @@ export default function OptionsList({
             `}
             onClick={() => !disabled && onSelect(opt)}
           >
-            {opt.answer}
+            {opt.choiceText}
           </button>
         );
       })}

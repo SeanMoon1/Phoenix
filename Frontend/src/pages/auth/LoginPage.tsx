@@ -21,7 +21,7 @@ const loginSchema = yup.object({
 type LoginFormData = yup.InferType<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, oauthLogin, isLoading } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
   const [isAdminMode, setIsAdminMode] = useState(false);
 
@@ -52,21 +52,28 @@ const LoginPage: React.FC = () => {
     reset();
   };
 
-  // OAuth 로그인 핸들러 (데모용 - 실제로는 각 OAuth 제공자의 SDK 사용)
+  // OAuth 로그인 핸들러 - 실제 OAuth 엔드포인트로 리다이렉트
   const handleOAuthLogin = async (provider: string) => {
     try {
-      // 실제 구현에서는 각 OAuth 제공자의 SDK를 사용하여 사용자 정보를 받아옴
-      // 여기서는 데모용으로 가상의 사용자 정보를 사용
-      const mockUserData = {
-        email: `user@${provider}.com`,
-        name: `${provider} 사용자`,
-        provider: provider,
-        providerId: `${provider}_${Date.now()}`,
-        profileImage: `https://via.placeholder.com/150?text=${provider}`,
-      };
+      // API 기본 URL 가져오기
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-      await oauthLogin(mockUserData);
-      navigate('/');
+      // 각 OAuth 제공자별 엔드포인트로 리다이렉트
+      switch (provider) {
+        case 'google':
+          window.location.href = `${apiBaseUrl}/auth/google`;
+          break;
+        case 'kakao':
+          window.location.href = `${apiBaseUrl}/auth/kakao`;
+          break;
+        case 'naver':
+          window.location.href = `${apiBaseUrl}/auth/naver`;
+          break;
+        default:
+          console.error(`지원하지 않는 OAuth 제공자: ${provider}`);
+          alert(`${provider} 로그인은 아직 지원되지 않습니다.`);
+      }
     } catch (error: unknown) {
       console.error(`${provider} 로그인 실패:`, error);
       alert(`${provider} 로그인에 실패했습니다.`);
@@ -140,7 +147,7 @@ const LoginPage: React.FC = () => {
                       <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      <span className="px-2 text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400">
                         또는
                       </span>
                     </div>
@@ -151,7 +158,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('google')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -178,7 +185,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('kakao')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -193,7 +200,7 @@ const LoginPage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center w-full space-x-2"
                       onClick={() => handleOAuthLogin('naver')}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">

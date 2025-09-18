@@ -7,6 +7,7 @@ import {
   trainingResultApi,
   teamApi,
 } from '../../services/api';
+import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
 
 // game-script-tool 컴포넌트들을 import (향후 통합 예정)
@@ -45,6 +46,9 @@ const AdminPage: React.FC = () => {
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDescription, setNewTeamDescription] = useState('');
   const [creatingTeam, setCreatingTeam] = useState(false);
+  const [dataSourceStatus, setDataSourceStatus] = useState(
+    ScenarioDataSource.getStatus()
+  );
   const { user } = useAuthStore();
 
   const tabs = [
@@ -120,14 +124,43 @@ const AdminPage: React.FC = () => {
     // 기존 JSON 파일들을 로드하여 임포트
     setImporting(true);
     try {
-      const fireResponse = await fetch(
-        '/scripts/data/fire_training_scenario.json'
-      );
-      const fireData = await fireResponse.json();
+      const scenarioFiles = [
+        { name: 'fire_training_scenario.json', type: 'fire' },
+        { name: 'earthquake_training_scenario.json', type: 'earthquake' },
+        { name: 'emergency_first_aid_scenario.json', type: 'emergency' },
+        { name: 'traffic_accident_scenario.json', type: 'traffic' },
+      ];
 
-      const response = await scenarioApi.syncFromJson(fireData);
-      if (response.success) {
-        alert('화재 시나리오가 성공적으로 동기화되었습니다.');
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of scenarioFiles) {
+        try {
+          const response = await fetch(`/data/${file.name}`);
+          const data = await response.json();
+
+          const syncResponse = await scenarioApi.syncFromJson(data);
+          if (syncResponse.success) {
+            successCount++;
+            console.log(`${file.type} 시나리오 동기화 성공`);
+          } else {
+            failCount++;
+            console.error(`${file.type} 시나리오 동기화 실패`);
+          }
+        } catch (error) {
+          failCount++;
+          console.error(`${file.type} 시나리오 로드 실패:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        alert(
+          `${successCount}개 시나리오가 성공적으로 동기화되었습니다.${
+            failCount > 0 ? ` (${failCount}개 실패)` : ''
+          }`
+        );
+        // 시나리오 목록 새로고침
+        window.location.reload();
       } else {
         alert('시나리오 동기화에 실패했습니다.');
       }
@@ -137,6 +170,13 @@ const AdminPage: React.FC = () => {
     } finally {
       setImporting(false);
     }
+  };
+
+  // 데이터 소스 전환 핸들러
+  const handleDataSourceChange = (source: 'static' | 'api' | 'auto') => {
+    ScenarioDataSource.setSource(source);
+    setDataSourceStatus(ScenarioDataSource.getStatus());
+    alert(`데이터 소스가 ${source}로 변경되었습니다.`);
   };
 
   // 팀 생성
@@ -412,6 +452,67 @@ const AdminPage: React.FC = () => {
               <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
                 시나리오 관리
               </h2>
+
+              {/* 데이터 소스 설정 섹션 */}
+              <div className="p-6 mb-8 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                  📊 시나리오 데이터 소스 설정
+                </h3>
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    현재 데이터 소스:{' '}
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">
+                      {dataSourceStatus.currentSource}
+                    </span>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleDataSourceChange('static')}
+                      className={`px-3 py-1 text-sm rounded-full ${
+                        dataSourceStatus.currentSource === 'static'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                      }`}
+                    >
+                      📁 정적 파일만
+                    </button>
+                    <button
+                      onClick={() => handleDataSourceChange('api')}
+                      className={`px-3 py-1 text-sm rounded-full ${
+                        dataSourceStatus.currentSource === 'api'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                      }`}
+                    >
+                      🌐 API만
+                    </button>
+                    <button
+                      onClick={() => handleDataSourceChange('auto')}
+                      className={`px-3 py-1 text-sm rounded-full ${
+                        dataSourceStatus.currentSource === 'auto'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                      }`}
+                    >
+                      🔄 자동 전환
+                    </button>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <p>
+                    • <strong>정적 파일만</strong>: public/data 폴더의 JSON 파일
+                    사용 (개발/테스트용)
+                  </p>
+                  <p>
+                    • <strong>API만</strong>: AWS Aurora/RDS 데이터베이스에서
+                    조회 (운영용)
+                  </p>
+                  <p>
+                    • <strong>자동 전환</strong>: 정적 파일 우선, 실패 시 API
+                    사용 (기본값)
+                  </p>
+                </div>
+              </div>
 
               {/* 시나리오 임포트 섹션 */}
               <div className="p-6 mb-8 rounded-lg bg-gray-50 dark:bg-gray-700">

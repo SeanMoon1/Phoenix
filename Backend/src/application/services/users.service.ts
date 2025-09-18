@@ -60,7 +60,10 @@ export class UsersService {
 
   // AuthService에서 필요한 메서드들
   async create(data: any) {
+    console.log('🔍 UsersService.create 호출됨:', { data });
     const result = await this.createUser(data);
+    console.log('🔍 createUser 결과:', { result });
+    console.log('🔍 반환할 user:', result?.user);
     return result.user;
   }
 

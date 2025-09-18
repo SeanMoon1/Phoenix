@@ -6,6 +6,7 @@ export interface ScenarioRepository {
   findByTeamId(teamId: number): Promise<Scenario[]>;
   findByDisasterType(disasterType: string): Promise<Scenario[]>;
   findByApprovalStatus(status: string): Promise<Scenario[]>;
+  findByScenarioCode(scenarioCode: string): Promise<Scenario | null>;
   create(scenario: Partial<Scenario>): Promise<Scenario>;
   update(id: number, scenario: Partial<Scenario>): Promise<Scenario>;
   delete(id: number): Promise<void>;

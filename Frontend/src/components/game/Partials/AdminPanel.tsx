@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { UserRole } from '../../../types/game';
 
-// ✅ 1. 우측 패널 관련 스타일 컴포넌트들 (ScriptToolPage에서 옮겨올 것)
+// ScriptToolPage 우측 패널 스타일드 컴포넌트
 const RightPanel = styled.div`
   width: 320px;
   background: white;
@@ -161,19 +161,6 @@ const UserProfile = styled.div`
   margin-bottom: 12px;
 `;
 
-const Avatar = styled.div`
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-`;
-
 const UserDetails = styled.div`
   flex: 1;
 `;
@@ -230,7 +217,7 @@ const UserStat = styled.div`
   }
 `;
 
-// ✅ 2. Props 인터페이스
+// Props 인터페이스
 interface AdminPanelProps {
   currentUser: {
     name: string;
@@ -258,7 +245,7 @@ interface AdminPanelProps {
   onDeleteAllScenarios: () => void;
 }
 
-// ✅ 3. 컴포넌트 (ScriptToolPage의 우측 패널 JSX 부분)
+// ScriptToolPage의 우측 패널 JSX 부분
 const AdminPanel: React.FC<AdminPanelProps> = ({
   currentUser,
   stats,
@@ -272,7 +259,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* 사용자 정보 */}
       <UserInfo>
         <UserProfile>
-          <Avatar>👤</Avatar>
           <UserDetails>
             <UserName>{currentUser.name}</UserName>
             <RoleBadge role={currentUser.role}>🔐 관리자</RoleBadge>

@@ -1,5 +1,5 @@
-import { Controller, Get, Query, Res, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Res, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -17,7 +17,7 @@ export class OAuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth 로그인 시작' })
   @ApiResponse({ status: 302, description: 'Google OAuth 페이지로 리디렉션' })
-  async googleAuth(@Req() req: Request) {
+  async googleAuth(@Req() _req: Request) {
     // Passport가 자동으로 Google OAuth 페이지로 리디렉션
   }
 

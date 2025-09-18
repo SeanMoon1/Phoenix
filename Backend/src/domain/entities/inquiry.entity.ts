@@ -10,7 +10,6 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Team } from './team.entity';
 import { User } from './user.entity';
-import { Admin } from './admin.entity';
 
 @Entity('inquiry')
 export class Inquiry {
@@ -86,8 +85,4 @@ export class Inquiry {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @ManyToOne(() => Admin)
-  @JoinColumn({ name: 'responded_by' })
-  responder?: Admin;
 }

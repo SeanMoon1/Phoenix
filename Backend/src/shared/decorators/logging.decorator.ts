@@ -10,7 +10,11 @@ export enum LogLevel {
 }
 
 export const Log = (level: LogLevel = LogLevel.INFO) => {
-  return (target: any, propertyName: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     SetMetadata(LOG_LEVEL_METADATA, level)(target, propertyName, descriptor);
     return descriptor;
   };

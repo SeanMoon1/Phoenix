@@ -8,7 +8,7 @@ export interface ApiResponse<T = any> {
 
 // 사용자 타입 (Database 스키마 기준)
 export interface User {
-  id: string;
+  id: number;
   teamId?: number;
   userCode?: string;
   loginId: string;
@@ -177,7 +177,7 @@ export interface ChoiceOption {
   reactionText?: string;
   nextSceneCode?: string;
   scoreWeight: number;
-  nextEventId?: number;
+  nextEventId?: string;
   createdBy?: number;
   updatedBy?: number;
   deletedAt?: string;
@@ -387,4 +387,121 @@ export interface DashboardStats {
   totalScenarios: number;
   completedSessions: number;
   averageScore: number;
+}
+
+// 시나리오 생성기 관련 타입들
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface ConversionOptions {
+  teamId: number;
+  createdBy: number;
+  backup: boolean;
+  verbose: boolean;
+  debug: boolean;
+}
+
+export interface ConversionResult {
+  inputFile: string;
+  outputFile: string;
+  eventCount: number;
+  optionCount: number;
+  success: boolean;
+  error?: string;
+}
+
+export interface Statistics {
+  totalFiles: number;
+  successCount: number;
+  failureCount: number;
+  totalEvents: number;
+  totalOptions: number;
+  averageOptionsPerEvent: number;
+}
+
+export interface ValidationStats {
+  totalEvents: number;
+  totalOptions: number;
+  disasterTypes: Set<string>;
+  difficulties: Set<string>;
+  riskLevels: Set<string>;
+}
+
+export interface ValidationConfig {
+  required: string[];
+  types: Record<string, string>;
+  maxLengths: Record<string, number>;
+  allowedValues: Record<string, string[]>;
+}
+
+// 시나리오 생성기용 시나리오 이벤트 타입 (기존 ScenarioEvent와 구분)
+export interface ScenarioGeneratorEvent {
+  id?: number;
+  teamId?: number;
+  scenarioCode?: string;
+  sceneId: string;
+  title: string;
+  content: string;
+  sceneScript: string;
+  status?: string;
+  approvalStatus?: string;
+  createdAt?: string;
+  createdBy?: number | string;
+  order?: number;
+  disasterType?: string;
+  riskLevel?: string;
+  difficulty?: string;
+  options: ChoiceOption[];
+}
+
+// ScriptBlock 타입 (기존 게임 시스템 호환성)
+export interface ScriptBlock {
+  sceneId: string;
+  title?: string;
+  content?: string;
+  sceneScript?: string;
+  approvalStatus: ApprovalStatus;
+  createdAt: string;
+  updatedAt?: string;
+  createdBy: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  order: number;
+  disasterType?: string;
+  difficulty?: string;
+  rejectionReason?: string;
+  options?: Array<{
+    answerId: string;
+    answer: string;
+    reaction: string;
+    nextId: string;
+    points: {
+      speed: number;
+      accuracy: number;
+    };
+  }>;
+  sceneType?: string;
+  nextSceneId?: string;
+}
+
+// ApprovalStatus 타입
+export const ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  DRAFT: 'DRAFT',
+} as const;
+
+export type ApprovalStatus =
+  (typeof ApprovalStatus)[keyof typeof ApprovalStatus];
+
+// AppState 타입
+export interface AppState {
+  isSceneFormOpened: boolean;
+  modifySceneId: string | null;
+  isScenarioFormOpened: boolean;
+  modifyScenarioId: string | null;
 }

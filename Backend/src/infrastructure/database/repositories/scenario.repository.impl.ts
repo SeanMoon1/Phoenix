@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ScenarioRepository } from '../../../domain/repositories/scenario.repository';
 import { Scenario } from '../../../domain/entities/scenario.entity';
@@ -7,7 +6,7 @@ import { Scenario } from '../../../domain/entities/scenario.entity';
 @Injectable()
 export class TypeOrmScenarioRepository implements ScenarioRepository {
   constructor(
-    @InjectRepository(Scenario)
+    @Inject('ScenarioRepository')
     private readonly scenarioRepository: Repository<Scenario>,
   ) {}
 
@@ -68,6 +67,12 @@ export class TypeOrmScenarioRepository implements ScenarioRepository {
   async findByRiskLevel(riskLevel: string): Promise<Scenario[]> {
     return this.scenarioRepository.find({
       where: { riskLevel },
+    });
+  }
+
+  async findByScenarioCode(scenarioCode: string): Promise<Scenario | null> {
+    return this.scenarioRepository.findOne({
+      where: { scenarioCode },
     });
   }
 }

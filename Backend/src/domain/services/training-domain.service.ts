@@ -127,7 +127,7 @@ export class TrainingDomainService {
   /**
    * 훈련 세션 예상 소요 시간 계산
    */
-  calculateEstimatedDuration(session: TrainingSession): number {
+  calculateEstimatedDuration(_session: TrainingSession): number {
     // 기본 60분 + 시나리오 난이도에 따른 조정
     const baseDuration = 60;
     // 실제로는 시나리오의 난이도를 가져와서 계산해야 함

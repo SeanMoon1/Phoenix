@@ -1,12 +1,7 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
-import { LoginDto } from '../../presentation/dto/login.dto';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
 import { PasswordUtil } from '../../utils/password.util';
@@ -19,9 +14,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    console.log('🔍 validateUser 호출:', { email });
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(loginId: string, password: string): Promise<any> {
+    console.log('🔍 validateUser 호출:', { loginId });
+    const user = await this.usersService.findByLoginId(loginId);
     console.log('👤 사용자 조회 결과:', user ? '사용자 존재' : '사용자 없음');
 
     if (user) {
@@ -114,6 +109,16 @@ export class AuthService {
         userCode: `USER${Date.now()}`, // 고유한 사용자 코드 생성
         password: hashedPassword,
       });
+
+      console.log('🔍 사용자 생성 결과:', { user });
+
+      if (!user) {
+        console.log('❌ 사용자 생성 실패: user가 undefined');
+        throw new BadRequestException({
+          message: '사용자 생성에 실패했습니다.',
+          error: 'User creation failed',
+        });
+      }
 
       const { password: _, ...result } = user;
       return {
@@ -312,6 +317,7 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log(error);
       return {
         success: false,
         error: '로그인 ID 확인 중 오류가 발생했습니다.',

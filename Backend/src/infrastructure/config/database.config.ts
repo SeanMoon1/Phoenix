@@ -4,52 +4,42 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 export const getDatabaseConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => {
-  const isDevelopment = configService.get('NODE_ENV') === 'development';
-
-  return {
-    type: 'mysql',
-    host: isDevelopment
-      ? configService.get('DB_HOST_DEV') || 'localhost'
-      : configService.get('DB_HOST_PROD') ||
-        configService.get('DB_HOST') ||
-        'localhost',
-    port: isDevelopment
-      ? parseInt(configService.get('DB_PORT_DEV'), 10) || 3306
-      : parseInt(
-          configService.get('DB_PORT_PROD') || configService.get('DB_PORT'),
-          10,
-        ) || 3306,
-    username: isDevelopment
-      ? configService.get('DB_USERNAME_DEV') || 'root'
-      : configService.get('DB_USERNAME_PROD') ||
-        configService.get('DB_USERNAME') ||
-        'root',
-    password: isDevelopment
-      ? configService.get('DB_PASSWORD_DEV') || ''
-      : configService.get('DB_PASSWORD_PROD') ||
-        configService.get('DB_PASSWORD') ||
-        '',
-    database: isDevelopment
-      ? configService.get('DB_DATABASE_DEV') || 'phoenix'
-      : configService.get('DB_DATABASE_PROD') ||
-        configService.get('DB_DATABASE') ||
-        'phoenix',
-    entities: [
-      __dirname + '/../../domain/entities/*.entity{.ts,.js}',
-      __dirname + '/../database/entities/*.entity{.ts,.js}',
-    ],
+  const config = {
+    type: 'mysql' as const,
+    host: configService.get('DB_HOST'),
+    port: Number(configService.get('DB_PORT') ?? 3306),
+    username: configService.get('DB_USERNAME'),
+    password: configService.get('DB_PASSWORD'),
+    database: configService.get('DB_DATABASE'),
+    entities: [__dirname + '/../../domain/entities/*.entity.js'],
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-    synchronize: isDevelopment,
-    logging: isDevelopment,
-    // 연결 풀 설정
+    synchronize: false,
+    logging: configService.get('NODE_ENV') === 'development',
+    // 데이터베이스 연결 실패 시에도 애플리케이션이 계속 실행되도록 설정
+    retryAttempts: 3,
+    retryDelay: 3000,
+    autoLoadEntities: true,
     extra: {
-      connectionLimit: 10,
+      connectTimeout: 10000,
+      waitForConnections: true,
+      queueLimit: 0,
     },
-    // SSL 설정 (AWS RDS 사용 시)
-    ssl: !isDevelopment
-      ? {
-          rejectUnauthorized: false,
-        }
-      : false,
+    // Aurora RDS 연결을 위한 추가 설정
+    ssl:
+      process.env.NODE_ENV === 'production'
+        ? {
+            rejectUnauthorized: false,
+          }
+        : false,
   };
+
+  console.log('🔍 데이터베이스 설정:', {
+    host: config.host,
+    port: config.port,
+    username: config.username,
+    database: config.database,
+    entities: config.entities,
+  });
+
+  return config;
 };

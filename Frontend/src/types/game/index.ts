@@ -3,7 +3,30 @@
 // Database 스키마 기준으로 정의된 타입들을 사용하세요.
 
 // 기존 코드와의 호환성을 위해 re-export
-export type { User, ScenarioEvent, UserScenarioStats } from '../index';
+export type {
+  User,
+  Scenario,
+  ScenarioEvent,
+  ScenarioScene,
+  ChoiceOption,
+  UserScenarioStats,
+  TrainingSession,
+  TrainingParticipant,
+  UserChoiceLog,
+  UserLevelHistory,
+  Inquiry,
+  Faq,
+  Code,
+  Team,
+  ScriptBlock,
+  AppState,
+} from '../index';
+
+export { ApprovalStatus } from '../index';
+export type { ApprovalStatus as ApprovalStatusType } from '../index';
+
+// ApprovalStatus 타입을 직접 import
+import type { ApprovalStatus } from '../index';
 
 export const UserRole = {
   ADMIN: 'ADMIN',
@@ -13,62 +36,7 @@ export const UserRole = {
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-// SQL 스키마 기반 새로운 인터페이스들
-export interface Scenario {
-  scenarioId: string;
-  teamId: string;
-  scenarioCode: string;
-  title: string;
-  disasterType: string;
-  description: string;
-  riskLevel: string;
-  occurrenceCondition?: string;
-  status: ScenarioStatus;
-  approvalComment?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  createdAt: string;
-  createdBy: string;
-  approvedAt?: string;
-  approvedBy?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-  events: DecisionEvent[];
-}
-
-export interface DecisionEvent {
-  eventId: string;
-  scenarioId: string;
-  eventCode: string;
-  eventOrder: number;
-  eventDescription: string;
-  eventType: string;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-  choices: ChoiceOption[];
-}
-
-export interface ChoiceOption {
-  choiceId: string;
-  eventId: string;
-  scenarioId: string;
-  choiceCode: string;
-  choiceText: string;
-  isCorrect: boolean;
-  scoreWeight: number;
-  nextEventId?: string;
-  createdAt: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  deletedAt?: string;
-  isActive: boolean;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
 export const ScenarioStatus = {
   DRAFT: '임시저장',
@@ -90,90 +58,9 @@ export const EventType = {
 
 export type EventType = (typeof EventType)[keyof typeof EventType];
 
-// 기존 ScriptBlock (하위 호환성을 위해 유지)
-export interface ScriptBlock {
-  sceneId: string;
-  title?: string;
-  content?: string;
-  sceneScript?: string;
-  approvalStatus: ApprovalStatus;
-  createdAt: string;
-  updatedAt?: string;
-  createdBy: string;
-  approvedBy?: string;
-  approvedAt?: string;
-  order: number;
-  disasterType?: string;
-  difficulty?: string;
-  rejectionReason?: string;
-  options?: Array<{
-    answerId: string;
-    answer: string;
-    reaction: string;
-    nextId: string;
-    points: {
-      speed: number;
-      accuracy: number;
-    };
-  }>;
-  sceneType?: string;
-  nextSceneId?: string;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
-export const ApprovalStatus = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  DRAFT: 'DRAFT',
-} as const;
-
-export type ApprovalStatus =
-  (typeof ApprovalStatus)[keyof typeof ApprovalStatus];
-
-export interface AppState {
-  isSceneFormOpened: boolean;
-  modifySceneId: string | null;
-  isScenarioFormOpened: boolean;
-  modifyScenarioId: string | null;
-}
-
-export interface TrainingResult {
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeSpent: number;
-  completedAt: string;
-  // 레벨업 시스템 관련 필드 추가
-  exp_gained: number; // 획득한 경험치
-  level_before: number; // 훈련 전 레벨
-  level_after: number; // 훈련 후 레벨
-  level_up: boolean; // 레벨업 여부
-  bonus_exp: number; // 보너스 경험치 (난이도, 빠른 완료 등)
-}
-
-// 레벨업 시스템을 위한 새로운 인터페이스
-export interface UserProgress {
-  user_id: string;
-  user_level: number;
-  user_exp: number;
-  total_score: number;
-  completed_scenarios: number;
-  current_streak: number; // 연속 완료 횟수
-  longest_streak: number; // 최장 연속 완료 횟수
-  achievements: Achievement[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Achievement {
-  achievement_id: string;
-  achievement_name: string;
-  achievement_description: string;
-  achievement_type: AchievementType;
-  unlocked_at: string;
-  progress: number; // 달성도 (0-100)
-  is_completed: boolean;
-}
+// 중복된 타입 정의 제거 - Frontend/src/types/index.ts 사용
 
 export const AchievementType = {
   LEVEL_UP: 'LEVEL_UP', // 레벨업 달성

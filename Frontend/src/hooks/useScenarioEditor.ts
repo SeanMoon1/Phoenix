@@ -20,18 +20,41 @@ interface FormData {
   }>;
 }
 
-// ✅ getNextAvailableSceneId 함수 추가 (존재하지 않을 경우)
+// #1-1 형식으로 다음 사용 가능한 Scene ID 생성
 const getNextAvailableSceneId = (existingBlocks: ScriptBlock[]): string => {
   const existingIds = existingBlocks.map(block => block.sceneId);
-  let counter = 1;
-  let newId = `scene${counter}`;
 
-  while (existingIds.includes(newId)) {
-    counter++;
-    newId = `scene${counter}`;
+  // 기존 ID들에서 시나리오 번호와 장면 번호 추출
+  const scenarioMap: { [key: number]: number[] } = {};
+
+  existingIds.forEach(id => {
+    // #1-1, #2-3 등의 형식에서 번호 추출
+    const match = id.match(/^#(\d+)-(\d+)$/);
+    if (match) {
+      const scenarioNum = parseInt(match[1]);
+      const sceneNum = parseInt(match[2]);
+
+      if (!scenarioMap[scenarioNum]) {
+        scenarioMap[scenarioNum] = [];
+      }
+      scenarioMap[scenarioNum].push(sceneNum);
+    }
+  });
+
+  // 가장 큰 시나리오 번호 찾기
+  const maxScenarioNum = Math.max(0, ...Object.keys(scenarioMap).map(Number));
+
+  if (maxScenarioNum === 0) {
+    // 기존 시나리오가 없으면 #1-1부터 시작
+    return '#1-1';
   }
 
-  return newId;
+  // 현재 가장 큰 시나리오에서 다음 장면 번호 찾기
+  const currentScenarioScenes = scenarioMap[maxScenarioNum] || [];
+  const maxSceneNum = Math.max(0, ...currentScenarioScenes);
+
+  // 다음 장면 번호로 ID 생성
+  return `#${maxScenarioNum}-${maxSceneNum + 1}`;
 };
 
 export const useScenarioEditor = () => {

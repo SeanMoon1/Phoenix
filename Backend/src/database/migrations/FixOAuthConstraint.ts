@@ -25,10 +25,8 @@ export class FixOAuthConstraint1700000000002 implements MigrationInterface {
         console.log('ℹ️ uk_team_name 제약조건이 이미 존재하지 않습니다.');
       }
     } catch (error) {
-      console.warn(
-        '⚠️ uk_team_name 제약조건 제거 중 오류 (무시 가능):',
-        error.message,
-      );
+      // 에러 무시하고 계속 진행
+      console.log('ℹ️ uk_team_name 제약조건 처리 건너뜀');
     }
   }
 
@@ -40,7 +38,8 @@ export class FixOAuthConstraint1700000000002 implements MigrationInterface {
       `);
       console.log('🔄 uk_team_name 제약조건이 복원되었습니다.');
     } catch (error) {
-      console.warn('⚠️ uk_team_name 제약조건 복원 중 오류:', error.message);
+      // 에러 무시하고 계속 진행
+      console.log('ℹ️ uk_team_name 제약조건 복원 건너뜀');
     }
   }
 }

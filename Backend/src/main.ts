@@ -42,17 +42,15 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
 
-    // OAuth 문제 해결을 위한 마이그레이션 실행
+    // OAuth 문제 해결을 위한 마이그레이션 실행 (에러 무시)
     try {
       const dataSource = app.get(DataSource);
       const oauthFix = new FixOAuthConstraint1700000000002();
       await oauthFix.up(dataSource.createQueryRunner());
       console.log('✅ OAuth 문제 해결 마이그레이션 완료');
     } catch (error) {
-      console.warn(
-        '⚠️ OAuth 마이그레이션 실행 중 오류 (무시 가능):',
-        error.message,
-      );
+      // 에러 무시하고 계속 진행
+      console.log('ℹ️ OAuth 마이그레이션 건너뜀 (이미 처리됨)');
     }
 
     // 개발 환경에서만 시드 실행

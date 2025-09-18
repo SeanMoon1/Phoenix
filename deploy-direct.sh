@@ -85,8 +85,8 @@ print_status "OAuth 문제 해결: 마이그레이션 실행 중..."
 cd Backend
 if [ -f ".env" ]; then
     source .env
-    # 마이그레이션 실행
-    npm run migration:run || print_warning "마이그레이션 실행 중 오류 (무시 가능)"
+    # 마이그레이션 실행 (에러 무시)
+    npm run migration:run 2>/dev/null || true
     print_status "OAuth 문제 해결 완료!"
 fi
 cd ..

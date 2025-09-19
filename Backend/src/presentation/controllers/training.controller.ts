@@ -62,8 +62,10 @@ export class TrainingController {
   @Get()
   @ApiOperation({ summary: '모든 훈련 세션 조회' })
   @ApiResponse({ status: 200, description: '훈련 세션 목록 조회 성공' })
-  findAll() {
-    return this.trainingService.findAll();
+  async findAll() {
+    const sessions = await this.trainingService.findAll();
+    console.log('🔍 DB에서 조회된 세션들:', sessions);
+    return { success: true, data: sessions };
   }
 
   @Get(':id')

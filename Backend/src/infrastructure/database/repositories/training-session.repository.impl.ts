@@ -41,8 +41,14 @@ export class TypeOrmTrainingSessionRepository
   }
 
   async create(session: Partial<TrainingSession>): Promise<TrainingSession> {
+    console.log('🔍 저장할 세션 데이터:', session);
     const newSession = this.trainingSessionRepository.create(session);
-    return this.trainingSessionRepository.save(newSession);
+    console.log('🔍 생성된 엔티티:', newSession);
+    const savedSession = await this.trainingSessionRepository.save(newSession);
+    console.log('🔍 저장된 세션 ID:', savedSession.id);
+    console.log('🔍 저장된 세션 전체:', savedSession);
+    console.log('🔍 저장된 세션 키들:', Object.keys(savedSession));
+    return savedSession;
   }
 
   async update(

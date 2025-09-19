@@ -10,6 +10,15 @@ import {
 
 export class CreateTrainingSessionDto {
   @ApiProperty({
+    example: 'SESS001',
+    description: '세션 코드',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  sessionCode?: string;
+
+  @ApiProperty({
     example: '화재 대응 훈련 세션',
     description: '훈련 세션명',
   })

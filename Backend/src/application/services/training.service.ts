@@ -14,7 +14,12 @@ export class TrainingService {
   async create(
     createTrainingSessionDto: CreateTrainingSessionDto,
   ): Promise<TrainingSession> {
-    return this.trainingSessionRepository.create(createTrainingSessionDto);
+    // sessionCode가 없으면 자동 생성
+    const sessionData = {
+      ...createTrainingSessionDto,
+      sessionCode: createTrainingSessionDto.sessionCode || `SESS${Date.now()}`,
+    };
+    return this.trainingSessionRepository.create(sessionData);
   }
 
   async findAll(): Promise<TrainingSession[]> {

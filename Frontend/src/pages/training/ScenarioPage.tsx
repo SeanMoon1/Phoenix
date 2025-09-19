@@ -129,29 +129,16 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       console.log('훈련 세션 생성 완료:', session);
 
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-      // 모든 가능한 경로에서 sessionId 추출 시도
-      const sessionId =
-        session.data?.id || // ApiResponse 구조
-        (session as any).id || // 직접 엔티티 반환
-        (session as any).data?.id || // 다른 래핑 구조
-        session.id || // 최상위 id
-        (session as any).response?.data?.id || // 응답 래핑 구조
-        (session as any).result?.id || // result 래핑 구조
-        (session as any).sessionId; // sessionId 속성명
-
-      console.log('🔍 세션 ID 추출 시도:', {
-        'session.data?.id': session.data?.id,
-        '(session as any).id': (session as any).id,
-        '(session as any).data?.id': (session as any).data?.id,
-        'session.id': session.id,
-        '(session as any).response?.data?.id': (session as any).response?.data
-          ?.id,
-        '(session as any).result?.id': (session as any).result?.id,
-        '(session as any).sessionId': (session as any).sessionId,
-        '최종 sessionId': sessionId,
+      // ApiResponse 구조에서 sessionId 추출
+      const sessionId = (session.data as any)?.id;
+      console.log('🔍 세션 ID:', sessionId);
+      console.log('🔍 세션 응답 구조:', {
+        success: session.success,
+        hasData: !!session.data,
+        dataId: (session.data as any)?.id,
+        dataKeys: session.data ? Object.keys(session.data) : 'no data',
+        fullResponse: session,
       });
-
-      console.log('🔍 전체 응답 구조:', JSON.stringify(session, null, 2));
 
       if (!sessionId) {
         console.error('❌ 세션 ID를 찾을 수 없습니다. 전체 응답:', session);

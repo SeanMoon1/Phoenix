@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingResultApi } from '@/services/api';
@@ -56,6 +56,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  // ref to scroll target (SituationCard top)
+  const topRef = useRef<HTMLDivElement | null>(null);
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
@@ -218,6 +220,11 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       gameState.resetSceneFlags();
       gameState.setHistory(h => [...h, gameState.current]);
       gameState.setCurrent(nextIndex);
+      // 스크롤: 상태 변경 후 다음 씬의 SituationCard가 화면 상단에 보이도록
+      requestAnimationFrame(() => {
+        // 약간의 지연이 필요하면 setTimeout(..., 50)으로 조정
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
       return;
     }
 
@@ -227,6 +234,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       gameState.resetSceneFlags();
       gameState.setHistory(h => [...h, gameState.current]);
       gameState.setCurrent(seqNextIndex);
+      requestAnimationFrame(() => {
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
       return;
     }
 
@@ -303,7 +313,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
             hideExpFill={expSystem.hideExpFill}
             playerName={user?.name ?? user?.loginId ?? '플레이어 이름'}
           />
-          <main>
+          <main ref={topRef}>
             <ProgressBar
               currentIndex={gameState.current}
               total={gameState.scenarios.length}

@@ -129,9 +129,16 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       console.log('훈련 세션 생성 완료:', session);
 
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-      // ApiResponse 구조에서 data.id 사용
-      const sessionId = session.data?.id;
+      // 실제 응답 구조 확인 후 sessionId 추출
+      const sessionId = session.data?.id || (session as any).id;
       console.log('🔍 세션 ID:', sessionId);
+      console.log('🔍 세션 응답 구조:', {
+        hasData: !!session.data,
+        hasId: !!(session as any).id,
+        dataId: session.data?.id,
+        sessionId: (session as any).id,
+        fullResponse: session,
+      });
 
       if (!sessionId) {
         console.error('❌ 세션 ID를 찾을 수 없습니다. 전체 응답:', session);

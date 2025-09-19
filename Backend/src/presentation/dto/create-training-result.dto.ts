@@ -28,6 +28,11 @@ export class CreateTrainingResultDto {
   @IsNotEmpty()
   userId: number;
 
+  @ApiProperty({ example: 'RESULT001', description: '결과 코드' })
+  @IsString()
+  @IsNotEmpty()
+  resultCode: string;
+
   @ApiProperty({ example: 85, description: '정확도 점수' })
   @IsNumber()
   @IsNotEmpty()

@@ -150,7 +150,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         sessionId: sessionId, // 생성된 세션 ID 사용
         scenarioId: scenarioIdMap[scenarioType] || 1,
         userId: user.id,
-        // resultCode는 서버에서 자동 생성되므로 제거
+        resultCode: `RESULT${Date.now()}`, // 결과 코드 자동 생성
         accuracyScore:
           gameState.scenarios.length > 0
             ? Math.round(

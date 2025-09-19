@@ -29,29 +29,34 @@ export class UserProgressController {
         await this.trainingResultService.getTrainingResultsByUser(userId);
 
       // 시나리오별 통계 계산
-      const scenarioStats = results.reduce((acc, result) => {
-        const scenarioId = result.scenarioId;
-        if (!acc[scenarioId]) {
-          acc[scenarioId] = {
-            scenarioId,
-            scenarioName: result.scenario?.title || `시나리오 ${scenarioId}`,
-            totalAttempts: 0,
-            totalScore: 0,
-            averageScore: 0,
-            bestScore: 0,
-            lastAttempt: null,
-            completionRate: 0,
-          };
-        }
+      const scenarioStats = results.reduce(
+        (acc, result) => {
+          const scenarioId = result.scenarioId;
+          if (!acc[scenarioId]) {
+            acc[scenarioId] = {
+              scenarioId,
+              scenarioName: result.scenario?.title || `시나리오 ${scenarioId}`,
+              totalAttempts: 0,
+              totalScore: 0,
+              averageScore: 0,
+              bestScore: 0,
+              lastAttempt: null,
+              completionRate: 0,
+            };
+          }
 
-        acc[scenarioId].totalAttempts++;
-        acc[scenarioId].totalScore += result.totalScore || 0;
-        acc[scenarioId].bestScore = Math.max(
-          acc[scenarioId].bestScore,
-          result.totalScore || 0,
-        );
-        acc[scenarioId].lastAttempt = result.completedAt;
-      }, {});
+          acc[scenarioId].totalAttempts++;
+          acc[scenarioId].totalScore += result.totalScore || 0;
+          acc[scenarioId].bestScore = Math.max(
+            acc[scenarioId].bestScore,
+            result.totalScore || 0,
+          );
+          acc[scenarioId].lastAttempt = result.completedAt;
+
+          return acc; // reduce 함수에서 누락된 반환값 추가
+        },
+        {} as Record<number, any>,
+      );
 
       // 평균 점수 계산
       Object.values(scenarioStats).forEach((stat: any) => {

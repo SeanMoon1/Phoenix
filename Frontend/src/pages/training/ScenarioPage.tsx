@@ -127,8 +127,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
       const session = await trainingApi.createSession(sessionData);
       console.log('훈련 세션 생성 완료:', session);
+
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-      // ApiResponse<TrainingSession> 구조에서 data.id 사용
+      // ApiResponse 구조에서 data.id 사용
       const sessionId = session.data?.id;
       console.log('🔍 세션 ID:', sessionId);
 

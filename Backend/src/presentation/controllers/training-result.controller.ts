@@ -46,13 +46,13 @@ export class TrainingResultController {
         id: result.id,
         resultCode: result.resultCode,
       });
-      return result;
+      return { success: true, data: result };
     } catch (error) {
       console.error(
         '❌ TrainingResultController.createTrainingResult 실패:',
         error,
       );
-      throw error;
+      return { success: false, error: error.message };
     }
   }
 

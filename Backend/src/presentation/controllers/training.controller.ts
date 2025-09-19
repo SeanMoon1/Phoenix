@@ -44,10 +44,10 @@ export class TrainingController {
     try {
       const result = this.trainingService.create(createTrainingSessionDto);
       console.log('✅ TrainingController.create 성공');
-      return result;
+      return { success: true, data: result };
     } catch (error) {
       console.error('❌ TrainingController.create 실패:', error);
-      throw error;
+      return { success: false, error: error.message };
     }
   }
 

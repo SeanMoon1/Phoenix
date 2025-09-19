@@ -137,6 +137,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         hasId: !!(session as any).id,
         dataId: session.data?.id,
         sessionId: (session as any).id,
+        dataKeys: session.data ? Object.keys(session.data) : 'no data',
+        dataValues: session.data,
         fullResponse: session,
       });
 

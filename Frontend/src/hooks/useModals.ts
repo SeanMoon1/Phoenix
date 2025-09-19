@@ -60,46 +60,51 @@ export function useModals({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 엔딩 모달 처리
+  // 엔딩 모달 처리 - sceneId만 체크하여 무한 루프 방지
   useEffect(() => {
+    const sceneId = scenario?.sceneId;
+    const isEndScene = sceneId ? sceneId.trim() === END_SCENE_ID : false;
+
     console.log('🔍 useModals 엔딩 체크:', {
       hasScenario: !!scenario,
-      sceneId: scenario?.sceneId,
+      sceneId,
       endModalAutoShown,
-      isEndScene: scenario
-        ? (scenario.sceneId ?? '').trim() === END_SCENE_ID
-        : false,
+      isEndScene,
       failedThisRun,
     });
 
-    if (!scenario || endModalAutoShown) return;
-    if ((scenario.sceneId ?? '').trim() === END_SCENE_ID) {
-      console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
-      setEndModalAutoShown(true);
-      // onSaveResult는 비동기지만 에러를 흘리지 않도록 처리
+    if (!scenario || endModalAutoShown || !isEndScene) return;
+
+    console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
+    setEndModalAutoShown(true);
+
+    // onSaveResult 함수 호출 전 로깅
+    console.log('🚀 onSaveResult 함수 호출 시도:', typeof onSaveResult);
+    if (typeof onSaveResult === 'function') {
       onSaveResult().catch(err =>
         console.error('[useModals] onSaveResult failed', err)
       );
+    } else {
+      console.error('❌ onSaveResult가 함수가 아닙니다:', onSaveResult);
+    }
 
-      if (!failedThisRun) {
-        _setClearMsg(
-          `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
-        );
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 4500);
-      } else {
-        _setFailMsg(
-          `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
-        );
-      }
+    if (!failedThisRun) {
+      _setClearMsg(
+        `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
+      );
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4500);
+    } else {
+      _setFailMsg(
+        `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
+      );
     }
   }, [
-    scenario,
+    scenario?.sceneId, // sceneId만 의존성으로 사용
     endModalAutoShown,
     failedThisRun,
     scenarioSetName,
-    setEndModalAutoShown,
-    // onSaveResult를 의존성 배열에서 제거하여 무한 루프 방지
+    // setEndModalAutoShown과 onSaveResult를 의존성 배열에서 제거하여 무한 루프 방지
   ]);
 
   // 모달 시 스크롤 잠금

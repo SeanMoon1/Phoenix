@@ -76,6 +76,15 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   // 결과 저장 함수 - useCallback으로 메모이제이션하여 무한 루프 방지
   const saveTrainingResult = useCallback(async () => {
     console.log('🚀 saveTrainingResult 함수 호출됨!');
+    console.log('🔍 saveTrainingResult 호출 시점 정보:', {
+      hasUser: !!user,
+      userId: user?.id,
+      scenarioType,
+      gameStateScenariosLength: gameState.scenarios.length,
+      expSystemTotalCorrect: expSystem.totalCorrect,
+      expSystemLevel: expSystem.level,
+    });
+
     try {
       if (!user) {
         console.error(
@@ -168,9 +177,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     scenarioType,
     scenarioSetName,
     startTime,
-    gameState.scenarios.length,
-    expSystem.totalCorrect,
-    expSystem.level,
+    // gameState와 expSystem의 값들은 함수 내에서 직접 참조하므로 의존성에서 제거
   ]);
 
   // 모달 훅

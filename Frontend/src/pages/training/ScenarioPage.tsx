@@ -184,7 +184,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   ]);
 
   // 모달 훅
-  console.log('🔄 ScenarioPage - useModals 훅 호출 시작');
   const modals = useModals({
     scenario: gameState.scenario,
     failedThisRun: gameState.failedThisRun,
@@ -192,14 +191,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     endModalAutoShown: gameState.endModalAutoShown,
     setEndModalAutoShown: gameState.setEndModalAutoShown,
     onSaveResult: saveTrainingResult,
-  });
-  console.log('✅ ScenarioPage - useModals 훅 호출 완료');
-
-  // saveTrainingResult 함수가 제대로 전달되는지 확인
-  console.log('🔍 ScenarioPage - saveTrainingResult 함수 확인:', {
-    isFunction: typeof saveTrainingResult === 'function',
-    functionName: saveTrainingResult?.name,
-    functionLength: saveTrainingResult?.length,
   });
 
   // useModals에 전달되는 scenario 값 디버깅 (무한 루프 방지를 위해 useEffect로 이동)

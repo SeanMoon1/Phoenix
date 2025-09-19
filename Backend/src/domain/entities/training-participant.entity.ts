@@ -25,9 +25,9 @@ export class TrainingParticipant {
   @Column({ name: 'session_id' })
   sessionId: number;
 
-  @ApiProperty({ description: '팀 ID' })
-  @Column({ name: 'team_id' })
-  teamId: number;
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
 
   @ApiProperty({ description: '시나리오 ID' })
   @Column({ name: 'scenario_id' })

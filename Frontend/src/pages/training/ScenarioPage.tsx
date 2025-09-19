@@ -146,7 +146,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       }
 
       const resultData = {
-        participantId: user.id, // 사용자 ID를 participantId로 사용
+        // participantId는 백엔드에서 자동 생성됨
         sessionId: sessionId, // 생성된 세션 ID 사용
         scenarioId: scenarioIdMap[scenarioType] || 1,
         userId: user.id,

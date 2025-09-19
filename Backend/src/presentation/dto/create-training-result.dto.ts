@@ -8,10 +8,10 @@ import {
 } from 'class-validator';
 
 export class CreateTrainingResultDto {
-  @ApiProperty({ example: 1, description: '참가자 ID' })
+  @ApiProperty({ example: 1, description: '참가자 ID', required: false })
   @IsNumber()
-  @IsNotEmpty()
-  participantId: number;
+  @IsOptional()
+  participantId?: number;
 
   @ApiProperty({ example: 1, description: '세션 ID' })
   @IsNumber()

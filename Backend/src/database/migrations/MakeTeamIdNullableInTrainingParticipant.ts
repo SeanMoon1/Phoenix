@@ -6,25 +6,36 @@ export class MakeTeamIdNullableInTrainingParticipant1700000000000
   name = 'MakeTeamIdNullableInTrainingParticipant1700000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // 먼저 외래키 제약조건을 안전하게 제거
+    try {
+      await queryRunner.query(`
+        ALTER TABLE training_participant 
+        DROP FOREIGN KEY training_participant_ibfk_2
+      `);
+    } catch (error) {
+      console.log(
+        '외래키 제약조건이 존재하지 않거나 다른 이름입니다:',
+        error.message,
+      );
+    }
+
     // team_id 컬럼을 nullable로 변경
     await queryRunner.query(`
       ALTER TABLE training_participant 
       MODIFY COLUMN team_id BIGINT NULL COMMENT '팀 ID'
     `);
 
-    // 외래키 제약조건 제거 (team_id가 null일 수 있으므로)
-    await queryRunner.query(`
-      ALTER TABLE training_participant 
-      DROP FOREIGN KEY training_participant_ibfk_2
-    `);
-
     // team_id가 null이 아닌 경우에만 외래키 제약조건 추가
-    await queryRunner.query(`
-      ALTER TABLE training_participant 
-      ADD CONSTRAINT fk_training_participant_team 
-      FOREIGN KEY (team_id) REFERENCES team(team_id) 
-      ON DELETE SET NULL ON UPDATE CASCADE
-    `);
+    try {
+      await queryRunner.query(`
+        ALTER TABLE training_participant 
+        ADD CONSTRAINT fk_training_participant_team 
+        FOREIGN KEY (team_id) REFERENCES team(team_id) 
+        ON DELETE SET NULL ON UPDATE CASCADE
+      `);
+    } catch (error) {
+      console.log('외래키 제약조건 추가 실패:', error.message);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

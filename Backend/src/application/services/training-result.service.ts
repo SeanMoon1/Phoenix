@@ -222,6 +222,39 @@ export class TrainingResultService {
    * @param scenarioId 시나리오 ID
    * @returns 참가자 ID
    */
+  private async ensureDefaultTeamExists(): Promise<number> {
+    try {
+      // 기본 팀 조회
+      const defaultTeam = await this.trainingResultRepository.manager.findOne(
+        'Team',
+        {
+          where: { teamId: 1 },
+        },
+      );
+
+      if (defaultTeam) {
+        return 1;
+      }
+
+      // 기본 팀이 없으면 생성
+      const newTeam = this.trainingResultRepository.manager.create('Team', {
+        teamId: 1,
+        teamName: '기본 팀',
+        teamCode: 'DEFAULT',
+        description: '개인 사용자를 위한 기본 팀',
+        isActive: true,
+      });
+
+      await this.trainingResultRepository.manager.save('Team', newTeam);
+      console.log('✅ 기본 팀 생성 완료:', { teamId: 1 });
+      return 1;
+    } catch (error) {
+      console.error('❌ 기본 팀 생성 실패:', error);
+      // 실패 시에도 1을 반환 (기존 팀이 있을 가능성)
+      return 1;
+    }
+  }
+
   private async createOrGetParticipant(
     userId: number,
     sessionId: number,
@@ -260,7 +293,14 @@ export class TrainingResultService {
         },
       );
 
-      const teamId = session?.teamId; // 세션의 teamId가 없으면 null (팀 없이도 참가 가능)
+      // teamId가 없으면 기본값 1 사용 (임시 해결책)
+      // TODO: 데이터베이스 스키마에서 team_id를 nullable로 변경 후 이 부분 수정
+      let teamId = session?.teamId;
+
+      if (!teamId) {
+        // 기본 팀이 존재하는지 확인하고, 없으면 생성
+        teamId = await this.ensureDefaultTeamExists();
+      }
 
       // 새 참가자 생성
       const participantCode = `PART_${Date.now()}_${userId}`;

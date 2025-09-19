@@ -194,7 +194,7 @@ Phoenix/
 │
 ├── .gitignore
 ├── README.md
-├── docker-compose.yml              # 로컬 개발용
+├── deploy-direct.sh                # 직접 실행 배포 스크립트
 └── package.json                    # 루트 패키지
 ```
 
@@ -207,39 +207,48 @@ Phoenix/
 ```bash
 # Backend/.env 파일 생성
 cd Backend
-cp .env.example .env  # 또는 직접 생성
+cp ../env.example .env  # 또는 직접 생성
 ```
 
 **필수 환경 변수:**
 
 ```env
 # Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=password
+DB_HOST=your_database_host
+DB_PORT=3306
+DB_USERNAME=your_database_username
+DB_PASSWORD=your_secure_password_here
 DB_DATABASE=phoenix
 
 # JWT
 JWT_SECRET=your-super-secret-jwt-key-here
 JWT_EXPIRES_IN=7d
 
-# Google OAuth (Google Cloud Console에서 발급)
+# OAuth 설정
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+GOOGLE_CALLBACK_URL=https://your-domain.com/auth/google/callback
+
+KAKAO_CLIENT_ID=your-kakao-client-id
+KAKAO_CLIENT_SECRET=your-kakao-client-secret
+KAKAO_CALLBACK_URL=https://your-domain.com/auth/kakao/callback
+
+NAVER_CLIENT_ID=your-naver-client-id
+NAVER_CLIENT_SECRET=your-naver-client-secret
+NAVER_CALLBACK_URL=https://your-domain.com/auth/naver/callback
 
 # OAuth 리다이렉션 설정
-OAUTH_REDIRECT_BASE=https://phoenix-4.com
-OAUTH_SUCCESS_REDIRECT=https://phoenix-4.com/auth/callback
-OAUTH_FAILURE_REDIRECT=https://phoenix-4.com/auth/callback
+OAUTH_REDIRECT_BASE=https://your-domain.com
+OAUTH_SUCCESS_REDIRECT=https://your-domain.com/auth/callback
+OAUTH_FAILURE_REDIRECT=https://your-domain.com/login?error=oauth
 
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
+# API URL
+API_URL=https://api.your-domain.com
+FRONTEND_URL=https://your-domain.com
 
 # Server
 PORT=3000
-NODE_ENV=development
+NODE_ENV=production
 ```
 
 #### Frontend 환경 변수 (.env 파일 생성)
@@ -254,41 +263,52 @@ cp .env.example .env  # 또는 직접 생성
 
 ```env
 # API URL
-VITE_API_URL=http://localhost:3000
+VITE_API_BASE_URL=https://api.your-domain.com
 
 # Environment
-VITE_NODE_ENV=development
+VITE_SCENARIO_DATA_SOURCE=auto
 ```
 
-### 2. 개발 환경 설정
+### 2. 프로덕션 배포
+
+#### 자동 배포 (권장)
 
 ```bash
 # 저장소 클론
 git clone <repository-url>
 cd Phoenix
 
-# 개발 환경 자동 설정 (Linux/Mac)
-chmod +x Frontend/scripts/setup/setup.sh
-./Frontend/scripts/setup/setup.sh
+# 배포 스크립트 실행
+chmod +x deploy-direct.sh
+./deploy-direct.sh production
 ```
 
-### 3. 개발 서버 실행
+#### 수동 배포
 
 ```bash
-# Backend 서버 시작
+# 1. Backend 빌드 및 실행
 cd Backend
-npm run start:dev
+npm install --production
+npm run build
+pm2 start dist/main.js --name phoenix-backend --env production
 
-# Frontend 서버 시작 (새 터미널)
-cd Frontend
-npm run dev
+# 2. Frontend 빌드 및 배포
+cd ../Frontend
+npm install
+npm run build
+sudo cp -r dist/* /var/www/html/
+
+# 3. nginx 설정 및 재시작
+sudo cp nginx/nginx.conf /etc/nginx/nginx.conf
+sudo nginx -t
+sudo systemctl restart nginx
 ```
 
-### 4. 접속 확인
+### 3. 접속 확인
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000
-- **API 문서**: http://localhost:3000/api
+- **Frontend**: https://www.phoenix-4.com
+- **Backend API**: https://api.phoenix-4.com
+- **API 문서**: https://api.phoenix-4.com/api
 
 ## 🎯 시나리오 관리 도구
 

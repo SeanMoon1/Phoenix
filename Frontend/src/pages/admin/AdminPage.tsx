@@ -10,10 +10,6 @@ import {
 import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
 
-// game-script-tool 컴포넌트들을 import (향후 통합 예정)
-// import ScriptView from '../../scripts/game-script-tool/src/Components/ScriptView';
-// import ApprovalManager from '../../scripts/game-script-tool/src/Components/ApprovalManager/ApprovalManager';
-
 interface TeamStats {
   totalSessions: number;
   activeSessions: number;
@@ -459,7 +455,7 @@ const AdminPage: React.FC = () => {
                   📊 시나리오 데이터 소스 설정
                 </h3>
                 <div className="mb-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
                     현재 데이터 소스:{' '}
                     <span className="font-semibold text-blue-600 dark:text-blue-400">
                       {dataSourceStatus.currentSource}

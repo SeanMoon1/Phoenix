@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout';
 import { useAuthStore } from '../../stores/authStore';
-import { teamApi } from '../../services/api';
+import { teamApi, myPageApi } from '../../services/api';
 import { Button } from '../../components/ui';
+import type { TrainingResult, UserScenarioStats } from '../../types';
 
 const MyPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('records');
@@ -11,6 +12,57 @@ const MyPage: React.FC = () => {
   const [isValidatingTeam, setIsValidatingTeam] = useState(false);
   const [teamValidationError, setTeamValidationError] = useState('');
   const [teamInfo, setTeamInfo] = useState<any>(null);
+
+  // 실제 데이터 상태
+  const [trainingRecords, setTrainingRecords] = useState<TrainingResult[]>([]);
+  const [trainingStats, setTrainingStats] = useState<{
+    totalTrainings: number;
+    totalScore: number;
+    averageScore: number;
+    bestScore: number;
+  } | null>(null);
+  const [scenarioStats, setScenarioStats] = useState<UserScenarioStats[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 데이터 로딩
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user?.id) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // 병렬로 데이터 가져오기
+        const [recordsResponse, statsResponse, scenarioResponse] =
+          await Promise.all([
+            myPageApi.getTrainingRecords(user.id),
+            myPageApi.getTrainingStatistics(user.id),
+            myPageApi.getScenarioStatistics(user.id),
+          ]);
+
+        if (recordsResponse.success) {
+          setTrainingRecords(recordsResponse.data || []);
+        }
+
+        if (statsResponse.success) {
+          setTrainingStats(statsResponse.data || null);
+        }
+
+        if (scenarioResponse.success) {
+          setScenarioStats(scenarioResponse.data || []);
+        }
+      } catch (err) {
+        console.error('사용자 데이터 로딩 실패:', err);
+        setError('데이터를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [user?.id]);
 
   // 탭 클릭 핸들러
   const handleTabClick = (tabId: string) => {
@@ -90,93 +142,75 @@ const MyPage: React.FC = () => {
               훈련 기록 목록
             </h2>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {[
-              {
-                id: 1,
-                title: '아파트 화재 대응',
-                type: '화재',
-                date: '2025-01-15',
-                completion_time: 750, // 초 단위
-                status: '완료',
-                scenario_code: 'FIR001',
-              },
-              {
-                id: 2,
-                title: '지진 대피 훈련',
-                type: '지진',
-                date: '2025-01-14',
-                completion_time: 525, // 초 단위
-                status: '완료',
-                scenario_code: 'EAR001',
-              },
-              {
-                id: 3,
-                title: '응급처치 기본',
-                type: '응급처치',
-                date: '2025-01-13',
-                completion_time: 920, // 초 단위
-                status: '완료',
-                scenario_code: 'EME001',
-              },
-              {
-                id: 4,
-                title: '교통사고 대응',
-                type: '교통사고',
-                date: '2025-01-12',
-                completion_time: 680, // 초 단위
-                status: '완료',
-                scenario_code: 'TRA001',
-              },
-            ].map(record => (
-              <div
-                key={record.id}
-                className="px-6 py-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {record.title}
-                      </h3>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          record.type === '화재'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                            : record.type === '지진'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            : record.type === '응급처치'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                        }`}
-                      >
-                        {record.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center mt-2 space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                      <span>📅 {record.date}</span>
-                      <span>
-                        ⏱️ {Math.floor(record.completion_time / 60)}분{' '}
-                        {record.completion_time % 60}초
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        코드: {record.scenario_code}
-                      </span>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          record.status === '완료'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}
-                      >
-                        {record.status}
-                      </span>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 border-b-2 border-indigo-600 rounded-full animate-spin"></div>
+                <span className="text-gray-600 dark:text-gray-300">
+                  데이터를 불러오는 중...
+                </span>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-2 text-lg text-red-500">⚠️</div>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            </div>
+          ) : trainingRecords.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-4 text-4xl text-gray-400">📊</div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  아직 훈련 기록이 없습니다.
+                </p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  훈련을 시작해보세요!
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {trainingRecords.map(record => (
+                <div
+                  key={record.id}
+                  className="px-6 py-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          훈련 기록 #{record.id}
+                        </h3>
+                        <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+                          시나리오 #{record.scenarioId}
+                        </span>
+                      </div>
+                      <div className="flex items-center mt-2 space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                        <span>
+                          📅 {new Date(record.completedAt).toLocaleDateString()}
+                        </span>
+                        <span>
+                          ⏱️ {Math.floor((record.completionTime || 0) / 60)}분{' '}
+                          {(record.completionTime || 0) % 60}초
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          총점: {record.totalScore}점
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          정확도: {record.accuracyScore}점
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          속도: {record.speedScore}점
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     ),
@@ -193,183 +227,141 @@ const MyPage: React.FC = () => {
           <h2 className="mb-6 text-2xl font-bold text-center text-gray-900 dark:text-white">
             전체 점수 요약
           </h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600">
-                <span className="text-3xl font-bold text-white">87.3</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 border-b-2 border-yellow-600 rounded-full animate-spin"></div>
+                <span className="text-gray-600 dark:text-gray-300">
+                  데이터를 불러오는 중...
+                </span>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                전체 평균 점수
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">15회 훈련 기준</p>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600">
-                <span className="text-3xl font-bold text-white">92</span>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-2 text-lg text-red-500">⚠️</div>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                최고 점수
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">응급처치 기본</p>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600">
-                <span className="text-3xl font-bold text-white">86</span>
+          ) : !trainingStats ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-4 text-4xl text-gray-400">🏆</div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  아직 훈련 기록이 없습니다.
+                </p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  훈련을 시작해보세요!
+                </p>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                최저 점수
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">교통사고 대응</p>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="text-center">
+                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600">
+                  <span className="text-3xl font-bold text-white">
+                    {trainingStats.averageScore.toFixed(1)}
+                  </span>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  전체 평균 점수
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {trainingStats.totalTrainings}회 훈련 기준
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600">
+                  <span className="text-3xl font-bold text-white">
+                    {trainingStats.bestScore}
+                  </span>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  최고 점수
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">최고 기록</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600">
+                  <span className="text-3xl font-bold text-white">
+                    {trainingStats.totalScore}
+                  </span>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  총 점수
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">누적 점수</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 훈련 유형별 점수 */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* 화재 점수 */}
-          <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <div className="flex items-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 mr-4 bg-red-100 rounded-lg dark:bg-red-900/30">
-                <span className="text-2xl">🔥</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  화재 (FIRE)
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  평균 점수: 87.0점 | 완료 횟수: 4회
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  아파트 화재 대응
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  87점
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                <div
-                  className="h-2 bg-red-500 rounded-full"
-                  style={{ width: '87%' }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-500">
-                총점: 348점 | 최고점: 87점 | 총 소요시간: 50분
-              </div>
-            </div>
-          </div>
+        {scenarioStats.length > 0 && (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            {scenarioStats.map((stat, index) => {
+              const typeInfo = {
+                FIRE: { icon: '🔥', name: '화재', color: 'red' },
+                EARTHQUAKE: { icon: '🌍', name: '지진', color: 'yellow' },
+                EMERGENCY: { icon: '🚑', name: '응급처치', color: 'green' },
+                TRAFFIC: { icon: '🚗', name: '교통사고', color: 'blue' },
+                UNKNOWN: { icon: '❓', name: '기타', color: 'gray' },
+              };
+              const type =
+                typeInfo[stat.scenarioType as keyof typeof typeInfo] ||
+                typeInfo.UNKNOWN;
 
-          {/* 지진 점수 */}
-          <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <div className="flex items-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 mr-4 bg-yellow-100 rounded-lg dark:bg-yellow-900/30">
-                <span className="text-2xl">🌍</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  지진 (EARTHQUAKE)
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  평균 점수: 90.0점 | 완료 횟수: 3회
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  지진 대피 훈련
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  90점
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+              return (
                 <div
-                  className="h-2 bg-yellow-500 rounded-full"
-                  style={{ width: '90%' }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-500">
-                총점: 270점 | 최고점: 90점 | 총 소요시간: 26분
-              </div>
-            </div>
+                  key={index}
+                  className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"
+                >
+                  <div className="flex items-center mb-4">
+                    <div
+                      className={`flex items-center justify-center w-12 h-12 mr-4 bg-${type.color}-100 rounded-lg dark:bg-${type.color}-900/30`}
+                    >
+                      <span className="text-2xl">{type.icon}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {type.name} ({stat.scenarioType})
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        평균 점수: {stat.averageScore.toFixed(1)}점 | 완료 횟수:{' '}
+                        {stat.completedCount}회
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        시나리오 유형
+                      </span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {stat.bestScore}점
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                      <div
+                        className={`h-2 bg-${type.color}-500 rounded-full`}
+                        style={{
+                          width: `${Math.min(
+                            (stat.averageScore / 100) * 100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      총점: {stat.totalScore}점 | 최고점: {stat.bestScore}점 |
+                      평균: {stat.averageScore.toFixed(1)}점
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {/* 응급처치 점수 */}
-          <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <div className="flex items-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 mr-4 bg-green-100 rounded-lg dark:bg-green-900/30">
-                <span className="text-2xl">🚑</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  응급처치 (EMERGENCY)
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  평균 점수: 92.0점 | 완료 횟수: 4회
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  응급처치 기본
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  92점
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                <div
-                  className="h-2 bg-green-500 rounded-full"
-                  style={{ width: '92%' }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-500">
-                총점: 368점 | 최고점: 92점 | 총 소요시간: 61분
-              </div>
-            </div>
-          </div>
-
-          {/* 교통사고 점수 */}
-          <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <div className="flex items-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 mr-4 bg-blue-100 rounded-lg dark:bg-blue-900/30">
-                <span className="text-2xl">🚗</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  교통사고 (TRAFFIC)
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  평균 점수: 86.0점 | 완료 횟수: 4회
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  교통사고 대응
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  86점
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                <div
-                  className="h-2 bg-blue-500 rounded-full"
-                  style={{ width: '86%' }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-500">
-                총점: 344점 | 최고점: 86점 | 총 소요시간: 45분
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     ),
   };
@@ -385,118 +377,148 @@ const MyPage: React.FC = () => {
           <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
             기본 정보
           </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                이름
-              </label>
-              <input
-                type="text"
-                defaultValue="김훈련"
-                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                로그인 ID
-              </label>
-              <input
-                type="text"
-                defaultValue="user001"
-                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                이메일
-              </label>
-              <input
-                type="email"
-                defaultValue="user001@phoenix.com"
-                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                전화번호
-              </label>
-              <input
-                type="tel"
-                defaultValue="010-1234-5678"
-                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                소속 팀
-              </label>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="팀 코드를 입력하세요 (예: TEAM001)"
-                    value={teamCode}
-                    onChange={e => {
-                      setTeamCode(e.target.value);
-                      validateTeamCode(e.target.value);
-                    }}
-                    className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                  <Button
-                    onClick={handleJoinTeam}
-                    disabled={!teamInfo || isValidatingTeam}
-                    className="px-4 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    가입
-                  </Button>
-                </div>
-
-                {/* 팀 코드 검증 상태 표시 */}
-                {isValidatingTeam && (
-                  <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
-                    <div className="w-4 h-4 mr-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                    팀 코드를 확인하는 중...
-                  </div>
-                )}
-
-                {teamInfo && !isValidatingTeam && (
-                  <div className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
-                    <div className="flex items-center text-sm text-green-800 dark:text-green-200">
-                      <span className="mr-2">✅</span>
-                      <div>
-                        <div className="font-medium">{teamInfo.name}</div>
-                        {teamInfo.description && (
-                          <div className="mt-1 text-xs text-green-600 dark:text-green-300">
-                            {teamInfo.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {teamValidationError && (
-                  <div className="text-sm text-red-600 dark:text-red-400">
-                    {teamValidationError}
-                  </div>
-                )}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 border-b-2 border-purple-600 rounded-full animate-spin"></div>
+                <span className="text-gray-600 dark:text-gray-300">
+                  데이터를 불러오는 중...
+                </span>
               </div>
             </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                사용자 코드
-              </label>
-              <input
-                type="text"
-                value={user?.userCode || '자동 생성됨'}
-                disabled
-                className="w-full px-3 py-2 text-gray-500 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                사용자 코드는 시스템에서 자동으로 생성됩니다.
-              </p>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-2 text-lg text-red-500">⚠️</div>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
+              </div>
             </div>
-          </div>
+          ) : !user ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="mb-4 text-4xl text-gray-400">👤</div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  사용자 정보를 불러올 수 없습니다.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  이름
+                </label>
+                <input
+                  type="text"
+                  defaultValue={user.name || ''}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  로그인 ID
+                </label>
+                <input
+                  type="text"
+                  defaultValue={user.loginId || ''}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  이메일
+                </label>
+                <input
+                  type="email"
+                  defaultValue={user.email || ''}
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  사용자 레벨
+                </label>
+                <input
+                  type="text"
+                  value={`레벨 ${user.userLevel || 1} - ${
+                    user.currentTier || '초급자'
+                  }`}
+                  disabled
+                  className="w-full px-3 py-2 text-gray-500 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  소속 팀
+                </label>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="팀 코드를 입력하세요 (예: TEAM001)"
+                      value={teamCode}
+                      onChange={e => {
+                        setTeamCode(e.target.value);
+                        validateTeamCode(e.target.value);
+                      }}
+                      className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    <Button
+                      onClick={handleJoinTeam}
+                      disabled={!teamInfo || isValidatingTeam}
+                      className="px-4 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      가입
+                    </Button>
+                  </div>
+
+                  {/* 팀 코드 검증 상태 표시 */}
+                  {isValidatingTeam && (
+                    <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
+                      <div className="w-4 h-4 mr-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
+                      팀 코드를 확인하는 중...
+                    </div>
+                  )}
+
+                  {teamInfo && !isValidatingTeam && (
+                    <div className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+                      <div className="flex items-center text-sm text-green-800 dark:text-green-200">
+                        <span className="mr-2">✅</span>
+                        <div>
+                          <div className="font-medium">{teamInfo.name}</div>
+                          {teamInfo.description && (
+                            <div className="mt-1 text-xs text-green-600 dark:text-green-300">
+                              {teamInfo.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {teamValidationError && (
+                    <div className="text-sm text-red-600 dark:text-red-400">
+                      {teamValidationError}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  사용자 코드
+                </label>
+                <input
+                  type="text"
+                  value={user?.userCode || '자동 생성됨'}
+                  disabled
+                  className="w-full px-3 py-2 text-gray-500 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400"
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  사용자 코드는 시스템에서 자동으로 생성됩니다.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="flex justify-end mt-6">
             <button className="px-6 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700">
               정보 수정

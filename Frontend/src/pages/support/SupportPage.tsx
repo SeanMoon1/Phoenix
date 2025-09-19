@@ -24,7 +24,7 @@ const SupportPage: React.FC = () => {
               category: '회원가입/로그인',
               question: '회원가입은 어떻게 하나요?',
               answer:
-                'Phoenix 재난훈련 시스템에 가입하려면 먼저 팀 관리자로부터 팀 코드를 받아야 합니다. 팀 코드를 받으신 후 홈페이지 상단의 "회원가입" 버튼을 클릭하여 개인정보를 입력하고 팀 코드를 입력하시면 됩니다. 가입 과정에서 이메일 인증이 필요하며, 인증 완료 후 즉시 서비스를 이용하실 수 있습니다.',
+                'Google, Kakao, Naver 계정으로 가입하거나, 회원가입 버튼을 통해 개인정보를 입력 후 가입하실 수 있습니다.',
             },
             {
               id: 2,
@@ -38,7 +38,7 @@ const SupportPage: React.FC = () => {
               category: '훈련 관련',
               question: '훈련 점수는 어떻게 계산되나요?',
               answer:
-                '훈련 점수는 정확도(40%), 속도(30%), 완성도(30%)의 가중치를 적용하여 계산됩니다. 정확도는 올바른 응답과 행동의 비율을, 속도는 제한 시간 내 완료 여부를, 완성도는 전체 시나리오 완주 여부를 평가합니다. 각 시나리오마다 다른 배점과 보너스 점수가 있으며, 연속으로 정답을 맞추면 콤보 보너스가 추가됩니다. 최종 점수는 100점 만점으로 표시되며, 80점 이상이면 우수, 60점 이상이면 보통, 60점 미만이면 재훈련을 권장합니다.',
+                '훈련 점수는 정확도, 완성도의 가중치를 적용하여 계산됩니다. 정확도는 올바른 응답과 행동의 비율을, 완성도는 전체 시나리오 완주 여부를 평가합니다. 각 시나리오마다 다른 배점과 보너스 점수가 있으며, 연속으로 정답을 맞추면 콤보 보너스가 추가됩니다. 최종 점수는 100점 만점으로 표시되며, 80점 이상이면 우수, 60점 이상이면 보통, 60점 미만이면 재훈련을 권장합니다.',
             },
             {
               id: 4,
@@ -52,23 +52,23 @@ const SupportPage: React.FC = () => {
               category: '훈련 관련',
               question: '훈련 중 문제가 발생했을 때 어떻게 해야 하나요?',
               answer:
-                '훈련 중 기술적 문제나 오류가 발생하면 즉시 "일시정지" 버튼을 눌러 훈련을 중단하세요. 진행 상황은 자동으로 저장되므로 걱정하지 마세요. 문제 해결 후 "훈련 재개" 버튼을 눌러 이어서 진행할 수 있습니다. 만약 문제가 지속되면 훈련을 완전히 종료하고 고객지원팀에 문의하세요. 문의 시 훈련 ID와 발생한 오류 메시지를 함께 전달해주시면 빠른 해결이 가능합니다. 모든 훈련 기록은 서버에 안전하게 보관되므로 데이터 손실 걱정은 하지 않으셔도 됩니다.',
+                '훈련 중 기술적 문제나 오류가 발생하면 스크린 샷을 찍고, 훈련을 완전히 종료한 후 고객지원팀에 문의하세요. 문의 시 훈련 ID와 발생한 오류 메시지를 함께 전달해주시면 빠른 해결이 가능합니다. 모든 훈련 기록은 서버에 안전하게 보관되므로 데이터 손실 걱정은 하지 않으셔도 됩니다.',
             },
           ].map(faq => (
             <div
               key={faq.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+              className="overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800"
             >
               <button
-                className="w-full px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="w-full px-6 py-4 text-left transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                 onClick={() =>
                   setOpenFaqId(openFaqId === faq.id ? null : faq.id)
                 }
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">
+                    <div className="flex items-center mb-2 space-x-3">
+                      <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
                         {faq.category}
                       </span>
                     </div>
@@ -98,7 +98,7 @@ const SupportPage: React.FC = () => {
               {openFaqId === faq.id && (
                 <div className="px-6 pb-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="pt-4">
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <p className="leading-relaxed text-gray-700 dark:text-gray-300">
                       {faq.answer}
                     </p>
                   </div>
@@ -109,23 +109,23 @@ const SupportPage: React.FC = () => {
         </div>
 
         {/* 추가 도움말 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+        <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+          <h2 className="mb-6 text-2xl font-bold text-center text-gray-900 dark:text-white">
             추가 도움이 필요하신가요?
           </h2>
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full dark:bg-blue-900/30">
               <span className="text-2xl">💬</span>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
               문의하기
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="mb-4 text-gray-600 dark:text-gray-300">
               온라인 문의 양식을 통해 문의하세요
             </p>
             <button
               onClick={() => setActiveTab('contact')}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+              className="px-6 py-3 text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               문의하기
             </button>
@@ -142,43 +142,43 @@ const SupportPage: React.FC = () => {
     content: (
       <div className="space-y-8">
         {/* 문의 양식 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+          <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
             문의 양식
           </h2>
           <form className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   이름 *
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="이름을 입력하세요"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                   이메일 *
                 </label>
                 <input
                   type="email"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="이메일을 입력하세요"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 문의 유형 *
               </label>
               <select
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="">문의 유형을 선택하세요</option>
                 <option>회원가입/로그인 문제</option>
@@ -191,32 +191,32 @@ const SupportPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 제목 *
               </label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="문의 제목을 입력하세요"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 문의 내용 *
               </label>
               <textarea
                 required
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="문의 내용을 자세히 입력해주세요."
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              className="w-full px-4 py-3 font-medium text-white transition-colors duration-200 bg-green-600 rounded-lg hover:bg-green-700"
             >
               문의하기
             </button>
@@ -224,14 +224,14 @@ const SupportPage: React.FC = () => {
         </div>
 
         {/* 응답 시간 안내 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+          <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
             응답 시간 안내
           </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                <span className="text-green-600 dark:text-green-400 text-xs">
+              <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full dark:bg-green-900/30">
+                <span className="text-xs text-green-600 dark:text-green-400">
                   ✓
                 </span>
               </div>
@@ -240,8 +240,8 @@ const SupportPage: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 dark:text-yellow-400 text-xs">
+              <div className="flex items-center justify-center w-6 h-6 bg-yellow-100 rounded-full dark:bg-yellow-900/30">
+                <span className="text-xs text-yellow-600 dark:text-yellow-400">
                   !
                 </span>
               </div>
@@ -250,8 +250,8 @@ const SupportPage: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400 text-xs">
+              <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full dark:bg-blue-900/30">
+                <span className="text-xs text-blue-600 dark:text-blue-400">
                   🔧
                 </span>
               </div>
@@ -274,25 +274,25 @@ const SupportPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           {/* 페이지 헤더 */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
               고객지원
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+            <p className="max-w-3xl text-lg text-gray-600 dark:text-gray-300">
               궁금한 점이나 문제가 있으시면 언제든지 문의해주세요. 빠르고 정확한
               답변을 드리겠습니다.
             </p>
           </div>
 
           {/* 메인 콘텐츠 영역 - 7:3 비율 */}
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start">
+          <div className="grid items-start grid-cols-1 gap-8 lg:grid-cols-10">
             {/* 좌측 고객지원 콘텐츠 섹션 (7/10) */}
             <div className="lg:col-span-7">
               {/* 탭 네비게이션 */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+              <div className="p-6 mb-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
                 <div className="flex flex-wrap gap-2">
                   {tabs.map(tab => (
                     <button
@@ -312,14 +312,14 @@ const SupportPage: React.FC = () => {
               </div>
 
               {/* 선택된 탭의 콘텐츠 */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+              <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
                 <div className="mb-8">
                   <div
                     className={`w-20 h-20 bg-${currentContent.color}-100 dark:bg-${currentContent.color}-900/30 rounded-full flex items-center justify-center mb-4`}
                   >
                     <span className="text-4xl">{currentContent.icon}</span>
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
                     {currentContent.title}
                   </h2>
                   <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -335,25 +335,25 @@ const SupportPage: React.FC = () => {
 
             {/* 우측 가이드 섹션 (3/10) */}
             <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-8 self-start">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+              <div className="sticky self-start p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 top-8">
+                <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
                   고객지원 가이드
                 </h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                       ❓ FAQ
                     </h3>
-                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 자주 묻는 질문과 답변 확인</li>
                       <li>• 빠른 문제 해결 방법 안내</li>
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                       💬 문의
                     </h3>
-                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 온라인 문의 양식 작성</li>
                       <li>• 문의 유형별 분류</li>
                       <li>• 응답 시간 안내 및 추적</li>

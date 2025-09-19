@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
+import { authApi } from '../../services/api';
 
 // 회원가입 스키마 (팀 코드와 사용자 코드 제거)
 const registerSchema = yup.object({
@@ -38,15 +39,69 @@ type RegisterFormData = yup.InferType<typeof registerSchema>;
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const [loginIdStatus, setLoginIdStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({
+    checking: false,
+    available: null,
+    message: '',
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   });
+
+  const watchedLoginId = watch('loginId');
+
+  // 실시간 ID 중복검증
+  useEffect(() => {
+    const checkLoginId = async () => {
+      if (!watchedLoginId || watchedLoginId.length < 3) {
+        setLoginIdStatus({
+          checking: false,
+          available: null,
+          message: '',
+        });
+        return;
+      }
+
+      setLoginIdStatus(prev => ({ ...prev, checking: true }));
+
+      try {
+        const response = await authApi.checkLoginId(watchedLoginId);
+        if (response.success && response.data) {
+          setLoginIdStatus({
+            checking: false,
+            available: response.data.available,
+            message: response.data.message || '',
+          });
+        } else {
+          setLoginIdStatus({
+            checking: false,
+            available: false,
+            message: 'ID 확인 중 오류가 발생했습니다.',
+          });
+        }
+      } catch (error) {
+        setLoginIdStatus({
+          checking: false,
+          available: false,
+          message: 'ID 확인 중 오류가 발생했습니다.',
+        });
+      }
+    };
+
+    const timeoutId = setTimeout(checkLoginId, 500); // 500ms 디바운스
+    return () => clearTimeout(timeoutId);
+  }, [watchedLoginId]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -87,12 +142,31 @@ const RegisterPage: React.FC = () => {
             >
               {/* 사용자 정보 입력 */}
               <div className="space-y-3 sm:space-y-4">
-                <Input
-                  label="로그인 ID"
-                  placeholder="이메일의 @ 앞부분 (예: user123)"
-                  error={errors.loginId?.message}
-                  {...register('loginId')}
-                />
+                <div>
+                  <Input
+                    label="로그인 ID"
+                    placeholder="user123"
+                    error={errors.loginId?.message}
+                    {...register('loginId')}
+                  />
+                  {watchedLoginId && watchedLoginId.length >= 3 && (
+                    <div className="mt-2 text-xs">
+                      {loginIdStatus.checking ? (
+                        <span className="text-blue-500 dark:text-blue-400">
+                          🔍 ID 확인 중...
+                        </span>
+                      ) : loginIdStatus.available === true ? (
+                        <span className="text-green-500 dark:text-green-400">
+                          ✅ {loginIdStatus.message}
+                        </span>
+                      ) : loginIdStatus.available === false ? (
+                        <span className="text-red-500 dark:text-red-400">
+                          ❌ {loginIdStatus.message}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
 
                 <Input
                   label="이름"
@@ -109,13 +183,23 @@ const RegisterPage: React.FC = () => {
                   {...register('email')}
                 />
 
-                <Input
-                  label="비밀번호"
-                  type="password"
-                  placeholder="••••••••"
-                  error={errors.password?.message}
-                  {...register('password')}
-                />
+                <div>
+                  <Input
+                    label="비밀번호"
+                    type="password"
+                    placeholder="••••••••"
+                    error={errors.password?.message}
+                    {...register('password')}
+                  />
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mb-1">비밀번호 요구사항:</p>
+                    <ul className="list-disc list-inside space-y-0.5">
+                      <li>최소 6자 이상</li>
+                      <li>소문자 포함 (필수)</li>
+                      <li>숫자 포함 (필수)</li>
+                    </ul>
+                  </div>
+                </div>
 
                 <Input
                   label="비밀번호 확인"

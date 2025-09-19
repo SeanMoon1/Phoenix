@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 import { runSeeds } from './database/seeds';
+import { FixOAuthConstraint1700000000002 } from './database/migrations/FixOAuthConstraint';
 
 async function bootstrap() {
   try {
@@ -20,8 +21,15 @@ async function bootstrap() {
 
     // CORS 설정
     app.enableCors({
-      origin: ['http://localhost:3000', 'http://localhost:3001'],
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'https://www.phoenix-4.com',
+        'https://phoenix-4.com',
+      ],
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     });
 
     // Swagger 설정
@@ -33,6 +41,17 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
+
+    // OAuth 문제 해결을 위한 마이그레이션 실행 (에러 무시)
+    try {
+      const dataSource = app.get(DataSource);
+      const oauthFix = new FixOAuthConstraint1700000000002();
+      await oauthFix.up(dataSource.createQueryRunner());
+      console.log('✅ OAuth 문제 해결 마이그레이션 완료');
+    } catch (error) {
+      // 에러 무시하고 계속 진행
+      console.log('ℹ️ OAuth 마이그레이션 건너뜀 (이미 처리됨)');
+    }
 
     // 개발 환경에서만 시드 실행
     if (process.env.NODE_ENV === 'development') {

@@ -592,6 +592,62 @@ export const authApi = {
   },
 };
 
+// 마이페이지 관련 API 함수들
+export const myPageApi = {
+  /**
+   * 사용자 훈련 기록 조회
+   * @param userId 사용자 ID
+   * @returns 훈련 기록 목록
+   */
+  getTrainingRecords: async (userId: number) => {
+    return api.get<TrainingResult[]>(`/training-results/user/${userId}`);
+  },
+
+  /**
+   * 사용자 훈련 통계 조회
+   * @param userId 사용자 ID
+   * @returns 훈련 통계
+   */
+  getTrainingStatistics: async (userId: number) => {
+    return api.get<{
+      totalTrainings: number;
+      totalScore: number;
+      averageScore: number;
+      bestScore: number;
+    }>(`/training-results/statistics/${userId}`);
+  },
+
+  /**
+   * 사용자 시나리오별 통계 조회
+   * @param userId 사용자 ID
+   * @returns 시나리오별 통계
+   */
+  getScenarioStatistics: async (userId: number) => {
+    return api.get<UserScenarioStats[]>(
+      `/user-progress/${userId}/scenario-stats`
+    );
+  },
+
+  /**
+   * 사용자 정보 조회
+   * @param userId 사용자 ID
+   * @returns 사용자 정보
+   */
+  getUserInfo: async (userId: number) => {
+    return api.get<User>(`/users/${userId}`);
+  },
+
+  /**
+   * 사용자 정보 수정
+   * @param userId 사용자 ID
+   * @param userData 수정할 사용자 데이터
+   * @returns 수정 결과
+   */
+  updateUserInfo: async (userId: number, userData: Partial<User>) => {
+    return api.put<User>(`/users/${userId}`, userData);
+  },
+};
+
 // 지원 관련 API 함수들 (Database 스키마 기준)
 export const supportApi = {
   /**

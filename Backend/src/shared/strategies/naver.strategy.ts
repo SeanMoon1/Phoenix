@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Strategy, VerifyCallback } from 'passport-naver';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
   constructor(private configService: ConfigService) {
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL'),
-      scope: ['email', 'profile'],
+      clientID: configService.get<string>('NAVER_CLIENT_ID'),
+      clientSecret: configService.get<string>('NAVER_CLIENT_SECRET'),
+      callbackURL: configService.get<string>('NAVER_CALLBACK_URL'),
     });
   }
 
@@ -21,50 +20,45 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     try {
-      console.log('🔍 Google OAuth Profile 정보:', {
+      console.log('🔍 Naver OAuth Profile 정보:', {
         id: profile.id,
         displayName: profile.displayName,
         emails: profile.emails,
-        name: profile.name,
-        photos: profile.photos,
+        _json: profile._json,
       });
 
-      const { name, emails, photos, id, displayName } = profile;
-
+      const { id, displayName, emails, _json } = profile;
+      
       // 이메일 정보 안전하게 추출
-      const email = emails && emails.length > 0 ? emails[0].value : null;
-
+      let email = null;
+      if (emails && emails.length > 0 && emails[0]?.value) {
+        email = emails[0].value;
+      } else if (_json?.email) {
+        email = _json.email;
+      }
+      
       // 이름 정보 안전하게 추출
       let fullName = '';
-      if (name) {
-        if (name.givenName && name.familyName) {
-          fullName = `${name.givenName} ${name.familyName}`.trim();
-        } else if (name.givenName) {
-          fullName = name.givenName;
-        } else if (name.familyName) {
-          fullName = name.familyName;
-        }
-      }
-
-      // displayName이 있으면 우선 사용
-      if (displayName && !fullName) {
+      if (displayName) {
         fullName = displayName;
+      } else if (_json?.name) {
+        fullName = _json.name;
       }
-
+      
       // 프로필 이미지 안전하게 추출
-      const profileImage = photos && photos.length > 0 ? photos[0].value : null;
+      const profileImage = _json?.profile_image || null;
 
       const user = {
         email,
         name: fullName,
         profileImage,
-        provider: 'google',
+        provider: 'naver',
         providerId: id,
         accessToken,
         refreshToken,
       };
 
-      console.log('✅ Google OAuth 사용자 정보 파싱 완료:', {
+      console.log('✅ Naver OAuth 사용자 정보 파싱 완료:', {
         email: user.email || 'undefined',
         name: user.name || 'undefined',
         provider: user.provider,
@@ -77,7 +71,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
       done(null, user);
     } catch (error) {
-      console.error('❌ Google OAuth 사용자 정보 파싱 실패:', error);
+      console.error('❌ Naver OAuth 사용자 정보 파싱 실패:', error);
       done(error, null);
     }
   }

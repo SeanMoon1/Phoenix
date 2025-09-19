@@ -42,6 +42,12 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '로그인 성공' })
   async login(@Body() loginDto: LoginDto, @Request() req) {
     console.log('🎯 AuthController.login 호출됨');
+    console.log('📝 받은 로그인 데이터:', {
+      loginId: loginDto.loginId,
+      password: loginDto.password ? '***' : 'undefined',
+      hasPassword: !!loginDto.password,
+    });
+    console.log('👤 req.user:', req.user ? '사용자 존재' : '사용자 없음');
     return this.authService.login(req.user);
   }
 

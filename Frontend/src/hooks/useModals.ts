@@ -38,8 +38,8 @@ export function useModals({
   onSaveResult,
 }: UseModalsProps): UseModalsReturn {
   // 모달 상태
-  const [clearMsg, setClearMsg] = useState<string | null>(null);
-  const [failMsg, setFailMsg] = useState<string | null>(null);
+  const [_clearMsg, _setClearMsg] = useState<string | null>(null);
+  const [_failMsg, _setFailMsg] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   // 화면 크기
@@ -63,18 +63,21 @@ export function useModals({
   // 엔딩 모달 처리
   useEffect(() => {
     if (!scenario || endModalAutoShown) return;
-    if (scenario.sceneId === END_SCENE_ID) {
+    if ((scenario.sceneId ?? '').trim() === END_SCENE_ID) {
       setEndModalAutoShown(true);
-      onSaveResult();
+      // onSaveResult는 비동기지만 에러를 흘리지 않도록 처리
+      onSaveResult().catch(err =>
+        console.error('[useModals] onSaveResult failed', err)
+      );
 
       if (!failedThisRun) {
-        setClearMsg(
+        _setClearMsg(
           `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
         );
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 4500);
       } else {
-        setFailMsg(
+        _setFailMsg(
           `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
         );
       }
@@ -90,7 +93,7 @@ export function useModals({
 
   // 모달 시 스크롤 잠금
   useEffect(() => {
-    const lock = clearMsg || failMsg || showConfetti;
+    const lock = _clearMsg || _failMsg || showConfetti;
     const { body, documentElement: html } = document;
     if (lock) {
       const prevBodyOverflow = body.style.overflow;
@@ -102,12 +105,19 @@ export function useModals({
         html.style.overflowX = prevHtmlOverflowX;
       };
     }
-  }, [clearMsg, failMsg, showConfetti]);
+  }, [_clearMsg, _failMsg, showConfetti]);
+
+  const setClearMsg = (msg: string | null) => {
+    _setClearMsg(msg); // if you rename internal setter, else use existing setClearMsg
+  };
+  const setFailMsg = (msg: string | null) => {
+    _setFailMsg(msg);
+  };
 
   return {
     // 모달 상태
-    clearMsg,
-    failMsg,
+    clearMsg: _clearMsg,
+    failMsg: _failMsg,
     showConfetti,
 
     // 화면 크기

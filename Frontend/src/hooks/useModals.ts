@@ -76,14 +76,34 @@ export function useModals({
     if (!scenario || endModalAutoShown || !isEndScene) return;
 
     console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
+    console.log('🔍 useModals 상세 정보:', {
+      scenarioTitle: scenario?.title,
+      scenarioSceneId: scenario?.sceneId,
+      endModalAutoShown,
+      isEndScene,
+      failedThisRun,
+      scenarioSetName,
+    });
+
     setEndModalAutoShown(true);
 
     // onSaveResult 함수 호출 전 로깅
     console.log('🚀 onSaveResult 함수 호출 시도:', typeof onSaveResult);
+    console.log('🔍 onSaveResult 함수 상세:', {
+      isFunction: typeof onSaveResult === 'function',
+      functionName: onSaveResult?.name,
+      functionLength: onSaveResult?.length,
+    });
+
     if (typeof onSaveResult === 'function') {
-      onSaveResult().catch(err =>
-        console.error('[useModals] onSaveResult failed', err)
-      );
+      console.log('✅ onSaveResult 함수 호출 시작');
+      onSaveResult()
+        .then(() => {
+          console.log('✅ onSaveResult 함수 호출 성공');
+        })
+        .catch(err => {
+          console.error('❌ [useModals] onSaveResult failed', err);
+        });
     } else {
       console.error('❌ onSaveResult가 함수가 아닙니다:', onSaveResult);
     }

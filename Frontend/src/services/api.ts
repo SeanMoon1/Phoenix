@@ -307,7 +307,21 @@ export const trainingApi = {
    * @returns 훈련 세션 생성 결과
    */
   createSession: async (sessionData: Partial<TrainingSession>) => {
-    return api.post<TrainingSession>('/training', sessionData);
+    console.log('📤 trainingApi.createSession 호출됨:', {
+      url: '/training',
+      method: 'POST',
+      data: sessionData,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await api.post<TrainingSession>('/training', sessionData);
+      console.log('✅ trainingApi.createSession 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ trainingApi.createSession 실패:', error);
+      throw error;
+    }
   },
 
   /**
@@ -401,7 +415,24 @@ export const trainingResultApi = {
    * @returns 저장 결과
    */
   save: async (resultData: Partial<TrainingResult>) => {
-    return api.post<TrainingResult>('/training-results', resultData);
+    console.log('📤 trainingResultApi.save 호출됨:', {
+      url: '/training-results',
+      method: 'POST',
+      data: resultData,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await api.post<TrainingResult>(
+        '/training-results',
+        resultData
+      );
+      console.log('✅ trainingResultApi.save 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ trainingResultApi.save 실패:', error);
+      throw error;
+    }
   },
 
   /**

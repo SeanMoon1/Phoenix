@@ -83,7 +83,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       gameStateScenariosLength: gameState.scenarios.length,
       expSystemTotalCorrect: expSystem.totalCorrect,
       expSystemLevel: expSystem.level,
+      currentTime: new Date().toISOString(),
     });
+
+    console.log('🔍 saveTrainingResult 함수 스택 트레이스:', new Error().stack);
 
     try {
       if (!user) {

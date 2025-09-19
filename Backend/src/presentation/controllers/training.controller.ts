@@ -30,7 +30,25 @@ export class TrainingController {
   @ApiOperation({ summary: '새 훈련 세션 생성' })
   @ApiResponse({ status: 201, description: '훈련 세션 생성 성공' })
   create(@Body() createTrainingSessionDto: CreateTrainingSessionDto) {
-    return this.trainingService.create(createTrainingSessionDto);
+    console.log('🔍 TrainingController.create 호출됨');
+    console.log('📝 받은 훈련 세션 데이터:', {
+      title: createTrainingSessionDto.title,
+      scenarioId: createTrainingSessionDto.scenarioId,
+      teamId: createTrainingSessionDto.teamId,
+      startTime: createTrainingSessionDto.startTime,
+      endTime: createTrainingSessionDto.endTime,
+      status: createTrainingSessionDto.status,
+      createdBy: createTrainingSessionDto.createdBy,
+    });
+
+    try {
+      const result = this.trainingService.create(createTrainingSessionDto);
+      console.log('✅ TrainingController.create 성공');
+      return result;
+    } catch (error) {
+      console.error('❌ TrainingController.create 실패:', error);
+      throw error;
+    }
   }
 
   @Get()

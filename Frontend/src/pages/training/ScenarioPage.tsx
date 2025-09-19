@@ -184,6 +184,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     // 무한 루프 방지를 위해 의존성 배열을 최소화
   ]);
 
+  // 마지막 씬인지 확인
+  const isLastScene = gameState.current >= gameState.scenarios.length - 1;
+
   // 모달 훅
   const modals = useModals({
     scenario: gameState.scenario,
@@ -192,6 +195,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     endModalAutoShown: gameState.endModalAutoShown,
     setEndModalAutoShown: gameState.setEndModalAutoShown,
     onSaveResult: saveTrainingResult,
+    isLastScene,
   });
 
   // 디버깅용 로깅 제거 - 무한 루프 방지

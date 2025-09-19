@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import type { Scenario } from '@/types';
 
-const END_SCENE_ID = '#END';
-
 interface UseModalsProps {
   scenario: Scenario | null;
   failedThisRun: boolean;
@@ -11,6 +9,7 @@ interface UseModalsProps {
   endModalAutoShown: boolean;
   setEndModalAutoShown: (value: boolean) => void;
   onSaveResult: () => Promise<void>;
+  isLastScene: boolean; // 마지막 씬인지 여부
 }
 
 interface UseModalsReturn {
@@ -36,6 +35,7 @@ export function useModals({
   endModalAutoShown,
   setEndModalAutoShown,
   onSaveResult,
+  isLastScene,
 }: UseModalsProps): UseModalsReturn {
   // 모달 상태
   const [_clearMsg, _setClearMsg] = useState<string | null>(null);
@@ -60,16 +60,13 @@ export function useModals({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 엔딩 모달 처리 - #END 씬에 도달했을 때만 한 번 실행
+  // 엔딩 모달 처리 - 마지막 씬에 도달했을 때만 한 번 실행
   useEffect(() => {
     // scenario가 없거나 이미 처리했으면 무시
     if (!scenario || endModalAutoShown) return;
 
-    const sceneId = scenario.sceneId;
-    const isEndScene = sceneId?.trim() === END_SCENE_ID;
-
-    // #END 씬이 아니면 무시
-    if (!isEndScene) return;
+    // 마지막 씬이 아니면 무시
+    if (!isLastScene) return;
 
     console.log('🎯 훈련 완료! 결과 저장 시작');
     setEndModalAutoShown(true);
@@ -97,11 +94,12 @@ export function useModals({
       );
     }
   }, [
-    scenario, // scenario 객체 자체를 의존성으로 사용
+    scenario,
     endModalAutoShown,
     failedThisRun,
     scenarioSetName,
     onSaveResult,
+    isLastScene, // 마지막 씬 여부도 의존성에 포함
   ]);
 
   // 모달 시 스크롤 잠금

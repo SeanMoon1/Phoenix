@@ -32,7 +32,7 @@ export class TrainingController {
   create(@Body() createTrainingSessionDto: CreateTrainingSessionDto) {
     console.log('🔍 TrainingController.create 호출됨');
     console.log('📝 받은 훈련 세션 데이터:', {
-      title: createTrainingSessionDto.title,
+      sessionName: createTrainingSessionDto.sessionName,
       scenarioId: createTrainingSessionDto.scenarioId,
       teamId: createTrainingSessionDto.teamId,
       startTime: createTrainingSessionDto.startTime,

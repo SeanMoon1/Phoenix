@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -150,33 +150,21 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     GetUserUseCase,
     UpdateUserUseCase,
     // Repository Implementations
-    TypeOrmUserRepository,
-    ScenarioRepositoryTypeOrm,
-    TeamRepositoryTypeOrm,
-    TrainingSessionRepositoryTypeOrm,
     {
       provide: 'UserRepository',
-      useFactory: (typeOrmUserRepository: TypeOrmUserRepository) =>
-        typeOrmUserRepository,
-      inject: [TypeOrmUserRepository],
+      useClass: TypeOrmUserRepository,
     },
     {
       provide: 'ScenarioRepository',
-      useFactory: (scenarioRepository: ScenarioRepositoryTypeOrm) =>
-        scenarioRepository,
-      inject: [ScenarioRepositoryTypeOrm],
+      useClass: ScenarioRepositoryTypeOrm,
     },
     {
       provide: 'TeamRepository',
-      useFactory: (teamRepository: TeamRepositoryTypeOrm) => teamRepository,
-      inject: [TeamRepositoryTypeOrm],
+      useClass: TeamRepositoryTypeOrm,
     },
     {
       provide: 'TrainingSessionRepository',
-      useFactory: (
-        trainingSessionRepository: TrainingSessionRepositoryTypeOrm,
-      ) => trainingSessionRepository,
-      inject: [TrainingSessionRepositoryTypeOrm],
+      useClass: TrainingSessionRepositoryTypeOrm,
     },
     // Strategies
     LocalStrategy,

@@ -1,14 +1,13 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { TrainingSessionRepository } from '../../domain/repositories/training-session.repository';
 import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { CreateTrainingSessionDto } from '../../presentation/dto/create-training-session.dto';
 import { UpdateTrainingSessionDto } from '../../presentation/dto/update-training-session.dto';
-import { TrainingSessionRepositoryTypeOrm } from '../../infrastructure/database/repositories/training-session.repository.typeorm';
 
 @Injectable()
 export class TrainingService {
   constructor(
-    @Inject(forwardRef(() => TrainingSessionRepositoryTypeOrm))
+    @Inject('TrainingSessionRepository')
     private readonly trainingSessionRepository: TrainingSessionRepository,
   ) {}
 

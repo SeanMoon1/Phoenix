@@ -1,4 +1,4 @@
-import { Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { TrainingSessionRepository } from '../../../domain/repositories/training-session.repository';

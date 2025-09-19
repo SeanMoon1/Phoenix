@@ -22,10 +22,10 @@ export class CreateTrainingSessionDto {
   @IsNotEmpty()
   scenarioId: number;
 
-  @ApiProperty({ example: 1, description: '팀 ID' })
+  @ApiProperty({ example: 1, description: '팀 ID', required: false })
   @IsNumber()
-  @IsNotEmpty()
-  teamId: number;
+  @IsOptional()
+  teamId?: number;
 
   @ApiProperty({
     example: '2024-01-15T09:00:00Z',

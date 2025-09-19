@@ -25,7 +25,34 @@ export class TrainingResultController {
     description: '훈련 결과가 성공적으로 생성되었습니다.',
   })
   async createTrainingResult(@Body() data: Partial<TrainingResult>) {
-    return this.trainingResultService.createTrainingResult(data);
+    console.log('🔍 TrainingResultController.createTrainingResult 호출됨');
+    console.log('📝 받은 데이터:', {
+      userId: data.userId,
+      sessionId: data.sessionId,
+      scenarioId: data.scenarioId,
+      participantId: data.participantId,
+      totalScore: data.totalScore,
+      accuracyScore: data.accuracyScore,
+      speedScore: data.speedScore,
+      completionTime: data.completionTime,
+      completedAt: data.completedAt,
+    });
+
+    try {
+      const result =
+        await this.trainingResultService.createTrainingResult(data);
+      console.log('✅ TrainingResultController.createTrainingResult 성공:', {
+        id: result.id,
+        resultCode: result.resultCode,
+      });
+      return result;
+    } catch (error) {
+      console.error(
+        '❌ TrainingResultController.createTrainingResult 실패:',
+        error,
+      );
+      throw error;
+    }
   }
 
   @Get('user/:userId')

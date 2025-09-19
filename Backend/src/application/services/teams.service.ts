@@ -1,5 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { TeamRepository } from '../../domain/repositories/team.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Team } from '../../domain/entities/team.entity';
 import { CreateTeamDto } from '../../presentation/dto/create-team.dto';
 import { UpdateTeamDto } from '../../presentation/dto/update-team.dto';
@@ -7,39 +8,41 @@ import { UpdateTeamDto } from '../../presentation/dto/update-team.dto';
 @Injectable()
 export class TeamsService {
   constructor(
-    @Inject('TeamRepository')
-    private readonly teamRepository: TeamRepository,
+    @InjectRepository(Team)
+    private readonly teamRepository: Repository<Team>,
   ) {}
 
   async create(createTeamDto: CreateTeamDto): Promise<Team> {
-    return this.teamRepository.create(createTeamDto);
+    const newTeam = this.teamRepository.create(createTeamDto);
+    return this.teamRepository.save(newTeam);
   }
 
   async findAll(): Promise<Team[]> {
-    return this.teamRepository.findAll();
+    return this.teamRepository.find();
   }
 
   async findOne(id: number): Promise<Team> {
-    return this.teamRepository.findById(id);
+    return this.teamRepository.findOne({ where: { id } });
   }
 
   async update(id: number, updateTeamDto: UpdateTeamDto): Promise<Team> {
-    return this.teamRepository.update(id, updateTeamDto);
+    await this.teamRepository.update(id, updateTeamDto);
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    return this.teamRepository.delete(id);
+    await this.teamRepository.delete(id);
   }
 
   async findByCode(teamCode: string): Promise<Team> {
-    return this.teamRepository.findByCode(teamCode);
+    return this.teamRepository.findOne({ where: { teamCode } });
   }
 
   async validateTeamCode(
     teamCode: string,
   ): Promise<{ valid: boolean; team?: Team; message?: string }> {
     try {
-      const team = await this.teamRepository.findByCode(teamCode);
+      const team = await this.teamRepository.findOne({ where: { teamCode } });
 
       if (!team) {
         return {

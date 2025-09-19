@@ -1,5 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { UserRepository } from '../../../domain/repositories/user.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../../domain/entities/user.entity';
 import { UserDomainService } from '../../../domain/services/user-domain.service';
 
 export interface UpdateUserRequest {
@@ -19,15 +21,17 @@ export interface UpdateUserResponse {
 @Injectable()
 export class UpdateUserUseCase {
   constructor(
-    @Inject('UserRepository')
-    private readonly userRepository: UserRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly userDomainService: UserDomainService,
   ) {}
 
   async execute(request: UpdateUserRequest): Promise<UpdateUserResponse> {
     try {
       // Find existing user
-      const existingUser = await this.userRepository.findById(request.id);
+      const existingUser = await this.userRepository.findOne({
+        where: { id: request.id },
+      });
       if (!existingUser) {
         return {
           success: false,
@@ -50,11 +54,15 @@ export class UpdateUserUseCase {
       }
 
       // Update user
-      const updatedUser = await this.userRepository.update(request.id, {
+      await this.userRepository.update(request.id, {
         name: request.name,
         email: request.email,
         profileImageUrl: request.profileImageUrl,
         password: request.password,
+      });
+
+      const updatedUser = await this.userRepository.findOne({
+        where: { id: request.id },
       });
 
       return {

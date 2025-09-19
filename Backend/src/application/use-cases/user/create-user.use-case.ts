@@ -1,5 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { UserRepository } from '../../../domain/repositories/user.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../../domain/entities/user.entity';
 import { UserDomainService } from '../../../domain/services/user-domain.service';
 
 export interface CreateUserRequest {
@@ -23,8 +25,8 @@ export interface CreateUserResponse {
 @Injectable()
 export class CreateUserUseCase {
   constructor(
-    @Inject('UserRepository')
-    private readonly userRepository: UserRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly userDomainService: UserDomainService,
   ) {}
 
@@ -40,23 +42,23 @@ export class CreateUserUseCase {
 
       if (!existingUserByEmail) {
         // 기존 사용자가 OAuth 사용자인지 확인
-        const existingUser = await this.userRepository.findByEmail(
-          request.email,
-        );
+        const existingUser = await this.userRepository.findOne({
+          where: { email: request.email },
+        });
         if (existingUser && existingUser.oauthProvider) {
           console.log('🔄 OAuth 사용자 발견 - 일반 회원가입으로 전환');
           // OAuth 사용자를 일반 사용자로 전환
           try {
-            const updatedUser = await this.userRepository.update(
-              existingUser.id,
-              {
-                loginId: request.loginId,
-                password: request.password,
-                name: request.name,
-                oauthProvider: null,
-                oauthProviderId: null,
-              },
-            );
+            await this.userRepository.update(existingUser.id, {
+              loginId: request.loginId,
+              password: request.password,
+              name: request.name,
+              oauthProvider: null,
+              oauthProviderId: null,
+            });
+            const updatedUser = await this.userRepository.findOne({
+              where: { id: existingUser.id },
+            });
             console.log('✅ OAuth 사용자를 일반 사용자로 전환 완료');
             return {
               success: true,
@@ -92,7 +94,7 @@ export class CreateUserUseCase {
 
       // Create user
       console.log('🔍 사용자 생성 시작');
-      const user = await this.userRepository.create({
+      const newUser = this.userRepository.create({
         loginId: request.loginId,
         password: request.password,
         name: request.name,
@@ -112,6 +114,7 @@ export class CreateUserUseCase {
         nextLevelExp: 100,
         isActive: true,
       });
+      const user = await this.userRepository.save(newUser);
       console.log('🔍 사용자 생성 완료:', { user });
 
       return {

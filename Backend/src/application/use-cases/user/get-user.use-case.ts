@@ -1,6 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../../domain/entities/user.entity';
-import { UserRepository } from '../../../domain/repositories/user.repository';
 
 export interface GetUserRequest {
   id: number;
@@ -15,13 +16,15 @@ export interface GetUserResponse {
 @Injectable()
 export class GetUserUseCase {
   constructor(
-    @Inject('UserRepository')
-    private readonly userRepository: UserRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async execute(request: GetUserRequest): Promise<GetUserResponse> {
     try {
-      const user = await this.userRepository.findById(request.id);
+      const user = await this.userRepository.findOne({
+        where: { id: request.id },
+      });
 
       if (!user) {
         return {

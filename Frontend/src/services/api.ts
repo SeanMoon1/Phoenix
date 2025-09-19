@@ -315,7 +315,10 @@ export const trainingApi = {
     });
 
     try {
-      const result = await api.post<TrainingSession>('/training', sessionData);
+      const result = await api.post<ApiResponse<TrainingSession>>(
+        '/training',
+        sessionData
+      );
       console.log('✅ trainingApi.createSession 성공:', result);
       return result;
     } catch (error) {

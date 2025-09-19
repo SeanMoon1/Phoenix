@@ -62,16 +62,41 @@ export function useModals({
 
   // 엔딩 모달 처리 - sceneId만 체크하여 무한 루프 방지
   useEffect(() => {
+    console.log('🔄 useModals useEffect 실행됨');
+
     const sceneId = scenario?.sceneId;
     const isEndScene = sceneId ? sceneId.trim() === END_SCENE_ID : false;
 
-    if (!scenario || endModalAutoShown || !isEndScene) return;
+    console.log('🔍 useModals 조건 체크:', {
+      hasScenario: !!scenario,
+      sceneId,
+      isEndScene,
+      endModalAutoShown,
+      failedThisRun,
+      scenarioTitle: scenario?.title,
+    });
+
+    if (!scenario) {
+      console.log('❌ scenario가 없음');
+      return;
+    }
+
+    if (endModalAutoShown) {
+      console.log('❌ endModalAutoShown이 이미 true');
+      return;
+    }
+
+    if (!isEndScene) {
+      console.log('❌ 엔딩 씬이 아님:', { sceneId, END_SCENE_ID });
+      return;
+    }
 
     console.log('🎯 훈련 완료! 결과 저장 시작');
     setEndModalAutoShown(true);
 
     // 훈련 결과 저장
     if (typeof onSaveResult === 'function') {
+      console.log('✅ onSaveResult 함수 호출 시작');
       onSaveResult()
         .then(() => {
           console.log('✅ 훈련 결과 저장 성공');
@@ -79,6 +104,8 @@ export function useModals({
         .catch(err => {
           console.error('❌ 훈련 결과 저장 실패:', err);
         });
+    } else {
+      console.error('❌ onSaveResult가 함수가 아님:', typeof onSaveResult);
     }
 
     if (!failedThisRun) {

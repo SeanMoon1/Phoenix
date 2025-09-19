@@ -1,13 +1,14 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ScenarioRepository } from '../../domain/repositories/scenario.repository';
 import { Scenario } from '../../domain/entities/scenario.entity';
 import { CreateScenarioDto } from '../../presentation/dto/create-scenario.dto';
 import { UpdateScenarioDto } from '../../presentation/dto/update-scenario.dto';
+import { ScenarioRepositoryTypeOrm } from '../../infrastructure/database/repositories/scenario.repository.typeorm';
 
 @Injectable()
 export class ScenariosService {
   constructor(
-    @Inject('ScenarioRepository')
+    @Inject(forwardRef(() => ScenarioRepositoryTypeOrm))
     private readonly scenarioRepository: ScenarioRepository,
   ) {}
 

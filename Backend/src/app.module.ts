@@ -150,6 +150,10 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     GetUserUseCase,
     UpdateUserUseCase,
     // Repository Implementations
+    TypeOrmUserRepository,
+    ScenarioRepositoryTypeOrm,
+    TeamRepositoryTypeOrm,
+    TrainingSessionRepositoryTypeOrm,
     {
       provide: 'UserRepository',
       useFactory: (typeOrmUserRepository: TypeOrmUserRepository) =>

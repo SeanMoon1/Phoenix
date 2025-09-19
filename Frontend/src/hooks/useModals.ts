@@ -73,7 +73,28 @@ export function useModals({
       failedThisRun,
     });
 
-    if (!scenario || endModalAutoShown || !isEndScene) return;
+    // 각 조건을 개별적으로 체크하여 어느 조건에서 막히는지 확인
+    if (!scenario) {
+      console.log('❌ useModals: scenario가 없음');
+      return;
+    }
+
+    if (endModalAutoShown) {
+      console.log('❌ useModals: endModalAutoShown이 이미 true');
+      return;
+    }
+
+    if (!isEndScene) {
+      console.log('❌ useModals: isEndScene이 false - 엔딩 씬이 아님', {
+        sceneId,
+        END_SCENE_ID,
+        trimmedSceneId: sceneId?.trim(),
+        isMatch: sceneId?.trim() === END_SCENE_ID,
+      });
+      return;
+    }
+
+    console.log('✅ useModals: 모든 조건 통과 - 훈련 완료 처리 시작');
 
     console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
     console.log('🔍 useModals 상세 정보:', {

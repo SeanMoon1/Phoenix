@@ -11,11 +11,11 @@ import {
 export class CreateTrainingSessionDto {
   @ApiProperty({
     example: '화재 대응 훈련 세션',
-    description: '훈련 세션 제목',
+    description: '훈련 세션명',
   })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  sessionName: string;
 
   @ApiProperty({ example: 1, description: '시나리오 ID' })
   @IsNumber()

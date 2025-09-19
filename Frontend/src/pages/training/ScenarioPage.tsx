@@ -116,7 +116,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
       // 1. 먼저 훈련 세션 생성
       const sessionData = {
-        title: `${scenarioSetName} 훈련`,
+        sessionName: `${scenarioSetName} 훈련`,
         scenarioId: scenarioIdMap[scenarioType] || 1,
         teamId: user.teamId || undefined, // 팀이 없으면 undefined (선택사항)
         startTime: new Date(startTime).toISOString(),
@@ -127,15 +127,13 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
       const session = await trainingApi.createSession(sessionData);
       console.log('훈련 세션 생성 완료:', session);
-      console.log('🔍 세션 ID 확인:', {
-        sessionData: session,
-        sessionId: session.data?.id,
-        hasData: !!session.data,
-      });
-
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
+      // ApiResponse<TrainingSession> 구조에서 data.id 사용
       const sessionId = session.data?.id;
+      console.log('🔍 세션 ID:', sessionId);
+
       if (!sessionId) {
+        console.error('❌ 세션 ID를 찾을 수 없습니다. 전체 응답:', session);
         throw new Error('세션 ID를 가져올 수 없습니다.');
       }
 

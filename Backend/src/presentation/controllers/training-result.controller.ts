@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { TrainingResultService } from '../../application/services/training-result.service';
 import { TrainingResult } from '../../domain/entities/training-result.entity';
+import { CreateTrainingResultDto } from '../dto/create-training-result.dto';
 import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
@@ -24,7 +25,7 @@ export class TrainingResultController {
     status: 201,
     description: '훈련 결과가 성공적으로 생성되었습니다.',
   })
-  async createTrainingResult(@Body() data: Partial<TrainingResult>) {
+  async createTrainingResult(@Body() data: CreateTrainingResultDto) {
     console.log('🔍 TrainingResultController.createTrainingResult 호출됨');
     console.log('📝 받은 데이터:', {
       userId: data.userId,

@@ -1,5 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ScenarioRepository } from '../../domain/repositories/scenario.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Scenario } from '../../domain/entities/scenario.entity';
 import { CreateScenarioDto } from '../../presentation/dto/create-scenario.dto';
 import { UpdateScenarioDto } from '../../presentation/dto/update-scenario.dto';
@@ -7,8 +8,8 @@ import { UpdateScenarioDto } from '../../presentation/dto/update-scenario.dto';
 @Injectable()
 export class ScenariosService {
   constructor(
-    @Inject('ScenarioRepository')
-    private readonly scenarioRepository: ScenarioRepository,
+    @InjectRepository(Scenario)
+    private readonly scenarioRepository: Repository<Scenario>,
   ) {}
 
   async create(createScenarioDto: CreateScenarioDto): Promise<Scenario> {
@@ -24,45 +25,47 @@ export class ScenariosService {
     };
 
     // 코드 중복 확인
-    const existingScenario = await this.scenarioRepository.findByScenarioCode(
-      scenarioData.scenarioCode,
-    );
+    const existingScenario = await this.scenarioRepository.findOne({
+      where: { scenarioCode: scenarioData.scenarioCode },
+    });
     if (existingScenario) {
       throw new Error('시나리오 코드가 이미 존재합니다.');
     }
 
-    return this.scenarioRepository.create(scenarioData);
+    const newScenario = this.scenarioRepository.create(scenarioData);
+    return this.scenarioRepository.save(newScenario);
   }
 
   async findAll(): Promise<Scenario[]> {
-    return this.scenarioRepository.findAll();
+    return this.scenarioRepository.find();
   }
 
   async findOne(id: number): Promise<Scenario> {
-    return this.scenarioRepository.findById(id);
+    return this.scenarioRepository.findOne({ where: { id } });
   }
 
   async update(
     id: number,
     updateScenarioDto: UpdateScenarioDto,
   ): Promise<Scenario> {
-    return this.scenarioRepository.update(id, updateScenarioDto);
+    await this.scenarioRepository.update(id, updateScenarioDto);
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    return this.scenarioRepository.delete(id);
+    await this.scenarioRepository.delete(id);
   }
 
   async findByTeamId(teamId: number): Promise<Scenario[]> {
-    return this.scenarioRepository.findByTeamId(teamId);
+    return this.scenarioRepository.find({ where: { teamId } });
   }
 
   async findByDisasterType(disasterType: string): Promise<Scenario[]> {
-    return this.scenarioRepository.findByDisasterType(disasterType);
+    return this.scenarioRepository.find({ where: { disasterType } });
   }
 
   async findByApprovalStatus(status: string): Promise<Scenario[]> {
-    return this.scenarioRepository.findByApprovalStatus(status);
+    return this.scenarioRepository.find({ where: { approvalStatus: status } });
   }
 
   /**
@@ -80,8 +83,8 @@ export class ScenariosService {
 
     // 다음 시퀀스 번호 조회
     const existingScenarios = teamId
-      ? await this.scenarioRepository.findByTeamId(teamId)
-      : await this.scenarioRepository.findAll();
+      ? await this.scenarioRepository.find({ where: { teamId } })
+      : await this.scenarioRepository.find();
     const typeScenarios = existingScenarios.filter(
       (s) => s.scenarioCode?.startsWith(typeCode) && s.isActive,
     );
@@ -135,10 +138,9 @@ export class ScenariosService {
           };
 
           // 기존 시나리오가 있는지 확인
-          const existingScenario =
-            await this.scenarioRepository.findByScenarioCode(
-              scenarioData.scenarioCode,
-            );
+          const existingScenario = await this.scenarioRepository.findOne({
+            where: { scenarioCode: scenarioData.scenarioCode },
+          });
 
           if (existingScenario) {
             // 기존 시나리오 업데이트
@@ -149,7 +151,8 @@ export class ScenariosService {
             successCount++;
           } else {
             // 새 시나리오 생성
-            await this.scenarioRepository.create(scenarioData);
+            const newScenario = this.scenarioRepository.create(scenarioData);
+            await this.scenarioRepository.save(newScenario);
             successCount++;
           }
         } catch (error) {

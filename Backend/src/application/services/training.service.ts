@@ -1,5 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { TrainingSessionRepository } from '../../domain/repositories/training-session.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { CreateTrainingSessionDto } from '../../presentation/dto/create-training-session.dto';
 import { UpdateTrainingSessionDto } from '../../presentation/dto/update-training-session.dto';
@@ -7,8 +8,8 @@ import { UpdateTrainingSessionDto } from '../../presentation/dto/update-training
 @Injectable()
 export class TrainingService {
   constructor(
-    @Inject('TrainingSessionRepository')
-    private readonly trainingSessionRepository: TrainingSessionRepository,
+    @InjectRepository(TrainingSession)
+    private readonly trainingSessionRepository: Repository<TrainingSession>,
   ) {}
 
   async create(
@@ -23,46 +24,47 @@ export class TrainingService {
     };
 
     // 코드 중복 확인
-    const existingSession =
-      await this.trainingSessionRepository.findBySessionCode(
-        sessionData.sessionCode,
-      );
+    const existingSession = await this.trainingSessionRepository.findOne({
+      where: { sessionCode: sessionData.sessionCode },
+    });
     if (existingSession) {
       throw new Error('세션 코드가 이미 존재합니다.');
     }
 
-    return this.trainingSessionRepository.create(sessionData);
+    const newSession = this.trainingSessionRepository.create(sessionData);
+    return this.trainingSessionRepository.save(newSession);
   }
 
   async findAll(): Promise<TrainingSession[]> {
-    return this.trainingSessionRepository.findAll();
+    return this.trainingSessionRepository.find();
   }
 
   async findOne(id: number): Promise<TrainingSession> {
-    return this.trainingSessionRepository.findById(id);
+    return this.trainingSessionRepository.findOne({ where: { id } });
   }
 
   async update(
     id: number,
     updateTrainingSessionDto: UpdateTrainingSessionDto,
   ): Promise<TrainingSession> {
-    return this.trainingSessionRepository.update(id, updateTrainingSessionDto);
+    await this.trainingSessionRepository.update(id, updateTrainingSessionDto);
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    return this.trainingSessionRepository.delete(id);
+    await this.trainingSessionRepository.delete(id);
   }
 
   async findByTeamId(teamId: number): Promise<TrainingSession[]> {
-    return this.trainingSessionRepository.findByTeamId(teamId);
+    return this.trainingSessionRepository.find({ where: { teamId } });
   }
 
   async findByScenarioId(scenarioId: number): Promise<TrainingSession[]> {
-    return this.trainingSessionRepository.findByScenarioId(scenarioId);
+    return this.trainingSessionRepository.find({ where: { scenarioId } });
   }
 
   async findByStatus(status: string): Promise<TrainingSession[]> {
-    return this.trainingSessionRepository.findByStatus(status);
+    return this.trainingSessionRepository.find({ where: { status } });
   }
 
   /**
@@ -75,8 +77,8 @@ export class TrainingService {
   ): Promise<string> {
     // 다음 시퀀스 번호 조회
     const existingSessions = teamId
-      ? await this.trainingSessionRepository.findByTeamId(teamId)
-      : await this.trainingSessionRepository.findAll();
+      ? await this.trainingSessionRepository.find({ where: { teamId } })
+      : await this.trainingSessionRepository.find();
     const nextNumber = existingSessions.length + 1;
     return `SESS${nextNumber.toString().padStart(3, '0')}`;
   }

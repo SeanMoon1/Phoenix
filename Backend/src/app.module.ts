@@ -41,9 +41,6 @@ import { UpdateUserUseCase } from './application/use-cases/user/update-user.use-
 // Infrastructure Layer - Repository Implementations
 import { RepositoriesModule } from './infrastructure/database/repositories/repositories.module';
 import { TypeOrmUserRepository } from './infrastructure/database/repositories/user.repository.impl';
-import { ScenarioRepositoryTypeOrm } from './infrastructure/database/repositories/scenario.repository.typeorm';
-import { TeamRepositoryTypeOrm } from './infrastructure/database/repositories/team.repository.typeorm';
-import { TrainingSessionRepositoryTypeOrm } from './infrastructure/database/repositories/training-session.repository.typeorm';
 
 // Domain Layer - Entities
 import { User } from './domain/entities/user.entity';
@@ -149,23 +146,6 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     CreateUserUseCase,
     GetUserUseCase,
     UpdateUserUseCase,
-    // Repository Implementations
-    {
-      provide: 'UserRepository',
-      useClass: TypeOrmUserRepository,
-    },
-    {
-      provide: 'ScenarioRepository',
-      useClass: ScenarioRepositoryTypeOrm,
-    },
-    {
-      provide: 'TeamRepository',
-      useClass: TeamRepositoryTypeOrm,
-    },
-    {
-      provide: 'TrainingSessionRepository',
-      useClass: TrainingSessionRepositoryTypeOrm,
-    },
     // Strategies
     LocalStrategy,
     JwtStrategy,

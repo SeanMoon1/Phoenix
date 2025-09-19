@@ -97,7 +97,8 @@ export function useModals({
     endModalAutoShown,
     failedThisRun,
     scenarioSetName,
-    // setEndModalAutoShown과 onSaveResult를 의존성 배열에서 제거하여 무한 루프 방지
+    onSaveResult, // onSaveResult 함수도 의존성에 포함
+    // setEndModalAutoShown은 함수이므로 의존성에서 제외
   ]);
 
   // 모달 시 스크롤 잠금

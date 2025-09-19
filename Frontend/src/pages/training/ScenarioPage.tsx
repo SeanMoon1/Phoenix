@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useEffect } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingApi, trainingResultApi } from '@/services/api';
@@ -180,7 +180,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     scenarioType,
     scenarioSetName,
     startTime,
-    // gameState와 expSystem의 값들은 함수 내에서 직접 참조하므로 의존성에서 제거
+    gameState.scenarios.length,
+    gameState.failedThisRun,
+    expSystem.totalCorrect,
+    expSystem.level,
   ]);
 
   // 모달 훅

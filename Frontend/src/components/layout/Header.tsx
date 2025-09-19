@@ -27,24 +27,13 @@ const Header: React.FC = () => {
     }
   }, []);
 
-  // 스크롤 이벤트 리스너 추가
+  // 스크롤 이벤트 리스너 추가 (헤더 고정만 처리)
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
       const shouldBeFixed = scrollTop > 10;
-      // console.log(
-      //   'Scroll position:',
-      //   scrollTop,
-      //   'Should be fixed:',
-      //   shouldBeFixed
-      // );
       setIsScrolled(shouldBeFixed);
-
-      // 모바일 메뉴가 열린 상태에서 스크롤 시 메뉴 닫기
-      if (isMobileMenuOpen && scrollTop > 0) {
-        setIsMobileMenuOpen(false);
-      }
     };
 
     // 초기 스크롤 위치 확인
@@ -54,7 +43,7 @@ const Header: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isMobileMenuOpen]);
+  }, []);
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -81,7 +70,7 @@ const Header: React.FC = () => {
   return (
     <>
       <header
-        className={`bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 transition-all duration-300 z-50 ${
+        className={`bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 transition-all duration-300 z-[100] ${
           isScrolled
             ? 'fixed top-0 left-0 right-0 shadow-xl backdrop-blur-sm bg-white/95 dark:bg-gray-900/95'
             : 'relative'
@@ -224,7 +213,7 @@ const Header: React.FC = () => {
               {/* 모바일 햄버거 메뉴 버튼 */}
               <button
                 onClick={toggleMobileMenu}
-                className="p-2 text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg lg:hidden dark:bg-gray-800 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400"
+                className="p-3 text-gray-700 transition-all duration-200 bg-gray-100 rounded-lg lg:hidden dark:bg-gray-800 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400"
                 aria-label="모바일 메뉴"
               >
                 <svg

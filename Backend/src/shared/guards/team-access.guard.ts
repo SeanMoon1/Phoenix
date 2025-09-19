@@ -24,10 +24,12 @@ export class TeamAccessGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     const request = context.switchToHttp().getRequest();
 
-    // 사용자의 팀 ID 확인
+    // 사용자의 팀 ID 확인 (팀이 없는 사용자도 허용)
     const userTeamId = user.teamId;
+
+    // 팀이 없는 사용자는 팀 관련 검증을 건너뛰고 허용
     if (!userTeamId) {
-      throw new ForbiddenException('팀에 소속되지 않은 사용자입니다.');
+      return true;
     }
 
     // 요청에서 팀 ID 추출 (URL 파라미터, 쿼리, 또는 바디에서)

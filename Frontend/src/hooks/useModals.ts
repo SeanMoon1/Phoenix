@@ -62,6 +62,8 @@ export function useModals({
 
   // 엔딩 모달 처리 - sceneId만 체크하여 무한 루프 방지
   useEffect(() => {
+    console.log('🔄 useModals useEffect 실행됨');
+    
     const sceneId = scenario?.sceneId;
     const isEndScene = sceneId ? sceneId.trim() === END_SCENE_ID : false;
 

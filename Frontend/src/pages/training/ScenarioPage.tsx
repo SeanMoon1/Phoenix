@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback } from 'react';
+import { useMemo, useRef, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingApi, trainingResultApi } from '@/services/api';
@@ -184,6 +184,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   ]);
 
   // 모달 훅
+  console.log('🔄 ScenarioPage - useModals 훅 호출 시작');
   const modals = useModals({
     scenario: gameState.scenario,
     failedThisRun: gameState.failedThisRun,
@@ -192,18 +193,35 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     setEndModalAutoShown: gameState.setEndModalAutoShown,
     onSaveResult: saveTrainingResult,
   });
+  console.log('✅ ScenarioPage - useModals 훅 호출 완료');
 
-  // useModals에 전달되는 scenario 값 디버깅
-  console.log('🔍 ScenarioPage - useModals에 전달되는 값들:', {
-    scenario: gameState.scenario,
-    scenarioId: gameState.scenario?.sceneId,
-    scenarioTitle: gameState.scenario?.title,
-    current: gameState.current,
-    scenariosLength: gameState.scenarios.length,
-    loading: gameState.loading,
-    failedThisRun: gameState.failedThisRun,
-    endModalAutoShown: gameState.endModalAutoShown,
+  // saveTrainingResult 함수가 제대로 전달되는지 확인
+  console.log('🔍 ScenarioPage - saveTrainingResult 함수 확인:', {
+    isFunction: typeof saveTrainingResult === 'function',
+    functionName: saveTrainingResult?.name,
+    functionLength: saveTrainingResult?.length,
   });
+
+  // useModals에 전달되는 scenario 값 디버깅 (무한 루프 방지를 위해 useEffect로 이동)
+  useEffect(() => {
+    console.log('🔍 ScenarioPage - useModals에 전달되는 값들:', {
+      scenario: gameState.scenario,
+      scenarioId: gameState.scenario?.sceneId,
+      scenarioTitle: gameState.scenario?.title,
+      current: gameState.current,
+      scenariosLength: gameState.scenarios.length,
+      loading: gameState.loading,
+      failedThisRun: gameState.failedThisRun,
+      endModalAutoShown: gameState.endModalAutoShown,
+    });
+  }, [
+    gameState.scenario,
+    gameState.current,
+    gameState.scenarios.length,
+    gameState.loading,
+    gameState.failedThisRun,
+    gameState.endModalAutoShown,
+  ]);
 
   // 엔딩 모달 자동 표시 처리 - useModals에서 처리하므로 제거
   // (useModals 훅에서 이미 엔딩 조건을 체크하고 모달을 표시하므로 중복 제거)

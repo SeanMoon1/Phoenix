@@ -37,8 +37,6 @@ export function useModals({
   setEndModalAutoShown,
   onSaveResult,
 }: UseModalsProps): UseModalsReturn {
-  console.log('🔄 useModals 훅 함수 실행됨');
-
   // 모달 상태
   const [_clearMsg, _setClearMsg] = useState<string | null>(null);
   const [_failMsg, _setFailMsg] = useState<string | null>(null);
@@ -64,85 +62,23 @@ export function useModals({
 
   // 엔딩 모달 처리 - sceneId만 체크하여 무한 루프 방지
   useEffect(() => {
-    console.log('🔄 useModals useEffect 실행됨');
-
     const sceneId = scenario?.sceneId;
     const isEndScene = sceneId ? sceneId.trim() === END_SCENE_ID : false;
 
-    console.log('🔍 useModals 엔딩 체크:', {
-      hasScenario: !!scenario,
-      sceneId,
-      endModalAutoShown,
-      isEndScene,
-      failedThisRun,
-      scenarioTitle: scenario?.title,
-      scenarioContent: scenario?.content?.substring(0, 50) + '...',
-    });
+    if (!scenario || endModalAutoShown || !isEndScene) return;
 
-    // 각 조건을 개별적으로 체크하여 어느 조건에서 막히는지 확인
-    if (!scenario) {
-      console.log('❌ useModals: scenario가 없음', {
-        hasScenario: !!scenario,
-        scenarioValue: scenario,
-        // useModals가 받은 props들을 확인하기 위해 추가 로깅
-        props: {
-          scenario,
-          failedThisRun,
-          scenarioSetName,
-          endModalAutoShown,
-        },
-      });
-      return;
-    }
-
-    if (endModalAutoShown) {
-      console.log('❌ useModals: endModalAutoShown이 이미 true');
-      return;
-    }
-
-    if (!isEndScene) {
-      console.log('❌ useModals: isEndScene이 false - 엔딩 씬이 아님', {
-        sceneId,
-        END_SCENE_ID,
-        trimmedSceneId: sceneId?.trim(),
-        isMatch: sceneId?.trim() === END_SCENE_ID,
-      });
-      return;
-    }
-
-    console.log('✅ useModals: 모든 조건 통과 - 훈련 완료 처리 시작');
-
-    console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
-    console.log('🔍 useModals 상세 정보:', {
-      scenarioTitle: scenario?.title,
-      scenarioSceneId: scenario?.sceneId,
-      endModalAutoShown,
-      isEndScene,
-      failedThisRun,
-      scenarioSetName,
-    });
-
+    console.log('🎯 훈련 완료! 결과 저장 시작');
     setEndModalAutoShown(true);
 
-    // onSaveResult 함수 호출 전 로깅
-    console.log('🚀 onSaveResult 함수 호출 시도:', typeof onSaveResult);
-    console.log('🔍 onSaveResult 함수 상세:', {
-      isFunction: typeof onSaveResult === 'function',
-      functionName: onSaveResult?.name,
-      functionLength: onSaveResult?.length,
-    });
-
+    // 훈련 결과 저장
     if (typeof onSaveResult === 'function') {
-      console.log('✅ onSaveResult 함수 호출 시작');
       onSaveResult()
         .then(() => {
-          console.log('✅ onSaveResult 함수 호출 성공');
+          console.log('✅ 훈련 결과 저장 성공');
         })
         .catch(err => {
-          console.error('❌ [useModals] onSaveResult failed', err);
+          console.error('❌ 훈련 결과 저장 실패:', err);
         });
-    } else {
-      console.error('❌ onSaveResult가 함수가 아닙니다:', onSaveResult);
     }
 
     if (!failedThisRun) {

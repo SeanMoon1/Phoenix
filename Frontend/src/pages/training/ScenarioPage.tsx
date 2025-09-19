@@ -193,26 +193,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     onSaveResult: saveTrainingResult,
   });
 
-  // useModals에 전달되는 scenario 값 디버깅 (무한 루프 방지를 위해 useEffect로 이동)
-  useEffect(() => {
-    console.log('🔍 ScenarioPage - useModals에 전달되는 값들:', {
-      scenario: gameState.scenario,
-      scenarioId: gameState.scenario?.sceneId,
-      scenarioTitle: gameState.scenario?.title,
-      current: gameState.current,
-      scenariosLength: gameState.scenarios.length,
-      loading: gameState.loading,
-      failedThisRun: gameState.failedThisRun,
-      endModalAutoShown: gameState.endModalAutoShown,
-    });
-  }, [
-    gameState.scenario,
-    gameState.current,
-    gameState.scenarios.length,
-    gameState.loading,
-    gameState.failedThisRun,
-    gameState.endModalAutoShown,
-  ]);
+  // 디버깅용 로깅 제거 - 무한 루프 방지
 
   // 엔딩 모달 자동 표시 처리 - useModals에서 처리하므로 제거
   // (useModals 훅에서 이미 엔딩 조건을 체크하고 모달을 표시하므로 중복 제거)
@@ -275,22 +256,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       ? gameState.scenarios.findIndex((s: any) => s.sceneId === nextId)
       : -1;
 
-    console.log('🔍 handleNext - nextId 처리:', {
-      nextId,
-      nextIndex,
-      isEndScene: nextId === '#END',
-      currentSceneId: gameState.scenario?.sceneId,
-      currentIndex: gameState.current,
-    });
-
     if (nextIndex !== -1) {
-      console.log('✅ handleNext - nextIndex로 이동:', {
-        from: gameState.current,
-        to: nextIndex,
-        targetSceneId: gameState.scenarios[nextIndex]?.sceneId,
-        targetTitle: gameState.scenarios[nextIndex]?.title,
-      });
-
       gameState.resetSceneFlags();
       gameState.setHistory((h: number[]) => [...h, gameState.current]);
       gameState.setCurrent(nextIndex);

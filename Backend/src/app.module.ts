@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -41,9 +41,9 @@ import { UpdateUserUseCase } from './application/use-cases/user/update-user.use-
 // Infrastructure Layer - Repository Implementations
 import { RepositoriesModule } from './infrastructure/database/repositories/repositories.module';
 import { TypeOrmUserRepository } from './infrastructure/database/repositories/user.repository.impl';
-import { TypeOrmScenarioRepository } from './infrastructure/database/repositories/scenario.repository.impl';
-import { TypeOrmTeamRepository } from './infrastructure/database/repositories/team.repository.impl';
-import { TypeOrmTrainingSessionRepository } from './infrastructure/database/repositories/training-session.repository.impl';
+import { ScenarioRepositoryTypeOrm } from './infrastructure/database/repositories/scenario.repository.typeorm';
+import { TeamRepositoryTypeOrm } from './infrastructure/database/repositories/team.repository.typeorm';
+import { TrainingSessionRepositoryTypeOrm } from './infrastructure/database/repositories/training-session.repository.typeorm';
 
 // Domain Layer - Entities
 import { User } from './domain/entities/user.entity';
@@ -158,15 +158,21 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     },
     {
       provide: 'ScenarioRepository',
-      useClass: TypeOrmScenarioRepository,
+      useFactory: (scenarioRepository: ScenarioRepositoryTypeOrm) =>
+        scenarioRepository,
+      inject: [ScenarioRepositoryTypeOrm],
     },
     {
       provide: 'TeamRepository',
-      useClass: TypeOrmTeamRepository,
+      useFactory: (teamRepository: TeamRepositoryTypeOrm) => teamRepository,
+      inject: [TeamRepositoryTypeOrm],
     },
     {
       provide: 'TrainingSessionRepository',
-      useClass: TypeOrmTrainingSessionRepository,
+      useFactory: (
+        trainingSessionRepository: TrainingSessionRepositoryTypeOrm,
+      ) => trainingSessionRepository,
+      inject: [TrainingSessionRepositoryTypeOrm],
     },
     // Strategies
     LocalStrategy,

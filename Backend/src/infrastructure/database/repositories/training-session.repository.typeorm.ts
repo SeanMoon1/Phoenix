@@ -1,16 +1,21 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, forwardRef } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { TrainingSessionRepository } from '../../../domain/repositories/training-session.repository';
 import { TrainingSession } from '../../../domain/entities/training-session.entity';
 
 @Injectable()
-export class TypeOrmTrainingSessionRepository
+export class TrainingSessionRepositoryTypeOrm
   implements TrainingSessionRepository
 {
+  private trainingSessionRepository: Repository<TrainingSession>;
+
   constructor(
-    @Inject('TrainingSessionRepository')
-    private readonly trainingSessionRepository: Repository<TrainingSession>,
-  ) {}
+    @InjectRepository(TrainingSession)
+    trainingSessionRepository: Repository<TrainingSession>,
+  ) {
+    this.trainingSessionRepository = trainingSessionRepository;
+  }
 
   async findById(id: number): Promise<TrainingSession | null> {
     return this.trainingSessionRepository.findOne({

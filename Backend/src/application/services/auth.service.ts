@@ -108,6 +108,10 @@ export class AuthService {
         //teamId: 1, // 기본 팀 ID로 설정
         userCode: `USER${Date.now()}`, // 고유한 사용자 코드 생성
         password: hashedPassword,
+        // 일반 회원가입 시 OAuth 필드들을 명시적으로 null로 설정
+        oauthProvider: null,
+        oauthProviderId: null,
+        profileImageUrl: null,
       });
 
       console.log('🔍 사용자 생성 결과:', { user });

@@ -32,17 +32,50 @@ export class CreateUserUseCase {
     try {
       console.log('🔍 CreateUserUseCase.execute 호출됨:', { request });
 
-      // Validate email uniqueness
+      // Validate email uniqueness (OAuth 사용자와 일반 사용자 통합 처리)
       const existingUserByEmail = await this.userDomainService.isEmailUnique(
         request.email,
       );
       console.log('🔍 이메일 중복 확인 결과:', existingUserByEmail);
+
       if (!existingUserByEmail) {
-        console.log('❌ 이메일 중복됨');
-        return {
-          success: false,
-          error: 'Email already exists',
-        };
+        // 기존 사용자가 OAuth 사용자인지 확인
+        const existingUser = await this.userRepository.findByEmail(
+          request.email,
+        );
+        if (existingUser && existingUser.oauthProvider) {
+          console.log('🔄 OAuth 사용자 발견 - 일반 회원가입으로 전환');
+          // OAuth 사용자를 일반 사용자로 전환
+          try {
+            const updatedUser = await this.userRepository.update(
+              existingUser.id,
+              {
+                loginId: request.loginId,
+                password: request.password,
+                name: request.name,
+                oauthProvider: null,
+                oauthProviderId: null,
+              },
+            );
+            console.log('✅ OAuth 사용자를 일반 사용자로 전환 완료');
+            return {
+              success: true,
+              user: updatedUser,
+            };
+          } catch (error) {
+            console.error('❌ OAuth 사용자 전환 실패:', error);
+            return {
+              success: false,
+              error: 'Failed to convert OAuth user to regular user',
+            };
+          }
+        } else {
+          console.log('❌ 이메일 중복됨 (일반 사용자)');
+          return {
+            success: false,
+            error: 'Email already exists',
+          };
+        }
       }
 
       // Validate login ID uniqueness

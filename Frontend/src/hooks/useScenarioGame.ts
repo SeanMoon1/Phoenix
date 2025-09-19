@@ -208,17 +208,9 @@ export function useScenarioGame({
       handleChoice,
       resetGame,
       resetSceneFlags,
-      setCurrent,
-      setHistory,
-      setSelected,
-      setFeedback,
-      setFailedThisRun,
-      setWrongTriedInThisScene,
-      setAwardedExpThisScene,
-      setEndModalAutoShown,
       choiceDisabled,
-      setChoiceDisabled,
       answered,
+      // setter 함수들은 의존성에서 제외 (무한 루프 방지)
     ]
   );
 }

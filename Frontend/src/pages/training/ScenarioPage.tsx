@@ -180,10 +180,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     scenarioType,
     scenarioSetName,
     startTime,
-    gameState.scenarios.length,
-    gameState.failedThisRun,
-    expSystem.totalCorrect,
-    expSystem.level,
+    // gameState와 expSystem의 값들은 함수 내에서 직접 참조하므로 의존성에서 제거
+    // 무한 루프 방지를 위해 의존성 배열을 최소화
   ]);
 
   // 모달 훅

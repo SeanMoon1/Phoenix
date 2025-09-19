@@ -16,7 +16,7 @@ import { TrainingParticipant } from './training-participant.entity';
 @Entity('training_session')
 export class TrainingSession {
   @ApiProperty({ description: '세션 ID' })
-  @PrimaryGeneratedColumn({ name: 'session_id', type: 'bigint' })
+  @PrimaryGeneratedColumn({ name: 'session_id' })
   id: number;
 
   @ApiProperty({ description: '팀 ID', required: false })

@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS choice_option (
 -- 10. 훈련 세션 테이블
 CREATE TABLE IF NOT EXISTS training_session (
     session_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '세션 ID',
-    team_id BIGINT NOT NULL COMMENT '팀 ID (생성 팀)',
+    team_id BIGINT NULL COMMENT '팀 ID (생성 팀)',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     session_code VARCHAR(50) NOT NULL COMMENT '세션 코드 (예: SESS001, SESS002)',
     session_name VARCHAR(255) NOT NULL COMMENT '세션명',

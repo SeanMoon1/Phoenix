@@ -127,11 +127,22 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
       const session = await trainingApi.createSession(sessionData);
       console.log('훈련 세션 생성 완료:', session);
+      console.log('🔍 세션 ID 확인:', {
+        sessionData: session,
+        sessionId: session.data?.id || session.id,
+        hasData: !!session.data,
+        hasId: !!session.id,
+      });
 
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
+      const sessionId = session.data?.id || session.id;
+      if (!sessionId) {
+        throw new Error('세션 ID를 가져올 수 없습니다.');
+      }
+
       const resultData = {
         participantId: user.id, // 사용자 ID를 participantId로 사용
-        sessionId: session.data?.id, // 생성된 세션 ID 사용
+        sessionId: sessionId, // 생성된 세션 ID 사용
         scenarioId: scenarioIdMap[scenarioType] || 1,
         userId: user.id,
         // resultCode는 서버에서 자동 생성되므로 제거

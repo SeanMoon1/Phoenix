@@ -28,15 +28,6 @@ export class OAuthRegisterDto {
   @IsNotEmpty()
   oauthProviderId: string;
 
-  @ApiProperty({
-    example: 'https://example.com/profile.jpg',
-    description: '프로필 이미지 URL',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  profileImageUrl?: string;
-
   @ApiProperty({ example: 'TEAM001', description: '팀 코드', required: false })
   @IsString()
   @IsOptional()

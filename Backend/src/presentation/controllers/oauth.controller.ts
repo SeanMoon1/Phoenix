@@ -181,7 +181,6 @@ export class OAuthController {
         name: user.name,
         provider: user.provider,
         providerId: user.providerId,
-        profileImage: user.profileImage,
       });
 
       // OAuth 사용자 등록/로그인 처리
@@ -190,7 +189,6 @@ export class OAuthController {
         name: user.name,
         oauthProvider: user.provider,
         oauthProviderId: user.providerId,
-        profileImageUrl: user.profileImage,
       });
 
       console.log(`🔍 ${provider} OAuth 처리 결과:`, result ? '성공' : '실패');

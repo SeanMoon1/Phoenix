@@ -157,7 +157,7 @@ export class AuthService {
         oauthProviderId: oauthRegisterDto.oauthProviderId,
       });
 
-      // 입력 데이터 검증
+      // 입력 데이터 검증 (이메일, 이름, OAuth 정보 필수)
       if (
         !oauthRegisterDto.email ||
         !oauthRegisterDto.name ||
@@ -207,7 +207,6 @@ export class AuthService {
             userCode: null, // 사용자 코드는 나중에 생성
             oauthProvider: oauthRegisterDto.oauthProvider,
             oauthProviderId: oauthRegisterDto.oauthProviderId,
-            profileImageUrl: oauthRegisterDto.profileImageUrl,
           });
           console.log('✅ 새 사용자 생성 완료:', {
             userId: user.id,
@@ -228,7 +227,6 @@ export class AuthService {
         try {
           user.oauthProvider = oauthRegisterDto.oauthProvider;
           user.oauthProviderId = oauthRegisterDto.oauthProviderId;
-          user.profileImageUrl = oauthRegisterDto.profileImageUrl;
           user = await this.usersService.update(user.id, user);
           console.log('✅ 기존 사용자 정보 업데이트 완료');
         } catch (updateError) {

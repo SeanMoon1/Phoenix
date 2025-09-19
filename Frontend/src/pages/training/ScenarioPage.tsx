@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { trainingResultApi } from '@/services/api';
+import { trainingApi, trainingResultApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ChoiceOption } from '@/types/index';
 
@@ -84,12 +84,26 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           flood: 5,
         };
 
+        // 1. 먼저 훈련 세션 생성
+        const sessionData = {
+          sessionName: `${scenarioSetName} 훈련`,
+          description: `${scenarioSetName} 시나리오 훈련 세션`,
+          startTime: new Date(startTime).toISOString(),
+          endTime: new Date().toISOString(),
+          status: 'completed' as const,
+          createdBy: user.id,
+        };
+
+        const session = await trainingApi.createSession(sessionData);
+        console.log('훈련 세션 생성 완료:', session);
+
+        // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
         const resultData = {
-          participantId: user.id,
-          sessionId: Date.now(),
+          participantId: user.id, // 사용자 ID를 participantId로 사용
+          sessionId: session.data?.id, // 생성된 세션 ID 사용
           scenarioId: scenarioIdMap[scenarioType] || 1,
           userId: user.id,
-          resultCode: gameState.failedThisRun ? 'FAILED' : 'COMPLETED',
+          // resultCode는 서버에서 자동 생성되므로 제거
           accuracyScore:
             gameState.scenarios.length > 0
               ? Math.round(
@@ -110,7 +124,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           completedAt: new Date().toISOString(),
         };
 
-        await trainingResultApi.save(resultData);
+        console.log('훈련 결과 저장 시도:', resultData);
+        const result = await trainingResultApi.save(resultData);
+        console.log('훈련 결과 저장 완료:', result);
       }
     } catch (error) {
       console.error('Failed to save training result:', error);

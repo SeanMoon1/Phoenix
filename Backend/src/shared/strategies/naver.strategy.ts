@@ -29,6 +29,8 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         redirectBase && callbackPath
           ? `${redirectBase}${callbackPath}`
           : 'http://phoenix-4.com/auth/naver/callback',
+      // 네이버 OAuth에서 받아올 정보 범위 설정 (필수 정보만)
+      scope: ['name', 'email'],
     });
   }
 
@@ -65,28 +67,21 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
       }
 
       // 이름 정보 안전하게 추출 (네이버는 _json.response.name 사용)
+      // 우선순위: 실명 > 별명 > displayName > username
       let fullName = '';
-      if (displayName) {
-        fullName = displayName;
+      if (_json?.response?.name) {
+        fullName = _json.response.name; // 실명 우선
       } else if (_json?.name) {
         fullName = _json.name;
-      } else if (_json?.response?.name) {
-        fullName = _json.response.name;
+      } else if (_json?.response?.nickname) {
+        fullName = _json.response.nickname; // 별명
       } else if (_json?.nickname) {
         fullName = _json.nickname;
-      } else if (_json?.response?.nickname) {
-        fullName = _json.response.nickname;
+      } else if (displayName) {
+        fullName = displayName;
       } else if (username) {
         fullName = username;
       }
-
-      // 프로필 이미지 안전하게 추출 (네이버는 _json.response.profile_image 사용)
-      const profileImage =
-        _json?.profile_image ||
-        _json?.profileImage ||
-        _json?.response?.profile_image ||
-        _json?.response?.profileImage ||
-        null;
 
       // providerId가 없으면 id 사용
       const providerId = id || _json?.id || _json?.response?.id || null;
@@ -94,7 +89,6 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
       const user = {
         email,
         name: fullName,
-        profileImage,
         provider: 'naver',
         providerId: providerId,
         accessToken,
@@ -106,7 +100,6 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         name: user.name || 'undefined',
         provider: user.provider,
         providerId: user.providerId || 'undefined',
-        profileImage: user.profileImage || 'undefined',
         emailType: typeof user.email,
         nameType: typeof user.name,
         providerIdType: typeof user.providerId,
@@ -114,7 +107,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         hasRefreshToken: !!user.refreshToken,
       });
 
-      // 필수 필드 검증
+      // 필수 필드 검증 (이메일, 이름, providerId 필수)
       if (!user.email || !user.name || !user.providerId) {
         console.error('❌ Naver OAuth 필수 필드 누락:', {
           email: user.email,

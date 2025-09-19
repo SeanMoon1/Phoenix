@@ -1,11 +1,20 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { TrainingResultService } from '../../application/services/training-result.service';
 import { TrainingResult } from '../../domain/entities/training-result.entity';
 import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
 @ApiTags('Training Results')
 @Controller('training-results')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TrainingResultController {
   constructor(private readonly trainingResultService: TrainingResultService) {}
 

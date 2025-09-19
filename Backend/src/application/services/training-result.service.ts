@@ -20,19 +20,25 @@ export class TrainingResultService {
       console.log('🔍 훈련 결과 생성 시작:', data);
 
       // 필수 필드 검증
-      if (!data.userId || !data.sessionId || !data.scenarioId) {
+      if (
+        !data.userId ||
+        !data.sessionId ||
+        !data.scenarioId ||
+        !data.participantId
+      ) {
         throw new Error(
-          '필수 필드가 누락되었습니다: userId, sessionId, scenarioId',
+          '필수 필드가 누락되었습니다: userId, sessionId, scenarioId, participantId',
         );
       }
 
-      // 결과 코드 생성
-      const resultCode = `RESULT_${Date.now()}_${data.userId}`;
+      // 결과 코드 생성 (이미 있으면 사용, 없으면 생성)
+      const resultCode =
+        data.resultCode || `RESULT_${Date.now()}_${data.userId}`;
 
       const trainingResult = this.trainingResultRepository.create({
         ...data,
         resultCode,
-        completedAt: new Date(),
+        completedAt: data.completedAt ? new Date(data.completedAt) : new Date(),
         isActive: true,
       });
 

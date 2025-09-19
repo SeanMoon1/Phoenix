@@ -29,7 +29,7 @@ export class TrainingController {
   @Post()
   @ApiOperation({ summary: '새 훈련 세션 생성' })
   @ApiResponse({ status: 201, description: '훈련 세션 생성 성공' })
-  create(@Body() createTrainingSessionDto: CreateTrainingSessionDto) {
+  async create(@Body() createTrainingSessionDto: CreateTrainingSessionDto) {
     console.log('🔍 TrainingController.create 호출됨');
     console.log('📝 받은 훈련 세션 데이터:', {
       sessionName: createTrainingSessionDto.sessionName,
@@ -42,8 +42,16 @@ export class TrainingController {
     });
 
     try {
-      const result = this.trainingService.create(createTrainingSessionDto);
+      const result = await this.trainingService.create(
+        createTrainingSessionDto,
+      );
       console.log('✅ TrainingController.create 성공');
+      console.log('🔍 반환된 result:', result);
+      console.log('🔍 result 타입:', typeof result);
+      console.log(
+        '🔍 result 키들:',
+        result ? Object.keys(result) : 'result is null/undefined',
+      );
       return { success: true, data: result };
     } catch (error) {
       console.error('❌ TrainingController.create 실패:', error);

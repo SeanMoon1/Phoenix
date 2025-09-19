@@ -129,13 +129,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       console.log('훈련 세션 생성 완료:', session);
       console.log('🔍 세션 ID 확인:', {
         sessionData: session,
-        sessionId: session.data?.id || session.id,
+        sessionId: session.data?.id,
         hasData: !!session.data,
-        hasId: !!session.id,
       });
 
       // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-      const sessionId = session.data?.id || session.id;
+      const sessionId = session.data?.id;
       if (!sessionId) {
         throw new Error('세션 ID를 가져올 수 없습니다.');
       }

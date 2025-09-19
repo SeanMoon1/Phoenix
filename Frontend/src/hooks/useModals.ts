@@ -71,11 +71,23 @@ export function useModals({
       endModalAutoShown,
       isEndScene,
       failedThisRun,
+      scenarioTitle: scenario?.title,
+      scenarioContent: scenario?.content?.substring(0, 50) + '...',
     });
 
     // 각 조건을 개별적으로 체크하여 어느 조건에서 막히는지 확인
     if (!scenario) {
-      console.log('❌ useModals: scenario가 없음');
+      console.log('❌ useModals: scenario가 없음', {
+        hasScenario: !!scenario,
+        scenarioValue: scenario,
+        // useModals가 받은 props들을 확인하기 위해 추가 로깅
+        props: {
+          scenario,
+          failedThisRun,
+          scenarioSetName,
+          endModalAutoShown,
+        },
+      });
       return;
     }
 

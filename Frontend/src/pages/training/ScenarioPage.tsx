@@ -75,6 +75,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // 결과 저장 함수
   const saveTrainingResult = async () => {
+    console.log('🚀 saveTrainingResult 함수 호출됨!');
     try {
       if (!user) {
         console.error(
@@ -83,7 +84,14 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         return;
       }
 
-      console.log('🔍 훈련 결과 저장 시작:', { userId: user.id, scenarioType });
+      console.log('🔍 훈련 결과 저장 시작:', {
+        userId: user.id,
+        scenarioType,
+        userTeamId: user.teamId,
+        gameStateScenariosLength: gameState.scenarios.length,
+        expSystemTotalCorrect: expSystem.totalCorrect,
+        expSystemLevel: expSystem.level,
+      });
 
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
       const scenarioIdMap: Record<string, number> = {
@@ -169,6 +177,21 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // 엔딩 모달 자동 표시 처리
   useEffect(() => {
+    console.log('🔍 엔딩 모달 체크:', {
+      hasScenario: !!gameState.scenario,
+      sceneId: gameState.scenario?.sceneId,
+      current: gameState.current,
+      totalScenarios: gameState.scenarios.length,
+      isEndScene: gameState.scenario
+        ? (gameState.scenario.sceneId ?? '').trim() === '#END' ||
+          gameState.current >= gameState.scenarios.length - 1
+        : false,
+      endModalAutoShown: gameState.endModalAutoShown,
+      hasClearMsg: !!modals.clearMsg,
+      hasFailMsg: !!modals.failMsg,
+      failedThisRun: gameState.failedThisRun,
+    });
+
     if (!gameState.scenario) return;
     const isEndScene =
       (gameState.scenario.sceneId ?? '').trim() === '#END' ||
@@ -176,6 +199,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     if (!isEndScene) return;
     if (gameState.endModalAutoShown || modals.clearMsg || modals.failMsg)
       return;
+
+    console.log('🎯 훈련 완료 조건 만족! 모달 표시 및 결과 저장 시작');
     gameState.setEndModalAutoShown(true);
     if (gameState.failedThisRun) {
       modals.setFailMsg(

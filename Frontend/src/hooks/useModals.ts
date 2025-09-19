@@ -62,8 +62,19 @@ export function useModals({
 
   // 엔딩 모달 처리
   useEffect(() => {
+    console.log('🔍 useModals 엔딩 체크:', {
+      hasScenario: !!scenario,
+      sceneId: scenario?.sceneId,
+      endModalAutoShown,
+      isEndScene: scenario
+        ? (scenario.sceneId ?? '').trim() === END_SCENE_ID
+        : false,
+      failedThisRun,
+    });
+
     if (!scenario || endModalAutoShown) return;
     if ((scenario.sceneId ?? '').trim() === END_SCENE_ID) {
+      console.log('🎯 useModals: 훈련 완료! 결과 저장 시작');
       setEndModalAutoShown(true);
       // onSaveResult는 비동기지만 에러를 흘리지 않도록 처리
       onSaveResult().catch(err =>

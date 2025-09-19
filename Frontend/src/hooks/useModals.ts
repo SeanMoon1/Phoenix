@@ -99,7 +99,7 @@ export function useModals({
     failedThisRun,
     scenarioSetName,
     setEndModalAutoShown,
-    onSaveResult,
+    // onSaveResult를 의존성 배열에서 제거하여 무한 루프 방지
   ]);
 
   // 모달 시 스크롤 잠금

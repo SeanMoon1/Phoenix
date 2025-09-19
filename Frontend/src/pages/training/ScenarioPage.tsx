@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingApi, trainingResultApi } from '@/services/api';
@@ -73,8 +73,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const gameState = useScenarioGame({ scenarioType });
   const expSystem = useExpSystem({ persistKey });
 
-  // 결과 저장 함수
-  const saveTrainingResult = async () => {
+  // 결과 저장 함수 - useCallback으로 메모이제이션하여 무한 루프 방지
+  const saveTrainingResult = useCallback(async () => {
     console.log('🚀 saveTrainingResult 함수 호출됨!');
     try {
       if (!user) {
@@ -163,7 +163,15 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       // 사용자에게 알림 (선택사항)
       alert('훈련 결과 저장에 실패했습니다. 다시 시도해주세요.');
     }
-  };
+  }, [
+    user,
+    scenarioType,
+    scenarioSetName,
+    startTime,
+    gameState.scenarios.length,
+    expSystem.totalCorrect,
+    expSystem.level,
+  ]);
 
   // 모달 훅
   const modals = useModals({
@@ -175,51 +183,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     onSaveResult: saveTrainingResult,
   });
 
-  // 엔딩 모달 자동 표시 처리
-  useEffect(() => {
-    console.log('🔍 엔딩 모달 체크:', {
-      hasScenario: !!gameState.scenario,
-      sceneId: gameState.scenario?.sceneId,
-      current: gameState.current,
-      totalScenarios: gameState.scenarios.length,
-      isEndScene: gameState.scenario
-        ? (gameState.scenario.sceneId ?? '').trim() === '#END' ||
-          gameState.current >= gameState.scenarios.length - 1
-        : false,
-      endModalAutoShown: gameState.endModalAutoShown,
-      hasClearMsg: !!modals.clearMsg,
-      hasFailMsg: !!modals.failMsg,
-      failedThisRun: gameState.failedThisRun,
-    });
-
-    if (!gameState.scenario) return;
-    const isEndScene =
-      (gameState.scenario.sceneId ?? '').trim() === '#END' ||
-      gameState.current >= gameState.scenarios.length - 1;
-    if (!isEndScene) return;
-    if (gameState.endModalAutoShown || modals.clearMsg || modals.failMsg)
-      return;
-
-    console.log('🎯 훈련 완료 조건 만족! 모달 표시 및 결과 저장 시작');
-    gameState.setEndModalAutoShown(true);
-    if (gameState.failedThisRun) {
-      modals.setFailMsg(
-        `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
-      );
-    } else {
-      modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
-      modals.setShowConfetti(true);
-    }
-  }, [
-    gameState.scenario,
-    gameState.current,
-    gameState.scenarios.length,
-    gameState.endModalAutoShown,
-    gameState.failedThisRun,
-    modals.clearMsg,
-    modals.failMsg,
-    scenarioSetName,
-  ]);
+  // 엔딩 모달 자동 표시 처리 - useModals에서 처리하므로 제거
+  // (useModals 훅에서 이미 엔딩 조건을 체크하고 모달을 표시하므로 중복 제거)
 
   // 선택 처리
   const handleChoice = (option: ChoiceOption) => {
@@ -303,19 +268,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       return;
     }
 
-    // 마지막 문제에서 Next 누른 경우: 모달 처리(이미 다른 곳에서 자동처리중이면 중복 주의)
+    // 마지막 문제에서 Next 누른 경우: useModals에서 자동 처리되므로 별도 처리 불필요
     if (isLastScene) {
-      if (!gameState.endModalAutoShown && !modals.clearMsg && !modals.failMsg) {
-        gameState.setEndModalAutoShown(true);
-        if (gameState.failedThisRun) {
-          modals.setFailMsg(
-            `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
-          );
-        } else {
-          modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
-          modals.setShowConfetti(true);
-        }
-      }
       return;
     }
   };

@@ -17,8 +17,20 @@ export class TrainingService {
     // sessionCode가 없으면 자동 생성
     const sessionData = {
       ...createTrainingSessionDto,
-      sessionCode: createTrainingSessionDto.sessionCode || `SESS${Date.now()}`,
+      sessionCode:
+        createTrainingSessionDto.sessionCode ||
+        (await this.generateSessionCode(createTrainingSessionDto.teamId || 1)),
     };
+
+    // 코드 중복 확인
+    const existingSession =
+      await this.trainingSessionRepository.findBySessionCode(
+        sessionData.sessionCode,
+      );
+    if (existingSession) {
+      throw new Error('세션 코드가 이미 존재합니다.');
+    }
+
     return this.trainingSessionRepository.create(sessionData);
   }
 
@@ -51,5 +63,18 @@ export class TrainingService {
 
   async findByStatus(status: string): Promise<TrainingSession[]> {
     return this.trainingSessionRepository.findByStatus(status);
+  }
+
+  /**
+   * 훈련 세션 코드 자동 생성
+   * @param teamId 팀 ID
+   * @returns 생성된 세션 코드
+   */
+  private async generateSessionCode(teamId: number): Promise<string> {
+    // 다음 시퀀스 번호 조회
+    const existingSessions =
+      await this.trainingSessionRepository.findByTeamId(teamId);
+    const nextNumber = existingSessions.length + 1;
+    return `SESS${nextNumber.toString().padStart(3, '0')}`;
   }
 }

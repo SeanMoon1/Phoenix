@@ -12,7 +12,26 @@ export class ScenariosService {
   ) {}
 
   async create(createScenarioDto: CreateScenarioDto): Promise<Scenario> {
-    return this.scenarioRepository.create(createScenarioDto);
+    // 시나리오 코드가 없으면 자동 생성
+    const scenarioData = {
+      ...createScenarioDto,
+      scenarioCode:
+        createScenarioDto.scenarioCode ||
+        (await this.generateScenarioCode(
+          createScenarioDto.teamId || 1,
+          createScenarioDto.disasterType || 'unknown',
+        )),
+    };
+
+    // 코드 중복 확인
+    const existingScenario = await this.scenarioRepository.findByScenarioCode(
+      scenarioData.scenarioCode,
+    );
+    if (existingScenario) {
+      throw new Error('시나리오 코드가 이미 존재합니다.');
+    }
+
+    return this.scenarioRepository.create(scenarioData);
   }
 
   async findAll(): Promise<Scenario[]> {
@@ -44,6 +63,46 @@ export class ScenariosService {
 
   async findByApprovalStatus(status: string): Promise<Scenario[]> {
     return this.scenarioRepository.findByApprovalStatus(status);
+  }
+
+  /**
+   * 시나리오 코드 자동 생성
+   * @param teamId 팀 ID
+   * @param disasterType 재난 유형
+   * @returns 생성된 시나리오 코드
+   */
+  private async generateScenarioCode(
+    teamId: number,
+    disasterType: string,
+  ): Promise<string> {
+    // 재난 유형별 코드 생성
+    const typeCode = this.getDisasterTypeCode(disasterType);
+
+    // 다음 시퀀스 번호 조회
+    const existingScenarios =
+      await this.scenarioRepository.findByTeamId(teamId);
+    const typeScenarios = existingScenarios.filter(
+      (s) => s.scenarioCode?.startsWith(typeCode) && s.isActive,
+    );
+
+    const nextNumber = typeScenarios.length + 1;
+    return `${typeCode}${nextNumber.toString().padStart(3, '0')}`;
+  }
+
+  /**
+   * 재난 유형별 코드 반환
+   * @param disasterType 재난 유형
+   * @returns 3자리 코드
+   */
+  private getDisasterTypeCode(disasterType: string): string {
+    const typeMap: { [key: string]: string } = {
+      fire: 'FIR',
+      earthquake: 'EAR',
+      emergency: 'EME',
+      traffic: 'TRA',
+      flood: 'FLO',
+    };
+    return typeMap[disasterType.toLowerCase()] || 'GEN';
   }
 
   async syncFromJson(

@@ -79,4 +79,12 @@ export class TypeOrmTrainingSessionRepository
       where: { status: 'active' },
     });
   }
+
+  async findBySessionCode(
+    sessionCode: string,
+  ): Promise<TrainingSession | null> {
+    return this.trainingSessionRepository.findOne({
+      where: { sessionCode },
+    });
+  }
 }

@@ -61,7 +61,13 @@ export class TrainingResultController {
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 200, description: '사용자 훈련 결과 목록' })
   async getTrainingResultsByUser(@Param('userId') userId: number) {
-    return this.trainingResultService.getTrainingResultsByUser(userId);
+    try {
+      const results =
+        await this.trainingResultService.getTrainingResultsByUser(userId);
+      return { success: true, data: results };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
   @Get('session/:sessionId')
@@ -77,7 +83,13 @@ export class TrainingResultController {
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 200, description: '사용자 훈련 통계' })
   async getTrainingStatistics(@Param('userId') userId: number) {
-    return this.trainingResultService.getTrainingStatistics(userId);
+    try {
+      const stats =
+        await this.trainingResultService.getTrainingStatistics(userId);
+      return { success: true, data: stats };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
   @Get('choice-logs/:resultId')

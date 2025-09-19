@@ -228,7 +228,7 @@ export class TrainingResultService {
       const defaultTeam = await this.trainingResultRepository.manager.findOne(
         'Team',
         {
-          where: { teamId: 1 },
+          where: { id: 1 },
         },
       );
 
@@ -238,11 +238,12 @@ export class TrainingResultService {
 
       // 기본 팀이 없으면 생성
       const newTeam = this.trainingResultRepository.manager.create('Team', {
-        teamId: 1,
-        teamName: '기본 팀',
+        id: 1,
+        name: '기본 팀',
         teamCode: 'DEFAULT',
         description: '개인 사용자를 위한 기본 팀',
         isActive: true,
+        status: 'ACTIVE',
       });
 
       await this.trainingResultRepository.manager.save('Team', newTeam);

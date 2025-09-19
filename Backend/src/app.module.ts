@@ -156,25 +156,17 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
         typeOrmUserRepository,
       inject: [TypeOrmUserRepository],
     },
-    TypeOrmScenarioRepository,
     {
       provide: 'ScenarioRepository',
-      useFactory: (dataSource: DataSource) =>
-        dataSource.getRepository(Scenario),
-      inject: [DataSource],
+      useClass: TypeOrmScenarioRepository,
     },
-    TypeOrmTeamRepository,
     {
       provide: 'TeamRepository',
-      useFactory: (dataSource: DataSource) => dataSource.getRepository(Team),
-      inject: [DataSource],
+      useClass: TypeOrmTeamRepository,
     },
-    TypeOrmTrainingSessionRepository,
     {
       provide: 'TrainingSessionRepository',
-      useFactory: (dataSource: DataSource) =>
-        dataSource.getRepository(TrainingSession),
-      inject: [DataSource],
+      useClass: TypeOrmTrainingSessionRepository,
     },
     // Strategies
     LocalStrategy,

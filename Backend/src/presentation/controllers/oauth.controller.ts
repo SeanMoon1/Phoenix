@@ -51,6 +51,28 @@ export class OAuthController {
     };
   }
 
+  @Get('naver/status')
+  @ApiOperation({ summary: 'Naver OAuth 설정 상태 확인' })
+  @ApiResponse({ status: 200, description: 'OAuth 설정 상태' })
+  async getNaverOAuthStatus() {
+    const clientId = this.configService.get<string>('NAVER_CLIENT_ID');
+    const clientSecret = this.configService.get<string>('NAVER_CLIENT_SECRET');
+    const redirectBase = this.configService.get<string>('OAUTH_REDIRECT_BASE');
+    const callbackPath = this.configService.get<string>('NAVER_CALLBACK_PATH');
+
+    const baseUrl = redirectBase || 'https://phoenix-4.com';
+    return {
+      configured: !!(clientId && clientSecret && redirectBase && callbackPath),
+      clientId: clientId ? `${clientId.substring(0, 10)}...` : 'Not configured',
+      redirectUrl:
+        redirectBase && callbackPath
+          ? `${redirectBase}${callbackPath}`
+          : 'Not configured',
+      successRedirect: `${baseUrl}/auth/callback`,
+      failureRedirect: `${baseUrl}/auth/callback`,
+    };
+  }
+
   // Naver OAuth 엔드포인트
   @Get('naver')
   @UseGuards(AuthGuard('naver'))
@@ -65,6 +87,10 @@ export class OAuthController {
   @ApiOperation({ summary: 'Naver OAuth 콜백 처리' })
   @ApiResponse({ status: 302, description: '로그인 성공/실패에 따른 리디렉션' })
   async naverAuthCallback(@Req() req: Request, @Res() res: Response) {
+    console.log('🔍 네이버 OAuth 콜백 시작');
+    console.log('📝 req.user:', req.user);
+    console.log('📝 req.body:', req.body);
+    console.log('📝 req.query:', req.query);
     return this.handleOAuthCallback(req, res, 'naver');
   }
 
@@ -93,6 +119,9 @@ export class OAuthController {
   ) {
     try {
       console.log(`🔍 ${provider} OAuth 콜백 시작`);
+      console.log(`📝 req.user 타입:`, typeof req.user);
+      console.log(`📝 req.user 값:`, req.user);
+
       const user = req.user as any;
       console.log(
         `👤 ${provider} OAuth 사용자 정보:`,
@@ -108,6 +137,11 @@ export class OAuthController {
           profileImage: user.profileImage,
           hasAccessToken: !!user.accessToken,
           hasRefreshToken: !!user.refreshToken,
+          emailType: typeof user.email,
+          nameType: typeof user.name,
+          providerType: typeof user.provider,
+          providerIdType: typeof user.providerId,
+          profileImageType: typeof user.profileImage,
         });
       }
 

@@ -17,6 +17,7 @@ import { UsersController } from './presentation/controllers/users.controller';
 import { ScenariosController } from './presentation/controllers/scenarios.controller';
 import { TrainingController } from './presentation/controllers/training.controller';
 import { TrainingResultController } from './presentation/controllers/training-result.controller';
+import { UserProgressController } from './presentation/controllers/user-progress.controller';
 import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
 
@@ -129,6 +130,7 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     ScenariosController,
     TrainingController,
     TrainingResultController,
+    UserProgressController,
     TeamsController,
     AdminController,
   ],

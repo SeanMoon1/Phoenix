@@ -18,7 +18,7 @@ export class ScenariosService {
       scenarioCode:
         createScenarioDto.scenarioCode ||
         (await this.generateScenarioCode(
-          createScenarioDto.teamId || 1,
+          createScenarioDto.teamId,
           createScenarioDto.disasterType || 'unknown',
         )),
     };
@@ -72,15 +72,16 @@ export class ScenariosService {
    * @returns 생성된 시나리오 코드
    */
   private async generateScenarioCode(
-    teamId: number,
+    teamId: number | null | undefined,
     disasterType: string,
   ): Promise<string> {
     // 재난 유형별 코드 생성
     const typeCode = this.getDisasterTypeCode(disasterType);
 
     // 다음 시퀀스 번호 조회
-    const existingScenarios =
-      await this.scenarioRepository.findByTeamId(teamId);
+    const existingScenarios = teamId
+      ? await this.scenarioRepository.findByTeamId(teamId)
+      : await this.scenarioRepository.findAll();
     const typeScenarios = existingScenarios.filter(
       (s) => s.scenarioCode?.startsWith(typeCode) && s.isActive,
     );

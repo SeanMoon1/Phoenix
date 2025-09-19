@@ -19,7 +19,7 @@ export class TrainingService {
       ...createTrainingSessionDto,
       sessionCode:
         createTrainingSessionDto.sessionCode ||
-        (await this.generateSessionCode(createTrainingSessionDto.teamId || 1)),
+        (await this.generateSessionCode(createTrainingSessionDto.teamId)),
     };
 
     // 코드 중복 확인
@@ -67,13 +67,16 @@ export class TrainingService {
 
   /**
    * 훈련 세션 코드 자동 생성
-   * @param teamId 팀 ID
+   * @param teamId 팀 ID (null 허용)
    * @returns 생성된 세션 코드
    */
-  private async generateSessionCode(teamId: number): Promise<string> {
+  private async generateSessionCode(
+    teamId: number | null | undefined,
+  ): Promise<string> {
     // 다음 시퀀스 번호 조회
-    const existingSessions =
-      await this.trainingSessionRepository.findByTeamId(teamId);
+    const existingSessions = teamId
+      ? await this.trainingSessionRepository.findByTeamId(teamId)
+      : await this.trainingSessionRepository.findAll();
     const nextNumber = existingSessions.length + 1;
     return `SESS${nextNumber.toString().padStart(3, '0')}`;
   }

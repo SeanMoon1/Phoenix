@@ -53,7 +53,12 @@ export class AuthService {
           email: user.email,
           name: user.name,
           userLevel: user.userLevel,
+          userExp: user.userExp,
+          totalScore: user.totalScore,
+          completedScenarios: user.completedScenarios,
           currentTier: user.currentTier,
+          levelProgress: user.levelProgress,
+          nextLevelExp: user.nextLevelExp,
         },
       },
     };

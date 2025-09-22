@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS training_session (
 CREATE TABLE IF NOT EXISTS training_participant (
     participant_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '참가자 ID',
     session_id BIGINT NOT NULL COMMENT '세션 ID',
-    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     participant_code VARCHAR(50) NOT NULL COMMENT '참가자 코드 (예: PART001, PART002)',

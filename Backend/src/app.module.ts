@@ -18,6 +18,7 @@ import { ScenariosController } from './presentation/controllers/scenarios.contro
 import { TrainingController } from './presentation/controllers/training.controller';
 import { TrainingResultController } from './presentation/controllers/training-result.controller';
 import { UserProgressController } from './presentation/controllers/user-progress.controller';
+import { UserExpController } from './presentation/controllers/user-exp.controller';
 import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
 import { AdminAuthController } from './presentation/controllers/admin-auth.controller';
@@ -28,6 +29,7 @@ import { UsersService } from './application/services/users.service';
 import { ScenariosService } from './application/services/scenarios.service';
 import { TrainingService } from './application/services/training.service';
 import { TrainingResultService } from './application/services/training-result.service';
+import { UserExpService } from './application/services/user-exp.service';
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 
@@ -134,6 +136,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     TrainingController,
     TrainingResultController,
     UserProgressController,
+    UserExpController,
     TeamsController,
     AdminController,
     AdminAuthController,
@@ -145,6 +148,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     ScenariosService,
     TrainingService,
     TrainingResultService,
+    UserExpService,
     TeamsService,
     AdminService,
     // Domain Services

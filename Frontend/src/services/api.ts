@@ -922,3 +922,57 @@ export const codeApi = {
     return api.get<Code[]>('/codes/faq-categories');
   },
 };
+
+// 사용자 경험치 관련 API
+export const userExpApi = {
+  /**
+   * 사용자 경험치 업데이트
+   * @param data 경험치 업데이트 데이터
+   * @returns 업데이트 결과
+   */
+  updateUserExp: async (data: {
+    userId: number;
+    expToAdd: number;
+    totalScore?: number;
+    completedScenarios?: number;
+    currentTier?: string;
+  }) => {
+    return api.post<{
+      success: boolean;
+      data?: {
+        id: number;
+        userLevel: number;
+        userExp: number;
+        currentTier: string;
+        levelProgress: number;
+        nextLevelExp: number;
+        totalScore: number;
+        completedScenarios: number;
+      };
+      message?: string;
+      error?: string;
+    }>('/user-exp/update', data);
+  },
+
+  /**
+   * 사용자 경험치 정보 조회
+   * @param userId 사용자 ID
+   * @returns 사용자 경험치 정보
+   */
+  getUserExpInfo: async (userId: number) => {
+    return api.get<{
+      success: boolean;
+      data?: {
+        userLevel: number;
+        userExp: number;
+        currentTier: string;
+        levelProgress: number;
+        nextLevelExp: number;
+        totalScore: number;
+        completedScenarios: number;
+      };
+      message?: string;
+      error?: string;
+    }>(`/user-exp/${userId}/info`);
+  },
+};

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { trainingApi, trainingResultApi } from '@/services/api';
+import { trainingApi, trainingResultApi, userExpApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 
 export function useTrainingResult() {
@@ -70,6 +70,26 @@ export function useTrainingResult() {
           completedAt: new Date().toISOString(),
         };
         await trainingResultApi.save(resultData);
+
+        // 서버에 경험치 정보 전송
+        try {
+          const expToAdd = Math.round(
+            (opts.expSystemState.totalCorrect /
+              opts.gameStateSummary.scenariosCount) *
+              50
+          ); // 정답률에 따른 경험치
+          await userExpApi.updateUserExp({
+            userId: user.id,
+            expToAdd,
+            totalScore: resultData.totalScore,
+            completedScenarios: 1,
+          });
+          console.log('✅ 서버에 경험치 정보 전송 완료');
+        } catch (expError) {
+          console.error('❌ 서버 경험치 업데이트 실패:', expError);
+          // 경험치 업데이트 실패해도 훈련 결과는 저장된 상태로 처리
+        }
+
         return { ok: true };
       } catch (err) {
         console.error('useTrainingResult.saveTrainingResult failed', err);

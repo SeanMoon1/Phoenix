@@ -5,6 +5,7 @@ import { TrainingParticipant } from '../../domain/entities/training-participant.
 import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UserExpService } from './user-exp.service';
 
 @Injectable()
 export class TrainingResultService {
@@ -15,6 +16,7 @@ export class TrainingResultService {
     private readonly userChoiceLogRepository: Repository<UserChoiceLog>,
     @InjectRepository(TrainingParticipant)
     private readonly trainingParticipantRepository: Repository<TrainingParticipant>,
+    private readonly userExpService: UserExpService,
   ) {}
 
   async createTrainingResult(
@@ -61,6 +63,28 @@ export class TrainingResultService {
         resultCode,
         participantId,
       });
+
+      // 사용자 경험치 업데이트
+      try {
+        const expToAdd = this.calculateExpFromScore(data.totalScore || 0);
+        await this.userExpService.updateUserExp({
+          userId: data.userId!,
+          expToAdd,
+          totalScore: data.totalScore || 0,
+          completedScenarios: 1, // 시나리오 1개 완료
+        });
+        console.log('✅ 사용자 경험치 업데이트 완료:', {
+          userId: data.userId,
+          expAdded: expToAdd,
+          totalScore: data.totalScore,
+        });
+      } catch (expError) {
+        console.error(
+          '❌ 사용자 경험치 업데이트 실패 (훈련 결과는 저장됨):',
+          expError,
+        );
+        // 경험치 업데이트 실패해도 훈련 결과는 저장된 상태로 반환
+      }
 
       return savedResult;
     } catch (error) {
@@ -222,39 +246,6 @@ export class TrainingResultService {
    * @param scenarioId 시나리오 ID
    * @returns 참가자 ID
    */
-  private async ensureDefaultTeamExists(): Promise<number> {
-    try {
-      // 기본 팀 조회
-      const defaultTeam = await this.trainingResultRepository.manager.findOne(
-        'Team',
-        {
-          where: { id: 1 },
-        },
-      );
-
-      if (defaultTeam) {
-        return 1;
-      }
-
-      // 기본 팀이 없으면 생성
-      const newTeam = this.trainingResultRepository.manager.create('Team', {
-        id: 1,
-        name: '기본 팀',
-        teamCode: 'DEFAULT',
-        description: '개인 사용자를 위한 기본 팀',
-        isActive: true,
-        status: 'ACTIVE',
-      });
-
-      await this.trainingResultRepository.manager.save('Team', newTeam);
-      console.log('✅ 기본 팀 생성 완료:', { teamId: 1 });
-      return 1;
-    } catch (error) {
-      console.error('❌ 기본 팀 생성 실패:', error);
-      // 실패 시에도 1을 반환 (기존 팀이 있을 가능성)
-      return 1;
-    }
-  }
 
   private async createOrGetParticipant(
     userId: number,
@@ -294,14 +285,8 @@ export class TrainingResultService {
         },
       );
 
-      // teamId가 없으면 기본값 1 사용 (임시 해결책)
-      // TODO: 데이터베이스 스키마에서 team_id를 nullable로 변경 후 이 부분 수정
-      let teamId = session?.teamId;
-
-      if (!teamId) {
-        // 기본 팀이 존재하는지 확인하고, 없으면 생성
-        teamId = await this.ensureDefaultTeamExists();
-      }
+      // teamId가 없으면 null로 설정 (팀 상관없이 훈련 가능)
+      let teamId = session?.teamId || null;
 
       // 새 참가자 생성
       const participantCode = `PART_${Date.now()}_${userId}`;
@@ -327,5 +312,16 @@ export class TrainingResultService {
       console.error('❌ 참가자 생성/조회 실패:', error);
       throw error;
     }
+  }
+
+  /**
+   * 점수를 기반으로 경험치 계산
+   * @param totalScore 총 점수
+   * @returns 계산된 경험치
+   */
+  private calculateExpFromScore(totalScore: number): number {
+    // 기본 경험치: 점수 * 0.5 (최소 10, 최대 100)
+    const baseExp = Math.round(totalScore * 0.5);
+    return Math.max(10, Math.min(100, baseExp));
   }
 }

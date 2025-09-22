@@ -729,6 +729,29 @@ export const adminApi = {
   createAdmin: async (adminData: CreateAdminData) => {
     return api.post<Admin>('/admin/create', adminData);
   },
+
+  /**
+   * 새 팀 생성 (관리자용)
+   * @param teamData 팀 생성 데이터
+   * @returns 생성된 팀 정보
+   */
+  createTeam: async (teamData: { name: string; description?: string }) => {
+    return api.post<Team>('/admin/teams', teamData);
+  },
+
+  /**
+   * 새 훈련 세션 생성
+   * @param sessionData 훈련 세션 생성 데이터
+   * @returns 생성된 훈련 세션 정보
+   */
+  createTrainingSession: async (sessionData: {
+    name: string;
+    description?: string;
+    scenarioType: string;
+    teamId: number;
+  }) => {
+    return api.post<any>('/admin/training-sessions', sessionData);
+  },
 };
 
 // 마이페이지 관련 API 함수들

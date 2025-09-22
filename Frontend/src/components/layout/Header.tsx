@@ -125,7 +125,7 @@ const Header: React.FC = () => {
                 고객지원
               </Link>
 
-              {/* 마이페이지 - 로그인한 사용자만 표시 */}
+              {/* {user?.isAdmin ? '관리자페이지' : '마이페이지'} - 로그인한 사용자만 표시 */}
               {isAuthenticated && (
                 <Link
                   to="/mypage"
@@ -135,7 +135,7 @@ const Header: React.FC = () => {
                       : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  마이페이지
+                  {user?.isAdmin ? '관리자페이지' : '마이페이지'}
                 </Link>
               )}
 
@@ -291,7 +291,7 @@ const Header: React.FC = () => {
                   </Link>
                 </div>
 
-                {/* 마이페이지 - 로그인한 사용자만 표시 */}
+                {/* {user?.isAdmin ? '관리자페이지' : '마이페이지'} - 로그인한 사용자만 표시 */}
                 {isAuthenticated && (
                   <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
                     <Link
@@ -303,7 +303,7 @@ const Header: React.FC = () => {
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      마이페이지
+                      {user?.isAdmin ? '관리자페이지' : '마이페이지'}
                     </Link>
                   </div>
                 )}

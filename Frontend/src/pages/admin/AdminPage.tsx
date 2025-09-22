@@ -5,7 +5,7 @@ import {
   trainingApi,
   scenarioApi,
   trainingResultApi,
-  teamApi,
+  adminApi,
 } from '../../services/api';
 import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
@@ -49,6 +49,13 @@ const AdminPage: React.FC = () => {
   );
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const [adminRefreshTrigger, setAdminRefreshTrigger] = useState(0);
+
+  // 훈련 세션 생성 관련 상태
+  const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
+  const [newSessionName, setNewSessionName] = useState('');
+  const [newSessionDescription, setNewSessionDescription] = useState('');
+  const [selectedScenario, setSelectedScenario] = useState('');
+  const [creatingSession, setCreatingSession] = useState(false);
   const { user } = useAuthStore();
 
   const tabs = [
@@ -60,9 +67,9 @@ const AdminPage: React.FC = () => {
     { id: 'admins', label: '관리자', icon: '👨‍💼' },
   ];
 
-  // 팀 통계 로드
+  // 팀 통계 로드 (관리자는 teamId가 없을 수 있음)
   useEffect(() => {
-    if (user?.teamId) {
+    if (user?.teamId && user.teamId > 0) {
       loadTeamStats();
       loadMemberStats();
     }
@@ -189,7 +196,7 @@ const AdminPage: React.FC = () => {
 
     setCreatingTeam(true);
     try {
-      const response = await teamApi.create({
+      const response = await adminApi.createTeam({
         name: newTeamName,
         description: newTeamDescription,
       });
@@ -214,6 +221,51 @@ const AdminPage: React.FC = () => {
       alert('팀 생성 중 오류가 발생했습니다.');
     } finally {
       setCreatingTeam(false);
+    }
+  };
+
+  // 훈련 세션 생성
+  const createTrainingSession = async () => {
+    if (!newSessionName.trim()) {
+      alert('세션 이름을 입력해주세요.');
+      return;
+    }
+
+    if (!selectedScenario) {
+      alert('시나리오를 선택해주세요.');
+      return;
+    }
+
+    setCreatingSession(true);
+    try {
+      const response = await adminApi.createTrainingSession({
+        name: newSessionName,
+        description: newSessionDescription,
+        scenarioType: selectedScenario,
+        teamId: user?.teamId || 0,
+      });
+
+      if (response.success && response.data) {
+        alert('훈련 세션이 성공적으로 생성되었습니다!');
+        setShowCreateSessionModal(false);
+        setNewSessionName('');
+        setNewSessionDescription('');
+        setSelectedScenario('');
+        // 통계 새로고침
+        loadTeamStats();
+        loadMemberStats();
+      } else {
+        alert(
+          `훈련 세션 생성에 실패했습니다.\n${
+            response.error || '알 수 없는 오류가 발생했습니다.'
+          }`
+        );
+      }
+    } catch (error) {
+      console.error('훈련 세션 생성 실패:', error);
+      alert('훈련 세션 생성 중 오류가 발생했습니다.');
+    } finally {
+      setCreatingSession(false);
     }
   };
 
@@ -438,10 +490,7 @@ const AdminPage: React.FC = () => {
               {/* 훈련 세션 관리 버튼들 */}
               <div className="flex flex-wrap gap-4 mt-8">
                 <Button
-                  onClick={() => {
-                    // 훈련 세션 생성 모달 열기 (향후 구현)
-                    alert('훈련 세션 생성 기능은 곧 추가될 예정입니다.');
-                  }}
+                  onClick={() => setShowCreateSessionModal(true)}
                   className="bg-primary-600 hover:bg-primary-700"
                 >
                   새 훈련 세션 생성
@@ -722,6 +771,78 @@ const AdminPage: React.FC = () => {
                   isLoading={creatingTeam}
                 >
                   생성
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 훈련 세션 생성 모달 */}
+        {showCreateSessionModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                새 훈련 세션 생성
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    세션 이름 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newSessionName}
+                    onChange={e => setNewSessionName(e.target.value)}
+                    placeholder="세션 이름을 입력하세요"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    세션 설명
+                  </label>
+                  <textarea
+                    value={newSessionDescription}
+                    onChange={e => setNewSessionDescription(e.target.value)}
+                    placeholder="세션 설명을 입력하세요"
+                    rows={3}
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    시나리오 유형 *
+                  </label>
+                  <select
+                    value={selectedScenario}
+                    onChange={e => setSelectedScenario(e.target.value)}
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">시나리오를 선택하세요</option>
+                    <option value="fire">화재</option>
+                    <option value="earthquake">지진</option>
+                    <option value="first-aid">응급처치</option>
+                    <option value="traffic-accident">교통사고</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  onClick={() => setShowCreateSessionModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                >
+                  취소
+                </Button>
+                <Button
+                  onClick={createTrainingSession}
+                  disabled={creatingSession}
+                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {creatingSession ? '생성 중...' : '생성'}
                 </Button>
               </div>
             </div>

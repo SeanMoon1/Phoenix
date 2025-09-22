@@ -1,7 +1,7 @@
-import { useMemo, useRef, useCallback } from 'react';
+import { useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { trainingApi, trainingResultApi } from '@/services/api';
+import /* trainingApi, trainingResultApi */ '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ChoiceOption } from '@/types/index';
 
@@ -9,6 +9,7 @@ import type { ChoiceOption } from '@/types/index';
 import { useScenarioGame } from '@/hooks/useScenarioGame';
 import { useExpSystem } from '@/hooks/useExpSystem';
 import { useModals } from '@/hooks/useModals';
+import { useTrainingResult } from '@/hooks/useTrainingResult';
 
 // 컴포넌트 imports
 import CharacterPanel from '@/components/common/CharacterPanel';
@@ -72,76 +73,20 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const gameState = useScenarioGame({ scenarioType });
   const expSystem = useExpSystem({ persistKey });
 
-  // 결과 저장 함수 - useCallback으로 메모이제이션하여 무한 루프 방지
-  const saveTrainingResult = useCallback(async (): Promise<void> => {
-    if (!user) {
-      // 보수적 처리: 유저 없으면 저장하지 않음
-      console.warn('saveTrainingResult: no user, aborting');
-      return;
-    }
+  const normalizeToken = (v: any) =>
+    typeof v === 'string' ? v.trim().replace(/^#+/, '').toUpperCase() : null;
 
-    try {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-      const scenarioIdMap: Record<string, number> = {
-        fire: 1,
-        emergency: 2,
-        traffic: 3,
-        earthquake: 4,
-        flood: 5,
-      };
+  const goToIndex = (index: number) => {
+    gameState.resetSceneFlags();
+    gameState.setHistory((h: number[]) => [...h, gameState.current]);
+    gameState.setCurrent(index);
+    // 스크롤: 공통 처리
+    requestAnimationFrame(() => {
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
-      const sessionData: any = {
-        sessionName: `${scenarioSetName} 훈련`,
-        scenarioId: scenarioIdMap[scenarioType] || 1,
-        teamId: (user as any).teamId || undefined,
-        startTime: new Date(startTime).toISOString(),
-        endTime: new Date().toISOString(),
-        status: 'completed' as const,
-        createdBy: user.id,
-      };
-
-      const session = await trainingApi.createSession(sessionData as any);
-      const sessionId = (session.data as any)?.id;
-      if (!sessionId) {
-        console.error('saveTrainingResult: sessionId missing', session);
-        return;
-      }
-
-      const resultData = {
-        sessionId,
-        scenarioId: scenarioIdMap[scenarioType] || 1,
-        userId: user.id,
-        resultCode: `RESULT${Date.now()}`,
-        accuracyScore:
-          gameState.scenarios.length > 0
-            ? Math.round(
-                (expSystem.totalCorrect / gameState.scenarios.length) * 100
-              )
-            : 0,
-        speedScore: Math.max(0, 100 - Math.floor(timeSpent / 10)),
-        totalScore:
-          gameState.scenarios.length > 0
-            ? Math.round(
-                ((expSystem.totalCorrect / gameState.scenarios.length) * 100 +
-                  Math.max(0, 100 - Math.floor(timeSpent / 10))) /
-                  2
-              )
-            : 0,
-        completionTime: timeSpent,
-        feedback: `${scenarioSetName} 완료 - 레벨 ${expSystem.level}, 정답 ${expSystem.totalCorrect}/${gameState.scenarios.length}`,
-        completedAt: new Date().toISOString(),
-      };
-
-      const result = await trainingResultApi.save(resultData);
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('saveTrainingResult: saved', result);
-      }
-    } catch (err: any) {
-      console.error('saveTrainingResult failed', err);
-    }
-  }, [user, scenarioType, scenarioSetName, startTime, gameState, expSystem]);
-
-  // (isLastScene 변수를 사용하지 않으므로 제거 — 모달 처리는 useModals에서 담당)
+  const { saveTrainingResult } = useTrainingResult();
 
   const modals = useModals({
     scenario: gameState.scenario,
@@ -149,7 +94,21 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     scenarioSetName,
     endModalAutoShown: gameState.endModalAutoShown,
     setEndModalAutoShown: gameState.setEndModalAutoShown,
-    onSaveResult: saveTrainingResult,
+    onSaveResult: async () => {
+      await saveTrainingResult({
+        scenarioSetName,
+        scenarioType,
+        expSystemState: {
+          level: expSystem.level,
+          totalCorrect: expSystem.totalCorrect,
+        },
+        gameStateSummary: {
+          scenariosCount: gameState.scenarios.length,
+          startTimeMs: startTime,
+          failedThisRun: gameState.failedThisRun,
+        },
+      });
+    },
     currentIndex: gameState.current,
     scenariosCount: gameState.scenarios.length,
   });
@@ -187,8 +146,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     const nextId = typeof rawNext === 'string' ? rawNext.trim() : rawNext;
 
     // 특수 토큰 처리
-    const normalizeToken = (v: any) =>
-      typeof v === 'string' ? v.trim().replace(/^#+/, '').toUpperCase() : null;
     const token = normalizeToken(nextId);
     if (token === 'REVIEW') {
       gameState.resetGame();
@@ -208,24 +165,14 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       : -1;
 
     if (nextIndex !== -1) {
-      gameState.resetSceneFlags();
-      gameState.setHistory((h: number[]) => [...h, gameState.current]);
-      gameState.setCurrent(nextIndex);
-      requestAnimationFrame(() => {
-        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      goToIndex(nextIndex);
       return;
     }
 
     // 순차 이동
     const seqNextIndex = gameState.current + 1;
     if (seqNextIndex < gameState.scenarios.length) {
-      gameState.resetSceneFlags();
-      gameState.setHistory((h: number[]) => [...h, gameState.current]);
-      gameState.setCurrent(seqNextIndex);
-      requestAnimationFrame(() => {
-        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      goToIndex(seqNextIndex);
       return;
     }
   };

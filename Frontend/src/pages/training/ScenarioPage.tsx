@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingApi, trainingResultApi } from '@/services/api';
@@ -56,7 +56,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  // ref to scroll target (SituationCard top)
   const topRef = useRef<HTMLDivElement | null>(null);
 
   // URL에서 시나리오 타입 추출
@@ -86,7 +85,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           flood: 5,
         };
 
-        // 1. 먼저 훈련 세션 생성
+        // 훈련 세션 생성
         const sessionData = {
           sessionName: `${scenarioSetName} 훈련`,
           description: `${scenarioSetName} 시나리오 훈련 세션`,
@@ -99,13 +98,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         const session = await trainingApi.createSession(sessionData);
         console.log('훈련 세션 생성 완료:', session);
 
-        // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
+        // 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
         const resultData = {
           participantId: user.id, // 사용자 ID를 participantId로 사용
           sessionId: session.data?.id, // 생성된 세션 ID 사용
           scenarioId: scenarioIdMap[scenarioType] || 1,
           userId: user.id,
-          // resultCode는 서버에서 자동 생성되므로 제거
           accuracyScore:
             gameState.scenarios.length > 0
               ? Math.round(
@@ -125,17 +123,16 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           feedback: `${scenarioSetName} 완료 - 레벨 ${expSystem.level}, 정답 ${expSystem.totalCorrect}/${gameState.scenarios.length}`,
           completedAt: new Date().toISOString(),
         };
-
-        console.log('훈련 결과 저장 시도:', resultData);
         const result = await trainingResultApi.save(resultData);
-        console.log('훈련 결과 저장 완료:', result);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('훈련 결과 저장 완료:', result);
+        }
       }
     } catch (error) {
       console.error('Failed to save training result:', error);
     }
   };
 
-  // 모달 훅
   const modals = useModals({
     scenario: gameState.scenario,
     failedThisRun: gameState.failedThisRun,
@@ -143,36 +140,9 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     endModalAutoShown: gameState.endModalAutoShown,
     setEndModalAutoShown: gameState.setEndModalAutoShown,
     onSaveResult: saveTrainingResult,
+    currentIndex: gameState.current,
+    scenariosCount: gameState.scenarios.length,
   });
-
-  // 엔딩 모달 자동 표시 처리
-  useEffect(() => {
-    if (!gameState.scenario) return;
-    const isEndScene =
-      (gameState.scenario.sceneId ?? '').trim() === '#END' ||
-      gameState.current >= gameState.scenarios.length - 1;
-    if (!isEndScene) return;
-    if (gameState.endModalAutoShown || modals.clearMsg || modals.failMsg)
-      return;
-    gameState.setEndModalAutoShown(true);
-    if (gameState.failedThisRun) {
-      modals.setFailMsg(
-        `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
-      );
-    } else {
-      modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
-      modals.setShowConfetti(true);
-    }
-  }, [
-    gameState.scenario,
-    gameState.current,
-    gameState.scenarios.length,
-    gameState.endModalAutoShown,
-    gameState.failedThisRun,
-    modals.clearMsg,
-    modals.failMsg,
-    scenarioSetName,
-  ]);
 
   // 선택 처리
   const handleChoice = (option: ChoiceOption) => {

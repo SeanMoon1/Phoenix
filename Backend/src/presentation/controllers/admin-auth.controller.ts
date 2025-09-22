@@ -40,9 +40,15 @@ export class AdminAuthController {
           token,
           admin: payload,
         },
+        message: '관리자 로그인 성공',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('❌ 관리자 로그인 오류:', error);
+      return {
+        success: false,
+        error: error.message || '관리자 로그인에 실패했습니다.',
+        message: '관리자 로그인 실패',
+      };
     }
   }
 }

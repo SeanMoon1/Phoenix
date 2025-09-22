@@ -123,6 +123,8 @@ export class AdminService {
     password: string,
   ): Promise<Admin | null> {
     try {
+      console.log(`🔍 관리자 인증 시도: ${loginId}`);
+
       const admin = await this.adminRepository.findOne({
         where: {
           loginId,
@@ -133,13 +135,19 @@ export class AdminService {
       });
 
       if (!admin) {
+        console.log(`❌ 관리자 계정을 찾을 수 없습니다: ${loginId}`);
         return null;
       }
 
+      console.log(`✅ 관리자 계정 발견: ${admin.name} (${admin.email})`);
+
       const isPasswordValid = await bcrypt.compare(password, admin.password);
       if (!isPasswordValid) {
+        console.log(`❌ 비밀번호가 일치하지 않습니다: ${loginId}`);
         return null;
       }
+
+      console.log(`✅ 관리자 인증 성공: ${loginId}`);
 
       // 비밀번호 제거 후 반환
       const { password: _, ...adminWithoutPassword } = admin;

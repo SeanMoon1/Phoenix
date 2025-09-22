@@ -5,7 +5,10 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
   name = 'CreateInitialAdmin1700000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    console.log('🚀 초기 관리자 마이그레이션 시작...');
+
     // 1. 기본 권한 레벨 생성
+    console.log('📝 권한 레벨 생성 중...');
     await queryRunner.query(`
       INSERT IGNORE INTO admin_level (
         level_name, 
@@ -43,6 +46,7 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
         0, 0, 0, 0, 1, 1
       )
     `);
+    console.log('✅ 권한 레벨 생성 완료');
 
     // 2. 기본 팀이 없으면 생성
     const teamExists = await queryRunner.query(`
@@ -76,6 +80,19 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
     const adminEmail = process.env.INITIAL_ADMIN_EMAIL;
     const adminPhone = process.env.INITIAL_ADMIN_PHONE;
 
+    console.log('🔍 환경변수 확인 중...');
+    console.log(
+      'INITIAL_ADMIN_LOGIN_ID:',
+      adminLoginId ? '설정됨' : '❌ 미설정',
+    );
+    console.log(
+      'INITIAL_ADMIN_PASSWORD:',
+      adminPassword ? '설정됨' : '❌ 미설정',
+    );
+    console.log('INITIAL_ADMIN_NAME:', adminName ? '설정됨' : '❌ 미설정');
+    console.log('INITIAL_ADMIN_EMAIL:', adminEmail ? '설정됨' : '❌ 미설정');
+    console.log('INITIAL_ADMIN_PHONE:', adminPhone ? '설정됨' : '❌ 미설정');
+
     // 환경변수 검증
     if (
       !adminLoginId ||
@@ -94,27 +111,31 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
     }
 
     // 4. 관리자가 이미 존재하는지 확인
+    console.log('🔍 기존 관리자 계정 확인 중...');
     const adminExists = await queryRunner.query(
       `SELECT COUNT(*) as count FROM admin WHERE login_id = ?`,
       [adminLoginId],
     );
 
     if (adminExists[0].count === 0) {
+      console.log('📝 새 관리자 계정 생성 중...');
+
       // 5. 비밀번호 해싱
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      console.log('🔐 비밀번호 해싱 완료');
 
       // 6. 초기 관리자 계정 생성
       await queryRunner.query(
         `INSERT INTO admin (
-          team_id, 
-          admin_level_id, 
-          login_id, 
-          password, 
-          name, 
-          email, 
-          phone, 
-          use_yn, 
-          created_by, 
+          team_id,
+          admin_level_id,
+          login_id,
+          password,
+          name,
+          email,
+          phone,
+          use_yn,
+          created_by,
           is_active
         ) VALUES (
           (SELECT team_id FROM team WHERE team_code = 'DEFAULT_TEAM' LIMIT 1),

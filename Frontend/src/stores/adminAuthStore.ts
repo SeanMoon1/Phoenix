@@ -34,7 +34,9 @@ export const useAdminAuthStore = create<AdminAuthStore>()(
       login: async (credentials: AdminLoginCredentials) => {
         set({ isLoading: true });
         try {
+          console.log('🔍 관리자 로그인 시도:', credentials.loginId);
           const response = await adminApi.login(credentials);
+          console.log('📡 API 응답:', response);
 
           if (response.success && response.data) {
             set({
@@ -43,10 +45,13 @@ export const useAdminAuthStore = create<AdminAuthStore>()(
               isAuthenticated: true,
               isLoading: false,
             });
+            console.log('✅ 관리자 로그인 성공');
           } else {
+            console.error('❌ 관리자 로그인 실패:', response.error);
             throw new Error(response.error || '관리자 로그인에 실패했습니다.');
           }
         } catch (error: any) {
+          console.error('❌ 관리자 로그인 오류:', error);
           set({ isLoading: false });
           throw new Error(error.message || '관리자 로그인에 실패했습니다.');
         }

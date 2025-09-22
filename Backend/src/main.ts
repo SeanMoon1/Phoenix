@@ -27,11 +27,11 @@ async function createInitialAdmin(dataSource: DataSource) {
   }
 
   try {
-    const queryRunner = dataSource.createQueryRunner();
-    await queryRunner.connect();
+    console.log('🚀 초기 관리자 계정 생성 시작...');
 
     // 1. 권한 레벨 생성
-    await queryRunner.query(`
+    console.log('📝 권한 레벨 생성 중...');
+    await dataSource.query(`
       INSERT IGNORE INTO admin_level (
         level_name, level_code, description, 
         can_manage_team, can_manage_users, can_manage_scenarios, 
@@ -42,23 +42,30 @@ async function createInitialAdmin(dataSource: DataSource) {
       ('시나리오 관리자', 'SCENARIO_ADMIN', '시나리오 관리 권한', 0, 0, 1, 1, 1, 1),
       ('조회 전용 관리자', 'VIEWER_ADMIN', '조회 권한만 가진 관리자', 0, 0, 0, 0, 1, 1)
     `);
+    console.log('✅ 권한 레벨 생성 완료');
 
     // 2. 기본 팀 생성
-    await queryRunner.query(`
+    console.log('📝 기본 팀 생성 중...');
+    await dataSource.query(`
       INSERT IGNORE INTO team (team_code, team_name, description, status, created_by, is_active)
       VALUES ('DEFAULT_TEAM', '기본 팀', '시스템 기본 팀', 'ACTIVE', 1, 1)
     `);
+    console.log('✅ 기본 팀 생성 완료');
 
     // 3. 관리자 계정 확인
-    const [existingAdmin] = await queryRunner.query(
+    console.log('🔍 기존 관리자 계정 확인 중...');
+    const existingAdmin = await dataSource.query(
       'SELECT COUNT(*) as count FROM admin WHERE login_id = ?',
       [adminLoginId],
     );
 
-    if (existingAdmin[0].count === 0) {
+    console.log('🔍 기존 관리자 계정 확인 결과:', existingAdmin);
+
+    if (existingAdmin && existingAdmin[0] && existingAdmin[0].count === 0) {
       // 4. 관리자 계정 생성
+      console.log('📝 관리자 계정 생성 중...');
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      await queryRunner.query(
+      await dataSource.query(
         `
         INSERT INTO admin (
           team_id, admin_level_id, login_id, password, name, email, phone, use_yn, created_by, is_active
@@ -75,10 +82,9 @@ async function createInitialAdmin(dataSource: DataSource) {
     } else {
       console.log(`ℹ️ 관리자 계정이 이미 존재합니다: ${adminLoginId}`);
     }
-
-    await queryRunner.release();
   } catch (error) {
     console.error('❌ 초기 관리자 계정 생성 실패:', error.message);
+    console.error('상세 오류:', error);
   }
 }
 

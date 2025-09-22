@@ -18,6 +18,10 @@ import type {
   Inquiry,
   Faq,
   Code,
+  Admin,
+  AdminLevel,
+  CreateAdminData,
+  AdminLoginCredentials,
 } from '../types';
 
 // API 기본 설정
@@ -655,6 +659,64 @@ export const authApi = {
       available: boolean;
       message?: string;
     }>(`/auth/check-login-id/${loginId}`);
+  },
+};
+
+// 관리자 관련 API 함수들
+export const adminApi = {
+  /**
+   * 관리자 로그인
+   * @param credentials 관리자 로그인 정보
+   * @returns 로그인 결과
+   */
+  login: async (credentials: AdminLoginCredentials) => {
+    return api.post<{
+      token: string;
+      admin: Admin;
+    }>('/admin/auth/login', credentials);
+  },
+
+  /**
+   * 관리자 대시보드 데이터 조회
+   * @returns 대시보드 데이터
+   */
+  getDashboard: async () => {
+    return api.get('/admin/dashboard');
+  },
+
+  /**
+   * 시스템 통계 조회
+   * @returns 통계 데이터
+   */
+  getStats: async () => {
+    return api.get('/admin/stats');
+  },
+
+  /**
+   * 관리자 목록 조회
+   * @param teamId 팀 ID (선택사항)
+   * @returns 관리자 목록
+   */
+  getAdmins: async (teamId?: number) => {
+    const params = teamId ? `?teamId=${teamId}` : '';
+    return api.get<Admin[]>(`/admin/admins${params}`);
+  },
+
+  /**
+   * 권한 레벨 목록 조회
+   * @returns 권한 레벨 목록
+   */
+  getAdminLevels: async () => {
+    return api.get<AdminLevel[]>('/admin/levels');
+  },
+
+  /**
+   * 새 관리자 계정 생성
+   * @param adminData 관리자 생성 데이터
+   * @returns 생성된 관리자 정보
+   */
+  createAdmin: async (adminData: CreateAdminData) => {
+    return api.post<Admin>('/admin/create', adminData);
   },
 };
 

@@ -41,6 +41,58 @@ export interface User {
   role?: string;
 }
 
+// 관리자 관련 타입
+export interface Admin {
+  id: number;
+  teamId: number;
+  adminLevelId: number;
+  loginId: string;
+  name: string;
+  email: string;
+  phone: string;
+  permissions?: string;
+  useYn: string;
+  createdBy: number;
+  updatedBy?: number;
+  deletedAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // 관계 데이터
+  adminLevel?: AdminLevel;
+  team?: Team;
+}
+
+export interface AdminLevel {
+  id: number;
+  levelName: string;
+  levelCode: string;
+  description?: string;
+  canManageTeam: boolean;
+  canManageUsers: boolean;
+  canManageScenarios: boolean;
+  canApproveScenarios: boolean;
+  canViewResults: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAdminData {
+  loginId: string;
+  password: string;
+  name: string;
+  email: string;
+  phone: string;
+  teamId: number;
+  adminLevelId: number;
+}
+
+export interface AdminLoginCredentials {
+  loginId: string;
+  password: string;
+}
+
 // 인증 관련 타입
 export interface LoginCredentials {
   loginId: string;

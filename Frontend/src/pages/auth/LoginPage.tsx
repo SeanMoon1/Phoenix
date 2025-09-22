@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
+import { useAdminAuthStore } from '../../stores/adminAuthStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
 
@@ -22,6 +23,7 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuthStore();
+  const { login: adminLogin, isLoading: isAdminLoading } = useAdminAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -73,8 +75,13 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data);
-      navigate('/');
+      if (isAdminMode) {
+        await adminLogin(data);
+        navigate('/admin');
+      } else {
+        await login(data);
+        navigate('/');
+      }
     } catch (error: unknown) {
       setError('root', {
         type: 'manual',
@@ -172,12 +179,16 @@ const LoginPage: React.FC = () => {
               )}
 
               {oauthError && (
-                <div className="p-3 text-xs text-center text-red-600 bg-red-50 border border-red-200 rounded-lg dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
+                <div className="p-3 text-xs text-center text-red-600 border border-red-200 rounded-lg bg-red-50 dark:text-red-400 dark:bg-red-900/20 dark:border-red-800 sm:text-sm">
                   {oauthError}
                 </div>
               )}
 
-              <Button type="submit" className="w-full" isLoading={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                isLoading={isAdminMode ? isAdminLoading : isLoading}
+              >
                 {isAdminMode ? '관리자 로그인' : '로그인'}
               </Button>
 

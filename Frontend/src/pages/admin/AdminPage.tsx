@@ -9,6 +9,8 @@ import {
 } from '../../services/api';
 import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
+import CreateAdminModal from '../../components/admin/CreateAdminModal';
+import AdminList from '../../components/admin/AdminList';
 
 interface TeamStats {
   totalSessions: number;
@@ -32,7 +34,7 @@ interface TeamMemberStats {
 
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    'scripts' | 'approval' | 'users' | 'training' | 'teams'
+    'scripts' | 'approval' | 'users' | 'training' | 'teams' | 'admins'
   >('training');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [memberStats, setMemberStats] = useState<TeamMemberStats[]>([]);
@@ -45,6 +47,7 @@ const AdminPage: React.FC = () => {
   const [dataSourceStatus, setDataSourceStatus] = useState(
     ScenarioDataSource.getStatus()
   );
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const { user } = useAuthStore();
 
   const tabs = [
@@ -53,6 +56,7 @@ const AdminPage: React.FC = () => {
     { id: 'scripts', label: '시나리오 관리', icon: '📝' },
     { id: 'approval', label: '승인 관리', icon: '✅' },
     { id: 'users', label: '사용자 관리', icon: '👤' },
+    { id: 'admins', label: '관리자', icon: '👨‍💼' },
   ];
 
   // 팀 통계 로드
@@ -229,7 +233,15 @@ const AdminPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() =>
-                  setActiveTab(tab.id as 'scripts' | 'approval' | 'users')
+                  setActiveTab(
+                    tab.id as
+                      | 'scripts'
+                      | 'approval'
+                      | 'users'
+                      | 'training'
+                      | 'teams'
+                      | 'admins'
+                  )
                 }
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
@@ -629,6 +641,18 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'admins' && (
+            <div className="p-6">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+                관리자 관리
+              </h2>
+              <AdminList
+                teamId={user?.teamId}
+                onCreateAdmin={() => setShowCreateAdminModal(true)}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -692,6 +716,16 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 관리자 생성 모달 */}
+      <CreateAdminModal
+        isOpen={showCreateAdminModal}
+        onClose={() => setShowCreateAdminModal(false)}
+        onSuccess={() => {
+          setShowCreateAdminModal(false);
+          // 관리자 목록 새로고침은 AdminList 컴포넌트에서 자동으로 처리됨
+        }}
+      />
     </AdminLayout>
   );
 };

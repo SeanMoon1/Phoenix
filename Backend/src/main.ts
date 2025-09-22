@@ -6,9 +6,37 @@ import { DataSource } from 'typeorm';
 import { runSeeds } from './database/seeds';
 import { FixOAuthConstraint1700000000002 } from './database/migrations/FixOAuthConstraint';
 import * as bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
+
+// .env 파일 로드
+dotenv.config();
 
 // 초기 관리자 계정 생성 함수
 async function createInitialAdmin(dataSource: DataSource) {
+  // 환경변수 로딩 확인
+  console.log('🔍 환경변수 확인 중...');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log(
+    'INITIAL_ADMIN_LOGIN_ID:',
+    process.env.INITIAL_ADMIN_LOGIN_ID ? '설정됨' : '❌ 미설정',
+  );
+  console.log(
+    'INITIAL_ADMIN_PASSWORD:',
+    process.env.INITIAL_ADMIN_PASSWORD ? '설정됨' : '❌ 미설정',
+  );
+  console.log(
+    'INITIAL_ADMIN_NAME:',
+    process.env.INITIAL_ADMIN_NAME ? '설정됨' : '❌ 미설정',
+  );
+  console.log(
+    'INITIAL_ADMIN_EMAIL:',
+    process.env.INITIAL_ADMIN_EMAIL ? '설정됨' : '❌ 미설정',
+  );
+  console.log(
+    'INITIAL_ADMIN_PHONE:',
+    process.env.INITIAL_ADMIN_PHONE ? '설정됨' : '❌ 미설정',
+  );
+
   const adminLoginId = process.env.INITIAL_ADMIN_LOGIN_ID;
   const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
   const adminName = process.env.INITIAL_ADMIN_NAME;
@@ -23,6 +51,9 @@ async function createInitialAdmin(dataSource: DataSource) {
     !adminPhone
   ) {
     console.log('⚠️ 초기 관리자 환경변수가 설정되지 않았습니다.');
+    console.log(
+      '필요한 환경변수: INITIAL_ADMIN_LOGIN_ID, INITIAL_ADMIN_PASSWORD, INITIAL_ADMIN_NAME, INITIAL_ADMIN_EMAIL, INITIAL_ADMIN_PHONE',
+    );
     return;
   }
 
@@ -61,7 +92,13 @@ async function createInitialAdmin(dataSource: DataSource) {
 
     console.log('🔍 기존 관리자 계정 확인 결과:', existingAdmin);
 
-    if (existingAdmin && existingAdmin[0] && existingAdmin[0].count === 0) {
+    const adminCount =
+      existingAdmin && existingAdmin[0] ? Number(existingAdmin[0].count) : 0;
+    console.log(
+      `📊 관리자 계정 수: ${adminCount} (타입: ${typeof adminCount})`,
+    );
+
+    if (adminCount === 0) {
       // 4. 관리자 계정 생성
       console.log('📝 관리자 계정 생성 중...');
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -80,7 +117,9 @@ async function createInitialAdmin(dataSource: DataSource) {
 
       console.log(`✅ 초기 관리자 계정 생성 완료: ${adminLoginId}`);
     } else {
-      console.log(`ℹ️ 관리자 계정이 이미 존재합니다: ${adminLoginId}`);
+      console.log(
+        `ℹ️ 관리자 계정이 이미 존재합니다: ${adminLoginId} (${adminCount}개)`,
+      );
     }
   } catch (error) {
     console.error('❌ 초기 관리자 계정 생성 실패:', error.message);

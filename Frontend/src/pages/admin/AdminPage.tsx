@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AdminLayout from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui';
 import {
   trainingApi,
@@ -217,7 +218,8 @@ const AdminPage: React.FC = () => {
   };
 
   return (
-    <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <AdminLayout>
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* 페이지 헤더 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -658,84 +660,85 @@ const AdminPage: React.FC = () => {
           )}
         </div>
 
-      {/* 팀 생성 모달 */}
-      {showCreateTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-              새 팀 생성
-            </h3>
+        {/* 팀 생성 모달 */}
+        {showCreateTeamModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                새 팀 생성
+              </h3>
 
-            <div className="p-3 mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                💡 팀 코드는 자동으로 생성됩니다. 생성된 팀 코드를 팀원들과
-                공유하여 팀에 가입할 수 있습니다.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  팀 이름 *
-                </label>
-                <input
-                  type="text"
-                  value={newTeamName}
-                  onChange={e => setNewTeamName(e.target.value)}
-                  placeholder="팀 이름을 입력하세요"
-                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              <div className="p-3 mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  💡 팀 코드는 자동으로 생성됩니다. 생성된 팀 코드를 팀원들과
+                  공유하여 팀에 가입할 수 있습니다.
+                </p>
               </div>
 
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  팀 설명
-                </label>
-                <textarea
-                  value={newTeamDescription}
-                  onChange={e => setNewTeamDescription(e.target.value)}
-                  placeholder="팀에 대한 설명을 입력하세요 (선택사항)"
-                  rows={3}
-                  className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    팀 이름 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTeamName}
+                    onChange={e => setNewTeamName(e.target.value)}
+                    placeholder="팀 이름을 입력하세요"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
 
-            <div className="flex justify-end mt-6 space-x-3">
-              <Button
-                onClick={() => {
-                  setShowCreateTeamModal(false);
-                  setNewTeamName('');
-                  setNewTeamDescription('');
-                }}
-                className="bg-gray-600 hover:bg-gray-700"
-                disabled={creatingTeam}
-              >
-                취소
-              </Button>
-              <Button
-                onClick={createTeam}
-                className="bg-blue-600 hover:bg-blue-700"
-                disabled={creatingTeam || !newTeamName.trim()}
-                isLoading={creatingTeam}
-              >
-                생성
-              </Button>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    팀 설명
+                  </label>
+                  <textarea
+                    value={newTeamDescription}
+                    onChange={e => setNewTeamDescription(e.target.value)}
+                    placeholder="팀에 대한 설명을 입력하세요 (선택사항)"
+                    rows={3}
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6 space-x-3">
+                <Button
+                  onClick={() => {
+                    setShowCreateTeamModal(false);
+                    setNewTeamName('');
+                    setNewTeamDescription('');
+                  }}
+                  className="bg-gray-600 hover:bg-gray-700"
+                  disabled={creatingTeam}
+                >
+                  취소
+                </Button>
+                <Button
+                  onClick={createTeam}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={creatingTeam || !newTeamName.trim()}
+                  isLoading={creatingTeam}
+                >
+                  생성
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 관리자 생성 모달 */}
-      <CreateAdminModal
-        isOpen={showCreateAdminModal}
-        onClose={() => setShowCreateAdminModal(false)}
-        onSuccess={() => {
-          setShowCreateAdminModal(false);
-          setAdminRefreshTrigger(prev => prev + 1); // 관리자 목록 새로고침
-        }}
-      />
-    </div>
+        {/* 관리자 생성 모달 */}
+        <CreateAdminModal
+          isOpen={showCreateAdminModal}
+          onClose={() => setShowCreateAdminModal(false)}
+          onSuccess={() => {
+            setShowCreateAdminModal(false);
+            setAdminRefreshTrigger(prev => prev + 1); // 관리자 목록 새로고침
+          }}
+        />
+      </div>
+    </AdminLayout>
   );
 };
 

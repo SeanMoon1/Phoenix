@@ -5,6 +5,7 @@ import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
 import AdminGuard from './components/guards/AdminGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
+import UserDashboard from './components/common/UserDashboard';
 
 // 동적 import로 페이지 로딩 최적화
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -25,7 +26,6 @@ const TrafficAccidentScenarioPage = lazy(
 );
 const ManualPage = lazy(() => import('./pages/manual/ManualPage'));
 const TrainingPage = lazy(() => import('./pages/training/TrainingPage'));
-const MyPage = lazy(() => import('./pages/mypage/MyPage'));
 const SupportPage = lazy(() => import('./pages/support/SupportPage'));
 
 // React Query 클라이언트 생성
@@ -321,8 +321,8 @@ function App() {
             <Route path="/manual" element={<ManualPage />} />
             <Route path="/training" element={<TrainingPage />} />
 
-            {/* 마이페이지 */}
-            <Route path="/mypage" element={<MyPage />} />
+            {/* 사용자 대시보드 (권한에 따라 마이페이지 또는 관리자페이지) */}
+            <Route path="/mypage" element={<UserDashboard />} />
 
             {/* 고객지원 */}
             <Route path="/support" element={<SupportPage />} />

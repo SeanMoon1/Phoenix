@@ -46,6 +46,11 @@ export const useAuthStore = create<AuthStore>()(
               currentTier: string;
               isAdmin?: boolean;
               adminLevel?: string;
+              userExp?: number;
+              totalScore?: number;
+              completedScenarios?: number;
+              levelProgress?: number;
+              nextLevelExp?: number;
             };
           }>('/auth/login', credentials);
 

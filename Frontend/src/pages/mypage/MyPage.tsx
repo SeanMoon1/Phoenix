@@ -4,7 +4,6 @@ import { useAuthStore } from '../../stores/authStore';
 import { teamApi, myPageApi } from '../../services/api';
 import { Button } from '../../components/ui';
 import type { TrainingResult, UserScenarioStats } from '../../types';
-import AdminPage from '../admin/AdminPage';
 
 const MyPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('records');
@@ -67,11 +66,6 @@ const MyPage: React.FC = () => {
 
   // 탭 클릭 핸들러
   const handleTabClick = (tabId: string) => {
-    // 관리자 탭 클릭 시 권한 확인
-    if (tabId === 'admin' && !user?.isAdmin) {
-      alert('관리자 권한이 필요합니다.');
-      return;
-    }
     setActiveTab(tabId);
   };
 
@@ -154,19 +148,6 @@ const MyPage: React.FC = () => {
       activeClass: 'bg-purple-600',
       hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
     },
-    // 관리자 권한이 있는 경우에만 관리자 탭 표시
-    ...(user?.isAdmin
-      ? [
-          {
-            id: 'admin',
-            name: '관리자',
-            icon: '👨‍💼',
-            color: 'red',
-            activeClass: 'bg-red-600',
-            hoverClass: 'hover:bg-red-100 dark:hover:bg-red-900/30',
-          },
-        ]
-      : []),
   ];
 
   const recordsContent = {
@@ -606,13 +587,6 @@ const MyPage: React.FC = () => {
     records: recordsContent,
     scores: scoresContent,
     profile: profileContent,
-    admin: {
-      title: '관리자 대시보드',
-      icon: '👨‍💼',
-      color: 'red',
-      iconBgClass: 'bg-red-100 dark:bg-red-900/20',
-      content: <AdminPage />,
-    },
   };
 
   const currentContent = contentMap[activeTab as keyof typeof contentMap];

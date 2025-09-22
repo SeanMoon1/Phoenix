@@ -598,8 +598,9 @@ AWS_SES_TO_EMAIL=phoenix4team@gmail.com
 
 - `your_actual_access_key_id_here`를 실제 Access Key ID (AKIA... 형태)로 교체
 - `your_actual_secret_access_key_here`를 실제 Secret Access Key로 교체
-- 이메일 주소는 AWS SES에서 검증된 주소여야 합니다
-- `phoenix4team@gmail.com`은 발신자이자 수신자로 사용됩니다 (답장 가능)
+- `AWS_SES_FROM_EMAIL`: AWS SES에서 검증된 발신자 이메일 (고정)
+- `AWS_SES_TO_EMAIL`: 문의를 받을 관리자 이메일 (고정)
+- 사용자가 입력한 이메일 주소는 이메일 내용에 포함되어 답장용으로 사용
 
 **예시:**
 

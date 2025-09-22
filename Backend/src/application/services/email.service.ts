@@ -32,7 +32,7 @@ export class EmailService {
         'AWS_SES_FROM_EMAIL',
         'phoenix4team@gmail.com',
       );
-      const toEmail = this.configService.get<string>(
+      const adminEmail = this.configService.get<string>(
         'AWS_SES_TO_EMAIL',
         'phoenix4team@gmail.com',
       );
@@ -40,7 +40,7 @@ export class EmailService {
       const command = new SendEmailCommand({
         FromEmailAddress: fromEmail,
         Destination: {
-          ToAddresses: [toEmail],
+          ToAddresses: [adminEmail], // 관리자 이메일로 문의 전송
         },
         Content: {
           Simple: {
@@ -61,7 +61,8 @@ export class EmailService {
 ${data.message}
 
 === 답장 방법 ===
-위 이메일 주소(${data.email})로 직접 답장하시면 됩니다.
+사용자 이메일 주소: ${data.email}
+위 이메일 주소로 직접 답장하시면 됩니다.
 
 ---
 이 문의는 Phoenix 재난훈련 시스템을 통해 전송되었습니다.

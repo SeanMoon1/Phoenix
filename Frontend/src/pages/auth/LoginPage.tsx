@@ -22,7 +22,7 @@ const loginSchema = yup.object({
 type LoginFormData = yup.InferType<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, setAuth } = useAuthStore();
   const { login: adminLogin, isLoading: isAdminLoading } = useAdminAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -77,7 +77,38 @@ const LoginPage: React.FC = () => {
     try {
       if (isAdminMode) {
         await adminLogin(data);
-        navigate('/admin');
+
+        // 관리자 로그인 후 일반 사용자 정보도 설정
+        // 관리자도 일반 사용자로서 MyPage에 접근할 수 있도록 함
+        const adminUser = {
+          id: 0, // 관리자는 일반 사용자 ID가 없으므로 0으로 설정
+          teamId: 0,
+          userCode: 'ADMIN',
+          loginId: data.loginId,
+          email: 'admin@phoenix.com',
+          name: '관리자',
+          useYn: 'Y',
+          userLevel: 1,
+          userExp: 0,
+          totalScore: 0,
+          completedScenarios: 0,
+          currentTier: 'ADMIN',
+          levelProgress: 0,
+          nextLevelExp: 0,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isAdmin: true,
+          adminLevel: 'SUPER_ADMIN',
+        };
+
+        setAuth({
+          user: adminUser,
+          token: '', // 관리자 토큰은 adminAuthStore에서 관리
+          isAuthenticated: true,
+        });
+
+        navigate('/mypage');
       } else {
         await login(data);
         navigate('/');

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { trainingApi, trainingResultApi } from '@/services/api';
@@ -73,84 +73,14 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const expSystem = useExpSystem({ persistKey });
 
   // 결과 저장 함수 - useCallback으로 메모이제이션하여 무한 루프 방지
-  const saveTrainingResult = useCallback(async () => {
-    console.log('🚀 saveTrainingResult 함수 호출됨!');
-    console.log('🔍 saveTrainingResult 호출 시점 정보:', {
-      hasUser: !!user,
-      userId: user?.id,
-      scenarioType,
-      gameStateScenariosLength: gameState.scenarios.length,
-      expSystemTotalCorrect: expSystem.totalCorrect,
-      expSystemLevel: expSystem.level,
-      currentTime: new Date().toISOString(),
-    });
-
-    console.log('🔍 saveTrainingResult 함수 스택 트레이스:', new Error().stack);
+  const saveTrainingResult = useCallback(async (): Promise<void> => {
+    if (!user) {
+      // 보수적 처리: 유저 없으면 저장하지 않음
+      console.warn('saveTrainingResult: no user, aborting');
+      return;
+    }
 
     try {
-      if (user) {
-        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-        const scenarioIdMap: Record<string, number> = {
-          fire: 1,
-          emergency: 2,
-          traffic: 3,
-          earthquake: 4,
-          flood: 5,
-        };
-
-        // 훈련 세션 생성
-        const sessionData = {
-          sessionName: `${scenarioSetName} 훈련`,
-          description: `${scenarioSetName} 시나리오 훈련 세션`,
-          startTime: new Date(startTime).toISOString(),
-          endTime: new Date().toISOString(),
-          status: 'completed' as const,
-          createdBy: user.id,
-        };
-
-        const session = await trainingApi.createSession(sessionData);
-        console.log('훈련 세션 생성 완료:', session);
-
-        // 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-        const resultData = {
-          participantId: user.id, // 사용자 ID를 participantId로 사용
-          sessionId: session.data?.id, // 생성된 세션 ID 사용
-          scenarioId: scenarioIdMap[scenarioType] || 1,
-          userId: user.id,
-          accuracyScore:
-            gameState.scenarios.length > 0
-              ? Math.round(
-                  (expSystem.totalCorrect / gameState.scenarios.length) * 100
-                )
-              : 0,
-          speedScore: Math.max(0, 100 - Math.floor(timeSpent / 10)),
-          totalScore:
-            gameState.scenarios.length > 0
-              ? Math.round(
-                  ((expSystem.totalCorrect / gameState.scenarios.length) * 100 +
-                    Math.max(0, 100 - Math.floor(timeSpent / 10))) /
-                    2
-                )
-              : 0,
-          completionTime: timeSpent,
-          feedback: `${scenarioSetName} 완료 - 레벨 ${expSystem.level}, 정답 ${expSystem.totalCorrect}/${gameState.scenarios.length}`,
-          completedAt: new Date().toISOString(),
-        };
-        const result = await trainingResultApi.save(resultData);
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('훈련 결과 저장 완료:', result);
-        }
-      }
-
-      console.log('🔍 훈련 결과 저장 시작:', {
-        userId: user.id,
-        scenarioType,
-        userTeamId: user.teamId,
-        gameStateScenariosLength: gameState.scenarios.length,
-        expSystemTotalCorrect: expSystem.totalCorrect,
-        expSystemLevel: expSystem.level,
-      });
-
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
       const scenarioIdMap: Record<string, number> = {
         fire: 1,
@@ -160,43 +90,28 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         flood: 5,
       };
 
-      // 1. 먼저 훈련 세션 생성
-      const sessionData = {
+      const sessionData: any = {
         sessionName: `${scenarioSetName} 훈련`,
         scenarioId: scenarioIdMap[scenarioType] || 1,
-        teamId: user.teamId || undefined, // 팀이 없으면 undefined (선택사항)
+        teamId: (user as any).teamId || undefined,
         startTime: new Date(startTime).toISOString(),
         endTime: new Date().toISOString(),
         status: 'completed' as const,
         createdBy: user.id,
       };
 
-      const session = await trainingApi.createSession(sessionData);
-      console.log('훈련 세션 생성 완료:', session);
-
-      // 2. 훈련 결과 데이터 생성 (participantId는 userId와 동일하게 설정)
-      // ApiResponse 구조에서 sessionId 추출
+      const session = await trainingApi.createSession(sessionData as any);
       const sessionId = (session.data as any)?.id;
-      console.log('🔍 세션 ID:', sessionId);
-      console.log('🔍 세션 응답 구조:', {
-        success: session.success,
-        hasData: !!session.data,
-        dataId: (session.data as any)?.id,
-        dataKeys: session.data ? Object.keys(session.data) : 'no data',
-        fullResponse: session,
-      });
-
       if (!sessionId) {
-        console.error('❌ 세션 ID를 찾을 수 없습니다. 전체 응답:', session);
-        throw new Error('세션 ID를 가져올 수 없습니다.');
+        console.error('saveTrainingResult: sessionId missing', session);
+        return;
       }
 
       const resultData = {
-        // participantId는 백엔드에서 자동 생성됨
-        sessionId: sessionId, // 생성된 세션 ID 사용
+        sessionId,
         scenarioId: scenarioIdMap[scenarioType] || 1,
         userId: user.id,
-        resultCode: `RESULT${Date.now()}`, // 결과 코드 자동 생성
+        resultCode: `RESULT${Date.now()}`,
         accuracyScore:
           gameState.scenarios.length > 0
             ? Math.round(
@@ -217,37 +132,16 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         completedAt: new Date().toISOString(),
       };
 
-      console.log('📤 훈련 결과 저장 시도:', resultData);
       const result = await trainingResultApi.save(resultData);
-      console.log('✅ 훈련 결과 저장 완료:', result);
-
-      if (result.success) {
-        console.log('🎉 훈련 결과가 성공적으로 저장되었습니다!');
-      } else {
-        console.warn('⚠️ 훈련 결과 저장에 문제가 있습니다:', result.error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('saveTrainingResult: saved', result);
       }
-    } catch (error: any) {
-      console.error('❌ 훈련 결과 저장 실패:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-
-      // 사용자에게 알림 (선택사항)
-      alert('훈련 결과 저장에 실패했습니다. 다시 시도해주세요.');
+    } catch (err: any) {
+      console.error('saveTrainingResult failed', err);
     }
-  }, [
-    user,
-    scenarioType,
-    scenarioSetName,
-    startTime,
-    // gameState와 expSystem의 값들은 함수 내에서 직접 참조하므로 의존성에서 제거
-    // 무한 루프 방지를 위해 의존성 배열을 최소화
-  ]);
+  }, [user, scenarioType, scenarioSetName, startTime, gameState, expSystem]);
 
-  // 마지막 씬인지 확인
-  const isLastScene = gameState.current >= gameState.scenarios.length - 1;
+  // (isLastScene 변수를 사용하지 않으므로 제거 — 모달 처리는 useModals에서 담당)
 
   const modals = useModals({
     scenario: gameState.scenario,

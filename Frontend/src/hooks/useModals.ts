@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react';
 import type { Scenario } from '@/types';
 
+// 엔딩 씬 식별자
+const END_SCENE_ID = '#END';
+
 interface UseModalsProps {
   scenario?: Scenario | null;
   failedThisRun?: boolean;

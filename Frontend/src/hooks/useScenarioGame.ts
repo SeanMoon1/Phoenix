@@ -88,7 +88,7 @@ export function useScenarioGame({
         // 깊은 복사(참조 문제 방지) 후 옵션 섞기
         const shuffled = (data || []).map(scene => {
           const opts = Array.isArray(scene.options)
-            ? scene.options.map(o => ({ ...o })) // shallow clone each option
+            ? scene.options.map(o => ({ ...o }))
             : [];
           const shuffledOpts = shuffleArray(opts);
           const clonedScene = { ...scene, options: shuffledOpts };

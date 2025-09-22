@@ -174,7 +174,7 @@ export const teamApi = {
    * @param teamData 팀 생성 데이터
    * @returns 팀 생성 결과
    */
-  create: async (teamData: { teamName: string; description?: string }) => {
+  create: async (teamData: { name: string; description?: string }) => {
     return api.post<Team>('/teams', teamData);
   },
 

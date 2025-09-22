@@ -190,21 +190,24 @@ const AdminPage: React.FC = () => {
     setCreatingTeam(true);
     try {
       const response = await teamApi.create({
-        teamName: newTeamName,
+        name: newTeamName,
         description: newTeamDescription,
       });
 
       if (response.success && response.data) {
+        const teamData = response.data as any;
         alert(
-          `팀이 성공적으로 생성되었습니다!\n팀 코드: ${
-            (response.data as any).teamCode
-          }`
+          `팀이 성공적으로 생성되었습니다!\n\n팀 이름: ${teamData.name}\n팀 코드: ${teamData.teamCode}\n\n팀 코드를 복사하여 팀원들과 공유하세요.`
         );
         setShowCreateTeamModal(false);
         setNewTeamName('');
         setNewTeamDescription('');
       } else {
-        alert('팀 생성에 실패했습니다.');
+        alert(
+          `팀 생성에 실패했습니다.\n${
+            response.error || '알 수 없는 오류가 발생했습니다.'
+          }`
+        );
       }
     } catch (error) {
       console.error('팀 생성 실패:', error);
@@ -665,6 +668,13 @@ const AdminPage: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               새 팀 생성
             </h3>
+
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                💡 팀 코드는 자동으로 생성됩니다. 생성된 팀 코드를 팀원들과
+                공유하여 팀에 가입할 수 있습니다.
+              </p>
+            </div>
 
             <div className="space-y-4">
               <div>

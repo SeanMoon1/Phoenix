@@ -31,8 +31,21 @@ export class TeamsController {
   @Post()
   @ApiOperation({ summary: '새 팀 생성' })
   @ApiResponse({ status: 201, description: '팀 생성 성공' })
-  create(@Body() createTeamDto: CreateTeamDto) {
-    return this.teamsService.create(createTeamDto);
+  async create(@Body() createTeamDto: CreateTeamDto) {
+    try {
+      const team = await this.teamsService.create(createTeamDto);
+      return {
+        success: true,
+        data: team,
+        message: '팀이 성공적으로 생성되었습니다.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || '팀 생성에 실패했습니다.',
+        message: '팀 생성 실패',
+      };
+    }
   }
 
   @Get()

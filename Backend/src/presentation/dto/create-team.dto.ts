@@ -2,10 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateTeamDto {
-  @ApiProperty({ example: 'TEAM001', description: '팀 코드' })
+  @ApiProperty({
+    example: 'TEAM001',
+    description: '팀 코드 (제공하지 않으면 자동 생성됩니다)',
+    required: false,
+  })
   @IsString()
-  @IsNotEmpty()
-  teamCode: string;
+  @IsOptional()
+  teamCode?: string;
 
   @ApiProperty({ example: '개발팀', description: '팀 이름' })
   @IsString()

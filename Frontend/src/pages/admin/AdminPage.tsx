@@ -48,6 +48,7 @@ const AdminPage: React.FC = () => {
     ScenarioDataSource.getStatus()
   );
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+  const [adminRefreshTrigger, setAdminRefreshTrigger] = useState(0);
   const { user } = useAuthStore();
 
   const tabs = [
@@ -650,6 +651,7 @@ const AdminPage: React.FC = () => {
               <AdminList
                 teamId={user?.teamId}
                 onCreateAdmin={() => setShowCreateAdminModal(true)}
+                refreshTrigger={adminRefreshTrigger}
               />
             </div>
           )}
@@ -723,7 +725,7 @@ const AdminPage: React.FC = () => {
         onClose={() => setShowCreateAdminModal(false)}
         onSuccess={() => {
           setShowCreateAdminModal(false);
-          // 관리자 목록 새로고침은 AdminList 컴포넌트에서 자동으로 처리됨
+          setAdminRefreshTrigger(prev => prev + 1); // 관리자 목록 새로고침
         }}
       />
     </AdminLayout>

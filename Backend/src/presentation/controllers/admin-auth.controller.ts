@@ -20,6 +20,8 @@ export class AdminAuthController {
   @ApiResponse({ status: 401, description: '인증 실패' })
   @ApiBody({ type: AdminLoginDto })
   async login(@Req() req: any) {
+    console.log('🔐 AdminAuthController.login 호출됨');
+    console.log('📝 요청 데이터:', req.body);
     try {
       const admin = req.user;
       const payload = {

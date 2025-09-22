@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
+import AdminGuard from './components/guards/AdminGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 
 // 동적 import로 페이지 로딩 최적화
@@ -328,8 +329,22 @@ function App() {
             <Route path="/support" element={<SupportPage />} />
 
             {/* 관리자페이지 */}
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/script-tool" element={<ScriptToolPage />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <AdminPage />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/script-tool"
+              element={
+                <AdminGuard>
+                  <ScriptToolPage />
+                </AdminGuard>
+              }
+            />
 
             {/* 화재 훈련 */}
             <Route path="/training/fire" element={<FireScenarioPage />} />

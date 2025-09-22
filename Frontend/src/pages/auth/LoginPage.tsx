@@ -281,8 +281,11 @@ const LoginPage: React.FC = () => {
 
               {isAdminMode && (
                 <div className="text-center">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     관리자 계정이 필요하시면 시스템 관리자에게 문의하세요
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    또는 기존 관리자로 로그인하여 새 관리자를 생성할 수 있습니다
                   </p>
                 </div>
               )}

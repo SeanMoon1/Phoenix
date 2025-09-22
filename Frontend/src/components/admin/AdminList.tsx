@@ -6,16 +6,21 @@ import { Button } from '../ui';
 interface AdminListProps {
   teamId?: number;
   onCreateAdmin: () => void;
+  refreshTrigger?: number; // 새로고침 트리거
 }
 
-const AdminList: React.FC<AdminListProps> = ({ teamId, onCreateAdmin }) => {
+const AdminList: React.FC<AdminListProps> = ({
+  teamId,
+  onCreateAdmin,
+  refreshTrigger,
+}) => {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAdmins();
-  }, [teamId]);
+  }, [teamId, refreshTrigger]);
 
   const loadAdmins = async () => {
     setLoading(true);

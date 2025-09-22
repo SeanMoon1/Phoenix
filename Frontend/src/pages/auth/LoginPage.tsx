@@ -76,7 +76,7 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       if (isAdminMode) {
-        await adminLogin(data);
+        const adminToken = await adminLogin(data);
 
         // 관리자 로그인 후 일반 사용자 정보도 설정
         // 관리자도 일반 사용자로서 MyPage에 접근할 수 있도록 함
@@ -102,9 +102,10 @@ const LoginPage: React.FC = () => {
           adminLevel: 'SUPER_ADMIN',
         };
 
+        // 관리자 토큰을 authStore에도 저장하여 API 호출 시 사용
         setAuth({
           user: adminUser,
-          token: '', // 관리자 토큰은 adminAuthStore에서 관리
+          token: adminToken,
           isAuthenticated: true,
         });
 

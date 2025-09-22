@@ -11,7 +11,7 @@ interface AdminAuthState {
 }
 
 interface AdminAuthStore extends AdminAuthState {
-  login: (credentials: AdminLoginCredentials) => Promise<void>;
+  login: (credentials: AdminLoginCredentials) => Promise<string>;
   logout: () => void;
   setAdmin: (admin: Admin) => void;
   setToken: (token: string) => void;
@@ -46,6 +46,7 @@ export const useAdminAuthStore = create<AdminAuthStore>()(
               isLoading: false,
             });
             console.log('✅ 관리자 로그인 성공');
+            return response.data.token; // 토큰 반환
           } else {
             console.error('❌ 관리자 로그인 실패:', response.error);
             throw new Error(response.error || '관리자 로그인에 실패했습니다.');

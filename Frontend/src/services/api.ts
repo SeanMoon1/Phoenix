@@ -36,16 +36,35 @@ export const apiClient: AxiosInstance = axios.create({
 // 요청 인터셉터 - 토큰 추가
 apiClient.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('auth-storage')
-      ? JSON.parse(localStorage.getItem('auth-storage')!).state.token
-      : null;
+    try {
+      const authStorage = localStorage.getItem('auth-storage');
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        const token = parsed?.state?.token;
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log(
+            '🔑 API 요청에 토큰 추가됨:',
+            token.substring(0, 20) + '...'
+          );
+        } else {
+          console.warn(
+            '⚠️ 토큰이 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
+          );
+        }
+      } else {
+        console.warn(
+          '⚠️ auth-storage가 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('❌ 토큰 파싱 오류:', error);
     }
     return config;
   },
   error => {
+    console.error('❌ 요청 인터셉터 오류:', error);
     return Promise.reject(error);
   }
 );
@@ -53,11 +72,24 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터 - 에러 처리
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
+    console.log('✅ API 응답 성공:', {
+      url: response.config.url,
+      status: response.status,
+      method: response.config.method?.toUpperCase(),
+    });
     return response;
   },
   error => {
+    console.error('❌ API 응답 오류:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      method: error.config?.method?.toUpperCase(),
+      message: error.message,
+      data: error.response?.data,
+    });
+
     if (error.response?.status === 401) {
-      // 인증 실패 시 로그아웃 처리
+      console.warn('🔐 인증 실패 - 로그아웃 처리');
       localStorage.removeItem('auth-storage');
       window.location.href = '/login';
     }
@@ -275,7 +307,24 @@ export const trainingApi = {
    * @returns 훈련 세션 생성 결과
    */
   createSession: async (sessionData: Partial<TrainingSession>) => {
-    return api.post<TrainingSession>('/training', sessionData);
+    console.log('📤 trainingApi.createSession 호출됨:', {
+      url: '/training',
+      method: 'POST',
+      data: sessionData,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await api.post<ApiResponse<TrainingSession>>(
+        '/training',
+        sessionData
+      );
+      console.log('✅ trainingApi.createSession 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ trainingApi.createSession 실패:', error);
+      throw error;
+    }
   },
 
   /**
@@ -369,7 +418,24 @@ export const trainingResultApi = {
    * @returns 저장 결과
    */
   save: async (resultData: Partial<TrainingResult>) => {
-    return api.post<TrainingResult>('/training-results', resultData);
+    console.log('📤 trainingResultApi.save 호출됨:', {
+      url: '/training-results',
+      method: 'POST',
+      data: resultData,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await api.post<TrainingResult>(
+        '/training-results',
+        resultData
+      );
+      console.log('✅ trainingResultApi.save 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ trainingResultApi.save 실패:', error);
+      throw error;
+    }
   },
 
   /**

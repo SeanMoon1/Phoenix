@@ -14,4 +14,5 @@ export interface TrainingSessionRepository {
   delete(id: number): Promise<void>;
   findByDateRange(startDate: Date, endDate: Date): Promise<TrainingSession[]>;
   findActiveSessions(): Promise<TrainingSession[]>;
+  findBySessionCode(sessionCode: string): Promise<TrainingSession | null>;
 }

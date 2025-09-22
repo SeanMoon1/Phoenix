@@ -20,14 +20,12 @@ export class AuthService {
     console.log('👤 사용자 조회 결과:', user ? '사용자 존재' : '사용자 없음');
 
     if (user) {
-      console.log('🔐 입력된 비밀번호:', password);
-      console.log('🔐 저장된 해시:', user.password);
-      console.log('🔐 비밀번호 비교 시작');
+      console.log('🔐 비밀번호 검증 시작');
       const isPasswordValid = await PasswordUtil.comparePassword(
         password,
         user.password,
       );
-      console.log('🔐 비밀번호 비교 결과:', isPasswordValid);
+      console.log('🔐 비밀번호 검증 결과:', isPasswordValid ? '성공' : '실패');
 
       if (isPasswordValid) {
         const { password: _, ...result } = user;
@@ -84,7 +82,7 @@ export class AuthService {
       const passwordStrength = PasswordUtil.getPasswordStrength(
         registerDto.password,
       );
-      console.log('🔐 비밀번호 강도:', passwordStrength);
+      console.log('🔐 비밀번호 강도:', passwordStrength.score);
 
       if (passwordStrength.score < 4) {
         // 최소 점수 4 (6자 + 소문자 + 숫자)
@@ -96,11 +94,11 @@ export class AuthService {
       }
 
       // 2. 비밀번호 해시화
-      console.log('🔐 원본 비밀번호:', registerDto.password);
+      console.log('🔐 비밀번호 해시화 시작');
       const hashedPassword = await PasswordUtil.hashPassword(
         registerDto.password,
       );
-      console.log('🔐 해시된 비밀번호:', hashedPassword);
+      console.log('🔐 비밀번호 해시화 완료');
 
       // 3. 사용자 생성 (팀 ID는 기본값으로 설정)
       const user = await this.usersService.create({

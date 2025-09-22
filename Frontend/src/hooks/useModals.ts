@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import type { Scenario } from '@/types';
 
-const END_SCENE_ID = '#END';
-
 interface UseModalsProps {
   scenario?: Scenario | null;
   failedThisRun?: boolean;

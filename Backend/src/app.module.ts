@@ -41,9 +41,6 @@ import { UpdateUserUseCase } from './application/use-cases/user/update-user.use-
 // Infrastructure Layer - Repository Implementations
 import { RepositoriesModule } from './infrastructure/database/repositories/repositories.module';
 import { TypeOrmUserRepository } from './infrastructure/database/repositories/user.repository.impl';
-import { TypeOrmScenarioRepository } from './infrastructure/database/repositories/scenario.repository.impl';
-import { TypeOrmTeamRepository } from './infrastructure/database/repositories/team.repository.impl';
-import { TypeOrmTrainingSessionRepository } from './infrastructure/database/repositories/training-session.repository.impl';
 
 // Domain Layer - Entities
 import { User } from './domain/entities/user.entity';
@@ -149,33 +146,6 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     CreateUserUseCase,
     GetUserUseCase,
     UpdateUserUseCase,
-    // Repository Implementations
-    {
-      provide: 'UserRepository',
-      useFactory: (typeOrmUserRepository: TypeOrmUserRepository) =>
-        typeOrmUserRepository,
-      inject: [TypeOrmUserRepository],
-    },
-    TypeOrmScenarioRepository,
-    {
-      provide: 'ScenarioRepository',
-      useFactory: (dataSource: DataSource) =>
-        dataSource.getRepository(Scenario),
-      inject: [DataSource],
-    },
-    TypeOrmTeamRepository,
-    {
-      provide: 'TeamRepository',
-      useFactory: (dataSource: DataSource) => dataSource.getRepository(Team),
-      inject: [DataSource],
-    },
-    TypeOrmTrainingSessionRepository,
-    {
-      provide: 'TrainingSessionRepository',
-      useFactory: (dataSource: DataSource) =>
-        dataSource.getRepository(TrainingSession),
-      inject: [DataSource],
-    },
     // Strategies
     LocalStrategy,
     JwtStrategy,

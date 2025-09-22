@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { TrainingResult } from '../../domain/entities/training-result.entity';
 import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
+import { TrainingParticipant } from '../../domain/entities/training-participant.entity';
+import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -11,6 +13,8 @@ export class TrainingResultService {
     private readonly trainingResultRepository: Repository<TrainingResult>,
     @InjectRepository(UserChoiceLog)
     private readonly userChoiceLogRepository: Repository<UserChoiceLog>,
+    @InjectRepository(TrainingParticipant)
+    private readonly trainingParticipantRepository: Repository<TrainingParticipant>,
   ) {}
 
   async createTrainingResult(
@@ -20,15 +24,22 @@ export class TrainingResultService {
       console.log('🔍 훈련 결과 생성 시작:', data);
 
       // 필수 필드 검증
-      if (
-        !data.userId ||
-        !data.sessionId ||
-        !data.scenarioId ||
-        !data.participantId
-      ) {
+      if (!data.userId || !data.sessionId || !data.scenarioId) {
         throw new Error(
-          '필수 필드가 누락되었습니다: userId, sessionId, scenarioId, participantId',
+          '필수 필드가 누락되었습니다: userId, sessionId, scenarioId',
         );
+      }
+
+      // participantId가 없으면 자동으로 참가자 생성
+      let participantId = data.participantId;
+      if (!participantId) {
+        console.log('🔍 participantId가 없어서 자동 생성합니다.');
+        participantId = await this.createOrGetParticipant(
+          data.userId!,
+          data.sessionId!,
+          data.scenarioId!,
+        );
+        console.log('✅ 참가자 생성/조회 완료:', { participantId });
       }
 
       // 결과 코드 생성 (이미 있으면 사용, 없으면 생성)
@@ -37,6 +48,7 @@ export class TrainingResultService {
 
       const trainingResult = this.trainingResultRepository.create({
         ...data,
+        participantId,
         resultCode,
         completedAt: data.completedAt ? new Date(data.completedAt) : new Date(),
         isActive: true,
@@ -47,6 +59,7 @@ export class TrainingResultService {
       console.log('✅ 훈련 결과 생성 완료:', {
         id: savedResult.id,
         resultCode,
+        participantId,
       });
 
       return savedResult;
@@ -198,6 +211,120 @@ export class TrainingResultService {
       return savedLog;
     } catch (error) {
       console.error('❌ 사용자 선택 로그 생성 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 참가자 생성 또는 조회
+   * @param userId 사용자 ID
+   * @param sessionId 세션 ID
+   * @param scenarioId 시나리오 ID
+   * @returns 참가자 ID
+   */
+  private async ensureDefaultTeamExists(): Promise<number> {
+    try {
+      // 기본 팀 조회
+      const defaultTeam = await this.trainingResultRepository.manager.findOne(
+        'Team',
+        {
+          where: { id: 1 },
+        },
+      );
+
+      if (defaultTeam) {
+        return 1;
+      }
+
+      // 기본 팀이 없으면 생성
+      const newTeam = this.trainingResultRepository.manager.create('Team', {
+        id: 1,
+        name: '기본 팀',
+        teamCode: 'DEFAULT',
+        description: '개인 사용자를 위한 기본 팀',
+        isActive: true,
+        status: 'ACTIVE',
+      });
+
+      await this.trainingResultRepository.manager.save('Team', newTeam);
+      console.log('✅ 기본 팀 생성 완료:', { teamId: 1 });
+      return 1;
+    } catch (error) {
+      console.error('❌ 기본 팀 생성 실패:', error);
+      // 실패 시에도 1을 반환 (기존 팀이 있을 가능성)
+      return 1;
+    }
+  }
+
+  private async createOrGetParticipant(
+    userId: number,
+    sessionId: number,
+    scenarioId: number,
+  ): Promise<number> {
+    try {
+      console.log('🔍 참가자 생성/조회 시작:', {
+        userId,
+        sessionId,
+        scenarioId,
+      });
+
+      // 기존 참가자 조회
+      const existingParticipant =
+        await this.trainingParticipantRepository.findOne({
+          where: {
+            userId,
+            sessionId,
+            scenarioId,
+            isActive: true,
+          },
+        });
+
+      if (existingParticipant) {
+        console.log('✅ 기존 참가자 발견:', {
+          participantId: existingParticipant.id,
+        });
+        return existingParticipant.id;
+      }
+
+      // 세션 정보 조회하여 teamId 가져오기
+      const session = await this.trainingResultRepository.manager.findOne(
+        TrainingSession,
+        {
+          where: { id: sessionId },
+        },
+      );
+
+      // teamId가 없으면 기본값 1 사용 (임시 해결책)
+      // TODO: 데이터베이스 스키마에서 team_id를 nullable로 변경 후 이 부분 수정
+      let teamId = session?.teamId;
+
+      if (!teamId) {
+        // 기본 팀이 존재하는지 확인하고, 없으면 생성
+        teamId = await this.ensureDefaultTeamExists();
+      }
+
+      // 새 참가자 생성
+      const participantCode = `PART_${Date.now()}_${userId}`;
+      const newParticipant = this.trainingParticipantRepository.create({
+        userId,
+        sessionId,
+        scenarioId,
+        participantCode,
+        status: '참여중',
+        isActive: true,
+        teamId, // null일 수 있음
+      });
+
+      const savedParticipant =
+        await this.trainingParticipantRepository.save(newParticipant);
+      console.log('✅ 새 참가자 생성 완료:', {
+        participantId: savedParticipant.id,
+        teamId,
+      });
+
+      return savedParticipant.id;
+    } catch (error) {
+      console.error('❌ 참가자 생성/조회 실패:', error);
       throw error;
     }
   }

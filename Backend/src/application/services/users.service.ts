@@ -1,5 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { UserRepository } from '../../domain/repositories/user.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../domain/entities/user.entity';
 import { UserDomainService } from '../../domain/services/user-domain.service';
 import { CreateUserUseCase } from '../use-cases/user/create-user.use-case';
 import { GetUserUseCase } from '../use-cases/user/get-user.use-case';
@@ -8,8 +10,8 @@ import { UpdateUserUseCase } from '../use-cases/user/update-user.use-case';
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject('UserRepository')
-    private readonly userRepository: UserRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly userDomainService: UserDomainService,
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly getUserUseCase: GetUserUseCase,
@@ -47,15 +49,15 @@ export class UsersService {
   }
 
   async getAllUsers() {
-    return this.userRepository.findAll();
+    return this.userRepository.find();
   }
 
   async deleteUser(id: number) {
-    const userId = this.userRepository.findById({ id } as any);
-    if (!userId) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
       throw new Error('User not found');
     }
-    return this.userRepository.delete({ id } as any);
+    await this.userRepository.delete(id);
   }
 
   // AuthService에서 필요한 메서드들
@@ -73,14 +75,19 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return this.userRepository.findByEmail(email);
+    return this.userRepository.findOne({ where: { email } });
   }
 
   async findByLoginId(loginId: string) {
-    return this.userRepository.findByLoginId(loginId);
+    return this.userRepository.findOne({ where: { loginId } });
   }
 
   async findByOAuthProvider(provider: string, providerId: string) {
-    return this.userRepository.findByOAuthProvider(provider, providerId);
+    return this.userRepository.findOne({
+      where: {
+        oauthProvider: provider,
+        oauthProviderId: providerId,
+      },
+    });
   }
 }

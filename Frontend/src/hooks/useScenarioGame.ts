@@ -151,47 +151,68 @@ export function useScenarioGame({
     [answered, current, scenario, awardedExpThisScene, wrongTriedInThisScene]
   );
 
-  return {
-    // 데이터 상태
-    scenarios,
-    scenario,
-    loading,
+  return useMemo(
+    () => ({
+      // 데이터 상태
+      scenarios,
+      scenario,
+      loading,
 
-    // 진행 상태
-    current,
-    history,
+      // 진행 상태
+      current,
+      history,
 
-    // 선택 상태
-    selected,
-    feedback,
+      // 선택 상태
+      selected,
+      feedback,
 
-    // 게임 상태
-    failedThisRun,
-    wrongTriedInThisScene,
-    awardedExpThisScene,
-    endModalAutoShown,
+      // 게임 상태
+      failedThisRun,
+      wrongTriedInThisScene,
+      awardedExpThisScene,
+      endModalAutoShown,
 
-    // 액션
-    handleChoice,
-    resetGame,
-    resetSceneFlags,
+      // 액션
+      handleChoice,
+      resetGame,
+      resetSceneFlags,
 
-    // 세터들
-    setCurrent,
-    setHistory,
-    setSelected,
-    setFeedback,
-    setFailedThisRun,
-    setWrongTriedInThisScene,
-    setAwardedExpThisScene,
-    setEndModalAutoShown,
+      // 세터들
+      setCurrent,
+      setHistory,
+      setSelected,
+      setFeedback,
+      setFailedThisRun,
+      setWrongTriedInThisScene,
+      setAwardedExpThisScene,
+      setEndModalAutoShown,
 
-    choiceDisabled,
-    setChoiceDisabled,
+      choiceDisabled,
+      setChoiceDisabled,
 
-    // newly exposed
-    answered,
-  };
+      // newly exposed
+      answered,
+    }),
+    [
+      scenarios,
+      scenario,
+      loading,
+      current,
+      history,
+      selected,
+      feedback,
+      failedThisRun,
+      wrongTriedInThisScene,
+      awardedExpThisScene,
+      endModalAutoShown,
+      handleChoice,
+      resetGame,
+      resetSceneFlags,
+      choiceDisabled,
+      answered,
+      // setter 함수들은 의존성에서 제외 (무한 루프 방지)
+    ]
+  );
 }
 
 // 유틸: Fisher-Yates 랜덤 셔플 (비파괴: 새 배열 반환)

@@ -1,14 +1,19 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TeamRepository } from '../../../domain/repositories/team.repository';
 import { Team } from '../../../domain/entities/team.entity';
 
 @Injectable()
-export class TypeOrmTeamRepository implements TeamRepository {
+export class TeamRepositoryTypeOrm implements TeamRepository {
+  private teamRepository: Repository<Team>;
+
   constructor(
-    @Inject('TeamRepository')
-    private readonly teamRepository: Repository<Team>,
-  ) {}
+    @InjectRepository(Team)
+    teamRepository: Repository<Team>,
+  ) {
+    this.teamRepository = teamRepository;
+  }
 
   async findById(id: number): Promise<Team | null> {
     return this.teamRepository.findOne({

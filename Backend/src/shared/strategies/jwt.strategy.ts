@@ -15,11 +15,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return {
+    console.log('🔍 JWT 토큰 검증:', {
+      sub: payload.sub,
+      email: payload.email,
+      username: payload.username,
+      teamId: payload.teamId,
+      iat: payload.iat,
+      exp: payload.exp,
+    });
+
+    const user = {
       userId: payload.sub,
       username: payload.username,
       email: payload.email,
       teamId: payload.teamId,
     };
+
+    console.log('✅ JWT 토큰 검증 성공:', user);
+    return user;
   }
 }

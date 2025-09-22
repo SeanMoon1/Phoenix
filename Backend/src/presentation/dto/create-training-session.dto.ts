@@ -10,22 +10,31 @@ import {
 
 export class CreateTrainingSessionDto {
   @ApiProperty({
+    example: 'SESS001',
+    description: '세션 코드',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  sessionCode?: string;
+
+  @ApiProperty({
     example: '화재 대응 훈련 세션',
-    description: '훈련 세션 제목',
+    description: '훈련 세션명',
   })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  sessionName: string;
 
   @ApiProperty({ example: 1, description: '시나리오 ID' })
   @IsNumber()
   @IsNotEmpty()
   scenarioId: number;
 
-  @ApiProperty({ example: 1, description: '팀 ID' })
+  @ApiProperty({ example: 1, description: '팀 ID', required: false })
   @IsNumber()
-  @IsNotEmpty()
-  teamId: number;
+  @IsOptional()
+  teamId?: number;
 
   @ApiProperty({
     example: '2024-01-15T09:00:00Z',

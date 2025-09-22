@@ -20,6 +20,7 @@ import { TrainingResultController } from './presentation/controllers/training-re
 import { UserProgressController } from './presentation/controllers/user-progress.controller';
 import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
+import { AdminAuthController } from './presentation/controllers/admin-auth.controller';
 
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
@@ -59,6 +60,8 @@ import { Achievement } from './domain/entities/achievement.entity';
 import { UserLevelHistory } from './domain/entities/user-level-history.entity';
 import { Inquiry } from './domain/entities/inquiry.entity';
 import { Faq } from './domain/entities/faq.entity';
+import { Admin } from './domain/entities/admin.entity';
+import { AdminLevel } from './domain/entities/admin-level.entity';
 
 // Infrastructure Layer - Database
 import { getDatabaseConfig } from './infrastructure/config/database.config';
@@ -72,6 +75,7 @@ import { JwtStrategy } from './shared/strategies/jwt.strategy';
 import { GoogleStrategy } from './shared/strategies/google.strategy';
 import { NaverStrategy } from './shared/strategies/naver.strategy';
 import { KakaoStrategy } from './shared/strategies/kakao.strategy';
+import { AdminStrategy } from './shared/strategies/admin.strategy';
 
 @Module({
   imports: [
@@ -104,6 +108,8 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
       UserLevelHistory,
       Inquiry,
       Faq,
+      Admin,
+      AdminLevel,
     ]),
     // Database module with entities (removed - using TypeOrmModule.forFeature directly)
     // JWT and Passport modules
@@ -130,6 +136,7 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     UserProgressController,
     TeamsController,
     AdminController,
+    AdminAuthController,
   ],
   providers: [
     AppService,
@@ -152,6 +159,7 @@ import { KakaoStrategy } from './shared/strategies/kakao.strategy';
     GoogleStrategy,
     NaverStrategy,
     KakaoStrategy,
+    AdminStrategy,
     // Global Filters and Interceptors
     {
       provide: APP_FILTER,

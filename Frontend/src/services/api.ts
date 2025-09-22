@@ -736,7 +736,7 @@ export const adminApi = {
    * @returns 생성된 팀 정보
    */
   createTeam: async (teamData: { name: string; description?: string }) => {
-    return api.post<Team>('/admin/teams', teamData);
+    return api.post<Team>('/teams', teamData);
   },
 
   /**
@@ -750,7 +750,25 @@ export const adminApi = {
     scenarioType: string;
     teamId: number;
   }) => {
-    return api.post<any>('/admin/training-sessions', sessionData);
+    // 시나리오 타입을 시나리오 ID로 변환 (임시로 1 사용)
+    const scenarioIdMap: { [key: string]: number } = {
+      fire: 1,
+      earthquake: 2,
+      'first-aid': 3,
+      'traffic-accident': 4,
+    };
+
+    const trainingSessionData = {
+      sessionName: sessionData.name,
+      scenarioId: scenarioIdMap[sessionData.scenarioType] || 1,
+      teamId: sessionData.teamId,
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2시간 후
+      status: 'scheduled',
+      createdBy: 1, // 관리자 ID (임시)
+    };
+
+    return api.post<any>('/training', trainingSessionData);
   },
 };
 

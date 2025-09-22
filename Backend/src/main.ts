@@ -5,6 +5,82 @@ import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 import { runSeeds } from './database/seeds';
 import { FixOAuthConstraint1700000000002 } from './database/migrations/FixOAuthConstraint';
+import * as bcrypt from 'bcryptjs';
+
+// 초기 관리자 계정 생성 함수
+async function createInitialAdmin(dataSource: DataSource) {
+  const adminLoginId = process.env.INITIAL_ADMIN_LOGIN_ID;
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+  const adminName = process.env.INITIAL_ADMIN_NAME;
+  const adminEmail = process.env.INITIAL_ADMIN_EMAIL;
+  const adminPhone = process.env.INITIAL_ADMIN_PHONE;
+
+  if (
+    !adminLoginId ||
+    !adminPassword ||
+    !adminName ||
+    !adminEmail ||
+    !adminPhone
+  ) {
+    console.log('⚠️ 초기 관리자 환경변수가 설정되지 않았습니다.');
+    return;
+  }
+
+  try {
+    const queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    // 1. 권한 레벨 생성
+    await queryRunner.query(`
+      INSERT IGNORE INTO admin_level (
+        level_name, level_code, description, 
+        can_manage_team, can_manage_users, can_manage_scenarios, 
+        can_approve_scenarios, can_view_results, is_active
+      ) VALUES 
+      ('슈퍼 관리자', 'SUPER_ADMIN', '모든 권한을 가진 최고 관리자', 1, 1, 1, 1, 1, 1),
+      ('팀 관리자', 'TEAM_ADMIN', '팀 단위 관리 권한', 1, 1, 1, 0, 1, 1),
+      ('시나리오 관리자', 'SCENARIO_ADMIN', '시나리오 관리 권한', 0, 0, 1, 1, 1, 1),
+      ('조회 전용 관리자', 'VIEWER_ADMIN', '조회 권한만 가진 관리자', 0, 0, 0, 0, 1, 1)
+    `);
+
+    // 2. 기본 팀 생성
+    await queryRunner.query(`
+      INSERT IGNORE INTO team (team_code, team_name, description, status, created_by, is_active)
+      VALUES ('DEFAULT_TEAM', '기본 팀', '시스템 기본 팀', 'ACTIVE', 1, 1)
+    `);
+
+    // 3. 관리자 계정 확인
+    const [existingAdmin] = await queryRunner.query(
+      'SELECT COUNT(*) as count FROM admin WHERE login_id = ?',
+      [adminLoginId],
+    );
+
+    if (existingAdmin[0].count === 0) {
+      // 4. 관리자 계정 생성
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      await queryRunner.query(
+        `
+        INSERT INTO admin (
+          team_id, admin_level_id, login_id, password, name, email, phone, use_yn, created_by, is_active
+        ) VALUES (
+          (SELECT team_id FROM team WHERE team_code = 'DEFAULT_TEAM' LIMIT 1),
+          (SELECT level_id FROM admin_level WHERE level_code = 'SUPER_ADMIN' LIMIT 1),
+          ?, ?, ?, ?, ?, 'Y', 1, 1
+        )
+      `,
+        [adminLoginId, hashedPassword, adminName, adminEmail, adminPhone],
+      );
+
+      console.log(`✅ 초기 관리자 계정 생성 완료: ${adminLoginId}`);
+    } else {
+      console.log(`ℹ️ 관리자 계정이 이미 존재합니다: ${adminLoginId}`);
+    }
+
+    await queryRunner.release();
+  } catch (error) {
+    console.error('❌ 초기 관리자 계정 생성 실패:', error.message);
+  }
+}
 
 async function bootstrap() {
   try {
@@ -51,6 +127,17 @@ async function bootstrap() {
     } catch (error) {
       // 에러 무시하고 계속 진행
       console.log('ℹ️ OAuth 마이그레이션 건너뜀 (이미 처리됨)');
+    }
+
+    // 초기 관리자 계정 생성
+    try {
+      const dataSource = app.get(DataSource);
+      await createInitialAdmin(dataSource);
+    } catch (error) {
+      console.warn(
+        '⚠️ 초기 관리자 계정 생성 중 오류 (무시 가능):',
+        error.message,
+      );
     }
 
     // 개발 환경에서만 시드 실행

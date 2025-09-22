@@ -2,41 +2,43 @@
 import { useState, useEffect } from 'react';
 import type { Scenario } from '@/types';
 
+// 엔딩 씬 식별자
+const END_SCENE_ID = '#END';
+
 interface UseModalsProps {
-  scenario: Scenario | null;
-  failedThisRun: boolean;
-  scenarioSetName: string;
-  endModalAutoShown: boolean;
-  setEndModalAutoShown: (value: boolean) => void;
-  onSaveResult: () => Promise<void>;
-  isLastScene: boolean; // 마지막 씬인지 여부
+  scenario?: Scenario | null;
+  failedThisRun?: boolean;
+  scenarioSetName?: string;
+  endModalAutoShown?: boolean;
+  setEndModalAutoShown?: (value: boolean) => void;
+  onSaveResult?: () => Promise<void>;
+  currentIndex?: number;
+  scenariosCount?: number;
 }
 
 interface UseModalsReturn {
-  // 모달 상태
   clearMsg: string | null;
   failMsg: string | null;
   showConfetti: boolean;
-
-  // 화면 크기
   vw: number;
   vh: number;
-
-  // 액션
   setClearMsg: (value: string | null) => void;
   setFailMsg: (value: string | null) => void;
   setShowConfetti: (value: boolean) => void;
 }
 
-export function useModals({
-  scenario,
-  failedThisRun,
-  scenarioSetName,
-  endModalAutoShown,
-  setEndModalAutoShown,
-  onSaveResult,
-  isLastScene,
-}: UseModalsProps): UseModalsReturn {
+export function useModals(opts?: Partial<UseModalsProps>): UseModalsReturn {
+  const {
+    scenario,
+    failedThisRun,
+    scenarioSetName,
+    endModalAutoShown,
+    setEndModalAutoShown,
+    onSaveResult,
+    currentIndex,
+    scenariosCount,
+  } = opts ?? {};
+
   // 모달 상태
   const [_clearMsg, _setClearMsg] = useState<string | null>(null);
   const [_failMsg, _setFailMsg] = useState<string | null>(null);
@@ -60,48 +62,6 @@ export function useModals({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // 엔딩 모달 처리 - 마지막 씬에 도달했을 때만 한 번 실행
-  useEffect(() => {
-    // scenario가 없거나 이미 처리했으면 무시
-    if (!scenario || endModalAutoShown) return;
-
-    // 마지막 씬이 아니면 무시
-    if (!isLastScene) return;
-
-    console.log('🎯 훈련 완료! 결과 저장 시작');
-    setEndModalAutoShown(true);
-
-    // 훈련 결과 저장
-    if (typeof onSaveResult === 'function') {
-      onSaveResult()
-        .then(() => {
-          console.log('✅ 훈련 결과 저장 성공');
-        })
-        .catch(err => {
-          console.error('❌ 훈련 결과 저장 실패:', err);
-        });
-    }
-
-    if (!failedThisRun) {
-      _setClearMsg(
-        `축하합니다! ${scenarioSetName} 시나리오를 모두 클리어하였습니다.`
-      );
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4500);
-    } else {
-      _setFailMsg(
-        `${scenarioSetName} 시나리오를 클리어하지 못했습니다. 다시 도전해보세요!`
-      );
-    }
-  }, [
-    scenario,
-    endModalAutoShown,
-    failedThisRun,
-    scenarioSetName,
-    onSaveResult,
-    isLastScene, // 마지막 씬 여부도 의존성에 포함
-  ]);
-
   // 모달 시 스크롤 잠금
   useEffect(() => {
     const lock = _clearMsg || _failMsg || showConfetti;
@@ -118,26 +78,67 @@ export function useModals({
     }
   }, [_clearMsg, _failMsg, showConfetti]);
 
-  const setClearMsg = (msg: string | null) => {
-    _setClearMsg(msg); // if you rename internal setter, else use existing setClearMsg
-  };
-  const setFailMsg = (msg: string | null) => {
-    _setFailMsg(msg);
-  };
+  // 엔딩 판정 및 모달 표시
+  useEffect(() => {
+    // don't run until we have scenario list info
+    if (typeof scenariosCount !== 'number' || scenariosCount <= 0) return;
+    // require either a valid scenario object or a numeric currentIndex
+    if (!scenario && typeof currentIndex !== 'number') return;
+    if (endModalAutoShown || _clearMsg || _failMsg) return;
+
+    // 엔딩 판정: 씬 ID가 #END 이거나 (현재 인덱스가 마지막 인덱스일 때)
+    const isBySceneId =
+      !!scenario && (scenario.sceneId ?? '').trim() === END_SCENE_ID;
+    const isByIndex =
+      typeof currentIndex === 'number' && currentIndex >= scenariosCount - 1;
+
+    if (!isBySceneId && !isByIndex) return;
+
+    // 플래그 설정(호출자에 의해 전달된 setter가 있으면 설정)
+    setEndModalAutoShown?.(true);
+
+    // 결과 저장 호출(있으면 비동기 호출)
+    if (onSaveResult) {
+      onSaveResult().catch(err => {
+        console.error('useModals.onSaveResult failed', err);
+      });
+    }
+
+    // 모달 메시지 설정
+    if (failedThisRun) {
+      _setFailMsg(
+        `${scenarioSetName ?? '훈련'} 훈련에 실패했습니다. 다시 도전해보세요!`
+      );
+    } else {
+      _setClearMsg(`${scenarioSetName ?? '훈련'} 훈련 완료!\n축하합니다!`);
+      setShowConfetti(true);
+      // optional: turn off confetti after a while
+      setTimeout(() => setShowConfetti(false), 4500);
+    }
+  }, [
+    scenario,
+    currentIndex,
+    scenariosCount,
+    endModalAutoShown,
+    failedThisRun,
+    _clearMsg,
+    _failMsg,
+    scenarioSetName,
+    onSaveResult,
+    setEndModalAutoShown,
+  ]);
+
+  const setClearMsg = (msg: string | null) => _setClearMsg(msg);
+  const setFailMsg = (msg: string | null) => _setFailMsg(msg);
 
   return {
-    // 모달 상태
     clearMsg: _clearMsg,
     failMsg: _failMsg,
     showConfetti,
-
-    // 화면 크기
     vw,
     vh,
-
-    // 액션
     setClearMsg,
     setFailMsg,
-    setShowConfetti,
+    setShowConfetti: setShowConfetti,
   };
 }

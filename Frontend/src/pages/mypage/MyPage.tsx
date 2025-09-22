@@ -124,15 +124,37 @@ const MyPage: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'records', name: '훈련기록', icon: '📊', color: 'indigo' },
-    { id: 'scores', name: '점수조회', icon: '🏆', color: 'yellow' },
-    { id: 'profile', name: '개인정보', icon: '👤', color: 'purple' },
+    {
+      id: 'records',
+      name: '훈련기록',
+      icon: '📊',
+      color: 'indigo',
+      activeClass: 'bg-indigo-600',
+      hoverClass: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
+    },
+    {
+      id: 'scores',
+      name: '점수조회',
+      icon: '🏆',
+      color: 'yellow',
+      activeClass: 'bg-yellow-600',
+      hoverClass: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
+    },
+    {
+      id: 'profile',
+      name: '개인정보',
+      icon: '👤',
+      color: 'purple',
+      activeClass: 'bg-purple-600',
+      hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
+    },
   ];
 
   const recordsContent = {
     title: '훈련 기록',
     icon: '📊',
     color: 'indigo',
+    iconBgClass: 'bg-indigo-100 dark:bg-indigo-900/30',
     content: (
       <div className="space-y-8">
         {/* 훈련 기록 목록 */}
@@ -220,6 +242,7 @@ const MyPage: React.FC = () => {
     title: '점수 조회',
     icon: '🏆',
     color: 'yellow',
+    iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (
       <div className="space-y-8">
         {/* 전체 점수 요약 */}
@@ -301,11 +324,41 @@ const MyPage: React.FC = () => {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             {scenarioStats.map((stat, index) => {
               const typeInfo = {
-                FIRE: { icon: '🔥', name: '화재', color: 'red' },
-                EARTHQUAKE: { icon: '🌍', name: '지진', color: 'yellow' },
-                EMERGENCY: { icon: '🚑', name: '응급처치', color: 'green' },
-                TRAFFIC: { icon: '🚗', name: '교통사고', color: 'blue' },
-                UNKNOWN: { icon: '❓', name: '기타', color: 'gray' },
+                FIRE: {
+                  icon: '🔥',
+                  name: '화재',
+                  color: 'red',
+                  bgClass: 'bg-red-100 dark:bg-red-900/30',
+                  progressClass: 'bg-red-500',
+                },
+                EARTHQUAKE: {
+                  icon: '🌍',
+                  name: '지진',
+                  color: 'yellow',
+                  bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+                  progressClass: 'bg-yellow-500',
+                },
+                EMERGENCY: {
+                  icon: '🚑',
+                  name: '응급처치',
+                  color: 'green',
+                  bgClass: 'bg-green-100 dark:bg-green-900/30',
+                  progressClass: 'bg-green-500',
+                },
+                TRAFFIC: {
+                  icon: '🚗',
+                  name: '교통사고',
+                  color: 'blue',
+                  bgClass: 'bg-blue-100 dark:bg-blue-900/30',
+                  progressClass: 'bg-blue-500',
+                },
+                UNKNOWN: {
+                  icon: '❓',
+                  name: '기타',
+                  color: 'gray',
+                  bgClass: 'bg-gray-100 dark:bg-gray-900/30',
+                  progressClass: 'bg-gray-500',
+                },
               };
               const type =
                 typeInfo[stat.scenarioType as keyof typeof typeInfo] ||
@@ -318,7 +371,7 @@ const MyPage: React.FC = () => {
                 >
                   <div className="flex items-center mb-4">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 mr-4 bg-${type.color}-100 rounded-lg dark:bg-${type.color}-900/30`}
+                      className={`flex items-center justify-center w-12 h-12 mr-4 ${type.bgClass} rounded-lg`}
                     >
                       <span className="text-2xl">{type.icon}</span>
                     </div>
@@ -343,7 +396,7 @@ const MyPage: React.FC = () => {
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
                       <div
-                        className={`h-2 bg-${type.color}-500 rounded-full`}
+                        className={`h-2 ${type.progressClass} rounded-full`}
                         style={{
                           width: `${Math.min(
                             (stat.averageScore / 100) * 100,
@@ -370,6 +423,7 @@ const MyPage: React.FC = () => {
     title: '개인정보',
     icon: '👤',
     color: 'purple',
+    iconBgClass: 'bg-purple-100 dark:bg-purple-900/30',
     content: (
       <div className="space-y-8">
         {/* 기본 정보 */}
@@ -564,8 +618,8 @@ const MyPage: React.FC = () => {
                       onClick={() => handleTabClick(tab.id)}
                       className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                         activeTab === tab.id
-                          ? `bg-${tab.color}-600 text-white shadow-lg`
-                          : `bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-${tab.color}-100 dark:hover:bg-${tab.color}-900/30`
+                          ? `${tab.activeClass} text-white shadow-lg`
+                          : `bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 ${tab.hoverClass}`
                       }`}
                     >
                       <span className="text-xl">{tab.icon}</span>
@@ -579,7 +633,7 @@ const MyPage: React.FC = () => {
               <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
                 <div className="mb-8">
                   <div
-                    className={`w-20 h-20 bg-${currentContent.color}-100 dark:bg-${currentContent.color}-900/30 rounded-full flex items-center justify-center mb-4`}
+                    className={`w-20 h-20 ${currentContent.iconBgClass} rounded-full flex items-center justify-center mb-4`}
                   >
                     <span className="text-4xl">{currentContent.icon}</span>
                   </div>

@@ -946,6 +946,27 @@ export const codeApi = {
   },
 };
 
+// 문의하기 관련 API
+export const contactApi = {
+  /**
+   * 문의하기 이메일 전송
+   * @param contactData 문의 데이터
+   * @returns 전송 결과
+   */
+  sendContact: async (contactData: {
+    name: string;
+    email: string;
+    type: string;
+    subject: string;
+    message: string;
+  }) => {
+    return api.post<{
+      success: boolean;
+      message: string;
+    }>('/contact', contactData);
+  },
+};
+
 // 사용자 경험치 관련 API
 export const userExpApi = {
   /**

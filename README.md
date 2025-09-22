@@ -39,6 +39,12 @@
 - **진행도 추적**: 개인 및 팀별 진행 상황
 - **통계 대시보드**: 시각화된 데이터 분석
 
+### 📧 고객지원 시스템
+
+- **문의하기 기능**: AWS SES를 통한 이메일 문의 시스템
+- **FAQ 시스템**: 자주 묻는 질문과 답변
+- **실시간 응답**: 빠른 고객 지원 서비스
+
 ## 🏗️ 기술 스택
 
 ### Frontend
@@ -510,6 +516,141 @@ Frontend/public/data/
 - 관리자가 시나리오를 생성하고 내보내기하면 JSON 파일로 다운로드
 - 이 파일을 `public/data` 폴더에 저장하면 정적 파일 방식으로 사용 가능
 - 또는 "기존 JSON 동기화" 버튼으로 데이터베이스에 자동 동기화
+
+## 📧 AWS SES 설정
+
+### 1. AWS SES 서비스 설정
+
+1. **AWS 콘솔에서 SES 서비스 접속**
+
+   - AWS 콘솔 로그인 → 검색창에 "SES" 입력
+   - "Simple Email Service" 선택
+   - **중요**: 우측 상단에서 리전을 `ap-northeast-2` (서울)로 변경
+
+2. **이메일 주소 검증 (Identities)**
+
+   - 좌측 메뉴에서 "Identities" 클릭
+   - "Create identity" 버튼 클릭
+   - "Email address" 선택 후 `phoenix4team@gmail.com` 입력
+   - "Create identity" 클릭
+   - 해당 이메일로 전송된 확인 메일에서 링크 클릭하여 검증 완료
+
+3. **샌드박스 모드 확인 및 해제**
+   - 좌측 메뉴에서 "Account dashboard" 클릭
+   - "Sending statistics" 섹션에서 "Request production access" 버튼 확인
+   - 클릭 후 사용 사례 설명 작성하여 승인 요청
+
+### 2. IAM 사용자 생성
+
+1. **IAM 콘솔에서 새 사용자 생성**
+
+   - AWS 콘솔 → IAM 서비스
+   - 좌측 메뉴에서 "Users" 클릭
+   - "Create user" 버튼 클릭
+   - 사용자명: `phoenix-ses-user`
+   - "Provide user access to the AWS Management Console" 체크 해제
+   - "Next" 클릭
+
+2. **권한 정책 연결**
+
+   - "Attach policies directly" 선택
+   - 검색창에 "SES" 입력
+   - "AmazonSESFullAccess" 정책 선택 (또는 아래 커스텀 정책 사용)
+   - "Next" → "Create user" 클릭
+
+   **또는 커스텀 정책 사용:**
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+         "Resource": "*"
+       }
+     ]
+   }
+   ```
+
+3. **액세스 키 생성 및 저장**
+   - 생성된 사용자 클릭 → "Security credentials" 탭
+   - "Access keys" 섹션에서 "Create access key" 클릭
+   - "Application running outside AWS" 선택
+   - "Next" → "Create access key"
+   - **Access Key ID** (AKIA... 형태)와 **Secret Access Key** 복사
+   - ⚠️ **중요**: Secret Access Key는 한 번만 표시되므로 반드시 복사해서 저장하세요!
+
+### 3. 환경변수 설정
+
+**Backend/.env 파일에 다음 변수들을 추가하세요:**
+
+```env
+# AWS SES Configuration
+AWS_ACCESS_KEY_ID=your_actual_access_key_id_here
+AWS_SECRET_ACCESS_KEY=your_actual_secret_access_key_here
+AWS_REGION=ap-northeast-2
+AWS_SES_FROM_EMAIL=phoenix4team@gmail.com
+AWS_SES_TO_EMAIL=phoenix4team@gmail.com
+```
+
+**중요사항:**
+
+- `your_actual_access_key_id_here`를 실제 Access Key ID (AKIA... 형태)로 교체
+- `your_actual_secret_access_key_here`를 실제 Secret Access Key로 교체
+- 이메일 주소는 AWS SES에서 검증된 주소여야 합니다
+- `phoenix4team@gmail.com`은 발신자이자 수신자로 사용됩니다 (답장 가능)
+
+**예시:**
+
+```env
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```
+
+### 4. 테스트
+
+1. **환경변수 설정 확인**
+
+   ```bash
+   # Backend/.env 파일에 AWS SES 설정이 올바르게 되어 있는지 확인
+   AWS_ACCESS_KEY_ID=your_actual_access_key_id
+   AWS_SECRET_ACCESS_KEY=your_actual_secret_access_key
+   AWS_REGION=ap-northeast-2
+   AWS_SES_FROM_EMAIL=phoenix4team@gmail.com
+   AWS_SES_TO_EMAIL=phoenix4team@gmail.com
+   ```
+
+2. **백엔드 서버 시작**
+
+   ```bash
+   cd Backend
+   npm run start:dev
+   ```
+
+3. **프론트엔드에서 문의하기 테스트**
+
+   - 브라우저에서 `/support` 페이지 접속
+   - 문의하기 탭 선택
+   - 문의 양식 작성 후 전송
+
+4. **이메일 확인**
+   - `phoenix4team@gmail.com`으로 문의 내용이 전송되는지 확인
+   - AWS SES 콘솔의 "Sending statistics"에서 전송 통계 확인
+
+### 5. 문제 해결
+
+**이메일이 전송되지 않는 경우:**
+
+- AWS SES 콘솔에서 이메일 주소가 "Verified" 상태인지 확인
+- IAM 사용자 권한이 올바른지 확인
+- 환경변수가 정확한지 확인
+- AWS 리전이 `ap-northeast-2`로 설정되어 있는지 확인
+
+**샌드박스 모드인 경우:**
+
+- 검증된 이메일 주소로만 전송 가능
+- 프로덕션 액세스 요청이 승인될 때까지 대기
 
 ## 📚 문서
 

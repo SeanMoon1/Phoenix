@@ -1,9 +1,68 @@
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout';
+import { contactApi } from '../../services/api';
 
 const SupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('faq');
   const [openFaqId, setOpenFaqId] = useState<number | null>(null);
+
+  // 문의하기 폼 상태
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    type: '',
+    subject: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+
+  // 문의하기 폼 핸들러
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitMessage('');
+
+    try {
+      const result = await contactApi.sendContact(contactForm);
+
+      if (result.success) {
+        setSubmitMessage(
+          '문의가 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다.'
+        );
+        setContactForm({
+          name: '',
+          email: '',
+          type: '',
+          subject: '',
+          message: '',
+        });
+      } else {
+        setSubmitMessage(
+          '문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        );
+      }
+    } catch (error) {
+      console.error('문의 전송 오류:', error);
+      setSubmitMessage(
+        '문의 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const tabs = [
     { id: 'faq', name: 'FAQ', icon: '❓', color: 'blue' },
@@ -146,7 +205,21 @@ const SupportPage: React.FC = () => {
           <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
             문의 양식
           </h2>
-          <form className="space-y-6">
+
+          {/* 제출 메시지 */}
+          {submitMessage && (
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                submitMessage.includes('성공')
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+              }`}
+            >
+              {submitMessage}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -154,6 +227,9 @@ const SupportPage: React.FC = () => {
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  value={contactForm.name}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="이름을 입력하세요"
@@ -165,6 +241,9 @@ const SupportPage: React.FC = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
+                  value={contactForm.email}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="이메일을 입력하세요"
@@ -177,16 +256,20 @@ const SupportPage: React.FC = () => {
                 문의 유형 *
               </label>
               <select
+                name="type"
+                value={contactForm.type}
+                onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="">문의 유형을 선택하세요</option>
-                <option>회원가입/로그인 문제</option>
-                <option>훈련 관련 문의</option>
-                <option>결제/구독 문의</option>
-                <option>기술적 문제</option>
-                <option>서비스 개선 제안</option>
-                <option>기타</option>
+                <option value="회원가입/로그인 문제">
+                  회원가입/로그인 문제
+                </option>
+                <option value="훈련 관련 문의">훈련 관련 문의</option>
+                <option value="기술적 문제">기술적 문제</option>
+                <option value="서비스 개선 제안">서비스 개선 제안</option>
+                <option value="기타">기타</option>
               </select>
             </div>
 
@@ -196,6 +279,9 @@ const SupportPage: React.FC = () => {
               </label>
               <input
                 type="text"
+                name="subject"
+                value={contactForm.subject}
+                onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="문의 제목을 입력하세요"
@@ -207,6 +293,9 @@ const SupportPage: React.FC = () => {
                 문의 내용 *
               </label>
               <textarea
+                name="message"
+                value={contactForm.message}
+                onChange={handleInputChange}
                 required
                 rows={6}
                 className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -216,9 +305,14 @@ const SupportPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full px-4 py-3 font-medium text-white transition-colors duration-200 bg-green-600 rounded-lg hover:bg-green-700"
+              disabled={isSubmitting}
+              className={`w-full px-4 py-3 font-medium text-white transition-colors duration-200 rounded-lg ${
+                isSubmitting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
-              문의하기
+              {isSubmitting ? '전송 중...' : '문의하기'}
             </button>
           </form>
         </div>

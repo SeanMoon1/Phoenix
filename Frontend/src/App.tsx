@@ -10,7 +10,6 @@ import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
-const AdminPage = lazy(() => import('./pages/admin/AdminPage'));
 const ScriptToolPage = lazy(() => import('./pages/admin/ScriptToolPage'));
 const FireScenarioPage = lazy(
   () => import('@/pages/training/FireScenarioPage')
@@ -328,15 +327,7 @@ function App() {
             {/* 고객지원 */}
             <Route path="/support" element={<SupportPage />} />
 
-            {/* 관리자페이지 */}
-            <Route
-              path="/admin"
-              element={
-                <AdminGuard>
-                  <AdminPage />
-                </AdminGuard>
-              }
-            />
+            {/* 관리자페이지 - MyPage 내에서 처리 */}
             <Route
               path="/admin/script-tool"
               element={

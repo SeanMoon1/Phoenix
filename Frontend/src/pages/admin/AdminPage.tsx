@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui';
 import {
   trainingApi,
@@ -218,8 +217,7 @@ const AdminPage: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* 페이지 헤더 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -659,7 +657,6 @@ const AdminPage: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
 
       {/* 팀 생성 모달 */}
       {showCreateTeamModal && (
@@ -669,7 +666,7 @@ const AdminPage: React.FC = () => {
               새 팀 생성
             </h3>
 
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="p-3 mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 💡 팀 코드는 자동으로 생성됩니다. 생성된 팀 코드를 팀원들과
                 공유하여 팀에 가입할 수 있습니다.
@@ -738,7 +735,7 @@ const AdminPage: React.FC = () => {
           setAdminRefreshTrigger(prev => prev + 1); // 관리자 목록 새로고침
         }}
       />
-    </AdminLayout>
+    </div>
   );
 };
 

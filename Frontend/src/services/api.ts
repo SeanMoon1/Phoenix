@@ -93,9 +93,20 @@ apiClient.interceptors.response.use(
     });
 
     if (error.response?.status === 401) {
-      console.warn('🔐 인증 실패 - 로그아웃 처리');
-      localStorage.removeItem('auth-storage');
-      window.location.href = '/login';
+      console.warn('🔐 인증 실패');
+
+      // 관리자 권한이 필요한 API인지 확인
+      const isAdminApi = error.config?.url?.includes('/admin/');
+      const isAuthApi = error.config?.url?.includes('/auth/');
+
+      if (isAdminApi || isAuthApi) {
+        console.warn('🔐 관리자/인증 API 인증 실패 - 로그아웃 처리');
+        localStorage.removeItem('auth-storage');
+        window.location.href = '/login';
+      } else {
+        console.warn('🔐 일반 API 인증 실패 - 로그아웃하지 않음');
+        // 일반 API의 경우 로그아웃하지 않고 에러만 반환
+      }
     }
     return Promise.reject(error);
   }

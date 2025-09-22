@@ -165,11 +165,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const handleNext = () => {
     if (!gameState.selected || !gameState.scenario) return;
 
-    // 마지막 씬 여부 계산
-    const isLastScene =
-      (gameState.scenario?.sceneId ?? '').trim() === '#END' ||
-      gameState.current >= gameState.scenarios.length - 1;
-
     // nextId 추출 (여러 필드 지원 + trim)
     const rawNext =
       (gameState.selected as any)?.nextId ??
@@ -206,9 +201,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       gameState.resetSceneFlags();
       gameState.setHistory(h => [...h, gameState.current]);
       gameState.setCurrent(nextIndex);
-      // 스크롤: 상태 변경 후 다음 씬의 SituationCard가 화면 상단에 보이도록
       requestAnimationFrame(() => {
-        // 약간의 지연이 필요하면 setTimeout(..., 50)으로 조정
         topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       return;
@@ -223,22 +216,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       requestAnimationFrame(() => {
         topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-      return;
-    }
-
-    // 마지막 문제에서 Next 누른 경우: 모달 처리(이미 다른 곳에서 자동처리중이면 중복 주의)
-    if (isLastScene) {
-      if (!gameState.endModalAutoShown && !modals.clearMsg && !modals.failMsg) {
-        gameState.setEndModalAutoShown(true);
-        if (gameState.failedThisRun) {
-          modals.setFailMsg(
-            `${scenarioSetName} 훈련에 실패했습니다. 다시 도전해보세요!`
-          );
-        } else {
-          modals.setClearMsg(`${scenarioSetName} 훈련 완료!\n축하합니다!`);
-          modals.setShowConfetti(true);
-        }
-      }
       return;
     }
   };

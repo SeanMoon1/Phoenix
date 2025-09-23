@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button, Input, Modal } from '../ui';
-import { adminApi, teamApi } from '../../services/api';
+import { adminApi } from '../../services/api';
 import type { CreateAdminData, AdminLevel, Team } from '../../types';
 
 interface CreateAdminModalProps {
@@ -75,17 +75,29 @@ const CreateAdminModal: React.FC<CreateAdminModalProps> = ({
   const loadData = async () => {
     setIsLoading(true);
     try {
+      console.log('관리자 모달 데이터 로드 시작...');
+
       const [levelsResponse, teamsResponse] = await Promise.all([
         adminApi.getAdminLevels(),
-        teamApi.getAll(),
+        adminApi.getTeams(), // teamApi.getAll() 대신 adminApi.getTeams() 사용
       ]);
+
+      console.log('권한 레벨 응답:', levelsResponse);
+      console.log('팀 목록 응답:', teamsResponse);
 
       if (levelsResponse.success && levelsResponse.data) {
         setAdminLevels(levelsResponse.data);
+        console.log('권한 레벨 설정됨:', levelsResponse.data);
+      } else {
+        console.error('권한 레벨 로드 실패:', levelsResponse.error);
       }
 
       if (teamsResponse.success && teamsResponse.data) {
         setTeams(teamsResponse.data);
+        console.log('팀 목록 로드됨:', teamsResponse.data);
+      } else {
+        console.error('팀 목록 로드 실패:', teamsResponse.error);
+        console.error('팀 응답 상세:', teamsResponse);
       }
     } catch (error) {
       console.error('데이터 로드 실패:', error);
@@ -167,20 +179,33 @@ const CreateAdminModal: React.FC<CreateAdminModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               팀 선택
             </label>
-            <select
-              {...register('teamId')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">팀을 선택하세요</option>
-              {teams.map(team => (
-                <option key={team.id} value={team.id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
+            {isLoading ? (
+              <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-700 dark:border-gray-600">
+                <span className="text-gray-500 dark:text-gray-400">
+                  팀 목록을 불러오는 중...
+                </span>
+              </div>
+            ) : (
+              <select
+                {...register('teamId')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">팀을 선택하세요</option>
+                {teams.map(team => (
+                  <option key={team.id} value={team.id}>
+                    {team.name} ({team.teamCode})
+                  </option>
+                ))}
+              </select>
+            )}
             {errors.teamId && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.teamId.message}
+              </p>
+            )}
+            {!isLoading && teams.length === 0 && (
+              <p className="mt-1 text-sm text-yellow-600 dark:text-yellow-400">
+                생성된 팀이 없습니다. 먼저 팀을 생성해주세요.
               </p>
             )}
           </div>

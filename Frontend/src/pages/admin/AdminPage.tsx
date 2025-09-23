@@ -71,6 +71,29 @@ const AdminPage: React.FC = () => {
   const [loadingScenarios, setLoadingScenarios] = useState(false);
   const { user } = useAuthStore();
 
+  // 관리자 권한 체크
+  if (
+    !user?.isAdmin &&
+    user?.adminLevel !== 'SUPER_ADMIN' &&
+    user?.adminLevel !== 'TEAM_ADMIN'
+  ) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="mb-4 text-6xl">🚫</div>
+            <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+              접근 권한이 없습니다
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              관리자 권한이 필요한 페이지입니다.
+            </p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   const tabs = [
     { id: 'training', label: '훈련 관리', icon: '🎯' },
     { id: 'teams', label: '팀 관리', icon: '👥' },
@@ -235,6 +258,8 @@ const AdminPage: React.FC = () => {
         setShowCreateTeamModal(false);
         setNewTeamName('');
         setNewTeamDescription('');
+        // 팀 목록 새로고침
+        loadTeams();
       } else {
         alert(
           `팀 생성에 실패했습니다.\n${
@@ -298,15 +323,20 @@ const AdminPage: React.FC = () => {
         loadTeamStats();
         loadMemberStats();
       } else {
+        const errorMessage =
+          response.error || '알 수 없는 오류가 발생했습니다.';
+        console.error('시나리오 생성 실패:', response);
         alert(
-          `시나리오 생성에 실패했습니다.\n${
-            response.error || '알 수 없는 오류가 발생했습니다.'
-          }`
+          `시나리오 생성에 실패했습니다.\n\n오류 내용: ${errorMessage}\n\n문제가 지속되면 관리자에게 문의하세요.`
         );
       }
     } catch (error) {
       console.error('시나리오 생성 실패:', error);
-      alert('시나리오 생성 중 오류가 발생했습니다.');
+      const errorMessage =
+        error instanceof Error ? error.message : '알 수 없는 오류';
+      alert(
+        `시나리오 생성 중 오류가 발생했습니다.\n\n오류 내용: ${errorMessage}\n\n문제가 지속되면 관리자에게 문의하세요.`
+      );
     } finally {
       setCreatingScenario(false);
     }
@@ -327,9 +357,23 @@ const AdminPage: React.FC = () => {
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      const response = selectedTeamId
-        ? await adminApi.getUsersByTeam(selectedTeamId)
-        : await adminApi.getUsers();
+      let response;
+
+      // 사용자 권한에 따라 다른 API 호출
+      if (user?.adminLevel === 'SUPER_ADMIN') {
+        // 총괄 관리자: 모든 사용자 조회 가능
+        response = selectedTeamId
+          ? await adminApi.getUsersByTeam(selectedTeamId)
+          : await adminApi.getUsers();
+      } else if (user?.adminLevel === 'TEAM_ADMIN' && user?.teamId) {
+        // 팀 관리자: 본인 팀의 사용자만 조회 가능
+        response = await adminApi.getUsersByTeam(user.teamId);
+      } else {
+        // 일반 사용자: 접근 불가
+        setUsers([]);
+        setLoadingUsers(false);
+        return;
+      }
 
       if (response.success && response.data) {
         setUsers(response.data);
@@ -791,9 +835,70 @@ const AdminPage: React.FC = () => {
                   </h3>
                 </div>
                 <div className="p-6">
-                  <div className="text-center text-gray-500 dark:text-gray-400">
-                    팀 목록 기능은 곧 추가될 예정입니다.
-                  </div>
+                  {teams.length > 0 ? (
+                    <div className="space-y-4">
+                      {teams.map(team => (
+                        <div
+                          key={team.id}
+                          className="p-4 border border-gray-200 rounded-lg dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                                {team.name}
+                              </h4>
+                              {team.description && (
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                  {team.description}
+                                </p>
+                              )}
+                              <div className="flex items-center mt-3 space-x-4">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    팀 코드:
+                                  </span>
+                                  <div className="flex items-center space-x-2">
+                                    <code className="px-2 py-1 text-sm font-mono bg-gray-100 text-gray-800 rounded dark:bg-gray-700 dark:text-gray-200">
+                                      {team.teamCode}
+                                    </code>
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(
+                                          team.teamCode
+                                        );
+                                        alert(
+                                          '팀 코드가 클립보드에 복사되었습니다!'
+                                        );
+                                      }}
+                                      className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                                    >
+                                      복사
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  생성일:{' '}
+                                  {new Date(
+                                    team.createdAt
+                                  ).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <div className="mb-4 text-4xl">👥</div>
+                      <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                        생성된 팀이 없습니다
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        새 팀을 생성하여 시작하세요.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -898,36 +1003,63 @@ const AdminPage: React.FC = () => {
                 사용자 관리
               </h2>
 
-              {/* 팀 필터 */}
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  팀 필터
-                </label>
-                <select
-                  value={selectedTeamId || ''}
-                  onChange={e =>
-                    handleTeamChange(
-                      e.target.value ? parseInt(e.target.value) : null
-                    )
-                  }
-                  className="w-full max-w-xs px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">모든 사용자</option>
-                  {teams.map(team => (
-                    <option key={team.id} value={team.id}>
-                      {team.name} ({team.teamCode})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* 팀 필터 - 총괄 관리자만 모든 팀 선택 가능 */}
+              {user?.adminLevel === 'SUPER_ADMIN' && (
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    팀 필터
+                  </label>
+                  <select
+                    value={selectedTeamId || ''}
+                    onChange={e =>
+                      handleTeamChange(
+                        e.target.value ? parseInt(e.target.value) : null
+                      )
+                    }
+                    className="w-full max-w-xs px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">모든 사용자</option>
+                    {teams.map(team => (
+                      <option key={team.id} value={team.id}>
+                        {team.name} ({team.teamCode})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* 팀 관리자에게는 현재 팀 정보 표시 */}
+              {user?.adminLevel === 'TEAM_ADMIN' && user?.teamId && (
+                <div className="mb-6">
+                  <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <strong>현재 팀:</strong>{' '}
+                      {teams.find(t => t.id === user.teamId)?.name ||
+                        '알 수 없음'}
+                      {teams.find(t => t.id === user.teamId)?.teamCode && (
+                        <span className="ml-2 text-xs">
+                          (코드:{' '}
+                          {teams.find(t => t.id === user.teamId)?.teamCode})
+                        </span>
+                      )}
+                    </p>
+                    <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                      팀 관리자 권한으로 본인 팀의 사용자만 조회할 수 있습니다.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* 사용자 목록 */}
               <div className="bg-white rounded-lg shadow dark:bg-gray-800">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     사용자 목록{' '}
-                    {selectedTeamId &&
+                    {user?.adminLevel === 'SUPER_ADMIN' &&
+                      selectedTeamId &&
                       `(${teams.find(t => t.id === selectedTeamId)?.name})`}
+                    {user?.adminLevel === 'TEAM_ADMIN' &&
+                      `(${teams.find(t => t.id === user.teamId)?.name})`}
                   </h3>
                 </div>
                 <div className="p-6">

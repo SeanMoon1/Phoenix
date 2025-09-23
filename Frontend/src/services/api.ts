@@ -718,7 +718,15 @@ export const adminApi = {
    * @returns 권한 레벨 목록
    */
   getAdminLevels: async () => {
-    return api.get<AdminLevel[]>('/admin/levels');
+    console.log('adminApi.getAdminLevels 호출됨');
+    try {
+      const result = await api.get<AdminLevel[]>('/admin/levels');
+      console.log('adminApi.getAdminLevels 응답:', result);
+      return result;
+    } catch (error) {
+      console.error('adminApi.getAdminLevels 에러:', error);
+      throw error;
+    }
   },
 
   /**
@@ -744,7 +752,15 @@ export const adminApi = {
    * @returns 팀 목록
    */
   getTeams: async () => {
-    return api.get<Team[]>('/admin/teams');
+    console.log('adminApi.getTeams 호출됨');
+    try {
+      const result = await api.get<Team[]>('/admin/teams');
+      console.log('adminApi.getTeams 응답:', result);
+      return result;
+    } catch (error) {
+      console.error('adminApi.getTeams 에러:', error);
+      throw error;
+    }
   },
 
   /**

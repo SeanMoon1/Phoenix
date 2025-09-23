@@ -62,7 +62,84 @@ const AuthCallbackPage: React.FC = () => {
           return;
         }
 
-        // Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
+        // 백엔드에서 실제 사용자 정보를 가져오기 위해 API 호출
+        try {
+          console.log('🔍 백엔드에서 사용자 정보 조회 중...');
+
+          // JWT 토큰을 사용하여 사용자 프로필 조회
+          const response = await fetch(
+            `${
+              import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+            }/auth/profile`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const profileData = await response.json();
+          console.log('👤 백엔드에서 받은 사용자 정보:', profileData);
+
+          // 백엔드에서 받은 실제 사용자 정보 사용
+          const user = {
+            id: profileData.id,
+            teamId: profileData.teamId || 0,
+            userCode: profileData.userCode || '',
+            loginId: profileData.loginId || '',
+            email: profileData.email,
+            name: profileData.name,
+            useYn: profileData.useYn || 'Y',
+            userLevel: profileData.userLevel || 1,
+            userExp: profileData.userExp || 0,
+            totalScore: profileData.totalScore || 0,
+            completedScenarios: profileData.completedScenarios || 0,
+            currentTier: profileData.currentTier || 'BRONZE',
+            levelProgress: profileData.levelProgress || 0,
+            nextLevelExp: profileData.nextLevelExp || 100,
+            isActive: profileData.isActive !== false,
+            createdAt: profileData.createdAt || new Date().toISOString(),
+            updatedAt: profileData.updatedAt || new Date().toISOString(),
+            isAdmin: profileData.isAdmin || false,
+            adminLevel: profileData.adminLevel || 'USER',
+            // OAuth 관련 정보 추가
+            oauthProvider: profileData.oauthProvider,
+            oauthProviderId: profileData.oauthProviderId,
+          };
+
+          console.log('✅ Setting auth state with backend data:', {
+            hasToken: !!token,
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              oauthProvider: user.oauthProvider,
+            },
+          });
+
+          // 인증 상태 설정
+          setAuth({
+            token,
+            user,
+            isAuthenticated: true,
+          });
+
+          console.log('🚀 Redirecting to home page...');
+          // 메인페이지로 리다이렉트
+          navigate('/');
+          return;
+        } catch (profileError) {
+          console.error('❌ 백엔드에서 사용자 정보 조회 실패:', profileError);
+          // 백엔드 조회 실패 시 기존 방식으로 fallback
+          console.log('🔄 Fallback to callback user data...');
+        }
+
+        // Fallback: Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
         const user = {
           id: userData.id,
           teamId: 0, // OAuth 사용자는 기본값

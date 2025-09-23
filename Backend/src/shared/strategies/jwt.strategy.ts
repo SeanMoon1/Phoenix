@@ -50,6 +50,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       loginId: user.loginId,
       adminLevel: user.adminLevel,
       isAdmin: user.isAdmin,
+      userId: user.userId,
+      email: user.email,
+      name: user.name,
+      teamId: user.teamId,
     });
     return user;
   }

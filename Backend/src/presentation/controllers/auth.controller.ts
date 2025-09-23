@@ -52,11 +52,12 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('profile')
+  @Get('profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 프로필 조회' })
   @ApiResponse({ status: 200, description: '프로필 조회 성공' })
   getProfile(@Request() req) {
+    console.log('🔍 사용자 프로필 조회:', req.user);
     return req.user;
   }
 

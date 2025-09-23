@@ -26,6 +26,17 @@ export class UserProgressController {
 
       const user = req.user;
 
+      console.log('🔍 시나리오 통계 조회 권한 검증:', {
+        userId: userId,
+        userFromToken: user,
+        userType: typeof user,
+        userIdType: typeof userId,
+        userFromTokenId: user?.id,
+        userFromTokenIdType: typeof user?.id,
+        comparison: user?.id === userId,
+        strictComparison: user?.id === Number(userId),
+      });
+
       if (!user) {
         return { success: false, error: '인증이 필요합니다.' };
       }

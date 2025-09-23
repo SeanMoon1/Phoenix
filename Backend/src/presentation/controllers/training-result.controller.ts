@@ -77,6 +77,17 @@ export class TrainingResultController {
     try {
       const user = req.user;
 
+      console.log('🔍 훈련 결과 조회 권한 검증:', {
+        userId: userId,
+        userFromToken: user,
+        userType: typeof user,
+        userIdType: typeof userId,
+        userFromTokenId: user?.id,
+        userFromTokenIdType: typeof user?.id,
+        comparison: user?.id === userId,
+        strictComparison: user?.id === Number(userId),
+      });
+
       // 권한 체크: 본인 또는 팀 관리자만 조회 가능
       if (!user) {
         return { success: false, error: '인증이 필요합니다.' };

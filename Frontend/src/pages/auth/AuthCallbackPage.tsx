@@ -25,94 +25,148 @@ const AuthCallbackPage: React.FC = () => {
   const { setAuth } = useAuthStore();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const userParam = searchParams.get('user');
-    const error = searchParams.get('error');
+    const handleOAuthCallback = async () => {
+      const token = searchParams.get('token');
+      const userParam = searchParams.get('user');
+      const error = searchParams.get('error');
 
-    console.log('🔍 OAuth Callback Debug Info:', {
-      token: token ? `${token.substring(0, 20)}...` : 'No token',
-      userParam: userParam ? 'Present' : 'Missing',
-      error: error || 'No error',
-      allParams: Object.fromEntries(searchParams.entries()),
-    });
+      console.log('🔍 OAuth Callback Debug Info:', {
+        token: token ? `${token.substring(0, 20)}...` : 'No token',
+        userParam: userParam ? 'Present' : 'Missing',
+        error: error || 'No error',
+        allParams: Object.fromEntries(searchParams.entries()),
+      });
 
-    if (error) {
-      // OAuth 에러 처리
-      console.error('❌ OAuth error:', error);
-      const errorMessage = getErrorMessage(error);
-      navigate(`/login?error=${errorMessage}`);
-      return;
-    }
+      if (error) {
+        // OAuth 에러 처리
+        console.error('❌ OAuth error:', error);
+        const errorMessage = getErrorMessage(error);
+        navigate(`/login?error=${errorMessage}`);
+        return;
+      }
 
-    if (token && userParam) {
-      try {
-        // URL 디코딩 및 JSON 파싱
-        const userData = JSON.parse(decodeURIComponent(userParam));
-        console.log('👤 Parsed user data:', userData);
-
-        // 필수 필드 검증
-        if (!userData.id || !userData.email || !userData.name) {
-          console.error('❌ Missing required user data:', {
-            hasId: !!userData.id,
-            hasEmail: !!userData.email,
-            hasName: !!userData.name,
-            userData,
-          });
-          navigate('/login?error=incomplete_user_data');
-          return;
-        }
-
-        // 백엔드에서 실제 사용자 정보를 가져오기 위해 API 호출
+      if (token && userParam) {
         try {
-          console.log('🔍 백엔드에서 사용자 정보 조회 중...');
+          // URL 디코딩 및 JSON 파싱
+          const userData = JSON.parse(decodeURIComponent(userParam));
+          console.log('👤 Parsed user data:', userData);
 
-          // JWT 토큰을 사용하여 사용자 프로필 조회
-          const response = await fetch(
-            `${
-              import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-            }/auth/profile`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          // 필수 필드 검증
+          if (!userData.id || !userData.email || !userData.name) {
+            console.error('❌ Missing required user data:', {
+              hasId: !!userData.id,
+              hasEmail: !!userData.email,
+              hasName: !!userData.name,
+              userData,
+            });
+            navigate('/login?error=incomplete_user_data');
+            return;
           }
 
-          const profileData = await response.json();
-          console.log('👤 백엔드에서 받은 사용자 정보:', profileData);
+          // 백엔드에서 실제 사용자 정보를 가져오기 위해 API 호출
+          try {
+            console.log('🔍 백엔드에서 사용자 정보 조회 중...');
 
-          // 백엔드에서 받은 실제 사용자 정보 사용
+            // JWT 토큰을 사용하여 사용자 프로필 조회
+            const response = await fetch(
+              `${
+                import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+              }/auth/profile`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const profileData = await response.json();
+            console.log('👤 백엔드에서 받은 사용자 정보:', profileData);
+
+            // 백엔드에서 받은 실제 사용자 정보 사용
+            const user = {
+              id: profileData.id,
+              teamId: profileData.teamId || 0,
+              userCode: profileData.userCode || '',
+              loginId: profileData.loginId || '',
+              email: profileData.email,
+              name: profileData.name,
+              useYn: profileData.useYn || 'Y',
+              userLevel: profileData.userLevel || 1,
+              userExp: profileData.userExp || 0,
+              totalScore: profileData.totalScore || 0,
+              completedScenarios: profileData.completedScenarios || 0,
+              currentTier: profileData.currentTier || 'BRONZE',
+              levelProgress: profileData.levelProgress || 0,
+              nextLevelExp: profileData.nextLevelExp || 100,
+              isActive: profileData.isActive !== false,
+              createdAt: profileData.createdAt || new Date().toISOString(),
+              updatedAt: profileData.updatedAt || new Date().toISOString(),
+              isAdmin: profileData.isAdmin || false,
+              adminLevel: profileData.adminLevel || 'USER',
+              // OAuth 관련 정보 추가
+              oauthProvider: profileData.oauthProvider,
+              oauthProviderId: profileData.oauthProviderId,
+            };
+
+            console.log('✅ Setting auth state with backend data:', {
+              hasToken: !!token,
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                oauthProvider: user.oauthProvider,
+              },
+            });
+
+            // 인증 상태 설정
+            setAuth({
+              token,
+              user,
+              isAuthenticated: true,
+            });
+
+            console.log('🚀 Redirecting to home page...');
+            // 메인페이지로 리다이렉트
+            navigate('/');
+            return;
+          } catch (profileError) {
+            console.error('❌ 백엔드에서 사용자 정보 조회 실패:', profileError);
+            // 백엔드 조회 실패 시 기존 방식으로 fallback
+            console.log('🔄 Fallback to callback user data...');
+          }
+
+          // Fallback: Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
           const user = {
-            id: profileData.id,
-            teamId: profileData.teamId || 0,
-            userCode: profileData.userCode || '',
-            loginId: profileData.loginId || '',
-            email: profileData.email,
-            name: profileData.name,
-            useYn: profileData.useYn || 'Y',
-            userLevel: profileData.userLevel || 1,
-            userExp: profileData.userExp || 0,
-            totalScore: profileData.totalScore || 0,
-            completedScenarios: profileData.completedScenarios || 0,
-            currentTier: profileData.currentTier || 'BRONZE',
-            levelProgress: profileData.levelProgress || 0,
-            nextLevelExp: profileData.nextLevelExp || 100,
-            isActive: profileData.isActive !== false,
-            createdAt: profileData.createdAt || new Date().toISOString(),
-            updatedAt: profileData.updatedAt || new Date().toISOString(),
-            isAdmin: profileData.isAdmin || false,
-            adminLevel: profileData.adminLevel || 'USER',
+            id: userData.id,
+            teamId: 0, // OAuth 사용자는 기본값
+            userCode: '', // OAuth 사용자는 기본값
+            loginId: '', // OAuth 사용자는 기본값
+            email: userData.email,
+            name: userData.name,
+            useYn: 'Y',
+            userLevel: 1, // 기본 레벨
+            userExp: 0,
+            totalScore: 0,
+            completedScenarios: 0,
+            currentTier: 'BRONZE', // 기본 티어
+            levelProgress: 0,
+            nextLevelExp: 100,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isAdmin: false, // OAuth 사용자는 기본적으로 일반 사용자
+            adminLevel: 'USER',
             // OAuth 관련 정보 추가
-            oauthProvider: profileData.oauthProvider,
-            oauthProviderId: profileData.oauthProviderId,
+            oauthProvider: userData.provider,
+            oauthProviderId: userData.providerId,
           };
 
-          console.log('✅ Setting auth state with backend data:', {
+          console.log('✅ Setting auth state:', {
             hasToken: !!token,
             user: {
               id: user.id,
@@ -132,71 +186,21 @@ const AuthCallbackPage: React.FC = () => {
           console.log('🚀 Redirecting to home page...');
           // 메인페이지로 리다이렉트
           navigate('/');
-          return;
-        } catch (profileError) {
-          console.error('❌ 백엔드에서 사용자 정보 조회 실패:', profileError);
-          // 백엔드 조회 실패 시 기존 방식으로 fallback
-          console.log('🔄 Fallback to callback user data...');
+        } catch (error) {
+          console.error('❌ Failed to parse user data:', error);
+          navigate('/login?error=invalid_callback');
         }
-
-        // Fallback: Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
-        const user = {
-          id: userData.id,
-          teamId: 0, // OAuth 사용자는 기본값
-          userCode: '', // OAuth 사용자는 기본값
-          loginId: '', // OAuth 사용자는 기본값
-          email: userData.email,
-          name: userData.name,
-          useYn: 'Y',
-          userLevel: 1, // 기본 레벨
-          userExp: 0,
-          totalScore: 0,
-          completedScenarios: 0,
-          currentTier: 'BRONZE', // 기본 티어
-          levelProgress: 0,
-          nextLevelExp: 100,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isAdmin: false, // OAuth 사용자는 기본적으로 일반 사용자
-          adminLevel: 'USER',
-          // OAuth 관련 정보 추가
-          oauthProvider: userData.provider,
-          oauthProviderId: userData.providerId,
-        };
-
-        console.log('✅ Setting auth state:', {
+      } else {
+        // 토큰이나 사용자 정보가 없는 경우
+        console.error('❌ Missing callback data:', {
           hasToken: !!token,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            oauthProvider: user.oauthProvider,
-          },
+          hasUserParam: !!userParam,
         });
-
-        // 인증 상태 설정
-        setAuth({
-          token,
-          user,
-          isAuthenticated: true,
-        });
-
-        console.log('🚀 Redirecting to home page...');
-        // 메인페이지로 리다이렉트
-        navigate('/');
-      } catch (error) {
-        console.error('❌ Failed to parse user data:', error);
-        navigate('/login?error=invalid_callback');
+        navigate('/login?error=missing_callback_data');
       }
-    } else {
-      // 토큰이나 사용자 정보가 없는 경우
-      console.error('❌ Missing callback data:', {
-        hasToken: !!token,
-        hasUserParam: !!userParam,
-      });
-      navigate('/login?error=missing_callback_data');
-    }
+    };
+
+    handleOAuthCallback();
   }, [searchParams, navigate, setAuth]);
 
   return (

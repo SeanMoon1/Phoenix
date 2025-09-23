@@ -52,6 +52,13 @@ export class UsersService {
     return this.userRepository.find();
   }
 
+  async getUsersByTeam(teamId: number) {
+    return this.userRepository.find({
+      where: { teamId },
+      relations: ['team'],
+    });
+  }
+
   async deleteUser(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {

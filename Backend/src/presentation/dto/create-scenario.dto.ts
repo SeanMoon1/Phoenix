@@ -24,12 +24,11 @@ export class CreateScenarioDto {
   title: string;
 
   @ApiProperty({
-    example: 'fire',
-    description: '재난 유형',
-    enum: ['fire', 'earthquake', 'flood', 'other'],
+    example: '화재',
+    description: '재난 유형 (자유 입력)',
   })
   @IsString()
-  @IsIn(['fire', 'earthquake', 'flood', 'other'])
+  @IsNotEmpty()
   disasterType: string;
 
   @ApiProperty({

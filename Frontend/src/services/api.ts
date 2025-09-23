@@ -736,7 +736,32 @@ export const adminApi = {
    * @returns 생성된 팀 정보
    */
   createTeam: async (teamData: { name: string; description?: string }) => {
-    return api.post<Team>('/teams', teamData);
+    return api.post<Team>('/admin/teams', teamData);
+  },
+
+  /**
+   * 모든 팀 조회 (관리자용)
+   * @returns 팀 목록
+   */
+  getTeams: async () => {
+    return api.get<Team[]>('/admin/teams');
+  },
+
+  /**
+   * 모든 사용자 조회 (관리자용)
+   * @returns 사용자 목록
+   */
+  getUsers: async () => {
+    return api.get<User[]>('/admin/users');
+  },
+
+  /**
+   * 특정 팀의 사용자 조회 (관리자용)
+   * @param teamId 팀 ID
+   * @returns 팀 사용자 목록
+   */
+  getUsersByTeam: async (teamId: number) => {
+    return api.get<User[]>(`/admin/users/team/${teamId}`);
   },
 
   /**

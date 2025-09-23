@@ -50,12 +50,25 @@ const AdminPage: React.FC = () => {
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const [adminRefreshTrigger, setAdminRefreshTrigger] = useState(0);
 
-  // 훈련 세션 생성 관련 상태
-  const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
-  const [newSessionName, setNewSessionName] = useState('');
-  const [newSessionDescription, setNewSessionDescription] = useState('');
-  const [selectedScenario, setSelectedScenario] = useState('');
-  const [creatingSession, setCreatingSession] = useState(false);
+  // 시나리오 생성 관련 상태
+  const [showCreateScenarioModal, setShowCreateScenarioModal] = useState(false);
+  const [newScenarioTitle, setNewScenarioTitle] = useState('');
+  const [newScenarioDescription, setNewScenarioDescription] = useState('');
+  const [newScenarioDisasterType, setNewScenarioDisasterType] = useState('');
+  const [newScenarioRiskLevel, setNewScenarioRiskLevel] = useState('');
+  const [newScenarioOccurrenceCondition, setNewScenarioOccurrenceCondition] =
+    useState('');
+  const [creatingScenario, setCreatingScenario] = useState(false);
+
+  // 사용자 관리 관련 상태
+  const [users, setUsers] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  // 승인관리 관련 상태
+  const [pendingScenarios, setPendingScenarios] = useState<any[]>([]);
+  const [loadingScenarios, setLoadingScenarios] = useState(false);
   const { user } = useAuthStore();
 
   const tabs = [
@@ -74,6 +87,19 @@ const AdminPage: React.FC = () => {
       loadMemberStats();
     }
   }, [user?.teamId]);
+
+  // 사용자 관리 데이터 로드
+  useEffect(() => {
+    loadTeams();
+    loadUsers();
+  }, []);
+
+  // 승인관리 데이터 로드
+  useEffect(() => {
+    if (activeTab === 'approval') {
+      loadPendingScenarios();
+    }
+  }, [activeTab]);
 
   const loadTeamStats = async () => {
     if (!user?.teamId) return;
@@ -224,48 +250,160 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  // 훈련 세션 생성
-  const createTrainingSession = async () => {
-    if (!newSessionName.trim()) {
-      alert('세션 이름을 입력해주세요.');
+  // 시나리오 생성
+  const createScenario = async () => {
+    if (!newScenarioTitle.trim()) {
+      alert('시나리오 제목을 입력해주세요.');
       return;
     }
 
-    if (!selectedScenario) {
-      alert('시나리오를 선택해주세요.');
+    if (!newScenarioDisasterType) {
+      alert('재난 유형을 선택해주세요.');
       return;
     }
 
-    setCreatingSession(true);
+    if (!newScenarioRiskLevel) {
+      alert('위험도를 선택해주세요.');
+      return;
+    }
+
+    setCreatingScenario(true);
     try {
-      const response = await adminApi.createTrainingSession({
-        name: newSessionName,
-        description: newSessionDescription,
-        scenarioType: selectedScenario,
-        teamId: user?.teamId || 0,
+      // 시나리오 코드 자동 생성 (예: SCEN_20241223_001)
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+      const scenarioCode = `SCEN_${dateStr}_001`;
+
+      const response = await scenarioApi.create({
+        teamId: user?.teamId || 1,
+        scenarioCode,
+        title: newScenarioTitle,
+        disasterType: newScenarioDisasterType,
+        description: newScenarioDescription,
+        riskLevel: newScenarioRiskLevel,
+        occurrenceCondition: newScenarioOccurrenceCondition,
+        status: '임시저장',
+        createdBy: user?.id || 1,
       });
 
       if (response.success && response.data) {
-        alert('훈련 세션이 성공적으로 생성되었습니다!');
-        setShowCreateSessionModal(false);
-        setNewSessionName('');
-        setNewSessionDescription('');
-        setSelectedScenario('');
+        alert('시나리오가 성공적으로 생성되었습니다!');
+        setShowCreateScenarioModal(false);
+        setNewScenarioTitle('');
+        setNewScenarioDescription('');
+        setNewScenarioDisasterType('');
+        setNewScenarioRiskLevel('');
+        setNewScenarioOccurrenceCondition('');
         // 통계 새로고침
         loadTeamStats();
         loadMemberStats();
       } else {
         alert(
-          `훈련 세션 생성에 실패했습니다.\n${
+          `시나리오 생성에 실패했습니다.\n${
             response.error || '알 수 없는 오류가 발생했습니다.'
           }`
         );
       }
     } catch (error) {
-      console.error('훈련 세션 생성 실패:', error);
-      alert('훈련 세션 생성 중 오류가 발생했습니다.');
+      console.error('시나리오 생성 실패:', error);
+      alert('시나리오 생성 중 오류가 발생했습니다.');
     } finally {
-      setCreatingSession(false);
+      setCreatingScenario(false);
+    }
+  };
+
+  // 사용자 관리 함수들
+  const loadTeams = async () => {
+    try {
+      const response = await adminApi.getTeams();
+      if (response.success && response.data) {
+        setTeams(response.data);
+      }
+    } catch (error) {
+      console.error('팀 목록 로드 실패:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const response = selectedTeamId
+        ? await adminApi.getUsersByTeam(selectedTeamId)
+        : await adminApi.getUsers();
+
+      if (response.success && response.data) {
+        setUsers(response.data);
+      }
+    } catch (error) {
+      console.error('사용자 목록 로드 실패:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleTeamChange = (teamId: number | null) => {
+    setSelectedTeamId(teamId);
+    loadUsers();
+  };
+
+  // 승인관리 함수들
+  const loadPendingScenarios = async () => {
+    setLoadingScenarios(true);
+    try {
+      const response = await scenarioApi.getAll();
+      if (response.success && response.data) {
+        // 승인 대기 중인 시나리오만 필터링
+        const pending = response.data.filter(
+          (scenario: any) =>
+            scenario.status === '승인대기' || scenario.status === '임시저장'
+        );
+        setPendingScenarios(pending);
+      }
+    } catch (error) {
+      console.error('승인 대기 시나리오 로드 실패:', error);
+    } finally {
+      setLoadingScenarios(false);
+    }
+  };
+
+  const approveScenario = async (scenarioId: number) => {
+    try {
+      const response = await scenarioApi.update(scenarioId, {
+        status: '활성화',
+        approvalComment: '관리자 승인 완료',
+      });
+
+      if (response.success) {
+        alert('시나리오가 승인되었습니다.');
+        loadPendingScenarios();
+      } else {
+        alert('시나리오 승인에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('시나리오 승인 실패:', error);
+      alert('시나리오 승인 중 오류가 발생했습니다.');
+    }
+  };
+
+  const rejectScenario = async (scenarioId: number) => {
+    const reason = prompt('거부 사유를 입력하세요:');
+    if (!reason) return;
+
+    try {
+      const response = await scenarioApi.update(scenarioId, {
+        status: '비활성화',
+        approvalComment: `거부 사유: ${reason}`,
+      });
+
+      if (response.success) {
+        alert('시나리오가 거부되었습니다.');
+        loadPendingScenarios();
+      } else {
+        alert('시나리오 거부에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('시나리오 거부 실패:', error);
+      alert('시나리오 거부 중 오류가 발생했습니다.');
     }
   };
 
@@ -490,10 +628,10 @@ const AdminPage: React.FC = () => {
               {/* 훈련 세션 관리 버튼들 */}
               <div className="flex flex-wrap gap-4 mt-8">
                 <Button
-                  onClick={() => setShowCreateSessionModal(true)}
+                  onClick={() => setShowCreateScenarioModal(true)}
                   className="bg-primary-600 hover:bg-primary-700"
                 >
-                  새 훈련 세션 생성
+                  새 시나리오 생성
                 </Button>
                 <Button
                   onClick={() => {
@@ -605,8 +743,8 @@ const AdminPage: React.FC = () => {
                   </Button>
                 </div>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  game-script-tool에서 생성한 JSON 파일을 업로드하거나, 기존
-                  JSON 파일을 DB와 동기화할 수 있습니다.
+                  시나리오 작성 도구를 통해서 생성한 JSON 파일을 업로드하거나,
+                  기존 JSON 파일을 DB와 동기화할 수 있습니다.
                 </p>
               </div>
 
@@ -617,7 +755,7 @@ const AdminPage: React.FC = () => {
                   시나리오 작성 도구
                 </h3>
                 <p className="mb-6 text-gray-600 dark:text-gray-400">
-                  game-script-tool을 사용하여 새로운 시나리오를 작성하세요.
+                  시나리오 작성 도구를 사용하여 새로운 시나리오를 작성하세요.
                 </p>
                 <Button
                   onClick={() => (window.location.href = '/admin/script-tool')}
@@ -663,34 +801,230 @@ const AdminPage: React.FC = () => {
 
           {activeTab === 'approval' && (
             <div className="p-6">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+              <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
                 승인 관리
               </h2>
-              <div className="py-12 text-center">
-                <div className="mb-4 text-6xl">⏳</div>
-                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                  승인 관리 시스템
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  승인 관리 기능이 개발 중입니다.
-                </p>
+
+              {/* 승인 대기 시나리오 목록 */}
+              <div className="bg-white rounded-lg shadow dark:bg-gray-800">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    승인 대기 시나리오
+                  </h3>
+                </div>
+                <div className="p-6">
+                  {loadingScenarios ? (
+                    <div className="py-8 text-center">
+                      <div className="inline-block w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
+                      <p className="mt-2 text-gray-600 dark:text-gray-400">
+                        승인 대기 시나리오를 불러오는 중...
+                      </p>
+                    </div>
+                  ) : pendingScenarios.length > 0 ? (
+                    <div className="space-y-4">
+                      {pendingScenarios.map(scenario => (
+                        <div
+                          key={scenario.id}
+                          className="p-4 border border-gray-200 rounded-lg dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                                {scenario.title}
+                              </h4>
+                              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                {scenario.description}
+                              </p>
+                              <div className="flex items-center mt-2 space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                                <span>재난 유형: {scenario.disasterType}</span>
+                                <span>위험도: {scenario.riskLevel}</span>
+                                <span>
+                                  상태:
+                                  <span
+                                    className={`ml-1 px-2 py-1 text-xs rounded-full ${
+                                      scenario.status === '승인대기'
+                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                                    }`}
+                                  >
+                                    {scenario.status}
+                                  </span>
+                                </span>
+                              </div>
+                              {scenario.occurrenceCondition && (
+                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                  <strong>발생 조건:</strong>{' '}
+                                  {scenario.occurrenceCondition}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex ml-4 space-x-2">
+                              <Button
+                                onClick={() => approveScenario(scenario.id)}
+                                className="px-3 py-1 text-sm text-white bg-green-600 hover:bg-green-700"
+                              >
+                                승인
+                              </Button>
+                              <Button
+                                onClick={() => rejectScenario(scenario.id)}
+                                className="px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-700"
+                              >
+                                거부
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <div className="mb-4 text-4xl">✅</div>
+                      <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                        승인 대기 시나리오가 없습니다
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        현재 승인을 기다리는 시나리오가 없습니다.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'users' && (
             <div className="p-6">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+              <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
                 사용자 관리
               </h2>
-              <div className="py-12 text-center">
-                <div className="mb-4 text-6xl">👥</div>
-                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                  사용자 관리 시스템
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  사용자 관리 기능이 개발 중입니다.
-                </p>
+
+              {/* 팀 필터 */}
+              <div className="mb-6">
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  팀 필터
+                </label>
+                <select
+                  value={selectedTeamId || ''}
+                  onChange={e =>
+                    handleTeamChange(
+                      e.target.value ? parseInt(e.target.value) : null
+                    )
+                  }
+                  className="w-full max-w-xs px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">모든 사용자</option>
+                  {teams.map(team => (
+                    <option key={team.id} value={team.id}>
+                      {team.name} ({team.teamCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 사용자 목록 */}
+              <div className="bg-white rounded-lg shadow dark:bg-gray-800">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    사용자 목록{' '}
+                    {selectedTeamId &&
+                      `(${teams.find(t => t.id === selectedTeamId)?.name})`}
+                  </h3>
+                </div>
+                <div className="p-6">
+                  {loadingUsers ? (
+                    <div className="py-8 text-center">
+                      <div className="inline-block w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
+                      <p className="mt-2 text-gray-600 dark:text-gray-400">
+                        사용자 목록을 불러오는 중...
+                      </p>
+                    </div>
+                  ) : users.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                              사용자
+                            </th>
+                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                              팀
+                            </th>
+                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                              이메일
+                            </th>
+                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                              가입일
+                            </th>
+                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                              상태
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                          {users.map(user => (
+                            <tr
+                              key={user.id}
+                              className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 w-10 h-10">
+                                    <div className="flex items-center justify-center w-10 h-10 font-medium text-white bg-blue-500 rounded-full">
+                                      {user.name?.charAt(0) || 'U'}
+                                    </div>
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {user.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                      {user.loginId}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                  {user.team?.name || '팀 없음'}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {user.team?.teamCode || '-'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
+                                {user.email}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
+                                {user.createdAt
+                                  ? new Date(
+                                      user.createdAt
+                                    ).toLocaleDateString()
+                                  : '-'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-200">
+                                  활성
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <div className="mb-4 text-4xl">👥</div>
+                      <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                        사용자가 없습니다
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {selectedTeamId
+                          ? '선택한 팀에 사용자가 없습니다.'
+                          : '등록된 사용자가 없습니다.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -777,36 +1111,36 @@ const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {/* 훈련 세션 생성 모달 */}
-        {showCreateSessionModal && (
+        {/* 시나리오 생성 모달 */}
+        {showCreateScenarioModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+            <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
               <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                새 훈련 세션 생성
+                새 시나리오 생성
               </h3>
 
               <div className="space-y-4">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    세션 이름 *
+                    시나리오 제목 *
                   </label>
                   <input
                     type="text"
-                    value={newSessionName}
-                    onChange={e => setNewSessionName(e.target.value)}
-                    placeholder="세션 이름을 입력하세요"
+                    value={newScenarioTitle}
+                    onChange={e => setNewScenarioTitle(e.target.value)}
+                    placeholder="시나리오 제목을 입력하세요"
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    세션 설명
+                    시나리오 설명
                   </label>
                   <textarea
-                    value={newSessionDescription}
-                    onChange={e => setNewSessionDescription(e.target.value)}
-                    placeholder="세션 설명을 입력하세요"
+                    value={newScenarioDescription}
+                    onChange={e => setNewScenarioDescription(e.target.value)}
+                    placeholder="시나리오 설명을 입력하세요"
                     rows={3}
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -814,35 +1148,63 @@ const AdminPage: React.FC = () => {
 
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    시나리오 유형 *
+                    재난 유형 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newScenarioDisasterType}
+                    onChange={e => setNewScenarioDisasterType(e.target.value)}
+                    placeholder="재난 유형을 입력하세요 (예: 화재, 지진, 홍수, 테러 등)"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    위험도 *
                   </label>
                   <select
-                    value={selectedScenario}
-                    onChange={e => setSelectedScenario(e.target.value)}
+                    value={newScenarioRiskLevel}
+                    onChange={e => setNewScenarioRiskLevel(e.target.value)}
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">시나리오를 선택하세요</option>
-                    <option value="fire">화재</option>
-                    <option value="earthquake">지진</option>
-                    <option value="first-aid">응급처치</option>
-                    <option value="traffic-accident">교통사고</option>
+                    <option value="">위험도를 선택하세요</option>
+                    <option value="LOW">낮음</option>
+                    <option value="MEDIUM">보통</option>
+                    <option value="HIGH">높음</option>
+                    <option value="VERY_HIGH">매우 높음</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    발생 조건
+                  </label>
+                  <input
+                    type="text"
+                    value={newScenarioOccurrenceCondition}
+                    onChange={e =>
+                      setNewScenarioOccurrenceCondition(e.target.value)
+                    }
+                    placeholder="발생 조건을 입력하세요 (선택사항)"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 mt-6">
                 <Button
-                  onClick={() => setShowCreateSessionModal(false)}
+                  onClick={() => setShowCreateScenarioModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
                 >
                   취소
                 </Button>
                 <Button
-                  onClick={createTrainingSession}
-                  disabled={creatingSession}
+                  onClick={createScenario}
+                  disabled={creatingScenario}
                   className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {creatingSession ? '생성 중...' : '생성'}
+                  {creatingScenario ? '생성 중...' : '생성'}
                 </Button>
               </div>
             </div>

@@ -43,7 +43,7 @@ export function useTrainingResult() {
         const sessionId = (session.data as any)?.id;
         const resultData = {
           sessionId,
-          participantId: user.id,
+          // participantId는 제거 - 서버에서 자동으로 생성하도록 함
           scenarioId: scenarioIdMap[opts.scenarioType || 'fire'] || 1,
           userId: user.id,
           resultCode: `RESULT${Date.now()}`,

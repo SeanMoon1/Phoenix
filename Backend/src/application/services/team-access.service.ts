@@ -13,9 +13,15 @@ export class TeamAccessService {
     targetTeamId: number | null,
     requiredPermissions: string[] = [],
   ): boolean {
-    // 팀이 없는 사용자는 접근 불가
+    // 팀이 없는 사용자는 개인 데이터에만 접근 가능
     if (!userTeamId) {
-      throw new ForbiddenException('팀에 소속되지 않은 사용자입니다.');
+      // 개인 데이터 접근은 허용 (targetTeamId가 null이거나 개인 데이터인 경우)
+      if (!targetTeamId) {
+        return true;
+      }
+      throw new ForbiddenException(
+        '팀에 소속되지 않은 사용자는 팀 데이터에 접근할 수 없습니다.',
+      );
     }
 
     // 같은 팀이 아니면 접근 불가

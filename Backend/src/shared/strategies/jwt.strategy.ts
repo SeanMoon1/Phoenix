@@ -23,14 +23,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       teamId: payload.teamId,
       adminLevel: payload.adminLevel,
       isAdmin: payload.isAdmin,
+      sub: payload.sub, // sub 필드도 확인
       iat: payload.iat,
       exp: payload.exp,
     });
 
+    // id가 없으면 sub 필드를 사용 (호환성)
+    const userId = payload.id || payload.sub;
+
     // 관리자인 경우와 일반 사용자인 경우를 구분하여 처리
     const user = {
-      id: payload.id,
-      userId: payload.id, // 호환성을 위해 userId도 설정
+      id: userId,
+      userId: userId, // 호환성을 위해 userId도 설정
       loginId: payload.loginId,
       username: payload.loginId, // 호환성을 위해 username도 설정
       name: payload.name,

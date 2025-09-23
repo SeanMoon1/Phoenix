@@ -40,7 +40,16 @@ export class AuthService {
   async login(user: any) {
     console.log('🔑 로그인 처리 시작:', { userId: user.id, email: user.email });
 
-    const payload = { email: user.email, sub: user.id };
+    const payload = {
+      id: user.id,
+      loginId: user.loginId,
+      name: user.name,
+      email: user.email,
+      teamId: user.teamId,
+      adminLevel: null, // 일반 사용자는 관리자 레벨 없음
+      isAdmin: false, // 일반 사용자는 관리자 아님
+      sub: user.id, // 호환성을 위해 유지
+    };
     const accessToken = this.jwtService.sign(payload);
 
     const response = {
@@ -249,7 +258,16 @@ export class AuthService {
         email: user.email,
       });
       try {
-        const payload = { email: user.email, sub: user.id };
+        const payload = {
+          id: user.id,
+          loginId: user.loginId,
+          name: user.name,
+          email: user.email,
+          teamId: user.teamId,
+          adminLevel: null, // 일반 사용자는 관리자 레벨 없음
+          isAdmin: false, // 일반 사용자는 관리자 아님
+          sub: user.id, // 호환성을 위해 유지
+        };
         const accessToken = this.jwtService.sign(payload);
         console.log('🔑 JWT 토큰 생성 완료');
 

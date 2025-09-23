@@ -253,4 +253,45 @@ export class AdminService {
       throw error;
     }
   }
+
+  async updateAdminLevel(loginId: string, adminLevelId: number): Promise<any> {
+    try {
+      console.log(`🔧 관리자 권한 수정 시작: ${loginId} -> ${adminLevelId}`);
+
+      // 관리자 계정 조회
+      const admin = await this.adminRepository.findOne({
+        where: { loginId, isActive: true },
+      });
+
+      if (!admin) {
+        throw new NotFoundException('관리자 계정을 찾을 수 없습니다.');
+      }
+
+      // 권한 레벨 존재 확인
+      const adminLevel = await this.adminLevelRepository.findOne({
+        where: { id: adminLevelId, isActive: true },
+      });
+
+      if (!adminLevel) {
+        throw new NotFoundException('존재하지 않는 권한 레벨입니다.');
+      }
+
+      // 권한 수정
+      await this.adminRepository.update({ id: admin.id }, { adminLevelId });
+
+      console.log(
+        `✅ 관리자 권한 수정 완료: ${loginId} -> ${adminLevel.levelCode}`,
+      );
+
+      return {
+        adminId: admin.id,
+        loginId: admin.loginId,
+        newLevel: adminLevel.levelCode,
+        newLevelName: adminLevel.levelName,
+      };
+    } catch (error) {
+      console.error('❌ 관리자 권한 수정 실패:', error);
+      throw error;
+    }
+  }
 }

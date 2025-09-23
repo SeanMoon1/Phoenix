@@ -26,7 +26,8 @@
     "migration:run": "npm run typeorm -- migration:run -d ormconfig.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d ormconfig.ts",
     "schema:drop": "npm run typeorm -- schema:drop -d ormconfig.ts",
-    "schema:sync": "npm run typeorm -- schema:sync -d ormconfig.ts"
+    "schema:sync": "npm run typeorm -- schema:sync -d ormconfig.ts",
+    "fix-admin": "node scripts/fix-admin-permissions.js"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.893.0",

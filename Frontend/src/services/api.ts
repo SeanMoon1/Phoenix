@@ -790,6 +790,14 @@ export const adminApi = {
   },
 
   /**
+   * 관리자 권한 수정 (개발용)
+   * @returns 권한 수정 결과
+   */
+  fixAdminPermissions: async () => {
+    return api.post('/admin/fix-permissions');
+  },
+
+  /**
    * 새 훈련 세션 생성
    * @param sessionData 훈련 세션 생성 데이터
    * @returns 생성된 훈련 세션 정보

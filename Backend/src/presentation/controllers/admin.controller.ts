@@ -237,4 +237,61 @@ export class AdminController {
       return { success: false, error: error.message };
     }
   }
+
+  @Post('fix-permissions')
+  @ApiOperation({ summary: '관리자 권한 수정 (개발용)' })
+  @ApiResponse({ status: 200, description: '권한 수정 성공' })
+  async fixAdminPermissions(@Req() req: any) {
+    try {
+      const user = req.user;
+
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      // 슈퍼 관리자만 이 기능 사용 가능
+      if (user.adminLevel !== 'SUPER_ADMIN') {
+        return {
+          success: false,
+          error: '권한 수정 기능은 슈퍼 관리자만 사용할 수 있습니다.',
+        };
+      }
+
+      // 초기 관리자 계정을 SUPER_ADMIN으로 수정
+      const initialAdminLoginId = process.env.INITIAL_ADMIN_LOGIN_ID;
+      if (!initialAdminLoginId) {
+        return {
+          success: false,
+          error: 'INITIAL_ADMIN_LOGIN_ID 환경변수가 설정되지 않았습니다.',
+        };
+      }
+
+      // SUPER_ADMIN 권한 레벨 ID 조회
+      const superAdminLevel = await this.adminService.getAdminLevels();
+      const superAdminLevelData = superAdminLevel.find(
+        (level) => level.levelCode === 'SUPER_ADMIN',
+      );
+
+      if (!superAdminLevelData) {
+        return {
+          success: false,
+          error: 'SUPER_ADMIN 권한 레벨을 찾을 수 없습니다.',
+        };
+      }
+
+      // 관리자 권한 수정 (직접 SQL 실행)
+      const result = await this.adminService.updateAdminLevel(
+        initialAdminLoginId,
+        superAdminLevelData.id,
+      );
+
+      return {
+        success: true,
+        data: result,
+        message: `관리자 권한이 SUPER_ADMIN으로 수정되었습니다: ${initialAdminLoginId}`,
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
 }

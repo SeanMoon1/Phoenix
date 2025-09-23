@@ -422,6 +422,30 @@ const AdminPage: React.FC = () => {
     loadUsers();
   };
 
+  // 관리자 권한 수정 핸들러
+  const handleFixPermissions = async () => {
+    if (
+      !confirm('초기 관리자 계정의 권한을 SUPER_ADMIN으로 수정하시겠습니까?')
+    ) {
+      return;
+    }
+
+    try {
+      const response = await adminApi.fixAdminPermissions();
+      if (response.success) {
+        alert(
+          '관리자 권한이 성공적으로 수정되었습니다!\n\n페이지를 새로고침하여 변경사항을 확인하세요.'
+        );
+        window.location.reload();
+      } else {
+        alert(`권한 수정에 실패했습니다: ${response.error}`);
+      }
+    } catch (error) {
+      console.error('권한 수정 실패:', error);
+      alert('권한 수정 중 오류가 발생했습니다.');
+    }
+  };
+
   // 승인관리 함수들
   const loadPendingScenarios = async () => {
     setLoadingScenarios(true);
@@ -851,12 +875,18 @@ const AdminPage: React.FC = () => {
 
               {/* 팀 생성 버튼 - 슈퍼 관리자만 접근 가능 */}
               {user?.adminLevel === 'SUPER_ADMIN' && (
-                <div className="mb-6">
+                <div className="flex mb-6 space-x-4">
                   <Button
                     onClick={() => setShowCreateTeamModal(true)}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     새 팀 생성
+                  </Button>
+                  <Button
+                    onClick={handleFixPermissions}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    관리자 권한 수정
                   </Button>
                 </div>
               )}
@@ -892,7 +922,7 @@ const AdminPage: React.FC = () => {
                                     팀 코드:
                                   </span>
                                   <div className="flex items-center space-x-2">
-                                    <code className="px-2 py-1 text-sm font-mono bg-gray-100 text-gray-800 rounded dark:bg-gray-700 dark:text-gray-200">
+                                    <code className="px-2 py-1 font-mono text-sm text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-200">
                                       {team.teamCode}
                                     </code>
                                     <button
@@ -1065,7 +1095,7 @@ const AdminPage: React.FC = () => {
               {/* 팀 관리자에게는 현재 팀 정보 표시 */}
               {user?.adminLevel === 'TEAM_ADMIN' && user?.teamId && (
                 <div className="mb-6">
-                  <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
                       <strong>현재 팀:</strong>{' '}
                       {teams.find(t => t.id === user.teamId)?.name ||

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -62,11 +70,49 @@ export class TrainingResultController {
   @ApiOperation({ summary: '사용자별 훈련 결과 조회' })
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 200, description: '사용자 훈련 결과 목록' })
-  async getTrainingResultsByUser(@Param('userId') userId: number) {
+  async getTrainingResultsByUser(
+    @Param('userId') userId: number,
+    @Req() req: any,
+  ) {
     try {
-      const results =
-        await this.trainingResultService.getTrainingResultsByUser(userId);
-      return { success: true, data: results };
+      const user = req.user;
+
+      // 권한 체크: 본인 또는 팀 관리자만 조회 가능
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      // 본인의 결과인 경우 (팀과 관계없이 조회 가능)
+      if (user.id === userId) {
+        const results =
+          await this.trainingResultService.getTrainingResultsByUser(userId);
+        return { success: true, data: results };
+      }
+
+      // 슈퍼 관리자인 경우 모든 사용자 결과 조회 가능
+      if (user.adminLevel === 'SUPER_ADMIN') {
+        const results =
+          await this.trainingResultService.getTrainingResultsByUser(userId);
+        return { success: true, data: results };
+      }
+
+      // 팀 관리자인 경우 팀원의 결과만 조회 가능
+      if (user.adminLevel === 'TEAM_ADMIN' && user.teamId) {
+        // 요청한 사용자가 같은 팀에 속하는지 확인
+        const targetUser = await this.trainingResultService.getUserById(userId);
+        if (targetUser && targetUser.teamId === user.teamId) {
+          const results =
+            await this.trainingResultService.getTrainingResultsByUser(userId);
+          return { success: true, data: results };
+        } else {
+          return {
+            success: false,
+            error: '해당 사용자의 훈련 결과 조회 권한이 없습니다.',
+          };
+        }
+      }
+
+      return { success: false, error: '훈련 결과 조회 권한이 없습니다.' };
     } catch (error) {
       return { success: false, error: error.message };
     }

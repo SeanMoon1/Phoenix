@@ -117,12 +117,36 @@ export const apiRequest = async <T>(
   config: AxiosRequestConfig
 ): Promise<ApiResponse<T>> => {
   try {
+    console.log('📤 API 요청 시작:', {
+      url: config.url,
+      method: config.method?.toUpperCase(),
+    });
+
     const response = await apiClient(config);
+
+    console.log('📥 API 응답 수신:', {
+      url: config.url,
+      success: response.data?.success,
+      dataLength: Array.isArray(response.data?.data)
+        ? response.data.data.length
+        : 'not array',
+      error: response.data?.error,
+    });
+
     return response.data;
   } catch (error: any) {
+    console.error('❌ API 요청 실패:', {
+      url: config.url,
+      method: config.method?.toUpperCase(),
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data,
+    });
+
     return {
       success: false,
       error:
+        error.response?.data?.error ||
         error.response?.data?.message ||
         error.message ||
         '알 수 없는 오류가 발생했습니다.',

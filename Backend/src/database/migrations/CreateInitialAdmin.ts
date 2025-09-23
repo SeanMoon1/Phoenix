@@ -110,14 +110,31 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
       return;
     }
 
-    // 4. 관리자가 이미 존재하는지 확인
+    // 4. 관리자 계정 확인 및 권한 업데이트
     console.log('🔍 기존 관리자 계정 확인 중...');
-    const adminExists = await queryRunner.query(
-      `SELECT COUNT(*) as count FROM admin WHERE login_id = ?`,
+    const existingAdmin = await queryRunner.query(
+      `SELECT admin_id, admin_level_id, al.level_code FROM admin a LEFT JOIN admin_level al ON a.admin_level_id = al.level_id WHERE a.login_id = ? AND a.is_active = 1`,
       [adminLoginId],
     );
 
-    if (adminExists[0].count === 0) {
+    if (existingAdmin && existingAdmin.length > 0) {
+      const admin = existingAdmin[0];
+      console.log(`📊 기존 관리자 권한: ${admin.level_code}`);
+
+      // SUPER_ADMIN 권한이 아니면 업데이트
+      if (admin.level_code !== 'SUPER_ADMIN') {
+        console.log('🔧 관리자 권한을 SUPER_ADMIN으로 업데이트 중...');
+        await queryRunner.query(
+          `UPDATE admin SET admin_level_id = (SELECT level_id FROM admin_level WHERE level_code = 'SUPER_ADMIN' LIMIT 1) WHERE admin_id = ?`,
+          [admin.admin_id],
+        );
+        console.log(
+          `✅ 관리자 권한 업데이트 완료: ${adminLoginId} -> SUPER_ADMIN`,
+        );
+      } else {
+        console.log(`ℹ️ 관리자 권한이 이미 SUPER_ADMIN입니다: ${adminLoginId}`);
+      }
+    } else {
       console.log('📝 새 관리자 계정 생성 중...');
 
       // 5. 비밀번호 해싱
@@ -146,8 +163,6 @@ export class CreateInitialAdmin1700000000002 implements MigrationInterface {
       );
 
       console.log(`✅ 초기 관리자 계정 생성 완료: ${adminLoginId}`);
-    } else {
-      console.log(`ℹ️ 관리자 계정이 이미 존재합니다: ${adminLoginId}`);
     }
   }
 

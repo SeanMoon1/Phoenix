@@ -34,6 +34,8 @@ const MyPage: React.FC = () => {
       setError(null);
 
       try {
+        console.log('🔍 사용자 데이터 로딩 시작:', { userId: user.id });
+
         // 병렬로 데이터 가져오기
         const [recordsResponse, statsResponse, scenarioResponse] =
           await Promise.all([
@@ -42,19 +44,48 @@ const MyPage: React.FC = () => {
             myPageApi.getScenarioStatistics(user.id),
           ]);
 
+        console.log('📊 API 응답 결과:', {
+          records: recordsResponse,
+          stats: statsResponse,
+          scenario: scenarioResponse,
+        });
+
+        // 훈련 기록 처리
         if (recordsResponse.success) {
+          console.log(
+            '✅ 훈련 기록 로딩 성공:',
+            recordsResponse.data?.length || 0
+          );
           setTrainingRecords(recordsResponse.data || []);
+        } else {
+          console.error('❌ 훈련 기록 로딩 실패:', recordsResponse.error);
+          setError(
+            `훈련 기록을 불러오는데 실패했습니다: ${recordsResponse.error}`
+          );
         }
 
+        // 훈련 통계 처리
         if (statsResponse.success) {
+          console.log('✅ 훈련 통계 로딩 성공:', statsResponse.data);
           setTrainingStats(statsResponse.data || null);
+        } else {
+          console.error('❌ 훈련 통계 로딩 실패:', statsResponse.error);
+          // 통계 로딩 실패는 에러로 처리하지 않음 (기록이 없을 수 있음)
         }
 
+        // 시나리오 통계 처리
         if (scenarioResponse.success) {
+          console.log(
+            '✅ 시나리오 통계 로딩 성공:',
+            scenarioResponse.data?.length || 0
+          );
           setScenarioStats(scenarioResponse.data || []);
+        } else {
+          console.error('❌ 시나리오 통계 로딩 실패:', scenarioResponse.error);
+          // 시나리오 통계 로딩 실패는 에러로 처리하지 않음
         }
       } catch (err) {
-        console.error('사용자 데이터 로딩 실패:', err);
+        console.error('❌ 사용자 데이터 로딩 실패:', err);
         setError('데이터를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
@@ -190,6 +221,14 @@ const MyPage: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   훈련을 시작해보세요!
                 </p>
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                    💡 훈련을 완료하면 여기에 기록이 표시됩니다.
+                  </p>
+                  <p className="text-xs text-blue-500 dark:text-blue-300 mt-1">
+                    팀에 소속되지 않아도 개인 훈련 기록을 확인할 수 있습니다.
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
@@ -227,6 +266,11 @@ const MyPage: React.FC = () => {
                           속도: {record.speedScore}점
                         </span>
                       </div>
+                      {record.feedback && (
+                        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300">
+                          💬 {record.feedback}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

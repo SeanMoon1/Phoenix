@@ -3,6 +3,7 @@ import { TrainingResult } from '../../domain/entities/training-result.entity';
 import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
 import { TrainingParticipant } from '../../domain/entities/training-participant.entity';
 import { TrainingSession } from '../../domain/entities/training-session.entity';
+import { User } from '../../domain/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserExpService } from './user-exp.service';
@@ -99,11 +100,21 @@ export class TrainingResultService {
 
       const results = await this.trainingResultRepository.find({
         where: { userId, isActive: true },
-        relations: ['session', 'scenario', 'user'],
+        relations: ['session', 'scenario', 'user', 'participant'],
         order: { completedAt: 'DESC' },
       });
 
-      console.log('✅ 사용자 훈련 결과 조회 완료:', { count: results.length });
+      console.log('✅ 사용자 훈련 결과 조회 완료:', {
+        userId,
+        count: results.length,
+        results: results.map((r) => ({
+          id: r.id,
+          sessionId: r.sessionId,
+          scenarioId: r.scenarioId,
+          totalScore: r.totalScore,
+          completedAt: r.completedAt,
+        })),
+      });
       return results;
     } catch (error) {
       console.error('❌ 사용자 훈련 결과 조회 실패:', error);
@@ -142,9 +153,11 @@ export class TrainingResultService {
 
       if (results.length === 0) {
         return {
+          totalTrainings: 0, // 프론트엔드 호환성을 위해 추가
           totalSessions: 0,
           totalScore: 0,
           averageScore: 0,
+          bestScore: 0, // 최고 점수 추가
           completedScenarios: 0,
           averageAccuracy: 0,
           averageSpeed: 0,
@@ -168,9 +181,11 @@ export class TrainingResultService {
       const lastTrainingDate = results[0]?.completedAt || null;
 
       const statistics = {
+        totalTrainings: totalSessions, // 프론트엔드 호환성을 위해 추가
         totalSessions,
         totalScore,
         averageScore: Math.round(averageScore * 100) / 100,
+        bestScore: Math.max(...results.map((r) => r.totalScore || 0)), // 최고 점수 추가
         completedScenarios,
         averageAccuracy: Math.round(averageAccuracy * 100) / 100,
         averageSpeed: Math.round(averageSpeed * 100) / 100,
@@ -331,21 +346,57 @@ export class TrainingResultService {
 
       // 팀에 속한 사용자들의 결과만 필터링
       const teamResults = results.filter((result) => {
-        // 세션의 팀 ID 또는 참가자의 팀 ID가 일치하는 경우
-        return (
-          result.session?.teamId === teamId ||
-          result.participant?.teamId === teamId
-        );
+        // 사용자의 팀 ID가 일치하는 경우 (가장 중요한 조건)
+        if (result.user?.teamId === teamId) {
+          return true;
+        }
+
+        // 세션의 팀 ID가 일치하는 경우
+        if (result.session?.teamId === teamId) {
+          return true;
+        }
+
+        // 참가자의 팀 ID가 일치하는 경우
+        if (result.participant?.teamId === teamId) {
+          return true;
+        }
+
+        return false;
       });
 
       console.log('✅ 팀별 훈련 결과 조회 완료:', {
         teamId,
         totalResults: results.length,
         teamResults: teamResults.length,
+        teamResultsDetails: teamResults.map((r) => ({
+          id: r.id,
+          userId: r.userId,
+          sessionTeamId: r.session?.teamId,
+          participantTeamId: r.participant?.teamId,
+          userTeamId: r.user?.teamId,
+          totalScore: r.totalScore,
+        })),
       });
       return teamResults;
     } catch (error) {
       console.error('❌ 팀별 훈련 결과 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 사용자 정보 조회
+   * @param userId 사용자 ID
+   * @returns 사용자 정보
+   */
+  async getUserById(userId: number): Promise<any> {
+    try {
+      const user = await this.trainingResultRepository.manager.findOne(User, {
+        where: { id: userId, isActive: true },
+      });
+      return user;
+    } catch (error) {
+      console.error('❌ 사용자 정보 조회 실패:', error);
       throw error;
     }
   }

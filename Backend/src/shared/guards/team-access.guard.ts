@@ -35,8 +35,16 @@ export class TeamAccessGuard implements CanActivate {
     // 요청에서 팀 ID 추출 (URL 파라미터, 쿼리, 또는 바디에서)
     const requestedTeamId = this.extractTeamIdFromRequest(request);
 
+    // 팀 관리자 권한 확인
+    const isTeamAdmin =
+      user.isAdmin &&
+      (user.adminLevel === 'TEAM_ADMIN' || user.adminLevel === 'SUPER_ADMIN');
+
     if (requestedTeamId && requestedTeamId !== userTeamId) {
-      throw new ForbiddenException('다른 팀의 데이터에 접근할 수 없습니다.');
+      // 팀 관리자는 다른 팀의 데이터도 조회 가능 (관리 목적)
+      if (!isTeamAdmin) {
+        throw new ForbiddenException('다른 팀의 데이터에 접근할 수 없습니다.');
+      }
     }
 
     return true;

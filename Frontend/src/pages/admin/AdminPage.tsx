@@ -94,14 +94,26 @@ const AdminPage: React.FC = () => {
     );
   }
 
-  const tabs = [
-    { id: 'training', label: '훈련 관리', icon: '🎯' },
-    { id: 'teams', label: '팀 관리', icon: '👥' },
-    { id: 'scripts', label: '시나리오 관리', icon: '📝' },
-    { id: 'approval', label: '승인 관리', icon: '✅' },
-    { id: 'users', label: '사용자 관리', icon: '👤' },
-    { id: 'admins', label: '관리자', icon: '👨‍💼' },
-  ];
+  // 권한에 따른 탭 필터링
+  const getAvailableTabs = () => {
+    const allTabs = [
+      { id: 'training', label: '훈련 관리', icon: '🎯' },
+      { id: 'teams', label: '팀 관리', icon: '👥' },
+      { id: 'scripts', label: '시나리오 관리', icon: '📝' },
+      { id: 'approval', label: '승인 관리', icon: '✅' },
+      { id: 'users', label: '사용자 관리', icon: '👤' },
+      { id: 'admins', label: '관리자', icon: '👨‍💼' },
+    ];
+
+    // 슈퍼 관리자만 관리자 탭 접근 가능
+    if (user?.adminLevel !== 'SUPER_ADMIN') {
+      return allTabs.filter(tab => tab.id !== 'admins');
+    }
+
+    return allTabs;
+  };
+
+  const tabs = getAvailableTabs();
 
   // 팀 통계 로드 (관리자는 teamId가 없을 수 있음)
   useEffect(() => {
@@ -345,8 +357,28 @@ const AdminPage: React.FC = () => {
   // 사용자 관리 함수들
   const loadTeams = async () => {
     try {
-      const response = await adminApi.getTeams();
-      if (response.success && response.data) {
+      let response;
+
+      if (user?.adminLevel === 'SUPER_ADMIN') {
+        // 슈퍼 관리자: 모든 팀 조회 가능
+        response = await adminApi.getTeams();
+      } else if (user?.adminLevel === 'TEAM_ADMIN' && user?.teamId) {
+        // 팀 관리자: 본인 팀만 조회 가능
+        const allTeams = await adminApi.getTeams();
+        if (allTeams.success && allTeams.data) {
+          const userTeam = allTeams.data.filter(
+            team => team.id === user.teamId
+          );
+          setTeams(userTeam);
+          return;
+        }
+      } else {
+        // 일반 사용자: 접근 불가
+        setTeams([]);
+        return;
+      }
+
+      if (response?.success && response.data) {
         setTeams(response.data);
       }
     } catch (error) {
@@ -817,15 +849,17 @@ const AdminPage: React.FC = () => {
                 팀 관리
               </h2>
 
-              {/* 팀 생성 버튼 */}
-              <div className="mb-6">
-                <Button
-                  onClick={() => setShowCreateTeamModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  새 팀 생성
-                </Button>
-              </div>
+              {/* 팀 생성 버튼 - 슈퍼 관리자만 접근 가능 */}
+              {user?.adminLevel === 'SUPER_ADMIN' && (
+                <div className="mb-6">
+                  <Button
+                    onClick={() => setShowCreateTeamModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    새 팀 생성
+                  </Button>
+                </div>
+              )}
 
               {/* 팀 목록 */}
               <div className="bg-white rounded-lg shadow dark:bg-gray-800">

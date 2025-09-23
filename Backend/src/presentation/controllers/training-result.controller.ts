@@ -11,6 +11,8 @@ import { TrainingResult } from '../../domain/entities/training-result.entity';
 import { CreateTrainingResultDto } from '../dto/create-training-result.dto';
 import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { TeamAccessGuard } from '../../shared/guards/team-access.guard';
+import { TeamAccess } from '../../shared/decorators/team-access.decorator';
 
 @ApiTags('Training Results')
 @Controller('training-results')
@@ -108,5 +110,21 @@ export class TrainingResultController {
   })
   async createUserChoiceLog(@Body() data: Partial<UserChoiceLog>) {
     return this.trainingResultService.createUserChoiceLog(data);
+  }
+
+  @Get('team/:teamId')
+  @ApiOperation({ summary: '팀별 훈련 결과 조회 (팀 관리자용)' })
+  @ApiParam({ name: 'teamId', description: '팀 ID' })
+  @ApiResponse({ status: 200, description: '팀 훈련 결과 목록' })
+  @UseGuards(TeamAccessGuard)
+  @TeamAccess('VIEW_RESULTS')
+  async getTrainingResultsByTeam(@Param('teamId') teamId: number) {
+    try {
+      const results =
+        await this.trainingResultService.getTrainingResultsByTeam(teamId);
+      return { success: true, data: results };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 }

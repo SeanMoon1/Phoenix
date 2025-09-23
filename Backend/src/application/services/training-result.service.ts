@@ -315,6 +315,42 @@ export class TrainingResultService {
   }
 
   /**
+   * 팀별 훈련 결과 조회 (팀 관리자용)
+   * @param teamId 팀 ID
+   * @returns 팀 훈련 결과 목록
+   */
+  async getTrainingResultsByTeam(teamId: number): Promise<TrainingResult[]> {
+    try {
+      console.log('🔍 팀별 훈련 결과 조회:', { teamId });
+
+      const results = await this.trainingResultRepository.find({
+        where: { isActive: true },
+        relations: ['session', 'scenario', 'user', 'participant'],
+        order: { completedAt: 'DESC' },
+      });
+
+      // 팀에 속한 사용자들의 결과만 필터링
+      const teamResults = results.filter((result) => {
+        // 세션의 팀 ID 또는 참가자의 팀 ID가 일치하는 경우
+        return (
+          result.session?.teamId === teamId ||
+          result.participant?.teamId === teamId
+        );
+      });
+
+      console.log('✅ 팀별 훈련 결과 조회 완료:', {
+        teamId,
+        totalResults: results.length,
+        teamResults: teamResults.length,
+      });
+      return teamResults;
+    } catch (error) {
+      console.error('❌ 팀별 훈련 결과 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 점수를 기반으로 경험치 계산
    * @param totalScore 총 점수
    * @returns 계산된 경험치

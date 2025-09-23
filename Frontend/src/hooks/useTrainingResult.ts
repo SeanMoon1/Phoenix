@@ -37,6 +37,7 @@ export function useTrainingResult() {
           endTime: new Date().toISOString(),
           status: 'completed',
           createdBy: user.id,
+          teamId: user.teamId || null, // 사용자의 팀 ID 추가 (없으면 null)
         };
         const session = await trainingApi.createSession(sessionData as any);
         const sessionId = (session.data as any)?.id;

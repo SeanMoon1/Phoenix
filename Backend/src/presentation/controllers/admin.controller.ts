@@ -60,8 +60,19 @@ export class AdminController {
   @Get('admins')
   @ApiOperation({ summary: '관리자 목록 조회' })
   @ApiResponse({ status: 200, description: '관리자 목록 조회 성공' })
-  async getAdmins(@Query('teamId') teamId?: number) {
+  async getAdmins(@Query('teamId') teamId?: number, @Req() req?: any) {
     try {
+      const user = req?.user;
+
+      // 슈퍼 관리자만 관리자 목록 조회 가능
+      if (!user || user.adminLevel !== 'SUPER_ADMIN') {
+        return {
+          success: false,
+          error:
+            '관리자 목록 조회 권한이 없습니다. 슈퍼 관리자만 접근 가능합니다.',
+        };
+      }
+
       const admins = await this.adminService.getAdmins(teamId);
       return { success: true, data: admins };
     } catch (error) {
@@ -88,9 +99,19 @@ export class AdminController {
   @ApiBody({ type: CreateAdminDto })
   async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req: any) {
     try {
+      const user = req.user;
+
+      // 슈퍼 관리자만 관리자 생성 가능
+      if (!user || user.adminLevel !== 'SUPER_ADMIN') {
+        return {
+          success: false,
+          error: '관리자 생성 권한이 없습니다. 슈퍼 관리자만 접근 가능합니다.',
+        };
+      }
+
       const admin = await this.adminService.createAdmin({
         ...createAdminDto,
-        createdBy: req.user.id, // JWT에서 사용자 ID 추출
+        createdBy: user.id, // JWT에서 사용자 ID 추출
       });
       return { success: true, data: admin };
     } catch (error) {
@@ -103,8 +124,18 @@ export class AdminController {
   @ApiResponse({ status: 201, description: '팀 생성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
   @ApiBody({ type: CreateTeamDto })
-  async createTeam(@Body() createTeamDto: CreateTeamDto) {
+  async createTeam(@Body() createTeamDto: CreateTeamDto, @Req() req: any) {
     try {
+      const user = req.user;
+
+      // 슈퍼 관리자만 팀 생성 가능
+      if (!user || user.adminLevel !== 'SUPER_ADMIN') {
+        return {
+          success: false,
+          error: '팀 생성 권한이 없습니다. 슈퍼 관리자만 접근 가능합니다.',
+        };
+      }
+
       const team = await this.teamsService.create(createTeamDto);
       return {
         success: true,
@@ -123,9 +154,26 @@ export class AdminController {
   @Get('teams')
   @ApiOperation({ summary: '모든 팀 조회 (관리자)' })
   @ApiResponse({ status: 200, description: '팀 목록 조회 성공' })
-  async getTeams() {
+  async getTeams(@Req() req: any) {
     try {
-      const teams = await this.teamsService.findAll();
+      const user = req.user;
+
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      let teams;
+      if (user.adminLevel === 'SUPER_ADMIN') {
+        // 슈퍼 관리자: 모든 팀 조회 가능
+        teams = await this.teamsService.findAll();
+      } else if (user.adminLevel === 'TEAM_ADMIN' && user.teamId) {
+        // 팀 관리자: 본인 팀만 조회 가능
+        const allTeams = await this.teamsService.findAll();
+        teams = allTeams.filter((team) => team.id === user.teamId);
+      } else {
+        return { success: false, error: '팀 조회 권한이 없습니다.' };
+      }
+
       return { success: true, data: teams };
     } catch (error) {
       return { success: false, error: error.message };
@@ -135,9 +183,25 @@ export class AdminController {
   @Get('users')
   @ApiOperation({ summary: '모든 사용자 조회 (관리자)' })
   @ApiResponse({ status: 200, description: '사용자 목록 조회 성공' })
-  async getUsers() {
+  async getUsers(@Req() req: any) {
     try {
-      const users = await this.usersService.getAllUsers();
+      const user = req.user;
+
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      let users;
+      if (user.adminLevel === 'SUPER_ADMIN') {
+        // 슈퍼 관리자: 모든 사용자 조회 가능
+        users = await this.usersService.getAllUsers();
+      } else if (user.adminLevel === 'TEAM_ADMIN' && user.teamId) {
+        // 팀 관리자: 본인 팀의 사용자만 조회 가능
+        users = await this.usersService.getUsersByTeam(user.teamId);
+      } else {
+        return { success: false, error: '사용자 조회 권한이 없습니다.' };
+      }
+
       return { success: true, data: users };
     } catch (error) {
       return { success: false, error: error.message };
@@ -147,8 +211,26 @@ export class AdminController {
   @Get('users/team/:teamId')
   @ApiOperation({ summary: '특정 팀의 사용자 조회 (관리자)' })
   @ApiResponse({ status: 200, description: '팀 사용자 목록 조회 성공' })
-  async getUsersByTeam(@Param('teamId') teamId: number) {
+  async getUsersByTeam(@Param('teamId') teamId: number, @Req() req: any) {
     try {
+      const user = req.user;
+
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      // 권한 체크
+      if (user.adminLevel === 'SUPER_ADMIN') {
+        // 슈퍼 관리자: 모든 팀의 사용자 조회 가능
+      } else if (user.adminLevel === 'TEAM_ADMIN' && user.teamId === teamId) {
+        // 팀 관리자: 본인 팀의 사용자만 조회 가능
+      } else {
+        return {
+          success: false,
+          error: '해당 팀의 사용자 조회 권한이 없습니다.',
+        };
+      }
+
       const users = await this.usersService.getUsersByTeam(teamId);
       return { success: true, data: users };
     } catch (error) {

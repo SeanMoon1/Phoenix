@@ -494,6 +494,15 @@ export const trainingResultApi = {
   saveChoiceLog: async (logData: Partial<UserChoiceLog>) => {
     return api.post<UserChoiceLog>('/training-results/choice-logs', logData);
   },
+
+  /**
+   * 팀별 훈련 결과 조회 (팀 관리자용)
+   * @param teamId 팀 ID
+   * @returns 팀 훈련 결과 목록
+   */
+  getByTeam: async (teamId: number) => {
+    return api.get<TrainingResult[]>(`/training-results/team/${teamId}`);
+  },
 };
 
 // 사용자 관련 API 함수들 (Database 스키마 기준)

@@ -26,6 +26,12 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     }
 
     console.log('✅ AdminStrategy: 관리자 인증 성공');
+    console.log('📊 AdminStrategy 반환 정보:', {
+      id: admin.id,
+      loginId: admin.loginId,
+      adminLevel: admin.adminLevel,
+      teamId: admin.teamId,
+    });
 
     return {
       id: admin.id,
@@ -34,7 +40,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
       email: admin.email,
       teamId: admin.teamId,
       adminLevelId: admin.adminLevelId,
-      adminLevel: admin.adminLevel,
+      adminLevel: admin.adminLevel, // 이미 levelCode로 설정됨
       team: admin.team,
       isAdmin: true,
     };

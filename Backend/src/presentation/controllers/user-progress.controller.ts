@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -20,59 +20,138 @@ export class UserProgressController {
   @ApiOperation({ summary: '사용자 시나리오 통계 조회' })
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiResponse({ status: 200, description: '사용자 시나리오 통계' })
-  async getScenarioStats(@Param('userId') userId: number) {
+  async getScenarioStats(@Param('userId') userId: number, @Req() req: any) {
     try {
       console.log('🔍 사용자 시나리오 통계 조회:', { userId });
 
-      // 사용자의 훈련 결과 조회
-      const results =
-        await this.trainingResultService.getTrainingResultsByUser(userId);
+      const user = req.user;
 
-      // 시나리오별 통계 계산
-      const scenarioStats = results.reduce(
-        (acc, result) => {
-          const scenarioId = result.scenarioId;
-          if (!acc[scenarioId]) {
-            acc[scenarioId] = {
-              scenarioId,
-              scenarioName: result.scenario?.title || `시나리오 ${scenarioId}`,
-              totalAttempts: 0,
-              totalScore: 0,
-              averageScore: 0,
-              bestScore: 0,
-              lastAttempt: null,
-              completionRate: 0,
-            };
-          }
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
 
-          acc[scenarioId].totalAttempts++;
-          acc[scenarioId].totalScore += result.totalScore || 0;
-          acc[scenarioId].bestScore = Math.max(
-            acc[scenarioId].bestScore,
-            result.totalScore || 0,
+      // 본인의 정보이거나 슈퍼 관리자인 경우
+      if (user.id === userId || user.adminLevel === 'SUPER_ADMIN') {
+        // 사용자의 훈련 결과 조회
+        const results =
+          await this.trainingResultService.getTrainingResultsByUser(userId);
+
+        // 시나리오별 통계 계산
+        const scenarioStats = results.reduce(
+          (acc, result) => {
+            const scenarioId = result.scenarioId;
+            if (!acc[scenarioId]) {
+              acc[scenarioId] = {
+                scenarioId,
+                scenarioName:
+                  result.scenario?.title || `시나리오 ${scenarioId}`,
+                totalAttempts: 0,
+                totalScore: 0,
+                averageScore: 0,
+                bestScore: 0,
+                lastAttempt: null,
+                completionRate: 0,
+              };
+            }
+
+            acc[scenarioId].totalAttempts++;
+            acc[scenarioId].totalScore += result.totalScore || 0;
+            acc[scenarioId].bestScore = Math.max(
+              acc[scenarioId].bestScore,
+              result.totalScore || 0,
+            );
+            acc[scenarioId].lastAttempt = result.completedAt;
+
+            return acc;
+          },
+          {} as Record<number, any>,
+        );
+
+        // 평균 점수 계산
+        Object.values(scenarioStats).forEach((stat: any) => {
+          stat.averageScore =
+            Math.round((stat.totalScore / stat.totalAttempts) * 100) / 100;
+          stat.completionRate = 100; // 완료된 시나리오이므로 100%
+        });
+
+        const statsArray = Object.values(scenarioStats);
+        console.log('✅ 사용자 시나리오 통계 조회 완료:', {
+          count: statsArray.length,
+        });
+
+        return {
+          success: true,
+          data: statsArray,
+        };
+      }
+
+      // 팀 관리자인 경우 같은 팀의 사용자만 조회 가능
+      if (user.adminLevel === 'TEAM_ADMIN' && user.teamId) {
+        // 사용자 정보를 먼저 조회하여 팀 확인
+        const targetUser = await this.trainingResultService.getUserById(userId);
+        if (targetUser && targetUser.teamId === user.teamId) {
+          // 사용자의 훈련 결과 조회
+          const results =
+            await this.trainingResultService.getTrainingResultsByUser(userId);
+
+          // 시나리오별 통계 계산
+          const scenarioStats = results.reduce(
+            (acc, result) => {
+              const scenarioId = result.scenarioId;
+              if (!acc[scenarioId]) {
+                acc[scenarioId] = {
+                  scenarioId,
+                  scenarioName:
+                    result.scenario?.title || `시나리오 ${scenarioId}`,
+                  totalAttempts: 0,
+                  totalScore: 0,
+                  averageScore: 0,
+                  bestScore: 0,
+                  lastAttempt: null,
+                  completionRate: 0,
+                };
+              }
+
+              acc[scenarioId].totalAttempts++;
+              acc[scenarioId].totalScore += result.totalScore || 0;
+              acc[scenarioId].bestScore = Math.max(
+                acc[scenarioId].bestScore,
+                result.totalScore || 0,
+              );
+              acc[scenarioId].lastAttempt = result.completedAt;
+
+              return acc;
+            },
+            {} as Record<number, any>,
           );
-          acc[scenarioId].lastAttempt = result.completedAt;
 
-          return acc; // reduce 함수에서 누락된 반환값 추가
-        },
-        {} as Record<number, any>,
-      );
+          // 평균 점수 계산
+          Object.values(scenarioStats).forEach((stat: any) => {
+            stat.averageScore =
+              Math.round((stat.totalScore / stat.totalAttempts) * 100) / 100;
+            stat.completionRate = 100; // 완료된 시나리오이므로 100%
+          });
 
-      // 평균 점수 계산
-      Object.values(scenarioStats).forEach((stat: any) => {
-        stat.averageScore =
-          Math.round((stat.totalScore / stat.totalAttempts) * 100) / 100;
-        stat.completionRate = 100; // 완료된 시나리오이므로 100%
-      });
+          const statsArray = Object.values(scenarioStats);
+          console.log('✅ 사용자 시나리오 통계 조회 완료:', {
+            count: statsArray.length,
+          });
 
-      const statsArray = Object.values(scenarioStats);
-      console.log('✅ 사용자 시나리오 통계 조회 완료:', {
-        count: statsArray.length,
-      });
+          return {
+            success: true,
+            data: statsArray,
+          };
+        } else {
+          return {
+            success: false,
+            error: '해당 사용자의 시나리오 통계 조회 권한이 없습니다.',
+          };
+        }
+      }
 
       return {
-        success: true,
-        data: statsArray,
+        success: false,
+        error: '사용자 시나리오 통계 조회 권한이 없습니다.',
       };
     } catch (error) {
       console.error('❌ 사용자 시나리오 통계 조회 실패:', error);

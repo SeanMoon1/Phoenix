@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -75,18 +76,57 @@ export class UserExpController {
     status: 200,
     description: '사용자 경험치 정보를 성공적으로 조회했습니다.',
   })
-  async getUserExpInfo(@Param('userId', ParseIntPipe) userId: number) {
+  async getUserExpInfo(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: any,
+  ) {
     try {
       console.log('🔍 UserExpController.getUserExpInfo 호출됨:', { userId });
 
-      const expInfo = await this.userExpService.getUserExpInfo(userId);
+      const user = req.user;
 
-      console.log('✅ UserExpController.getUserExpInfo 성공:', expInfo);
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      // 본인의 정보이거나 슈퍼 관리자인 경우
+      if (user.id === userId || user.adminLevel === 'SUPER_ADMIN') {
+        const expInfo = await this.userExpService.getUserExpInfo(userId);
+
+        console.log('✅ UserExpController.getUserExpInfo 성공:', expInfo);
+
+        return {
+          success: true,
+          data: expInfo,
+          message: '사용자 경험치 정보를 성공적으로 조회했습니다.',
+        };
+      }
+
+      // 팀 관리자인 경우 같은 팀의 사용자만 조회 가능
+      if (user.adminLevel === 'TEAM_ADMIN' && user.teamId) {
+        // 사용자 정보를 먼저 조회하여 팀 확인
+        const targetUser = await this.userExpService.getUserById(userId);
+        if (targetUser && targetUser.teamId === user.teamId) {
+          const expInfo = await this.userExpService.getUserExpInfo(userId);
+
+          console.log('✅ UserExpController.getUserExpInfo 성공:', expInfo);
+
+          return {
+            success: true,
+            data: expInfo,
+            message: '사용자 경험치 정보를 성공적으로 조회했습니다.',
+          };
+        } else {
+          return {
+            success: false,
+            error: '해당 사용자의 경험치 정보 조회 권한이 없습니다.',
+          };
+        }
+      }
 
       return {
-        success: true,
-        data: expInfo,
-        message: '사용자 경험치 정보를 성공적으로 조회했습니다.',
+        success: false,
+        error: '사용자 경험치 정보 조회 권한이 없습니다.',
       };
     } catch (error) {
       console.error('❌ UserExpController.getUserExpInfo 실패:', error);

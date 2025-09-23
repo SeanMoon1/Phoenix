@@ -148,10 +148,29 @@ export class AdminService {
       }
 
       console.log(`✅ 관리자 인증 성공: ${loginId}`);
+      console.log(`📊 관리자 권한 정보:`, {
+        adminLevelId: admin.adminLevelId,
+        adminLevel: admin.adminLevel,
+        levelCode: admin.adminLevel?.levelCode,
+      });
 
       // 비밀번호 제거 후 반환
       const { password: _, ...adminWithoutPassword } = admin;
-      return adminWithoutPassword as Admin;
+
+      // adminLevel 정보를 명시적으로 설정
+      const result = {
+        ...adminWithoutPassword,
+        adminLevel: admin.adminLevel?.levelCode || 'USER', // levelCode를 adminLevel로 설정
+      };
+
+      console.log(`📤 반환할 관리자 정보:`, {
+        id: result.id,
+        loginId: result.loginId,
+        adminLevel: result.adminLevel,
+        teamId: result.teamId,
+      });
+
+      return result as any;
     } catch (error) {
       console.error('❌ 관리자 인증 실패:', error);
       throw error;

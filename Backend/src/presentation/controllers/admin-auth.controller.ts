@@ -24,6 +24,13 @@ export class AdminAuthController {
     console.log('📝 요청 데이터:', req.body);
     try {
       const admin = req.user;
+      console.log('📊 관리자 로그인 정보:', {
+        id: admin.id,
+        loginId: admin.loginId,
+        adminLevel: admin.adminLevel,
+        teamId: admin.teamId,
+      });
+
       const payload = {
         id: admin.id,
         loginId: admin.loginId,
@@ -31,6 +38,7 @@ export class AdminAuthController {
         email: admin.email,
         teamId: admin.teamId,
         adminLevelId: admin.adminLevelId,
+        adminLevel: admin.adminLevel, // adminLevel 정보 추가
         isAdmin: true,
       };
 

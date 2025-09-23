@@ -171,4 +171,22 @@ export class UserExpService {
       throw error;
     }
   }
+
+  /**
+   * 사용자 정보 조회 (팀 확인용)
+   * @param userId 사용자 ID
+   * @returns 사용자 정보
+   */
+  async getUserById(userId: number): Promise<any> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, isActive: true },
+        select: ['id', 'teamId', 'name', 'email'],
+      });
+      return user;
+    } catch (error) {
+      console.error('❌ 사용자 정보 조회 실패:', error);
+      throw error;
+    }
+  }
 }

@@ -11,6 +11,7 @@ interface PersistState {
 
 interface UseExpSystemProps {
   persistKey: string;
+  userId?: number | null;
 }
 
 interface UseExpSystemReturn {
@@ -41,6 +42,7 @@ interface UseExpSystemReturn {
 
 export function useExpSystem({
   persistKey,
+  userId,
 }: UseExpSystemProps): UseExpSystemReturn {
   // 경험치 상태
   const [EXP, setEXP] = useState(0);
@@ -60,7 +62,17 @@ export function useExpSystem({
 
   // 로컬 스토리지 복구
   useEffect(() => {
-    const raw = localStorage.getItem(persistKey);
+    // 사용자 ID가 없으면 기본값으로 초기화
+    if (!userId) {
+      setEXP(0);
+      setLevel(1);
+      setTotalCorrect(0);
+      setEXPDisplay(0);
+      return;
+    }
+
+    const userSpecificKey = `${persistKey}_user_${userId}`;
+    const raw = localStorage.getItem(userSpecificKey);
     if (raw) {
       try {
         const s: PersistState = JSON.parse(raw);
@@ -71,18 +83,31 @@ export function useExpSystem({
       } catch {
         /* ignore */
       }
+    } else {
+      // 사용자별 데이터가 없으면 기본값으로 초기화
+      setEXP(0);
+      setLevel(1);
+      setTotalCorrect(0);
+      setEXPDisplay(0);
     }
-  }, [persistKey]);
+  }, [persistKey, userId]);
 
   // 로컬 스토리지 저장
   useEffect(() => {
+    // 사용자 ID가 없으면 저장하지 않음
+    if (!userId) return;
+
+    const userSpecificKey = `${persistKey}_user_${userId}`;
     const s: PersistState = { EXP, level, streak: 0, totalCorrect };
-    localStorage.setItem(persistKey, JSON.stringify(s));
-  }, [EXP, level, totalCorrect, persistKey]);
+    localStorage.setItem(userSpecificKey, JSON.stringify(s));
+  }, [EXP, level, totalCorrect, persistKey, userId]);
 
   // EXP 지급 함수
   const awardExp = useCallback(
     (amount: number) => {
+      // 사용자 ID가 없으면 경험치를 지급하지 않음
+      if (!userId) return;
+
       const oldLevel = level;
       const oldNeeded = getEXPForNextLevel(oldLevel);
 
@@ -143,13 +168,15 @@ export function useExpSystem({
         });
       }
     },
-    [EXP, level, EXPDisplay]
+    [EXP, level, EXPDisplay, userId]
   );
 
   // 정답 수 증가
   const incrementTotalCorrect = useCallback(() => {
+    // 사용자 ID가 없으면 정답 수를 증가시키지 않음
+    if (!userId) return;
     setTotalCorrect(c => c + 1);
-  }, []);
+  }, [userId]);
 
   return {
     // 상태

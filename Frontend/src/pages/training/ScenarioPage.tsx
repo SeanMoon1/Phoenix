@@ -71,7 +71,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // 커스텀 훅들
   const gameState = useScenarioGame({ scenarioType });
-  const expSystem = useExpSystem({ persistKey });
+  const expSystem = useExpSystem({ persistKey, userId: user?.id });
 
   const normalizeToken = (v: any) =>
     typeof v === 'string' ? v.trim().replace(/^#+/, '').toUpperCase() : null;

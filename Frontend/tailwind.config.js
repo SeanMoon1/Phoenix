@@ -4,6 +4,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Gmarket Sans', 'system-ui', 'sans-serif'],
+      },
       colors: {
         // 커스텀 색상 팔레트
         primary: {

@@ -68,15 +68,21 @@ export function useTrainingResult() {
                     100
                 )
               : 0,
-          speedScore: Math.max(0, 100 - Math.floor(timeSpent / 10)),
+          speedScore:
+            timeSpent <= 45
+              ? 100
+              : Math.max(0, Math.round(100 - (timeSpent - 45) / 3)), // 45초 이내 = 100점, 그 이후 3초당 1점 감점
           totalScore:
             opts.gameStateSummary.scenariosCount > 0
               ? Math.round(
-                  ((opts.expSystemState.totalCorrect /
+                  (opts.expSystemState.totalCorrect /
                     opts.gameStateSummary.scenariosCount) *
-                    100 +
-                    Math.max(0, 100 - Math.floor(timeSpent / 10))) /
-                    2
+                    100 *
+                    0.7 + // 정확도 70% 가중치
+                    (timeSpent <= 45
+                      ? 100
+                      : Math.max(0, Math.round(100 - (timeSpent - 45) / 3))) *
+                      0.3 // 속도 30% 가중치
                 )
               : 0,
           completionTime: timeSpent,

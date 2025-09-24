@@ -86,6 +86,7 @@ export class TrainingResultService {
         participantId,
         resultCode,
         scenarioType, // 시나리오 타입 추가
+        teamId: null, // 팀 상관없이 훈련 가능
         completedAt: data.completedAt ? new Date(data.completedAt) : new Date(),
         isActive: true,
       });

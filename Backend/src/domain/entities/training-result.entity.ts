@@ -41,6 +41,10 @@ export class TrainingResult {
   @Column({ name: 'user_id' })
   userId: number;
 
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
+
   @ApiProperty({ description: '결과 코드' })
   @Column({ name: 'result_code', length: 50 })
   resultCode: string;

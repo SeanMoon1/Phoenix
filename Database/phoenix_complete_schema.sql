@@ -272,6 +272,7 @@ CREATE TABLE IF NOT EXISTS training_result (
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입 (FIRE, EARTHQUAKE, EMERGENCY, TRAFFIC, FLOOD 등)',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)',
     result_code VARCHAR(50) NOT NULL COMMENT '결과 코드 (예: RESULT001, RESULT002)',
     accuracy_score INT NOT NULL COMMENT '정확도 점수',
     speed_score INT NOT NULL COMMENT '속도 점수',
@@ -288,6 +289,7 @@ CREATE TABLE IF NOT EXISTS training_result (
     FOREIGN KEY (session_id) REFERENCES training_session(session_id),
     FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id),
     FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
     UNIQUE KEY uk_participant_result_code (participant_id, result_code),
     CONSTRAINT chk_scenario_type CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'))
 );
@@ -824,24 +826,34 @@ CREATE PROCEDURE SafeMigration()
 BEGIN
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
     
-    -- 1. scenario_type 컬럼 추가 시도
+    -- 1. team_id 컬럼 추가 시도 (NULL 허용)
+    ALTER TABLE training_result 
+    ADD COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)' 
+    AFTER user_id;
+    
+    -- 2. team_id 외래키 추가 시도
+    ALTER TABLE training_result 
+    ADD CONSTRAINT fk_training_result_team 
+    FOREIGN KEY (team_id) REFERENCES team(team_id);
+    
+    -- 3. scenario_type 컬럼 추가 시도
     ALTER TABLE training_result 
     ADD COLUMN scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입' 
     AFTER scenario_id;
     
-    -- 2. 기존 데이터 업데이트
+    -- 4. 기존 데이터 업데이트
     UPDATE training_result tr
     JOIN scenario s ON tr.scenario_id = s.scenario_id
     SET tr.scenario_type = UPPER(s.disaster_type)
     WHERE tr.scenario_type = 'UNKNOWN';
     
-    -- 3. 인덱스 추가 시도
+    -- 5. 인덱스 추가 시도
     CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type);
     
-    -- 4. 복합 인덱스 추가 시도
+    -- 6. 복합 인덱스 추가 시도
     CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active);
     
-    -- 5. 제약조건 추가 시도
+    -- 7. 제약조건 추가 시도
     ALTER TABLE training_result 
     ADD CONSTRAINT chk_scenario_type 
     CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'));

@@ -3,7 +3,11 @@ import Layout from '../../components/layout/Layout';
 import { useAuthStore } from '../../stores/authStore';
 import { teamApi, myPageApi } from '../../services/api';
 import { Button } from '../../components/ui';
-import type { TrainingResult, UserScenarioStats } from '../../types';
+import type {
+  TrainingResult,
+  ScenarioTypeStatistics,
+  ScenarioTypeInfo,
+} from '../../types';
 
 const MyPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('records');
@@ -15,13 +19,9 @@ const MyPage: React.FC = () => {
 
   // 실제 데이터 상태
   const [trainingRecords, setTrainingRecords] = useState<TrainingResult[]>([]);
-  const [trainingStats, setTrainingStats] = useState<{
-    totalTrainings: number;
-    totalScore: number;
-    averageScore: number;
-    bestScore: number;
-  } | null>(null);
-  const [scenarioStats, setScenarioStats] = useState<UserScenarioStats[]>([]);
+  const [scenarioTypeStats, setScenarioTypeStats] = useState<
+    ScenarioTypeStatistics[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,17 +37,17 @@ const MyPage: React.FC = () => {
         console.log('🔍 사용자 데이터 로딩 시작:', { userId: user.id });
 
         // 병렬로 데이터 가져오기
-        const [recordsResponse, statsResponse, scenarioResponse] =
+        const [recordsResponse, statsResponse, scenarioTypeResponse] =
           await Promise.all([
             myPageApi.getTrainingRecords(user.id),
             myPageApi.getTrainingStatistics(user.id),
-            myPageApi.getScenarioStatistics(user.id),
+            myPageApi.getScenarioTypeStatistics(user.id),
           ]);
 
         console.log('📊 API 응답 결과:', {
           records: recordsResponse,
           stats: statsResponse,
-          scenario: scenarioResponse,
+          scenarioType: scenarioTypeResponse,
         });
 
         // 훈련 기록 처리
@@ -64,25 +64,27 @@ const MyPage: React.FC = () => {
           );
         }
 
-        // 훈련 통계 처리
+        // 훈련 통계 처리 (참고용으로만 로딩)
         if (statsResponse.success) {
           console.log('✅ 훈련 통계 로딩 성공:', statsResponse.data);
-          setTrainingStats(statsResponse.data || null);
         } else {
           console.error('❌ 훈련 통계 로딩 실패:', statsResponse.error);
           // 통계 로딩 실패는 에러로 처리하지 않음 (기록이 없을 수 있음)
         }
 
-        // 시나리오 통계 처리
-        if (scenarioResponse.success) {
+        // 시나리오 타입별 통계 처리
+        if (scenarioTypeResponse.success) {
           console.log(
-            '✅ 시나리오 통계 로딩 성공:',
-            scenarioResponse.data?.length || 0
+            '✅ 시나리오 타입별 통계 로딩 성공:',
+            scenarioTypeResponse.data?.length || 0
           );
-          setScenarioStats(scenarioResponse.data || []);
+          setScenarioTypeStats(scenarioTypeResponse.data || []);
         } else {
-          console.error('❌ 시나리오 통계 로딩 실패:', scenarioResponse.error);
-          // 시나리오 통계 로딩 실패는 에러로 처리하지 않음
+          console.error(
+            '❌ 시나리오 타입별 통계 로딩 실패:',
+            scenarioTypeResponse.error
+          );
+          // 시나리오 타입별 통계 로딩 실패는 에러로 처리하지 않음
         }
       } catch (err) {
         console.error('❌ 사용자 데이터 로딩 실패:', err);
@@ -154,6 +156,76 @@ const MyPage: React.FC = () => {
     }
   };
 
+  // 시나리오 타입 정보 정의
+  // 시간을 시/분/초로 변환하는 함수
+  const formatTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}시간 ${minutes}분 ${remainingSeconds}초`;
+    } else if (minutes > 0) {
+      return `${minutes}분 ${remainingSeconds}초`;
+    } else {
+      return `${remainingSeconds}초`;
+    }
+  };
+
+  const getScenarioTypeInfo = (scenarioType: string): ScenarioTypeInfo => {
+    const typeMap: Record<string, ScenarioTypeInfo> = {
+      FIRE: {
+        type: 'FIRE',
+        name: '화재',
+        icon: '🔥',
+        color: 'red',
+        bgClass: 'bg-red-100 dark:bg-red-900/30',
+        progressClass: 'bg-red-500',
+      },
+      EARTHQUAKE: {
+        type: 'EARTHQUAKE',
+        name: '지진',
+        icon: '🌍',
+        color: 'yellow',
+        bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+        progressClass: 'bg-yellow-500',
+      },
+      EMERGENCY: {
+        type: 'EMERGENCY',
+        name: '응급처치',
+        icon: '🚑',
+        color: 'green',
+        bgClass: 'bg-green-100 dark:bg-green-900/30',
+        progressClass: 'bg-green-500',
+      },
+      TRAFFIC: {
+        type: 'TRAFFIC',
+        name: '교통사고',
+        icon: '🚗',
+        color: 'blue',
+        bgClass: 'bg-blue-100 dark:bg-blue-900/30',
+        progressClass: 'bg-blue-500',
+      },
+      FLOOD: {
+        type: 'FLOOD',
+        name: '홍수',
+        icon: '🌊',
+        color: 'cyan',
+        bgClass: 'bg-cyan-100 dark:bg-cyan-900/30',
+        progressClass: 'bg-cyan-500',
+      },
+      UNKNOWN: {
+        type: 'UNKNOWN',
+        name: '기타',
+        icon: '❓',
+        color: 'gray',
+        bgClass: 'bg-gray-100 dark:bg-gray-900/30',
+        progressClass: 'bg-gray-500',
+      },
+    };
+    return typeMap[scenarioType] || typeMap.UNKNOWN;
+  };
+
   const tabs = [
     {
       id: 'records',
@@ -221,11 +293,11 @@ const MyPage: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   훈련을 시작해보세요!
                 </p>
-                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="p-4 mt-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                   <p className="text-sm text-blue-600 dark:text-blue-400">
                     💡 훈련을 완료하면 여기에 기록이 표시됩니다.
                   </p>
-                  <p className="text-xs text-blue-500 dark:text-blue-300 mt-1">
+                  <p className="mt-1 text-xs text-blue-500 dark:text-blue-300">
                     팀에 소속되지 않아도 개인 훈련 기록을 확인할 수 있습니다.
                   </p>
                 </div>
@@ -233,48 +305,60 @@ const MyPage: React.FC = () => {
             </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {trainingRecords.map(record => (
-                <div
-                  key={record.id}
-                  className="px-6 py-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          훈련 기록 #{record.id}
-                        </h3>
-                        <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
-                          시나리오 #{record.scenarioId}
-                        </span>
-                      </div>
-                      <div className="flex items-center mt-2 space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                        <span>
-                          📅 {new Date(record.completedAt).toLocaleDateString()}
-                        </span>
-                        <span>
-                          ⏱️ {Math.floor((record.completionTime || 0) / 60)}분{' '}
-                          {(record.completionTime || 0) % 60}초
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          총점: {record.totalScore}점
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          정확도: {record.accuracyScore}점
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          속도: {record.speedScore}점
-                        </span>
-                      </div>
-                      {record.feedback && (
-                        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300">
-                          💬 {record.feedback}
+              {trainingRecords.map(record => {
+                // 시나리오 타입 정보 가져오기 (새로운 scenarioType 필드 사용)
+                const scenarioType = record.scenarioType || 'UNKNOWN';
+                const typeInfo = getScenarioTypeInfo(scenarioType);
+
+                return (
+                  <div
+                    key={record.id}
+                    className="px-6 py-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center mb-3 space-x-3">
+                          <div
+                            className={`flex items-center space-x-2 px-3 py-2 rounded-lg ${typeInfo.bgClass}`}
+                          >
+                            <span className="text-2xl">{typeInfo.icon}</span>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                              {typeInfo.name}
+                            </h3>
+                          </div>
+                          <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+                            시나리오 #{record.scenarioId}
+                          </span>
                         </div>
-                      )}
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                          <span>
+                            📅{' '}
+                            {new Date(record.completedAt).toLocaleDateString()}
+                          </span>
+                          <span>
+                            ⏱️ {Math.floor((record.completionTime || 0) / 60)}분{' '}
+                            {(record.completionTime || 0) % 60}초
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            총점: {record.totalScore}점
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            정확도: {record.accuracyScore}점
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            속도: {record.speedScore}점
+                          </span>
+                        </div>
+                        {record.feedback && (
+                          <div className="p-2 mt-2 text-xs text-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
+                            💬 {record.feedback}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -289,174 +373,158 @@ const MyPage: React.FC = () => {
     iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (
       <div className="space-y-8">
-        {/* 전체 점수 요약 */}
-        <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-          <h2 className="mb-6 text-2xl font-bold text-center text-gray-900 dark:text-white">
-            전체 점수 요약
-          </h2>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 border-b-2 border-yellow-600 rounded-full animate-spin"></div>
-                <span className="text-gray-600 dark:text-gray-300">
-                  데이터를 불러오는 중...
-                </span>
-              </div>
+        {/* 시나리오 타입별 5가지 항목 통계 */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 border-b-2 border-yellow-600 rounded-full animate-spin"></div>
+              <span className="text-gray-600 dark:text-gray-300">
+                통계 데이터를 불러오는 중...
+              </span>
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="mb-2 text-lg text-red-500">⚠️</div>
-                <p className="text-red-600 dark:text-red-400">{error}</p>
-              </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mb-2 text-lg text-red-500">⚠️</div>
+              <p className="text-red-600 dark:text-red-400">{error}</p>
             </div>
-          ) : !trainingStats ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">🏆</div>
-                <p className="text-gray-600 dark:text-gray-300">
-                  아직 훈련 기록이 없습니다.
-                </p>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  훈련을 시작해보세요!
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              <div className="text-center">
-                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600">
-                  <span className="text-3xl font-bold text-white">
-                    {trainingStats.averageScore.toFixed(1)}
-                  </span>
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  전체 평균 점수
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {trainingStats.totalTrainings}회 훈련 기준
+          </div>
+        ) : scenarioTypeStats.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mb-4 text-4xl text-gray-400">🏆</div>
+              <p className="text-gray-600 dark:text-gray-300">
+                아직 통계 데이터가 없습니다.
+              </p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                훈련을 완료하면 여기에 통계가 표시됩니다.
+              </p>
+              <div className="p-4 mt-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                  💡 시나리오 타입별로 5가지 항목의 상세 통계를 확인할 수
+                  있습니다.
                 </p>
               </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600">
-                  <span className="text-3xl font-bold text-white">
-                    {trainingStats.bestScore}
-                  </span>
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  최고 점수
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">최고 기록</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600">
-                  <span className="text-3xl font-bold text-white">
-                    {trainingStats.totalScore}
-                  </span>
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                  총 점수
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">누적 점수</p>
-              </div>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+              시나리오 타입별 상세 통계
+            </h3>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              {scenarioTypeStats.map((stat, index) => {
+                const typeInfo = getScenarioTypeInfo(stat.scenarioType);
 
-        {/* 훈련 유형별 점수 */}
-        {scenarioStats.length > 0 && (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {scenarioStats.map((stat, index) => {
-              const typeInfo = {
-                FIRE: {
-                  icon: '🔥',
-                  name: '화재',
-                  color: 'red',
-                  bgClass: 'bg-red-100 dark:bg-red-900/30',
-                  progressClass: 'bg-red-500',
-                },
-                EARTHQUAKE: {
-                  icon: '🌍',
-                  name: '지진',
-                  color: 'yellow',
-                  bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
-                  progressClass: 'bg-yellow-500',
-                },
-                EMERGENCY: {
-                  icon: '🚑',
-                  name: '응급처치',
-                  color: 'green',
-                  bgClass: 'bg-green-100 dark:bg-green-900/30',
-                  progressClass: 'bg-green-500',
-                },
-                TRAFFIC: {
-                  icon: '🚗',
-                  name: '교통사고',
-                  color: 'blue',
-                  bgClass: 'bg-blue-100 dark:bg-blue-900/30',
-                  progressClass: 'bg-blue-500',
-                },
-                UNKNOWN: {
-                  icon: '❓',
-                  name: '기타',
-                  color: 'gray',
-                  bgClass: 'bg-gray-100 dark:bg-gray-900/30',
-                  progressClass: 'bg-gray-500',
-                },
-              };
-              const type =
-                typeInfo[stat.scenarioType as keyof typeof typeInfo] ||
-                typeInfo.UNKNOWN;
-
-              return (
-                <div
-                  key={index}
-                  className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"
-                >
-                  <div className="flex items-center mb-4">
-                    <div
-                      className={`flex items-center justify-center w-12 h-12 mr-4 ${type.bgClass} rounded-lg`}
-                    >
-                      <span className="text-2xl">{type.icon}</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {type.name} ({stat.scenarioType})
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300">
-                        평균 점수: {stat.averageScore.toFixed(1)}점 | 완료 횟수:{' '}
-                        {stat.completedCount}회
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">
-                        시나리오 유형
-                      </span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {stat.bestScore}점
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                return (
+                  <div
+                    key={index}
+                    className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"
+                  >
+                    <div className="flex items-center mb-6">
                       <div
-                        className={`h-2 ${type.progressClass} rounded-full`}
-                        style={{
-                          width: `${Math.min(
-                            (stat.averageScore / 100) * 100,
-                            100
-                          )}%`,
-                        }}
-                      ></div>
+                        className={`flex items-center justify-center w-16 h-16 mr-4 ${typeInfo.bgClass} rounded-lg`}
+                      >
+                        <span className="text-3xl">{typeInfo.icon}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {typeInfo.name}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          총 {stat.totalAttempts}회 훈련 완료
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      총점: {stat.totalScore}점 | 최고점: {stat.bestScore}점 |
-                      평균: {stat.averageScore.toFixed(1)}점
+
+                    {/* 5가지 항목 표시 */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {/* 1. 평균 점수 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                              평균 점수
+                            </p>
+                            <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                              {stat.averageScore.toFixed(1)}점
+                            </p>
+                          </div>
+                          <div className="text-3xl">📊</div>
+                        </div>
+                      </div>
+
+                      {/* 2. 정확도 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                              정확도
+                            </p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                              {stat.accuracyRate}%
+                            </p>
+                          </div>
+                          <div className="text-3xl">🎯</div>
+                        </div>
+                      </div>
+
+                      {/* 3. 훈련 시간 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                              평균 훈련 시간
+                            </p>
+                            <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                              {formatTime(stat.averageTimeSpent)}
+                            </p>
+                          </div>
+                          <div className="text-3xl">⏱️</div>
+                        </div>
+                      </div>
+
+                      {/* 4. 최고 점수 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                              최고 점수
+                            </p>
+                            <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
+                              {stat.bestScore}점
+                            </p>
+                          </div>
+                          <div className="text-3xl">🏆</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 5. 누적 점수 (전체 너비) */}
+                    <div className="p-4 mt-4 rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            누적 점수
+                          </p>
+                          <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">
+                            {stat.totalScore}점
+                          </p>
+                        </div>
+                        <div className="text-4xl">💎</div>
+                      </div>
+                    </div>
+
+                    {/* 추가 정보 */}
+                    <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                      마지막 훈련:{' '}
+                      {new Date(stat.lastCompletedAt).toLocaleDateString()}
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

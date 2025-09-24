@@ -264,12 +264,13 @@ CREATE TABLE IF NOT EXISTS training_participant (
     UNIQUE KEY uk_session_participant_code (session_id, participant_code)
 );
 
--- 12. 훈련 결과 테이블
+-- 12. 훈련 결과 테이블 (시나리오 타입 정보 포함)
 CREATE TABLE IF NOT EXISTS training_result (
     result_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '결과 ID',
     participant_id BIGINT NOT NULL COMMENT '참가자 ID',
     session_id BIGINT NOT NULL COMMENT '세션 ID',
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
+    scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입 (FIRE, EARTHQUAKE, EMERGENCY, TRAFFIC, FLOOD 등)',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
     result_code VARCHAR(50) NOT NULL COMMENT '결과 코드 (예: RESULT001, RESULT002)',
     accuracy_score INT NOT NULL COMMENT '정확도 점수',
@@ -287,7 +288,8 @@ CREATE TABLE IF NOT EXISTS training_result (
     FOREIGN KEY (session_id) REFERENCES training_session(session_id),
     FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id),
     FOREIGN KEY (user_id) REFERENCES user(user_id),
-    UNIQUE KEY uk_participant_result_code (participant_id, result_code)
+    UNIQUE KEY uk_participant_result_code (participant_id, result_code),
+    CONSTRAINT chk_scenario_type CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'))
 );
 
 -- 13. 사용자 선택 로그 테이블
@@ -496,6 +498,24 @@ LEFT JOIN admin a ON u.user_id = a.admin_id AND a.use_yn = 'Y' AND a.is_active =
 LEFT JOIN admin_level al ON a.admin_level_id = al.level_id
 WHERE u.is_active = 1 AND t.is_active = 1;
 
+-- 23. 시나리오 타입별 통계 뷰 (성능 최적화)
+CREATE VIEW v_scenario_type_statistics AS
+SELECT 
+    tr.user_id,
+    tr.scenario_type,
+    COUNT(*) as total_attempts,
+    SUM(tr.total_score) as total_score,
+    MAX(tr.total_score) as best_score,
+    ROUND(AVG(tr.total_score), 2) as average_score,
+    ROUND(AVG(tr.accuracy_score), 2) as average_accuracy,
+    ROUND(AVG(tr.speed_score), 2) as average_speed,
+    ROUND(AVG(tr.completion_time), 0) as average_time_spent,
+    ROUND(AVG(tr.accuracy_score), 0) as accuracy_rate,
+    MAX(tr.completed_at) as last_completed_at
+FROM training_result tr
+WHERE tr.is_active = 1
+GROUP BY tr.user_id, tr.scenario_type;
+
 -- =====================================================
 -- 인덱스 (Indexes)
 -- =====================================================
@@ -541,6 +561,8 @@ CREATE INDEX idx_training_session_scenario ON training_session(scenario_id);
 CREATE INDEX idx_training_session_team ON training_session(team_id);
 CREATE INDEX idx_training_participant_session ON training_participant(session_id);
 CREATE INDEX idx_training_result_participant ON training_result(participant_id);
+CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type);
+CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active);
 CREATE INDEX idx_user_choice_log_result ON user_choice_log(result_id);
 
 -- 기타 인덱스
@@ -548,30 +570,151 @@ CREATE INDEX idx_inquiry_team ON inquiry(team_id);
 CREATE INDEX idx_faq_team ON faq(team_id);
 
 -- =====================================================
--- 함수 (Functions) - 제거됨 (권한 문제로 인해 애플리케이션에서 처리)
+-- 저장 프로시저 (Stored Procedures)
 -- =====================================================
 
--- 함수들은 애플리케이션 레벨에서 처리됩니다:
--- 1. 시나리오 코드 생성: Backend/src/application/services/scenario.service.ts
--- 2. 권한 검증: Backend/src/shared/guards/ 권한 가드들
+-- 24. 시나리오 타입별 통계 조회 프로시저
+DELIMITER //
+
+CREATE PROCEDURE GetUserScenarioTypeStatistics(IN p_user_id BIGINT)
+BEGIN
+    SELECT 
+        tr.scenario_type,
+        COUNT(*) as total_attempts,
+        SUM(tr.total_score) as total_score,
+        MAX(tr.total_score) as best_score,
+        ROUND(AVG(tr.total_score), 2) as average_score,
+        ROUND(AVG(tr.accuracy_score), 2) as average_accuracy,
+        ROUND(AVG(tr.speed_score), 2) as average_speed,
+        ROUND(AVG(tr.completion_time), 0) as average_time_spent,
+        ROUND(AVG(tr.accuracy_score), 0) as accuracy_rate,
+        MAX(tr.completed_at) as last_completed_at
+    FROM training_result tr
+    WHERE tr.user_id = p_user_id 
+      AND tr.is_active = 1
+    GROUP BY tr.scenario_type
+    ORDER BY tr.scenario_type;
+END //
+
+DELIMITER ;
 
 -- =====================================================
--- 트리거 (Triggers) - 제거됨 (권한 문제로 인해 애플리케이션에서 처리)
+-- 트리거 (Triggers)
 -- =====================================================
 
--- 트리거들은 애플리케이션 레벨에서 처리됩니다:
--- 1. 시나리오 코드 생성: Backend/src/application/services/scenario.service.ts
--- 2. 코드 중복 방지: DTO validation 및 서비스 레벨 검증
--- 3. 권한 검증: Backend/src/shared/guards/ 권한 가드들
+-- 25. 훈련 결과 삽입 시 통계 업데이트 트리거
+DELIMITER //
 
--- =====================================================
--- 저장 프로시저 (Stored Procedures) - 제거됨 (권한 문제로 인해 애플리케이션에서 처리)
--- =====================================================
+CREATE TRIGGER tr_training_result_after_insert
+AFTER INSERT ON training_result
+FOR EACH ROW
+BEGIN
+    -- user_scenario_stats 테이블 업데이트 (기존 통계 테이블과 연동)
+    INSERT INTO user_scenario_stats (
+        user_id, 
+        team_id, 
+        scenario_type, 
+        completed_count, 
+        total_score, 
+        best_score, 
+        average_score, 
+        total_time_spent, 
+        last_completed_at
+    ) VALUES (
+        NEW.user_id,
+        (SELECT team_id FROM user WHERE user_id = NEW.user_id),
+        NEW.scenario_type,
+        1,
+        NEW.total_score,
+        NEW.total_score,
+        NEW.total_score,
+        NEW.completion_time,
+        NEW.completed_at
+    )
+    ON DUPLICATE KEY UPDATE
+        completed_count = completed_count + 1,
+        total_score = total_score + NEW.total_score,
+        best_score = GREATEST(best_score, NEW.total_score),
+        average_score = ROUND((total_score + NEW.total_score) / (completed_count + 1), 2),
+        total_time_spent = total_time_spent + NEW.completion_time,
+        last_completed_at = NEW.completed_at,
+        updated_at = CURRENT_TIMESTAMP;
+END //
 
--- 저장 프로시저들은 애플리케이션 레벨에서 처리됩니다:
--- 1. 권한 제어: Backend/src/shared/guards/ 권한 가드들
--- 2. 데이터 접근 제어: Backend/src/application/services/ 서비스들
--- 3. 팀별 데이터 격리: Repository 패턴과 서비스 레이어에서 처리
+DELIMITER ;
+
+-- 26. 훈련 결과 업데이트 시 통계 업데이트 트리거
+DELIMITER //
+
+CREATE TRIGGER tr_training_result_after_update
+AFTER UPDATE ON training_result
+FOR EACH ROW
+BEGIN
+    -- 시나리오 타입이 변경된 경우에만 통계 업데이트
+    IF OLD.scenario_type != NEW.scenario_type THEN
+        -- 기존 시나리오 타입 통계에서 제거
+        UPDATE user_scenario_stats 
+        SET completed_count = completed_count - 1,
+            total_score = total_score - OLD.total_score,
+            best_score = (
+                SELECT MAX(total_score) 
+                FROM training_result 
+                WHERE user_id = OLD.user_id 
+                  AND scenario_type = OLD.scenario_type 
+                  AND is_active = 1
+            ),
+            average_score = (
+                SELECT ROUND(AVG(total_score), 2) 
+                FROM training_result 
+                WHERE user_id = OLD.user_id 
+                  AND scenario_type = OLD.scenario_type 
+                  AND is_active = 1
+            ),
+            total_time_spent = total_time_spent - OLD.completion_time,
+            last_completed_at = (
+                SELECT MAX(completed_at) 
+                FROM training_result 
+                WHERE user_id = OLD.user_id 
+                  AND scenario_type = OLD.scenario_type 
+                  AND is_active = 1
+            ),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = OLD.user_id AND scenario_type = OLD.scenario_type;
+        
+        -- 새로운 시나리오 타입 통계에 추가
+        INSERT INTO user_scenario_stats (
+            user_id, 
+            team_id, 
+            scenario_type, 
+            completed_count, 
+            total_score, 
+            best_score, 
+            average_score, 
+            total_time_spent, 
+            last_completed_at
+        ) VALUES (
+            NEW.user_id,
+            (SELECT team_id FROM user WHERE user_id = NEW.user_id),
+            NEW.scenario_type,
+            1,
+            NEW.total_score,
+            NEW.total_score,
+            NEW.total_score,
+            NEW.completion_time,
+            NEW.completed_at
+        )
+        ON DUPLICATE KEY UPDATE
+            completed_count = completed_count + 1,
+            total_score = total_score + NEW.total_score,
+            best_score = GREATEST(best_score, NEW.total_score),
+            average_score = ROUND((total_score + NEW.total_score) / (completed_count + 1), 2),
+            total_time_spent = total_time_spent + NEW.completion_time,
+            last_completed_at = NEW.completed_at,
+            updated_at = CURRENT_TIMESTAMP;
+    END IF;
+END //
+
+DELIMITER ;
 
 -- =====================================================
 -- 기본 데이터 삽입 (Initial Data)
@@ -611,10 +754,11 @@ INSERT INTO admin (team_id, admin_level_id, login_id, password, name, email, pho
 
 -- 35. 샘플 시나리오 데이터 삽입
 INSERT INTO scenario (team_id, scenario_code, title, disaster_type, risk_level, difficulty, description, created_by) VALUES
-(1, 'FIR001', '아파트 화재 대응', 'fire', 'MEDIUM', 'easy', '새벽 3시 아파트 화재 상황 대응', 1),
-(1, 'EAR001', '지진 대피 훈련', 'earthquake', 'HIGH', 'medium', '지진 발생 시 대피 절차 훈련', 1),
-(1, 'EME001', '응급처치 기본', 'emergency', 'LOW', 'easy', '기본 응급처치 방법 훈련', 1),
-(1, 'TRA001', '교통사고 대응', 'traffic', 'MEDIUM', 'medium', '교통사고 발생 시 대응 절차', 1);
+(1, 'FIR001', '아파트 화재 대응', 'FIRE', 'MEDIUM', 'easy', '새벽 3시 아파트 화재 상황 대응', 1),
+(1, 'EAR001', '지진 대피 훈련', 'EARTHQUAKE', 'HIGH', 'medium', '지진 발생 시 대피 절차 훈련', 1),
+(1, 'EME001', '응급처치 기본', 'EMERGENCY', 'LOW', 'easy', '기본 응급처치 방법 훈련', 1),
+(1, 'TRA001', '교통사고 대응', 'TRAFFIC', 'MEDIUM', 'medium', '교통사고 발생 시 대응 절차', 1),
+(1, 'FLO001', '홍수 대피 훈련', 'FLOOD', 'HIGH', 'hard', '홍수 발생 시 대피 절차 훈련', 1);
 
 -- 36. 샘플 씬 데이터 삽입
 INSERT INTO scenario_scene (scenario_id, scene_code, scene_order, title, content, scene_script, created_by) VALUES
@@ -672,4 +816,7 @@ INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_
 SELECT 'Phoenix Database Schema 생성 완료!' as status;
 SELECT '총 테이블 수:' as info, COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE();
 SELECT '총 뷰 수:' as info, COUNT(*) as count FROM information_schema.views WHERE table_schema = DATABASE();
-SELECT '함수와 프로시저는 애플리케이션 레벨에서 처리됩니다.' as info;
+SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE table_schema = DATABASE() AND routine_type = 'PROCEDURE';
+SELECT '총 트리거 수:' as info, COUNT(*) as count FROM information_schema.triggers WHERE trigger_schema = DATABASE();
+SELECT '시나리오 타입별 통계 기능이 포함되었습니다.' as info;
+SELECT '5가지 항목 통계 (평균점수, 정확도, 훈련시간, 최고점수, 누적점수)를 지원합니다.' as info;

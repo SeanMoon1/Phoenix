@@ -151,6 +151,20 @@ export class TrainingResultController {
     }
   }
 
+  @Get('scenario-type-statistics/:userId')
+  @ApiOperation({ summary: '사용자 시나리오 타입별 통계 조회' })
+  @ApiParam({ name: 'userId', description: '사용자 ID' })
+  @ApiResponse({ status: 200, description: '시나리오 타입별 통계' })
+  async getScenarioTypeStatistics(@Param('userId') userId: number) {
+    try {
+      const stats =
+        await this.trainingResultService.getScenarioTypeStatistics(userId);
+      return { success: true, data: stats };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   @Get('choice-logs/:resultId')
   @ApiOperation({ summary: '사용자 선택 로그 조회' })
   @ApiParam({ name: 'resultId', description: '결과 ID' })

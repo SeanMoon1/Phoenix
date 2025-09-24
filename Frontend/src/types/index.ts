@@ -271,6 +271,7 @@ export interface TrainingResult {
   participantId: number;
   sessionId: number;
   scenarioId: number;
+  scenarioType: string; // 시나리오 타입 추가
   userId: number;
   resultCode: string;
   accuracyScore: number;
@@ -357,6 +358,30 @@ export interface UserScenarioStats {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// 시나리오 타입별 통계 타입 (새로운 5가지 항목)
+export interface ScenarioTypeStatistics {
+  scenarioType: string;
+  totalAttempts: number;
+  totalScore: number;
+  bestScore: number;
+  averageScore: number;
+  averageAccuracy: number;
+  averageSpeed: number;
+  averageTimeSpent: number;
+  accuracyRate: number;
+  lastCompletedAt: string;
+}
+
+// 시나리오 타입 정보 (UI 표시용)
+export interface ScenarioTypeInfo {
+  type: string;
+  name: string;
+  icon: string;
+  color: string;
+  bgClass: string;
+  progressClass: string;
 }
 
 // 사용자 레벨 히스토리 타입 (Database 스키마 기준)

@@ -33,6 +33,10 @@ export class TrainingResult {
   @Column({ name: 'scenario_id' })
   scenarioId: number;
 
+  @ApiProperty({ description: '시나리오 타입' })
+  @Column({ name: 'scenario_type', length: 50 })
+  scenarioType: string;
+
   @ApiProperty({ description: '사용자 ID' })
   @Column({ name: 'user_id' })
   userId: number;

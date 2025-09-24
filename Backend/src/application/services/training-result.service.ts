@@ -4,6 +4,7 @@ import { UserChoiceLog } from '../../domain/entities/user-choice-log.entity';
 import { TrainingParticipant } from '../../domain/entities/training-participant.entity';
 import { TrainingSession } from '../../domain/entities/training-session.entity';
 import { User } from '../../domain/entities/user.entity';
+import { Scenario } from '../../domain/entities/scenario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserExpService } from './user-exp.service';
@@ -49,10 +50,22 @@ export class TrainingResultService {
       const resultCode =
         data.resultCode || `RESULT_${Date.now()}_${data.userId}`;
 
+      // 시나리오 타입 정보 가져오기
+      const scenario = await this.trainingResultRepository.manager.findOne(
+        Scenario,
+        {
+          where: { id: data.scenarioId },
+        },
+      );
+      const scenarioType = scenario?.disasterType
+        ? scenario.disasterType.toUpperCase()
+        : 'UNKNOWN';
+
       const trainingResult = this.trainingResultRepository.create({
         ...data,
         participantId,
         resultCode,
+        scenarioType, // 시나리오 타입 추가
         completedAt: data.completedAt ? new Date(data.completedAt) : new Date(),
         isActive: true,
       });
@@ -397,6 +410,114 @@ export class TrainingResultService {
       return user;
     } catch (error) {
       console.error('❌ 사용자 정보 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 시나리오 타입별 통계 조회
+   * @param userId 사용자 ID
+   * @returns 시나리오 타입별 통계
+   */
+  async getScenarioTypeStatistics(userId: number): Promise<any> {
+    try {
+      console.log('🔍 시나리오 타입별 통계 조회:', { userId });
+
+      const results = await this.trainingResultRepository.find({
+        where: { userId, isActive: true },
+        relations: ['scenario'],
+        order: { completedAt: 'DESC' },
+      });
+
+      if (results.length === 0) {
+        return [];
+      }
+
+      // 시나리오 타입별로 그룹화
+      const scenarioTypeMap = new Map<string, any>();
+
+      results.forEach((result) => {
+        // 시나리오 타입을 직접 저장된 값으로 사용 (새로운 컬럼 활용)
+        const scenarioType =
+          result.scenarioType || result.scenario?.disasterType || 'UNKNOWN';
+
+        if (!scenarioTypeMap.has(scenarioType)) {
+          scenarioTypeMap.set(scenarioType, {
+            scenarioType,
+            totalAttempts: 0,
+            totalScore: 0,
+            totalAccuracy: 0,
+            totalSpeed: 0,
+            totalTimeSpent: 0,
+            bestScore: 0,
+            averageScore: 0,
+            averageAccuracy: 0,
+            averageSpeed: 0,
+            averageTimeSpent: 0,
+            lastCompletedAt: null,
+            scores: [],
+            accuracyScores: [],
+            speedScores: [],
+            timeSpent: [],
+          });
+        }
+
+        const stats = scenarioTypeMap.get(scenarioType);
+        stats.totalAttempts++;
+        stats.totalScore += result.totalScore || 0;
+        stats.totalAccuracy += result.accuracyScore || 0;
+        stats.totalSpeed += result.speedScore || 0;
+        stats.totalTimeSpent += result.completionTime || 0;
+        stats.bestScore = Math.max(stats.bestScore, result.totalScore || 0);
+        stats.lastCompletedAt = result.completedAt;
+
+        // 개별 점수들 저장 (평균 계산용)
+        stats.scores.push(result.totalScore || 0);
+        stats.accuracyScores.push(result.accuracyScore || 0);
+        stats.speedScores.push(result.speedScore || 0);
+        stats.timeSpent.push(result.completionTime || 0);
+      });
+
+      // 평균 계산
+      const scenarioTypeStats = Array.from(scenarioTypeMap.values()).map(
+        (stats) => {
+          stats.averageScore =
+            Math.round((stats.totalScore / stats.totalAttempts) * 100) / 100;
+          stats.averageAccuracy =
+            Math.round((stats.totalAccuracy / stats.totalAttempts) * 100) / 100;
+          stats.averageSpeed =
+            Math.round((stats.totalSpeed / stats.totalAttempts) * 100) / 100;
+          stats.averageTimeSpent = Math.round(
+            stats.totalTimeSpent / stats.totalAttempts,
+          );
+
+          // 정확도 계산 (정답률)
+          const accuracyRate = stats.averageAccuracy;
+
+          return {
+            scenarioType: stats.scenarioType,
+            totalAttempts: stats.totalAttempts,
+            totalScore: stats.totalScore,
+            bestScore: stats.bestScore,
+            averageScore: stats.averageScore,
+            averageAccuracy: stats.averageAccuracy,
+            averageSpeed: stats.averageSpeed,
+            averageTimeSpent: stats.averageTimeSpent,
+            accuracyRate: Math.round(accuracyRate),
+            lastCompletedAt: stats.lastCompletedAt,
+          };
+        },
+      );
+
+      console.log('✅ 시나리오 타입별 통계 조회 완료:', {
+        userId,
+        scenarioTypes: scenarioTypeStats.length,
+        stats: scenarioTypeStats,
+      });
+
+      return scenarioTypeStats;
+    } catch (error) {
+      console.error('❌ 시나리오 타입별 통계 조회 실패:', error);
       throw error;
     }
   }

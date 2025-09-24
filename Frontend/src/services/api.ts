@@ -14,6 +14,7 @@ import type {
   UserProgress,
   Achievement,
   UserScenarioStats,
+  ScenarioTypeStatistics,
   UserLevelHistory,
   Inquiry,
   Faq,
@@ -887,6 +888,17 @@ export const myPageApi = {
   getScenarioStatistics: async (userId: number) => {
     return api.get<UserScenarioStats[]>(
       `/user-progress/${userId}/scenario-stats`
+    );
+  },
+
+  /**
+   * 사용자 시나리오 타입별 통계 조회 (새로운 5가지 항목)
+   * @param userId 사용자 ID
+   * @returns 시나리오 타입별 통계
+   */
+  getScenarioTypeStatistics: async (userId: number) => {
+    return api.get<ScenarioTypeStatistics[]>(
+      `/training-results/scenario-type-statistics/${userId}`
     );
   },
 

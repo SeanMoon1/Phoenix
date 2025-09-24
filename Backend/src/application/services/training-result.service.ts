@@ -116,6 +116,20 @@ export class TrainingResultService {
         userId: savedResult.userId,
         sessionId: savedResult.sessionId,
         scenarioId: savedResult.scenarioId,
+        feedback: savedResult.feedback,
+        completedAt: savedResult.completedAt,
+        isActive: savedResult.isActive,
+      });
+
+      // 데이터베이스에 실제로 저장되었는지 확인
+      const verifyResult = await this.trainingResultRepository.findOne({
+        where: { id: savedResult.id },
+      });
+      console.log('🔍 저장 검증:', {
+        found: !!verifyResult,
+        resultId: verifyResult?.id,
+        scenarioType: verifyResult?.scenarioType,
+        totalScore: verifyResult?.totalScore,
       });
 
       // 사용자 경험치 업데이트
@@ -479,7 +493,24 @@ export class TrainingResultService {
         order: { completedAt: 'DESC' },
       });
 
+      console.log('🔍 조회된 훈련 결과:', {
+        userId,
+        resultsCount: results.length,
+        results: results.map((r) => ({
+          id: r.id,
+          scenarioType: r.scenarioType,
+          totalScore: r.totalScore,
+          accuracyScore: r.accuracyScore,
+          speedScore: r.speedScore,
+          completionTime: r.completionTime,
+          completedAt: r.completedAt,
+        })),
+      });
+
       if (results.length === 0) {
+        console.log(
+          '⚠️ 훈련 결과가 없습니다. 사용자가 훈련을 완료했는지 확인하세요.',
+        );
         return [];
       }
 

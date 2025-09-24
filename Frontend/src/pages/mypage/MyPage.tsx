@@ -76,13 +76,17 @@ const MyPage: React.FC = () => {
         if (scenarioTypeResponse.success) {
           console.log(
             '✅ 시나리오 타입별 통계 로딩 성공:',
-            scenarioTypeResponse.data?.length || 0
+            scenarioTypeResponse.data?.length || 0,
+            '데이터:',
+            scenarioTypeResponse.data
           );
           setScenarioTypeStats(scenarioTypeResponse.data || []);
         } else {
           console.error(
             '❌ 시나리오 타입별 통계 로딩 실패:',
-            scenarioTypeResponse.error
+            scenarioTypeResponse.error,
+            '전체 응답:',
+            scenarioTypeResponse
           );
           // 시나리오 타입별 통계 로딩 실패는 에러로 처리하지 않음
         }

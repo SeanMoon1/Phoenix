@@ -58,6 +58,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
+  // ref that points to the main scenario content section (SituationCard)
+  const contentRef = useRef<HTMLElement | null>(null);
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
@@ -80,9 +82,19 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.resetSceneFlags();
     gameState.setHistory((h: number[]) => [...h, gameState.current]);
     gameState.setCurrent(index);
-    // 스크롤: 공통 처리
+
     requestAnimationFrame(() => {
-      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      requestAnimationFrame(() => {
+        const targetEl = contentRef.current ?? topRef.current;
+        if (!targetEl) return;
+
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const rect = targetEl.getBoundingClientRect();
+        const top = window.scrollY + rect.top - headerHeight - 8; // small margin
+
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
     });
   };
 
@@ -183,6 +195,21 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.setHistory((h: number[]) => h.slice(0, -1));
     gameState.setCurrent(prev);
     gameState.resetSceneFlags();
+
+    // mirror scroll logic for prev
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const targetEl = contentRef.current ?? topRef.current;
+        if (!targetEl) return;
+
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const rect = targetEl.getBoundingClientRect();
+        const top = window.scrollY + rect.top - headerHeight - 8;
+
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
   };
 
   // 로딩/에러 처리
@@ -244,6 +271,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               hideExpFill={expSystem.hideExpFill}
             />
             <SituationCard
+              ref={contentRef}
               title={gameState.scenario.title ?? ''}
               content={gameState.scenario.content ?? ''}
               sceneScript={gameState.scenario.sceneScript ?? ''}

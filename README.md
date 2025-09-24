@@ -45,6 +45,15 @@
 - **FAQ 시스템**: 자주 묻는 질문과 답변
 - **실시간 응답**: 빠른 고객 지원 서비스
 
+### 🔧 시스템 관리
+
+- **PM2 프로세스 관리**: 무중단 서비스 및 자동 재시작
+- **Nginx 리버스 프록시**: SSL/TLS 보안 및 성능 최적화
+- **환경별 설정**: 개발/테스트/운영 환경 분리
+- **자동 초기화**: 첫 배포 시 관리자 계정 및 기본 데이터 자동 생성
+- **보안 강화**: XSS, CSRF 등 웹 보안 취약점 방지
+- **Rate Limiting**: API 남용 방지를 위한 요청 제한 기능
+
 ## 🏗️ 기술 스택
 
 ### Frontend
@@ -71,6 +80,8 @@
 - **PM2** (프로세스 관리)
 - **Nginx** (리버스 프록시)
 - **AWS EC2** (클라우드 배포)
+- **AWS SES** (이메일 서비스)
+- **Docker** (컨테이너화)
 - **GitHub Actions** (CI/CD)
 
 ## 🏛️ Clean Architecture
@@ -187,20 +198,22 @@ Phoenix/
 │   └── ecosystem.config.js         # PM2 설정
 │
 ├── 📁 Database/                    # SQL 스키마 및 백업 (운영용)
-│   ├── 📁 schema/                  # SQL 스키마 파일
-│   │   └── phoenix_schema_mysql.sql
-│   ├── 📁 migrations/              # 수동 SQL 마이그레이션
-│   └── 📁 backups/                 # 데이터베이스 백업
+│   └── phoenix_complete_schema.sql # 완전한 MySQL 스키마
 │
+├── 📁 nginx/                       # Nginx 설정
+│   └── nginx.conf                  # 리버스 프록시 설정
 │
 ├── 📁 Docs/                        # 📚 포괄적 문서
 │   ├── 📁 api/                     # ✅ API 문서 및 가이드
+│   │   └── README.md               # API 사용법
 │   ├── 📁 database/                # ✅ DB 설계 및 최적화
+│   │   └── README.md               # 데이터베이스 가이드
 │   └── 📁 deployment/              # ✅ 배포 가이드 및 AWS 최적화
+│       └── README.md               # 배포 가이드
 │
-├── .gitignore
-├── README.md
-├── deploy-direct.sh                # 직접 실행 배포 스크립트
+├── .gitignore                      # Git 무시 파일
+├── env.example                     # 환경 변수 예시
+├── README.md                       # 프로젝트 문서
 └── package.json                    # 루트 패키지
 ```
 
@@ -428,6 +441,17 @@ npm run build
 
 ## 🆕 최근 업데이트
 
+### v2.2.0 (2025.01.17)
+
+- **AWS SES 이메일 시스템**: 고객지원 문의하기 기능에 AWS SES 통합
+- **PM2 프로세스 관리**: 프로덕션 환경에서 안정적인 애플리케이션 실행
+- **Nginx 리버스 프록시**: SSL/TLS 보안 및 성능 최적화
+- **환경별 설정 관리**: 개발/테스트/운영 환경 분리
+- **자동 관리자 계정 생성**: 초기 배포 시 관리자 계정 자동 생성
+- **OAuth 문제 해결**: OAuth 인증 관련 데이터베이스 제약조건 수정
+- **보안 헤더 강화**: XSS, CSRF 등 웹 보안 취약점 방지
+- **Rate Limiting**: API 남용 방지를 위한 요청 제한 기능
+
 ### v2.1.0 (2025.01.16)
 
 - **시나리오 관리 도구 통합**: [game-script-tool](https://github.com/1000ship/game-script-tool) 기반 시나리오 생성기 완전 통합
@@ -447,6 +471,11 @@ npm run build
 
 ### 주요 변경사항
 
+- **AWS SES 이메일 통합**: 고객지원 문의 시 자동 이메일 전송
+- **PM2 기반 프로세스 관리**: 무중단 서비스 및 자동 재시작
+- **Nginx 보안 설정**: SSL/TLS 암호화 및 보안 헤더 적용
+- **환경 변수 관리**: `.env` 파일을 통한 설정 중앙화
+- **자동 초기화**: 첫 배포 시 관리자 계정 및 기본 데이터 자동 생성
 - **시나리오 관리 도구**: 관리자 페이지에서 시나리오 생성/편집 가능
 - **원본 출처 명시**: game-script-tool 기반으로 개발되었음을 명시
 - **재난 유형 확장**: 화재, 지진, 응급처치, 홍수, 복합 재난 시나리오 지원

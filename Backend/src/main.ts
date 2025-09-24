@@ -62,33 +62,46 @@ async function createInitialAdmin(dataSource: DataSource) {
 
     // 1. 권한 레벨 생성
     console.log('📝 권한 레벨 생성 중...');
-    await dataSource.query(`
-      INSERT IGNORE INTO admin_level (
-        level_name, level_code, description, 
-        can_manage_team, can_manage_users, can_manage_scenarios, 
-        can_approve_scenarios, can_view_results, is_active
-      ) VALUES 
-      ('슈퍼 관리자', 'SUPER_ADMIN', '모든 권한을 가진 최고 관리자', 1, 1, 1, 1, 1, 1),
-      ('팀 관리자', 'TEAM_ADMIN', '팀 단위 관리 권한', 1, 1, 1, 0, 1, 1),
-      ('시나리오 관리자', 'SCENARIO_ADMIN', '시나리오 관리 권한', 0, 0, 1, 1, 1, 1),
-      ('조회 전용 관리자', 'VIEWER_ADMIN', '조회 권한만 가진 관리자', 0, 0, 0, 0, 1, 1)
-    `);
-    console.log('✅ 권한 레벨 생성 완료');
+    try {
+      await dataSource.query(`
+        INSERT IGNORE INTO admin_level (
+          level_name, level_code, description, 
+          can_manage_team, can_manage_users, can_manage_scenarios, 
+          can_approve_scenarios, can_view_results, is_active
+        ) VALUES 
+        ('슈퍼 관리자', 'SUPER_ADMIN', '모든 권한을 가진 최고 관리자', 1, 1, 1, 1, 1, 1),
+        ('팀 관리자', 'TEAM_ADMIN', '팀 단위 관리 권한', 1, 1, 1, 0, 1, 1),
+        ('시나리오 관리자', 'SCENARIO_ADMIN', '시나리오 관리 권한', 0, 0, 1, 1, 1, 1),
+        ('조회 전용 관리자', 'VIEWER_ADMIN', '조회 권한만 가진 관리자', 0, 0, 0, 0, 1, 1)
+      `);
+      console.log('✅ 권한 레벨 생성 완료');
+    } catch (error) {
+      console.warn('⚠️ 권한 레벨 생성 중 오류 (무시 가능):', error.message);
+    }
 
     // 2. 기본 팀 생성
     console.log('📝 기본 팀 생성 중...');
-    await dataSource.query(`
-      INSERT IGNORE INTO team (team_code, team_name, description, status, created_by, is_active)
-      VALUES ('DEFAULT_TEAM', '기본 팀', '시스템 기본 팀', 'ACTIVE', 1, 1)
-    `);
-    console.log('✅ 기본 팀 생성 완료');
+    try {
+      await dataSource.query(`
+        INSERT IGNORE INTO team (team_code, team_name, description, status, created_by, is_active)
+        VALUES ('DEFAULT_TEAM', '기본 팀', '시스템 기본 팀', 'ACTIVE', 1, 1)
+      `);
+      console.log('✅ 기본 팀 생성 완료');
+    } catch (error) {
+      console.warn('⚠️ 기본 팀 생성 중 오류 (무시 가능):', error.message);
+    }
 
     // 3. 관리자 계정 확인 및 권한 업데이트
     console.log('🔍 기존 관리자 계정 확인 중...');
-    const existingAdmin = await dataSource.query(
-      'SELECT admin_id, admin_level_id, al.level_code FROM admin a LEFT JOIN admin_level al ON a.admin_level_id = al.level_id WHERE a.login_id = ? AND a.is_active = 1',
-      [adminLoginId],
-    );
+    const existingAdmin = await dataSource
+      .query(
+        'SELECT admin_id, admin_level_id, al.level_code FROM admin a LEFT JOIN admin_level al ON a.admin_level_id = al.level_id WHERE a.login_id = ? AND a.is_active = 1',
+        [adminLoginId],
+      )
+      .catch((error) => {
+        console.warn('⚠️ 관리자 계정 확인 중 오류 (무시 가능):', error.message);
+        return [];
+      });
 
     console.log('🔍 기존 관리자 계정 확인 결과:', existingAdmin);
 
@@ -112,21 +125,25 @@ async function createInitialAdmin(dataSource: DataSource) {
     } else {
       // 4. 관리자 계정 생성
       console.log('📝 새 관리자 계정 생성 중...');
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      await dataSource.query(
-        `
-        INSERT INTO admin (
-          team_id, admin_level_id, login_id, password, name, email, phone, use_yn, created_by, is_active
-        ) VALUES (
-          (SELECT team_id FROM team WHERE team_code = 'DEFAULT_TEAM' LIMIT 1),
-          (SELECT level_id FROM admin_level WHERE level_code = 'SUPER_ADMIN' LIMIT 1),
-          ?, ?, ?, ?, ?, 'Y', 1, 1
-        )
-      `,
-        [adminLoginId, hashedPassword, adminName, adminEmail, adminPhone],
-      );
+      try {
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        await dataSource.query(
+          `
+          INSERT INTO admin (
+            team_id, admin_level_id, login_id, password, name, email, phone, use_yn, created_by, is_active
+          ) VALUES (
+            (SELECT team_id FROM team WHERE team_code = 'DEFAULT_TEAM' LIMIT 1),
+            (SELECT level_id FROM admin_level WHERE level_code = 'SUPER_ADMIN' LIMIT 1),
+            ?, ?, ?, ?, ?, 'Y', 1, 1
+          )
+        `,
+          [adminLoginId, hashedPassword, adminName, adminEmail, adminPhone],
+        );
 
-      console.log(`✅ 초기 관리자 계정 생성 완료: ${adminLoginId}`);
+        console.log(`✅ 초기 관리자 계정 생성 완료: ${adminLoginId}`);
+      } catch (error) {
+        console.warn('⚠️ 관리자 계정 생성 중 오류 (무시 가능):', error.message);
+      }
     }
   } catch (error) {
     console.error('❌ 초기 관리자 계정 생성 실패:', error.message);
@@ -137,6 +154,21 @@ async function createInitialAdmin(dataSource: DataSource) {
 async function bootstrap() {
   try {
     const app = await NestFactory.create(AppModule);
+
+    // 데이터베이스 연결 확인
+    try {
+      const dataSource = app.get(DataSource);
+      await dataSource.query('SELECT 1');
+      console.log('✅ 데이터베이스 연결 성공');
+    } catch (dbError) {
+      console.error('❌ 데이터베이스 연결 실패:', dbError.message);
+      console.log('⚠️ 환경 변수를 확인해주세요:');
+      console.log('   - DB_HOST:', process.env.DB_HOST || '❌ 미설정');
+      console.log('   - DB_PORT:', process.env.DB_PORT || '❌ 미설정');
+      console.log('   - DB_USERNAME:', process.env.DB_USERNAME || '❌ 미설정');
+      console.log('   - DB_DATABASE:', process.env.DB_DATABASE || '❌ 미설정');
+      throw dbError;
+    }
 
     // Global validation pipe
     app.useGlobalPipes(

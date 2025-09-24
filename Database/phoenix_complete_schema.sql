@@ -814,9 +814,10 @@ INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_
 -- =====================================================
 
 SELECT 'Phoenix Database Schema 생성 완료!' as status;
+-- 데이터베이스 통계 정보 (안전한 방식)
 SELECT '총 테이블 수:' as info, COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE();
 SELECT '총 뷰 수:' as info, COUNT(*) as count FROM information_schema.views WHERE table_schema = DATABASE();
-SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE table_schema = DATABASE() AND routine_type = 'PROCEDURE';
+SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE routine_schema = DATABASE() AND routine_type = 'PROCEDURE';
 SELECT '총 트리거 수:' as info, COUNT(*) as count FROM information_schema.triggers WHERE trigger_schema = DATABASE();
 SELECT '시나리오 타입별 통계 기능이 포함되었습니다.' as info;
 SELECT '5가지 항목 통계 (평균점수, 정확도, 훈련시간, 최고점수, 누적점수)를 지원합니다.' as info;

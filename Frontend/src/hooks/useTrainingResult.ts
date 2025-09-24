@@ -2,6 +2,18 @@ import { useCallback } from 'react';
 import { trainingApi, trainingResultApi, userExpApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 
+// 시나리오 타입을 API용으로 변환하는 함수
+const getScenarioTypeForApi = (scenarioType: string): string => {
+  const typeMap: Record<string, string> = {
+    fire: 'FIRE',
+    'first-aid': 'EMERGENCY',
+    'traffic-accident': 'TRAFFIC',
+    earthquake: 'EARTHQUAKE',
+    flood: 'FLOOD',
+  };
+  return typeMap[scenarioType] || 'FIRE';
+};
+
 export function useTrainingResult() {
   const { user } = useAuthStore();
 
@@ -23,8 +35,8 @@ export function useTrainingResult() {
           : 0;
         const scenarioIdMap: Record<string, number> = {
           fire: 1,
-          emergency: 2,
-          traffic: 3,
+          'first-aid': 2,
+          'traffic-accident': 3,
           earthquake: 4,
           flood: 5,
         };
@@ -45,6 +57,7 @@ export function useTrainingResult() {
           sessionId,
           // participantId는 제거 - 서버에서 자동으로 생성하도록 함
           scenarioId: scenarioIdMap[opts.scenarioType || 'fire'] || 1,
+          scenarioType: getScenarioTypeForApi(opts.scenarioType || 'fire'), // 시나리오 타입 추가
           userId: user.id,
           resultCode: `RESULT${Date.now()}`,
           accuracyScore:
@@ -70,9 +83,21 @@ export function useTrainingResult() {
           feedback: `${opts.scenarioSetName} 완료 - 레벨 ${opts.expSystemState.level}, 정답 ${opts.expSystemState.totalCorrect}/${opts.gameStateSummary.scenariosCount}`,
           completedAt: new Date().toISOString(),
         };
-        console.log('📤 훈련 결과 저장 시도:', resultData);
+        console.log('📤 훈련 결과 저장 시도:', {
+          ...resultData,
+          scenarioType: resultData.scenarioType,
+          totalScore: resultData.totalScore,
+          accuracyScore: resultData.accuracyScore,
+          speedScore: resultData.speedScore,
+          completionTime: resultData.completionTime,
+        });
+
         const saveResult = await trainingResultApi.save(resultData);
-        console.log('✅ 훈련 결과 저장 성공:', saveResult);
+        console.log('✅ 훈련 결과 저장 성공:', {
+          success: saveResult.success,
+          data: saveResult.data,
+          error: saveResult.error,
+        });
 
         // 서버에 경험치 정보 전송
         try {

@@ -67,16 +67,19 @@ export class TrainingResultService {
       const resultCode =
         data.resultCode || `RESULT_${Date.now()}_${data.userId}`;
 
-      // 시나리오 타입 정보 가져오기
-      const scenario = await this.trainingResultRepository.manager.findOne(
-        Scenario,
-        {
-          where: { id: data.scenarioId },
-        },
-      );
-      const scenarioType = scenario?.disasterType
-        ? scenario.disasterType.toUpperCase()
-        : 'UNKNOWN';
+      // 시나리오 타입 정보 가져오기 (Frontend에서 전송된 값 우선 사용)
+      let scenarioType = data.scenarioType;
+      if (!scenarioType) {
+        const scenario = await this.trainingResultRepository.manager.findOne(
+          Scenario,
+          {
+            where: { id: data.scenarioId },
+          },
+        );
+        scenarioType = scenario?.disasterType
+          ? scenario.disasterType.toUpperCase()
+          : 'UNKNOWN';
+      }
 
       const trainingResult = this.trainingResultRepository.create({
         ...data,
@@ -109,6 +112,10 @@ export class TrainingResultService {
         totalScore: savedResult.totalScore,
         accuracyScore: savedResult.accuracyScore,
         speedScore: savedResult.speedScore,
+        completionTime: savedResult.completionTime,
+        userId: savedResult.userId,
+        sessionId: savedResult.sessionId,
+        scenarioId: savedResult.scenarioId,
       });
 
       // 사용자 경험치 업데이트

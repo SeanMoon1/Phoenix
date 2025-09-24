@@ -23,6 +23,11 @@ export class CreateTrainingResultDto {
   @IsNotEmpty()
   scenarioId: number;
 
+  @ApiProperty({ example: 'FIRE', description: '시나리오 타입' })
+  @IsString()
+  @IsOptional()
+  scenarioType?: string;
+
   @ApiProperty({ example: 1, description: '사용자 ID' })
   @IsNumber()
   @IsNotEmpty()

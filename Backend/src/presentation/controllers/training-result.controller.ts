@@ -41,12 +41,15 @@ export class TrainingResultController {
       userId: data.userId,
       sessionId: data.sessionId,
       scenarioId: data.scenarioId,
+      scenarioType: data.scenarioType,
       participantId: data.participantId,
       totalScore: data.totalScore,
       accuracyScore: data.accuracyScore,
       speedScore: data.speedScore,
       completionTime: data.completionTime,
       completedAt: data.completedAt,
+      resultCode: data.resultCode,
+      feedback: data.feedback,
     });
 
     try {

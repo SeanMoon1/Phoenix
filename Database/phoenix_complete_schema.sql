@@ -406,7 +406,7 @@ CREATE TABLE IF NOT EXISTS achievement (
 CREATE TABLE IF NOT EXISTS user_scenario_stats (
     stats_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '통계 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
-    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 통계 가능)',
     scenario_type VARCHAR(50) NOT NULL COMMENT '시나리오 유형',
     completed_count INT NOT NULL DEFAULT 0 COMMENT '완료 횟수',
     total_score BIGINT NOT NULL DEFAULT 0 COMMENT '총점',
@@ -611,7 +611,7 @@ CREATE TRIGGER tr_training_result_after_insert
 AFTER INSERT ON training_result
 FOR EACH ROW
 BEGIN
-    -- user_scenario_stats 테이블 업데이트 (기존 통계 테이블과 연동)
+    -- user_scenario_stats 테이블 업데이트 (팀 소속 없이도 가능)
     INSERT INTO user_scenario_stats (
         user_id, 
         team_id, 
@@ -624,7 +624,7 @@ BEGIN
         last_completed_at
     ) VALUES (
         NEW.user_id,
-        (SELECT team_id FROM user WHERE user_id = NEW.user_id),
+        COALESCE((SELECT team_id FROM user WHERE user_id = NEW.user_id), NULL),
         NEW.scenario_type,
         1,
         NEW.total_score,
@@ -826,15 +826,13 @@ CREATE PROCEDURE SafeMigration()
 BEGIN
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
     
-    -- 1. team_id 컬럼 추가 시도 (NULL 허용)
+    -- 1. training_result 테이블의 team_id 컬럼을 NULL 허용으로 변경
     ALTER TABLE training_result 
-    ADD COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)' 
-    AFTER user_id;
+    MODIFY COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)';
     
-    -- 2. team_id 외래키 추가 시도
-    ALTER TABLE training_result 
-    ADD CONSTRAINT fk_training_result_team 
-    FOREIGN KEY (team_id) REFERENCES team(team_id);
+    -- 2. user_scenario_stats 테이블의 team_id 컬럼을 NULL 허용으로 변경
+    ALTER TABLE user_scenario_stats 
+    MODIFY COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 통계 가능)';
     
     -- 3. scenario_type 컬럼 추가 시도
     ALTER TABLE training_result 

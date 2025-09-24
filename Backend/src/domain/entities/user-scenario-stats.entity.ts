@@ -21,9 +21,9 @@ export class UserScenarioStats {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @ApiProperty({ description: '팀 ID' })
-  @Column({ name: 'team_id' })
-  teamId: number;
+  @ApiProperty({ description: '팀 ID', required: false })
+  @Column({ name: 'team_id', nullable: true })
+  teamId?: number;
 
   @ApiProperty({ description: '시나리오 유형' })
   @Column({ name: 'scenario_type', length: 50 })

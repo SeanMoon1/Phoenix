@@ -7,8 +7,9 @@ type Props = {
 
 export default function ClearModal({ message, onClose }: Props) {
   return (
+    // z-index를 크게 올려서 상단 메뉴(헤더)보다 위에 렌더되도록 함
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70"
+      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black/70"
       aria-live="assertive"
     >
       <div className="relative flex flex-col items-center">
@@ -19,7 +20,7 @@ export default function ClearModal({ message, onClose }: Props) {
             className="h-56 w-auto animate-bounce"
           />
           {/* 말풍선 */}
-          <div className="absolute -top-28 left-1/2 -translate-x-1/2 bg-white text-black rounded-2xl p-4 shadow-lg w-72 text-center">
+          <div className="absolute -top-28 left-1/2 -translate-x-1/2 bg-white text-black rounded-2xl p-4 shadow-lg w-72 text-center z-[100000]">
             <p className="text-base font-semibold leading-relaxed">{message}</p>
             <div
               className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0

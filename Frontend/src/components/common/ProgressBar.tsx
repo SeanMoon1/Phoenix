@@ -1,4 +1,5 @@
-// src/components/common/ProgressBar.tsx
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import phoenixImg from '@/assets/images/phoenix.png';
 
 type Props = {
@@ -9,6 +10,9 @@ type Props = {
   expDisplay: number; // EXP 수치(모바일표시)
   neededExp: number; // 다음 레벨 필요치(모바일표시)
   hideExpFill?: boolean; // 레벨업 리셋 연출 시 초록바 잠깐 숨김
+  // ScenarioPage가 트리거해서 모달로 띄울지 제어
+  mobilePanelModalOpen?: boolean;
+  onCloseMobilePanel?: () => void;
 };
 
 export default function ProgressBar({
@@ -19,8 +23,54 @@ export default function ProgressBar({
   expDisplay,
   neededExp,
   hideExpFill = false,
+  mobilePanelModalOpen = false,
+  onCloseMobilePanel,
 }: Props) {
   const percentAll = Math.round(((currentIndex + 1) / total) * 100);
+
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 767 : false
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => setIsMobile(window.innerWidth <= 767);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  const mobileBlock = (
+    <div className="mt-4 grid grid-cols-1 gap-4">
+      <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
+        <img
+          src={phoenixImg}
+          alt="Phoenix Mascot"
+          className="h-24 w-auto mx-auto"
+        />
+        <div className="mt-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-base font-semibold">레벨</h2>
+            <span className="text-xl font-bold">Lv.{level}</span>
+          </div>
+          <div className="mt-2">
+            <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+              <div
+                className={
+                  'h-full bg-emerald-500 dark:bg-emerald-400 ' +
+                  (hideExpFill
+                    ? 'opacity-0 w-0 transition-none'
+                    : 'transition-[width] duration-500')
+                }
+                style={{ width: hideExpFill ? 0 : `${progressPct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs opacity-80">
+              EXP {Math.round(expDisplay)} / {neededExp} ({progressPct}%)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <section className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-4">
@@ -37,38 +87,32 @@ export default function ProgressBar({
         />
       </div>
 
-      {/* 모바일 전용 캐릭터 + 레벨 + EXP 바 */}
-      <div className="md:hidden mt-4 grid grid-cols-1 gap-4">
-        <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
-          <img
-            src={phoenixImg}
-            alt="Phoenix Mascot"
-            className="h-24 w-auto mx-auto"
-          />
-          <div className="mt-4">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-base font-semibold">레벨</h2>
-              <span className="text-xl font-bold">Lv.{level}</span>
-            </div>
-            <div className="mt-2">
-              <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={
-                    'h-full bg-emerald-500 dark:bg-emerald-400 ' +
-                    (hideExpFill
-                      ? 'opacity-0 w-0 transition-none'
-                      : 'transition-[width] duration-500')
-                  }
-                  style={{ width: hideExpFill ? 0 : `${progressPct}%` }}
-                />
+      {/* 모바일 전용 캐릭터+EXP 블록 */}
+      {isMobile && mobilePanelModalOpen
+        ? typeof document !== 'undefined' &&
+          createPortal(
+            <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 pointer-events-auto overflow-hidden">
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => onCloseMobilePanel?.()}
+              />
+              <div className="w-full max-w-lg relative pointer-events-auto">
+                <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4 overflow-hidden">
+                  {mobileBlock}
+                  <div className="flex justify-end mt-4">
+                    <button
+                      className="px-4 py-2 bg-emerald-500 text-white rounded-lg"
+                      onClick={() => onCloseMobilePanel?.()}
+                    >
+                      확인
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="mt-1 text-xs opacity-80">
-                EXP {Math.round(expDisplay)} / {neededExp} ({progressPct}%)
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+            </div>,
+            document.body
+          )
+        : null}
     </section>
   );
 }

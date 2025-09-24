@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import /* trainingApi, trainingResultApi */ '@/services/api';
@@ -60,6 +60,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const topRef = useRef<HTMLDivElement | null>(null);
   // ref that points to the main scenario content section (SituationCard)
   const contentRef = useRef<HTMLElement | null>(null);
+  const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
@@ -269,6 +270,8 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               expDisplay={expSystem.EXPDisplay}
               neededExp={expSystem.neededEXP}
               hideExpFill={expSystem.hideExpFill}
+              mobilePanelModalOpen={showMobilePanelModal}
+              onCloseMobilePanel={() => setShowMobilePanelModal(false)}
             />
             <SituationCard
               ref={contentRef}
@@ -315,6 +318,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
             onClose={() => {
               modals.setClearMsg(null);
               modals.setShowConfetti(false);
+              // 모바일이면 축하 모달 닫은 뒤 캐릭터+EXP 패널을 모달로 띄움
+              if (typeof modals.vw === 'number' && modals.vw < 768) {
+                setShowMobilePanelModal(true);
+              }
             }}
           />
         )}

@@ -814,83 +814,47 @@ INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_
 -- =====================================================
 
 -- =====================================================
--- 자동 마이그레이션 체크 및 실행
+-- 자동 마이그레이션 (안전한 방식)
 -- =====================================================
 
--- training_result 테이블에 scenario_type 컬럼이 있는지 확인
-SET @has_scenario_type = 0;
-SELECT COUNT(*) INTO @has_scenario_type 
-FROM information_schema.columns 
-WHERE table_schema = DATABASE() 
-  AND table_name = 'training_result' 
-  AND column_name = 'scenario_type';
+-- 안전한 마이그레이션을 위한 프로시저 생성
+DELIMITER //
 
--- scenario_type 컬럼이 없으면 자동으로 추가
-SET @sql = IF(@has_scenario_type = 0, 
-  'ALTER TABLE training_result ADD COLUMN scenario_type VARCHAR(50) NOT NULL DEFAULT ''UNKNOWN'' COMMENT ''시나리오 타입'' AFTER scenario_id',
-  'SELECT ''scenario_type 컬럼이 이미 존재합니다.'' as message'
-);
+CREATE PROCEDURE SafeMigration()
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
+    
+    -- 1. scenario_type 컬럼 추가 시도
+    ALTER TABLE training_result 
+    ADD COLUMN scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입' 
+    AFTER scenario_id;
+    
+    -- 2. 기존 데이터 업데이트
+    UPDATE training_result tr
+    JOIN scenario s ON tr.scenario_id = s.scenario_id
+    SET tr.scenario_type = UPPER(s.disaster_type)
+    WHERE tr.scenario_type = 'UNKNOWN';
+    
+    -- 3. 인덱스 추가 시도
+    CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type);
+    
+    -- 4. 복합 인덱스 추가 시도
+    CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active);
+    
+    -- 5. 제약조건 추가 시도
+    ALTER TABLE training_result 
+    ADD CONSTRAINT chk_scenario_type 
+    CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'));
+    
+END //
 
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+DELIMITER ;
 
--- 기존 데이터 업데이트 (scenario_type이 UNKNOWN인 경우만)
-UPDATE training_result tr
-JOIN scenario s ON tr.scenario_id = s.scenario_id
-SET tr.scenario_type = UPPER(s.disaster_type)
-WHERE tr.scenario_type = 'UNKNOWN';
+-- 마이그레이션 실행
+CALL SafeMigration();
 
--- 인덱스가 없으면 추가
-SET @has_index = 0;
-SELECT COUNT(*) INTO @has_index 
-FROM information_schema.statistics 
-WHERE table_schema = DATABASE() 
-  AND table_name = 'training_result' 
-  AND index_name = 'idx_training_result_scenario_type';
-
-SET @sql = IF(@has_index = 0, 
-  'CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type)',
-  'SELECT ''인덱스가 이미 존재합니다.'' as message'
-);
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- 복합 인덱스가 없으면 추가
-SET @has_composite_index = 0;
-SELECT COUNT(*) INTO @has_composite_index 
-FROM information_schema.statistics 
-WHERE table_schema = DATABASE() 
-  AND table_name = 'training_result' 
-  AND index_name = 'idx_training_result_user_scenario_type';
-
-SET @sql = IF(@has_composite_index = 0, 
-  'CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active)',
-  'SELECT ''복합 인덱스가 이미 존재합니다.'' as message'
-);
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- 제약조건이 없으면 추가
-SET @has_constraint = 0;
-SELECT COUNT(*) INTO @has_constraint 
-FROM information_schema.table_constraints 
-WHERE table_schema = DATABASE() 
-  AND table_name = 'training_result' 
-  AND constraint_name = 'chk_scenario_type';
-
-SET @sql = IF(@has_constraint = 0, 
-  'ALTER TABLE training_result ADD CONSTRAINT chk_scenario_type CHECK (scenario_type IN (''FIRE'', ''EARTHQUAKE'', ''EMERGENCY'', ''TRAFFIC'', ''FLOOD'', ''UNKNOWN''))',
-  'SELECT ''제약조건이 이미 존재합니다.'' as message'
-);
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+-- 프로시저 삭제
+DROP PROCEDURE IF EXISTS SafeMigration;
 
 -- =====================================================
 -- 완료 메시지

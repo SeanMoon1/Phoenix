@@ -1,3 +1,5 @@
+import React from 'react';
+
 // 기본 API 응답 타입
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -378,7 +380,7 @@ export interface ScenarioTypeStatistics {
 export interface ScenarioTypeInfo {
   type: string;
   name: string;
-  icon: string;
+  icon: React.ReactElement;
   color: string;
   bgClass: string;
   progressClass: string;

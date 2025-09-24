@@ -58,7 +58,7 @@
 
 ### Frontend
 
-- **React 18** + **TypeScript**
+- **React 19** + **TypeScript**
 - **Vite** (빌드 도구)
 - **TailwindCSS** (스타일링)
 - **Zustand** (상태 관리)

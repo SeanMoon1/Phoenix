@@ -19,7 +19,6 @@ import OptionsList from '@/components/common/OptionsList';
 import FeedbackBanner from '@/components/common/FeedbackBanner';
 import NavButtons from '@/components/common/NavButtons';
 import ClearModal from '@/components/common/ClearModal';
-import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
 import PlayMoreButton from '@/components/common/PlayMoreButton';
 import LevelUpToast from '@/components/common/LevelUpToast';
@@ -85,8 +84,13 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.setCurrent(index);
 
     requestAnimationFrame(() => {
+      // 데스크탑 화면에서 다음버튼 누르고 스크롤 맨 위에서 시작하도록 수정
       requestAnimationFrame(() => {
-        const targetEl = contentRef.current ?? topRef.current;
+        const isWide =
+          typeof window !== 'undefined' && window.innerWidth >= 768;
+        const targetEl = isWide
+          ? topRef.current
+          : contentRef.current ?? topRef.current;
         if (!targetEl) return;
 
         const header = document.querySelector('header');
@@ -322,16 +326,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               if (typeof modals.vw === 'number' && modals.vw < 768) {
                 setShowMobilePanelModal(true);
               }
-            }}
-          />
-        )}
-        {modals.failMsg && (
-          <FailModal
-            message={modals.failMsg}
-            onClose={() => modals.setFailMsg(null)}
-            onRetry={() => {
-              modals.setFailMsg(null);
-              gameState.resetGame();
             }}
           />
         )}

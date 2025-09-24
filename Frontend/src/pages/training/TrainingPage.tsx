@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 
 const TrainingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('fire');
+  const topRef = useRef<HTMLDivElement | null>(null);
+
+  // 페이지 진입 시(네비게이트 후) 최상단(헤더 아래)으로 스크롤
+  useEffect(() => {
+    // double RAF to ensure DOM/layout settled
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const target = topRef.current ?? document.body;
+        if (!target) return;
+        const rect = (target as HTMLElement).getBoundingClientRect();
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const top = window.scrollY + rect.top - headerHeight - 8;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  }, []);
 
   // 탭 클릭 핸들러
   const handleTabClick = (tabId: string) => {
@@ -325,7 +342,7 @@ const TrainingPage: React.FC = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={topRef}>
           {/* 페이지 헤더 */}
           <div className="mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">

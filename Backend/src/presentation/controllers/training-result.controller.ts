@@ -55,13 +55,25 @@ export class TrainingResultController {
       console.log('✅ TrainingResultController.createTrainingResult 성공:', {
         id: result.id,
         resultCode: result.resultCode,
+        scenarioType: result.scenarioType,
+        totalScore: result.totalScore,
+        participantId: result.participantId,
+        sessionId: result.sessionId,
+        scenarioId: result.scenarioId,
+        userId: result.userId,
       });
       return { success: true, data: result };
     } catch (error) {
-      console.error(
-        '❌ TrainingResultController.createTrainingResult 실패:',
-        error,
-      );
+      console.error('❌ TrainingResultController.createTrainingResult 실패:', {
+        error: error.message,
+        stack: error.stack,
+        data: {
+          userId: data.userId,
+          sessionId: data.sessionId,
+          scenarioId: data.scenarioId,
+          totalScore: data.totalScore,
+        },
+      });
       return { success: false, error: error.message };
     }
   }

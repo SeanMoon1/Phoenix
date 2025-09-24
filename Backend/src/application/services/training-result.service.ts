@@ -27,6 +27,44 @@ export class TrainingResultService {
     try {
       console.log('🔍 훈련 결과 생성 시작:', data);
 
+      // 데이터베이스 연결 상태 확인
+      try {
+        await this.trainingResultRepository.manager.query('SELECT 1');
+        console.log('✅ 데이터베이스 연결 상태 정상');
+      } catch (dbError) {
+        console.error('❌ 데이터베이스 연결 실패:', dbError);
+        throw new Error('데이터베이스 연결에 실패했습니다.');
+      }
+
+      // training_result 테이블 구조 확인
+      try {
+        const tableInfo = await this.trainingResultRepository.manager.query(`
+          DESCRIBE training_result
+        `);
+        console.log('🔍 training_result 테이블 구조:', tableInfo);
+
+        // scenario_type 컬럼 존재 여부 확인
+        const hasScenarioType = tableInfo.some(
+          (column: any) => column.Field === 'scenario_type',
+        );
+        if (!hasScenarioType) {
+          console.error('❌ scenario_type 컬럼이 존재하지 않습니다!');
+          console.error('🔧 해결 방법:');
+          console.error(
+            '1. Database/phoenix_complete_schema.sql 파일을 실행하세요',
+          );
+          console.error('2. 이 파일에는 자동 마이그레이션이 포함되어 있습니다');
+          console.error('3. 마이그레이션 후 서버를 재시작하세요');
+          throw new Error(
+            'training_result 테이블에 scenario_type 컬럼이 없습니다. phoenix_complete_schema.sql 파일을 실행해주세요.',
+          );
+        }
+        console.log('✅ scenario_type 컬럼 존재 확인');
+      } catch (schemaError) {
+        console.error('❌ 테이블 구조 확인 실패:', schemaError);
+        throw new Error('테이블 구조 확인에 실패했습니다.');
+      }
+
       // 필수 필드 검증
       if (!data.userId || !data.sessionId || !data.scenarioId) {
         throw new Error(
@@ -70,12 +108,28 @@ export class TrainingResultService {
         isActive: true,
       });
 
+      // 트랜잭션을 사용하여 데이터 일관성 보장
       const savedResult =
-        await this.trainingResultRepository.save(trainingResult);
+        await this.trainingResultRepository.manager.transaction(
+          async (transactionalEntityManager) => {
+            console.log('🔄 트랜잭션 시작 - 훈련 결과 저장');
+            const result =
+              await transactionalEntityManager.save(trainingResult);
+            console.log('✅ 트랜잭션 내 훈련 결과 저장 완료:', {
+              id: result.id,
+              resultCode: result.resultCode,
+            });
+            return result;
+          },
+        );
       console.log('✅ 훈련 결과 생성 완료:', {
         id: savedResult.id,
         resultCode,
         participantId,
+        scenarioType: savedResult.scenarioType,
+        totalScore: savedResult.totalScore,
+        accuracyScore: savedResult.accuracyScore,
+        speedScore: savedResult.speedScore,
       });
 
       // 사용자 경험치 업데이트
@@ -102,7 +156,17 @@ export class TrainingResultService {
 
       return savedResult;
     } catch (error) {
-      console.error('❌ 훈련 결과 생성 실패:', error);
+      console.error('❌ 훈련 결과 생성 실패:', {
+        error: error.message,
+        stack: error.stack,
+        data: {
+          userId: data.userId,
+          sessionId: data.sessionId,
+          scenarioId: data.scenarioId,
+          participantId: data.participantId,
+          totalScore: data.totalScore,
+        },
+      });
       throw error;
     }
   }

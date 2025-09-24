@@ -813,6 +813,89 @@ INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_
 -- 완료 메시지
 -- =====================================================
 
+-- =====================================================
+-- 자동 마이그레이션 체크 및 실행
+-- =====================================================
+
+-- training_result 테이블에 scenario_type 컬럼이 있는지 확인
+SET @has_scenario_type = 0;
+SELECT COUNT(*) INTO @has_scenario_type 
+FROM information_schema.columns 
+WHERE table_schema = DATABASE() 
+  AND table_name = 'training_result' 
+  AND column_name = 'scenario_type';
+
+-- scenario_type 컬럼이 없으면 자동으로 추가
+SET @sql = IF(@has_scenario_type = 0, 
+  'ALTER TABLE training_result ADD COLUMN scenario_type VARCHAR(50) NOT NULL DEFAULT ''UNKNOWN'' COMMENT ''시나리오 타입'' AFTER scenario_id',
+  'SELECT ''scenario_type 컬럼이 이미 존재합니다.'' as message'
+);
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 기존 데이터 업데이트 (scenario_type이 UNKNOWN인 경우만)
+UPDATE training_result tr
+JOIN scenario s ON tr.scenario_id = s.scenario_id
+SET tr.scenario_type = UPPER(s.disaster_type)
+WHERE tr.scenario_type = 'UNKNOWN';
+
+-- 인덱스가 없으면 추가
+SET @has_index = 0;
+SELECT COUNT(*) INTO @has_index 
+FROM information_schema.statistics 
+WHERE table_schema = DATABASE() 
+  AND table_name = 'training_result' 
+  AND index_name = 'idx_training_result_scenario_type';
+
+SET @sql = IF(@has_index = 0, 
+  'CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type)',
+  'SELECT ''인덱스가 이미 존재합니다.'' as message'
+);
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 복합 인덱스가 없으면 추가
+SET @has_composite_index = 0;
+SELECT COUNT(*) INTO @has_composite_index 
+FROM information_schema.statistics 
+WHERE table_schema = DATABASE() 
+  AND table_name = 'training_result' 
+  AND index_name = 'idx_training_result_user_scenario_type';
+
+SET @sql = IF(@has_composite_index = 0, 
+  'CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active)',
+  'SELECT ''복합 인덱스가 이미 존재합니다.'' as message'
+);
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 제약조건이 없으면 추가
+SET @has_constraint = 0;
+SELECT COUNT(*) INTO @has_constraint 
+FROM information_schema.table_constraints 
+WHERE table_schema = DATABASE() 
+  AND table_name = 'training_result' 
+  AND constraint_name = 'chk_scenario_type';
+
+SET @sql = IF(@has_constraint = 0, 
+  'ALTER TABLE training_result ADD CONSTRAINT chk_scenario_type CHECK (scenario_type IN (''FIRE'', ''EARTHQUAKE'', ''EMERGENCY'', ''TRAFFIC'', ''FLOOD'', ''UNKNOWN''))',
+  'SELECT ''제약조건이 이미 존재합니다.'' as message'
+);
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- =====================================================
+-- 완료 메시지
+-- =====================================================
+
 SELECT 'Phoenix Database Schema 생성 완료!' as status;
 -- 데이터베이스 통계 정보 (안전한 방식)
 SELECT '총 테이블 수:' as info, COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE();
@@ -821,3 +904,4 @@ SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schem
 SELECT '총 트리거 수:' as info, COUNT(*) as count FROM information_schema.triggers WHERE trigger_schema = DATABASE();
 SELECT '시나리오 타입별 통계 기능이 포함되었습니다.' as info;
 SELECT '5가지 항목 통계 (평균점수, 정확도, 훈련시간, 최고점수, 누적점수)를 지원합니다.' as info;
+SELECT '자동 마이그레이션이 완료되었습니다.' as info;

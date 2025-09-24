@@ -70,7 +70,9 @@ export function useTrainingResult() {
           feedback: `${opts.scenarioSetName} 완료 - 레벨 ${opts.expSystemState.level}, 정답 ${opts.expSystemState.totalCorrect}/${opts.gameStateSummary.scenariosCount}`,
           completedAt: new Date().toISOString(),
         };
-        await trainingResultApi.save(resultData);
+        console.log('📤 훈련 결과 저장 시도:', resultData);
+        const saveResult = await trainingResultApi.save(resultData);
+        console.log('✅ 훈련 결과 저장 성공:', saveResult);
 
         // 서버에 경험치 정보 전송
         try {
@@ -93,7 +95,16 @@ export function useTrainingResult() {
 
         return { ok: true };
       } catch (err) {
-        console.error('useTrainingResult.saveTrainingResult failed', err);
+        console.error('❌ useTrainingResult.saveTrainingResult 실패:', {
+          error: err,
+          message: (err as any)?.message || '알 수 없는 오류',
+          stack: (err as any)?.stack,
+          data: {
+            scenarioSetName: opts.scenarioSetName,
+            scenarioType: opts.scenarioType,
+            userId: user?.id,
+          },
+        });
         return { ok: false, error: err };
       }
     },

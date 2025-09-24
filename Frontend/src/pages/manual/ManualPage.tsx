@@ -1,20 +1,41 @@
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout';
+import { Icon } from '../../utils/icons';
 
 const ManualPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('fire');
 
   const tabs = [
-    { id: 'fire', name: '화재', icon: '🔥', color: 'red' },
-    { id: 'earthquake', name: '지진', icon: '🌍', color: 'yellow' },
-    { id: 'emergency', name: '응급처치', icon: '🚑', color: 'green' },
-    { id: 'traffic', name: '교통사고', icon: '🚗', color: 'blue' },
+    {
+      id: 'fire',
+      name: '화재',
+      icon: <Icon type="fire" category="disaster" />,
+      color: 'red',
+    },
+    {
+      id: 'earthquake',
+      name: '지진',
+      icon: <Icon type="earthquake" category="disaster" />,
+      color: 'yellow',
+    },
+    {
+      id: 'emergency',
+      name: '응급처치',
+      icon: <Icon type="emergency" category="disaster" />,
+      color: 'green',
+    },
+    {
+      id: 'traffic',
+      name: '교통사고',
+      icon: <Icon type="traffic" category="disaster" />,
+      color: 'blue',
+    },
   ];
 
   const manualContent = {
     fire: {
       title: '화재 대응 메뉴얼',
-      icon: '🔥',
+      icon: <Icon type="fire" category="disaster" />,
       color: 'red',
       content: [
         {
@@ -53,7 +74,7 @@ const ManualPage: React.FC = () => {
     },
     earthquake: {
       title: '지진 대응 메뉴얼',
-      icon: '🌍',
+      icon: <Icon type="earthquake" category="disaster" />,
       color: 'yellow',
       content: [
         {
@@ -93,7 +114,7 @@ const ManualPage: React.FC = () => {
     },
     emergency: {
       title: '응급처치 메뉴얼',
-      icon: '🚑',
+      icon: <Icon type="emergency" category="disaster" />,
       color: 'green',
       content: [
         {
@@ -134,7 +155,7 @@ const ManualPage: React.FC = () => {
     },
     traffic: {
       title: '교통사고 대응 메뉴얼',
-      icon: '🚗',
+      icon: <Icon type="traffic" category="disaster" />,
       color: 'blue',
       content: [
         {

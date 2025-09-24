@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { APPROVAL_STATUS_INFO } from '../ScriptInput/constants';
 import type { ScriptBlock as ScriptBlockType } from '../../../types/game';
 import { ApprovalStatus } from '../../../types/game';
+import { Icon, getDisasterIcon as getDisasterIconType, getDifficultyIcon as getDifficultyIconType } from '../../../utils/icons';
 
 const Container = styled.div`
   background-color: #efefef;
@@ -105,34 +106,14 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
   modifyBlock,
   blockList,
 }) => {
-  const getDisasterEmoji = (type: string): string => {
-    switch (type) {
-      case 'fire':
-        return '🔥';
-      case 'earthquake':
-        return '🌋';
-      case 'emergency':
-        return '🚑';
-      case 'flood':
-        return '🌊';
-      case 'complex':
-        return '⚠️';
-      default:
-        return '❓';
-    }
+  const getDisasterIconComponent = (type: string) => {
+    const iconType = getDisasterIconType(type);
+    return <Icon type={iconType} category="disaster" />;
   };
 
-  const getDifficultyEmoji = (difficulty: string): string => {
-    switch (difficulty) {
-      case 'easy':
-        return '🟢';
-      case 'medium':
-        return '🟡';
-      case 'hard':
-        return '🔴';
-      default:
-        return '⚪';
-    }
+  const getDifficultyIconComponent = (difficulty: string) => {
+    const iconType = getDifficultyIconType(difficulty);
+    return <Icon type={iconType} category="difficulty" />;
   };
 
   const getStatusInfo = (status: ApprovalStatus) => {
@@ -170,11 +151,11 @@ const ScriptBlock: React.FC<ScriptBlockProps> = ({
 
       <DisasterInfo>
         <InfoItem>
-          {getDisasterEmoji(block.disasterType || 'unknown')}{' '}
+          {getDisasterIconComponent(block.disasterType || 'unknown')}{' '}
           {block.disasterType || '재난 유형'}
         </InfoItem>
         <InfoItem>
-          {getDifficultyEmoji(block.difficulty || 'medium')}{' '}
+          {getDifficultyIconComponent(block.difficulty || 'medium')}{' '}
           {block.difficulty || '난이도'}
         </InfoItem>
       </DisasterInfo>

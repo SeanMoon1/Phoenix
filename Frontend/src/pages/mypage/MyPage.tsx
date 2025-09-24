@@ -3,6 +3,7 @@ import Layout from '../../components/layout/Layout';
 import { useAuthStore } from '../../stores/authStore';
 import { teamApi, myPageApi } from '../../services/api';
 import { Button } from '../../components/ui';
+import { Icon } from '../../utils/icons';
 import type {
   TrainingResult,
   ScenarioTypeStatistics,
@@ -177,7 +178,7 @@ const MyPage: React.FC = () => {
       FIRE: {
         type: 'FIRE',
         name: '화재',
-        icon: '🔥',
+        icon: <Icon type="fire" category="disaster" />,
         color: 'red',
         bgClass: 'bg-red-100 dark:bg-red-900/30',
         progressClass: 'bg-red-500',
@@ -185,7 +186,7 @@ const MyPage: React.FC = () => {
       EARTHQUAKE: {
         type: 'EARTHQUAKE',
         name: '지진',
-        icon: '🌍',
+        icon: <Icon type="earthquake" category="disaster" />,
         color: 'yellow',
         bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
         progressClass: 'bg-yellow-500',
@@ -193,7 +194,7 @@ const MyPage: React.FC = () => {
       EMERGENCY: {
         type: 'EMERGENCY',
         name: '응급처치',
-        icon: '🚑',
+        icon: <Icon type="emergency" category="disaster" />,
         color: 'green',
         bgClass: 'bg-green-100 dark:bg-green-900/30',
         progressClass: 'bg-green-500',
@@ -201,7 +202,7 @@ const MyPage: React.FC = () => {
       TRAFFIC: {
         type: 'TRAFFIC',
         name: '교통사고',
-        icon: '🚗',
+        icon: <Icon type="traffic" category="disaster" />,
         color: 'blue',
         bgClass: 'bg-blue-100 dark:bg-blue-900/30',
         progressClass: 'bg-blue-500',
@@ -209,7 +210,7 @@ const MyPage: React.FC = () => {
       FLOOD: {
         type: 'FLOOD',
         name: '홍수',
-        icon: '🌊',
+        icon: <Icon type="flood" category="disaster" />,
         color: 'cyan',
         bgClass: 'bg-cyan-100 dark:bg-cyan-900/30',
         progressClass: 'bg-cyan-500',
@@ -217,7 +218,7 @@ const MyPage: React.FC = () => {
       UNKNOWN: {
         type: 'UNKNOWN',
         name: '기타',
-        icon: '❓',
+        icon: <Icon type="unknown" category="disaster" />,
         color: 'gray',
         bgClass: 'bg-gray-100 dark:bg-gray-900/30',
         progressClass: 'bg-gray-500',
@@ -279,7 +280,9 @@ const MyPage: React.FC = () => {
           ) : error ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-2 text-lg text-red-500">⚠️</div>
+                <div className="mb-2 text-lg text-red-500">
+                  <Icon type="warning" category="status" />
+                </div>
                 <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
             </div>
@@ -555,7 +558,9 @@ const MyPage: React.FC = () => {
           ) : error ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-2 text-lg text-red-500">⚠️</div>
+                <div className="mb-2 text-lg text-red-500">
+                  <Icon type="warning" category="status" />
+                </div>
                 <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
             </div>

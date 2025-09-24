@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
+import { Icon } from '../../utils/icons';
 
 const TrainingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,15 +13,35 @@ const TrainingPage: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'fire', name: '화재', icon: '🔥', color: 'red' },
-    { id: 'earthquake', name: '지진', icon: '🌍', color: 'yellow' },
-    { id: 'emergency', name: '응급처치', icon: '🚑', color: 'green' },
-    { id: 'trafficAccident', name: '교통사고', icon: '🚗', color: 'blue' },
+    {
+      id: 'fire',
+      name: '화재',
+      icon: <Icon type="fire" category="disaster" />,
+      color: 'red',
+    },
+    {
+      id: 'earthquake',
+      name: '지진',
+      icon: <Icon type="earthquake" category="disaster" />,
+      color: 'yellow',
+    },
+    {
+      id: 'emergency',
+      name: '응급처치',
+      icon: <Icon type="emergency" category="disaster" />,
+      color: 'green',
+    },
+    {
+      id: 'trafficAccident',
+      name: '교통사고',
+      icon: <Icon type="traffic" category="disaster" />,
+      color: 'blue',
+    },
   ];
 
   const fireContent = {
     title: '화재 대응 훈련',
-    icon: '🔥',
+    icon: <Icon type="fire" category="disaster" />,
     color: 'red',
     content: (
       <div className="space-y-8">
@@ -93,7 +114,7 @@ const TrainingPage: React.FC = () => {
 
   const earthquakeContent = {
     title: '지진 대응 훈련',
-    icon: '🌍',
+    icon: <Icon type="earthquake" category="disaster" />,
     color: 'yellow',
     content: (
       <div className="space-y-8">
@@ -166,7 +187,7 @@ const TrainingPage: React.FC = () => {
 
   const emergencyContent = {
     title: '응급처치 훈련',
-    icon: '🚑',
+    icon: <Icon type="emergency" category="disaster" />,
     color: 'green',
     content: (
       <div className="space-y-8">
@@ -240,7 +261,7 @@ const TrainingPage: React.FC = () => {
 
   const trafficAccidentContent = {
     title: '교통사고 대응 훈련',
-    icon: '🚗',
+    icon: <Icon type="traffic" category="disaster" />,
     color: 'blue',
     content: (
       <div className="space-y-8">
@@ -392,7 +413,7 @@ const TrainingPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🔥 화재
+                      <Icon type="fire" category="disaster" /> 화재
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 화재 감지 및 신고 방법</li>
@@ -402,7 +423,7 @@ const TrainingPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🌍 지진
+                      <Icon type="earthquake" category="disaster" /> 지진
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 지진 발생 시 즉시 대응</li>
@@ -412,7 +433,7 @@ const TrainingPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🚑 응급처치
+                      <Icon type="emergency" category="disaster" /> 응급처치
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 심폐소생술 (CPR) 실습</li>
@@ -422,7 +443,7 @@ const TrainingPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🚗 교통사고
+                      <Icon type="traffic" category="disaster" /> 교통사고
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 사고 현장 안전 확보</li>

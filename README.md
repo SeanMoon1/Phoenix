@@ -368,12 +368,12 @@ interface ScenarioGeneratorEvent {
   title: string;
   content: string;
   sceneScript: string;
-  disasterType: "fire" | "earthquake" | "emergency" | "flood" | "complex";
-  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
-  difficulty: "easy" | "medium" | "hard" | "expert";
+  disasterType: 'fire' | 'earthquake' | 'emergency' | 'flood' | 'complex';
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
   options: ChoiceOption[];
-  status: "ACTIVE" | "INACTIVE";
-  approvalStatus: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+  status: 'ACTIVE' | 'INACTIVE';
+  approvalStatus: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
   createdBy: number;
   order: number;
@@ -497,7 +497,7 @@ VITE_SCENARIO_DATA_SOURCE=auto  # static, api, auto 중 선택
 
 ```javascript
 // 브라우저 콘솔에서 실행
-ScenarioDataSource.setSource("api"); // API로 전환
+ScenarioDataSource.setSource('api'); // API로 전환
 ScenarioDataSource.getStatus(); // 현재 상태 확인
 ```
 
@@ -698,6 +698,18 @@ AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ## 📄 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
+
+### 🎨 아이콘 라이센스
+
+이 프로젝트에서 사용된 아이콘들은 다음과 같은 라이센스를 따릅니다:
+
+- **react-icons**: MIT License
+- **Font Awesome Free**: CC BY 4.0 (Creative Commons Attribution 4.0)
+  - 저작자 표시: Font Awesome (https://fontawesome.com/)
+  - 상업적 사용 허용
+  - 수정 및 배포 허용
+
+Font Awesome 아이콘 사용 시 CC BY 4.0 라이센스에 따라 적절한 저작자 표시가 필요합니다.
 
 ## 📞 지원
 

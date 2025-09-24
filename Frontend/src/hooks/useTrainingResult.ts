@@ -34,11 +34,11 @@ export function useTrainingResult() {
           ? Math.floor((Date.now() - opts.gameStateSummary.startTimeMs) / 1000)
           : 0;
         const scenarioIdMap: Record<string, number> = {
-          fire: 1,
-          'first-aid': 2,
-          'traffic-accident': 3,
-          earthquake: 4,
-          flood: 5,
+          fire: 1, // FIRE
+          'first-aid': 3, // EMERGENCY (응급처치)
+          'traffic-accident': 4, // TRAFFIC (교통사고)
+          earthquake: 2, // EARTHQUAKE (지진)
+          flood: 5, // FLOOD (홍수)
         };
         const sessionData: any = {
           sessionName: `${opts.scenarioSetName} 훈련`,

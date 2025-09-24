@@ -112,7 +112,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         scenarioType,
         expSystemState: {
           level: expSystem.level,
-          totalCorrect: expSystem.totalCorrect,
+          totalCorrect: gameState.currentCorrect, // 현재 훈련의 정답 개수 사용
         },
         gameStateSummary: {
           scenariosCount: gameState.scenarios.length,

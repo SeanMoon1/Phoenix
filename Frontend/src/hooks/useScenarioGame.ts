@@ -49,6 +49,9 @@ interface UseScenarioGameReturn {
 
   // 이미 풀었던 문제 인덱스 목록
   answered: number[];
+
+  // 현재 훈련에서의 정답 개수
+  currentCorrect: number;
 }
 
 export function useScenarioGame({
@@ -73,6 +76,9 @@ export function useScenarioGame({
 
   // 이미 푼 문제 상태
   const [answered, setAnswered] = useState<number[]>([]);
+
+  // 현재 훈련에서의 정답 개수
+  const [currentCorrect, setCurrentCorrect] = useState(0);
 
   // 현재 시나리오
   const scenario = useMemo(
@@ -114,6 +120,7 @@ export function useScenarioGame({
     setEndModalAutoShown(false);
     setChoiceDisabled(false);
     setAnswered([]);
+    setCurrentCorrect(0);
   }, []);
 
   // 씬 플래그 리셋
@@ -145,6 +152,12 @@ export function useScenarioGame({
       // 첫 응답이고 정답이면 경험치 지급 대상일 수 있음
       const shouldAwardExp =
         isCorrect && !awardedExpThisScene && !wrongTriedInThisScene;
+
+      // 정답이면 현재 훈련 정답 개수 증가
+      if (isCorrect) {
+        setCurrentCorrect(prev => prev + 1);
+      }
+
       // NOTE: 실제 awardedExpThisScene 플래그는 ScenarioPage에서 EXP 지급 시 설정하도록 유지(중복 방지)
       return { shouldAwardExp, isCorrect };
     },
@@ -192,6 +205,7 @@ export function useScenarioGame({
 
       // newly exposed
       answered,
+      currentCorrect,
     }),
     [
       scenarios,
@@ -210,6 +224,7 @@ export function useScenarioGame({
       resetSceneFlags,
       choiceDisabled,
       answered,
+      currentCorrect,
       // setter 함수들은 의존성에서 제외 (무한 루프 방지)
     ]
   );

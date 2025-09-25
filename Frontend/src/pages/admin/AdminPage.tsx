@@ -8,6 +8,7 @@ import {
   adminApi,
   apiClient,
 } from '../../services/api';
+import { Icon } from '../../utils/icons';
 import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
 import CreateAdminModal from '../../components/admin/CreateAdminModal';
@@ -146,12 +147,36 @@ const AdminPage: React.FC = () => {
   // 권한에 따른 탭 필터링
   const getAvailableTabs = () => {
     const allTabs = [
-      { id: 'training', label: '훈련 관리', icon: '🎯' },
-      { id: 'teams', label: '팀 관리', icon: '👥' },
-      { id: 'scripts', label: '시나리오 관리', icon: '📝' },
-      { id: 'approval', label: '승인 관리', icon: '✅' },
-      { id: 'users', label: '사용자 관리', icon: '👤' },
-      { id: 'admins', label: '관리자', icon: '👨‍💼' },
+      {
+        id: 'training',
+        label: '훈련 관리',
+        icon: <Icon type="trophy" category="ui" className="text-lg" />,
+      },
+      {
+        id: 'teams',
+        label: '팀 관리',
+        icon: <Icon type="user" category="ui" className="text-lg" />,
+      },
+      {
+        id: 'scripts',
+        label: '시나리오 관리',
+        icon: <Icon type="user" category="ui" className="text-lg" />,
+      },
+      {
+        id: 'approval',
+        label: '승인 관리',
+        icon: <Icon type="success" category="status" className="text-lg" />,
+      },
+      {
+        id: 'users',
+        label: '사용자 관리',
+        icon: <Icon type="user" category="ui" className="text-lg" />,
+      },
+      {
+        id: 'admins',
+        label: '관리자',
+        icon: <Icon type="user" category="ui" className="text-lg" />,
+      },
     ];
 
     // 슈퍼 관리자만 관리자 탭 접근 가능
@@ -804,7 +829,8 @@ const AdminPage: React.FC = () => {
               {/* 데이터 소스 설정 섹션 */}
               <div className="p-6 mb-8 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
-                  📊 시나리오 데이터 소스 설정
+                  <Icon type="chart" category="ui" className="inline mr-2" />
+                  시나리오 데이터 소스 설정
                 </h3>
                 <div className="mb-4">
                   <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
@@ -1010,7 +1036,14 @@ const AdminPage: React.FC = () => {
                                     다운로드 중...
                                   </>
                                 ) : (
-                                  <>📊 통계 다운로드</>
+                                  <>
+                                    <Icon
+                                      type="chart"
+                                      category="ui"
+                                      className="inline mr-2"
+                                    />
+                                    통계 다운로드
+                                  </>
                                 )}
                               </Button>
                             </div>
@@ -1500,7 +1533,8 @@ const AdminPage: React.FC = () => {
                   }
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  📊 엑셀 파일
+                  <Icon type="chart" category="ui" className="inline mr-2" />
+                  엑셀 파일
                 </Button>
                 <Button
                   onClick={() =>

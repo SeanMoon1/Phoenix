@@ -7,6 +7,7 @@ import {
   FaWater,
   FaExclamationTriangle,
   FaQuestion,
+  FaQuestionCircle,
   FaCircle,
   FaCheckCircle,
   FaTimesCircle,
@@ -51,6 +52,7 @@ export const statusIcons = {
   warning: <FaExclamationTriangle className="text-yellow-500" />,
   info: <FaInfoCircle className="text-blue-500" />,
   alert: <FaExclamation className="text-red-500" />,
+  question: <FaQuestionCircle className="text-blue-500" />,
 };
 
 // UI 아이콘 매핑

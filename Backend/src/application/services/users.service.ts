@@ -43,6 +43,7 @@ export class UsersService {
       email?: string;
       profileImageUrl?: string;
       password?: string;
+      teamId?: number;
     },
   ) {
     return this.updateUserUseCase.execute({ id, ...data });

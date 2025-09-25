@@ -1151,4 +1151,15 @@ export const userExpApi = {
     );
     return response.data;
   },
+
+  /**
+   * 사용자 팀 가입
+   * @param userId 사용자 ID
+   * @param teamCode 팀 코드
+   * @returns 팀 가입 결과
+   */
+  joinTeam: async (userId: number, teamCode: string) => {
+    const response = await api.post(`/users/${userId}/join-team`, { teamCode });
+    return response.data;
+  },
 };

@@ -21,13 +21,17 @@ import { UsersService } from '../../application/services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { TeamsService } from '../../application/services/teams.service';
 
 @ApiTags('users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly teamsService: TeamsService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -214,6 +218,71 @@ export class UsersController {
       return {
         success: false,
         error: '사용자 정보 수정 권한이 없습니다.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Post(':id/join-team')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '사용자 팀 가입' })
+  @ApiResponse({ status: 200, description: '팀 가입 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 팀 코드' })
+  async joinTeam(
+    @Param('id') id: string,
+    @Body() body: { teamCode: string },
+    @Req() req: any,
+  ) {
+    try {
+      const user = req.user;
+      const userId = parseInt(id);
+
+      if (!user) {
+        return { success: false, error: '인증이 필요합니다.' };
+      }
+
+      // 본인의 정보이거나 슈퍼 관리자인 경우만 수정 가능
+      if (user.id !== userId && user.adminLevel !== 'SUPER_ADMIN') {
+        return {
+          success: false,
+          error: '팀 가입 권한이 없습니다.',
+        };
+      }
+
+      // 팀 코드 유효성 검증
+      const teamValidation = await this.teamsService.validateTeamCode(
+        body.teamCode,
+      );
+
+      if (!teamValidation.valid) {
+        return {
+          success: false,
+          error: teamValidation.message || '유효하지 않은 팀 코드입니다.',
+        };
+      }
+
+      // 사용자 정보 업데이트 (팀 ID 설정)
+      const result = await this.usersService.updateUser(userId, {
+        teamId: teamValidation.team?.id,
+        // 팀 가입 시 자동으로 팀 관리자 권한 부여 (선택사항)
+        // adminLevel: 'TEAM_ADMIN',
+      });
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.user,
+        message: '팀 가입이 완료되었습니다.',
       };
     } catch (error) {
       return {

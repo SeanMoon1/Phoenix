@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsOptional, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  MinLength,
+  IsNumber,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -38,4 +44,13 @@ export class UpdateUserDto {
   @IsString()
   @MinLength(6)
   password?: string;
+
+  @ApiProperty({
+    description: 'Team ID',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  teamId?: number;
 }

@@ -6,6 +6,7 @@ import Layout from './components/layout/Layout';
 import AdminGuard from './components/guards/AdminGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import UserDashboard from './components/common/UserDashboard';
+import { Icon } from './utils/icons';
 
 // 동적 import로 페이지 로딩 최적화
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -40,7 +41,7 @@ const queryClient = new QueryClient({
 
 // 기능 카드 컴포넌트
 const FeatureCard: React.FC<{
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   delay: number;
@@ -51,7 +52,7 @@ const FeatureCard: React.FC<{
     className="flex flex-col w-full h-full p-6 transition-all duration-300 transform bg-white border border-gray-200 shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:-translate-y-2 dark:border-gray-600"
   >
     <div className="flex flex-col h-full text-center">
-      <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl">
+      <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-2xl">
         {icon}
       </div>
       <h3 className="mb-3 text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -81,8 +82,13 @@ const HomePage: React.FC = () => {
                 animation="fadeIn"
                 className="mb-6 sm:mb-8"
               >
-                <h1 className="text-4xl font-bold text-orange-600 sm:text-5xl md:text-6xl dark:text-orange-400">
-                  재난훈련ON🔥
+                <h1 className="text-4xl font-bold text-orange-600 sm:text-5xl md:text-6xl dark:text-orange-400 flex items-center justify-center lg:justify-start gap-3">
+                  재난훈련ON
+                  <Icon
+                    type="fire"
+                    category="disaster"
+                    className="text-4xl sm:text-5xl md:text-6xl text-red-500"
+                  />
                 </h1>
               </AnimatedText>
 
@@ -177,37 +183,73 @@ const HomePage: React.FC = () => {
 
           <div className="grid items-stretch grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
-              icon="🎮"
+              icon={
+                <Icon
+                  type="vr"
+                  category="training"
+                  className="text-4xl text-blue-600 dark:text-blue-400"
+                />
+              }
               title="가상현실 훈련"
               description="실감나는 가상 환경에서 직접 체험하는 재난 대응 훈련을 제공합니다."
               delay={200}
             />
             <FeatureCard
-              icon="🎯"
+              icon={
+                <Icon
+                  type="scenario"
+                  category="training"
+                  className="text-4xl text-green-600 dark:text-green-400"
+                />
+              }
               title="실시간 시나리오"
               description="다양한 재난 상황을 실시간으로 시뮬레이션하여 현실감 있는 훈련을 제공합니다."
               delay={400}
             />
             <FeatureCard
-              icon="📊"
+              icon={
+                <Icon
+                  type="analytics"
+                  category="training"
+                  className="text-4xl text-purple-600 dark:text-purple-400"
+                />
+              }
               title="성과 분석"
               description="훈련 결과를 체계적으로 분석하고 개선점을 제시하여 능력 향상을 돕습니다."
               delay={600}
             />
             <FeatureCard
-              icon="🔄"
+              icon={
+                <Icon
+                  type="repeat"
+                  category="training"
+                  className="text-4xl text-orange-600 dark:text-orange-400"
+                />
+              }
               title="반복 훈련"
               description="필요한 만큼 반복하여 완벽한 대응 능력을 기를 수 있습니다."
               delay={800}
             />
             <FeatureCard
-              icon="👥"
+              icon={
+                <Icon
+                  type="teamwork"
+                  category="training"
+                  className="text-4xl text-indigo-600 dark:text-indigo-400"
+                />
+              }
               title="팀워크 훈련"
               description="여러 명이 함께 참여하여 협력과 소통 능력을 향상시킵니다."
               delay={1000}
             />
             <FeatureCard
-              icon="📱"
+              icon={
+                <Icon
+                  type="mobile"
+                  category="training"
+                  className="text-4xl text-teal-600 dark:text-teal-400"
+                />
+              }
               title="모바일 지원"
               description="언제 어디서나 접근 가능한 모바일 환경을 지원합니다."
               delay={1200}

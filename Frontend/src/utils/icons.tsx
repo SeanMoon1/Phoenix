@@ -15,6 +15,12 @@ import {
   FaChartBar,
   FaTrophy,
   FaUser,
+  FaGamepad,
+  FaPlay,
+  FaRedo,
+  FaUsers,
+  FaShieldAlt,
+  FaMobileAlt,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
@@ -52,14 +58,26 @@ export const uiIcons = {
   user: <FaUser />,
 };
 
+// 훈련 시스템 아이콘 매핑
+export const trainingIcons = {
+  vr: <FaGamepad />,
+  scenario: <FaPlay />,
+  analytics: <FaChartBar />,
+  repeat: <FaRedo />,
+  teamwork: <FaUsers />,
+  safety: <FaShieldAlt />,
+  mobile: <FaMobileAlt />,
+};
+
 // 아이콘 컴포넌트 타입
 export interface IconProps {
   type:
     | keyof typeof disasterIcons
     | keyof typeof difficultyIcons
     | keyof typeof statusIcons
-    | keyof typeof uiIcons;
-  category: 'disaster' | 'difficulty' | 'status' | 'ui';
+    | keyof typeof uiIcons
+    | keyof typeof trainingIcons;
+  category: 'disaster' | 'difficulty' | 'status' | 'ui' | 'training';
   className?: string;
 }
 
@@ -87,6 +105,10 @@ export const Icon: React.FC<IconProps> = ({
       break;
     case 'ui':
       icon = uiIcons[type as keyof typeof uiIcons] || uiIcons.user;
+      break;
+    case 'training':
+      icon =
+        trainingIcons[type as keyof typeof trainingIcons] || trainingIcons.vr;
       break;
     default:
       icon = disasterIcons.unknown;

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout';
 import { useAuthStore } from '../../stores/authStore';
-import { teamApi, myPageApi, userExpApi } from '../../services/api';
+import { teamApi, myPageApi, userExpApi, api } from '../../services/api';
 import { Button } from '../../components/ui';
 import { Icon } from '../../utils/icons';
 import type {
   TrainingResult,
   ScenarioTypeStatistics,
   ScenarioTypeInfo,
+  User,
 } from '../../types';
 
 const MyPage: React.FC = () => {
@@ -26,75 +27,77 @@ const MyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 데이터 로딩 함수
+  const loadUserData = async (userId?: number) => {
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log('🔍 사용자 데이터 로딩 시작:', { userId: targetUserId });
+
+      // 병렬로 데이터 가져오기
+      const [recordsResponse, statsResponse, scenarioTypeResponse] =
+        await Promise.all([
+          myPageApi.getTrainingRecords(targetUserId),
+          myPageApi.getTrainingStatistics(targetUserId),
+          myPageApi.getScenarioTypeStatistics(targetUserId),
+        ]);
+
+      console.log('📊 API 응답 결과:', {
+        records: recordsResponse,
+        stats: statsResponse,
+        scenarioType: scenarioTypeResponse,
+      });
+
+      // 훈련 기록 처리
+      if (recordsResponse.success) {
+        console.log(
+          '✅ 훈련 기록 로딩 성공:',
+          recordsResponse.data?.length || 0
+        );
+        setTrainingRecords(recordsResponse.data || []);
+      } else {
+        console.error('❌ 훈련 기록 로딩 실패:', recordsResponse.error);
+        setError(
+          `훈련 기록을 불러오는데 실패했습니다: ${recordsResponse.error}`
+        );
+      }
+
+      // 훈련 통계 처리 (참고용으로만 로딩)
+      if (statsResponse.success) {
+        console.log('✅ 훈련 통계 로딩 성공:', statsResponse.data);
+      } else {
+        console.error('❌ 훈련 통계 로딩 실패:', statsResponse.error);
+        // 통계 로딩 실패는 에러로 처리하지 않음 (기록이 없을 수 있음)
+      }
+
+      // 시나리오 타입별 통계 처리
+      if (scenarioTypeResponse.success) {
+        console.log(
+          '✅ 시나리오 타입별 통계 로딩 성공:',
+          scenarioTypeResponse.data?.length || 0
+        );
+        setScenarioTypeStats(scenarioTypeResponse.data || []);
+      } else {
+        console.error(
+          '❌ 시나리오 타입별 통계 로딩 실패:',
+          scenarioTypeResponse.error
+        );
+        // 시나리오 타입별 통계 로딩 실패는 에러로 처리하지 않음
+      }
+    } catch (err) {
+      console.error('❌ 사용자 데이터 로딩 실패:', err);
+      setError('데이터를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 데이터 로딩
   useEffect(() => {
-    const loadUserData = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        console.log('🔍 사용자 데이터 로딩 시작:', { userId: user.id });
-
-        // 병렬로 데이터 가져오기
-        const [recordsResponse, statsResponse, scenarioTypeResponse] =
-          await Promise.all([
-            myPageApi.getTrainingRecords(user.id),
-            myPageApi.getTrainingStatistics(user.id),
-            myPageApi.getScenarioTypeStatistics(user.id),
-          ]);
-
-        console.log('📊 API 응답 결과:', {
-          records: recordsResponse,
-          stats: statsResponse,
-          scenarioType: scenarioTypeResponse,
-        });
-
-        // 훈련 기록 처리
-        if (recordsResponse.success) {
-          console.log(
-            '✅ 훈련 기록 로딩 성공:',
-            recordsResponse.data?.length || 0
-          );
-          setTrainingRecords(recordsResponse.data || []);
-        } else {
-          console.error('❌ 훈련 기록 로딩 실패:', recordsResponse.error);
-          setError(
-            `훈련 기록을 불러오는데 실패했습니다: ${recordsResponse.error}`
-          );
-        }
-
-        // 훈련 통계 처리 (참고용으로만 로딩)
-        if (statsResponse.success) {
-          console.log('✅ 훈련 통계 로딩 성공:', statsResponse.data);
-        } else {
-          console.error('❌ 훈련 통계 로딩 실패:', statsResponse.error);
-          // 통계 로딩 실패는 에러로 처리하지 않음 (기록이 없을 수 있음)
-        }
-
-        // 시나리오 타입별 통계 처리
-        if (scenarioTypeResponse.success) {
-          console.log(
-            '✅ 시나리오 타입별 통계 로딩 성공:',
-            scenarioTypeResponse.data?.length || 0
-          );
-          setScenarioTypeStats(scenarioTypeResponse.data || []);
-        } else {
-          console.error(
-            '❌ 시나리오 타입별 통계 로딩 실패:',
-            scenarioTypeResponse.error
-          );
-          // 시나리오 타입별 통계 로딩 실패는 에러로 처리하지 않음
-        }
-      } catch (err) {
-        console.error('❌ 사용자 데이터 로딩 실패:', err);
-        setError('데이터를 불러오는 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadUserData();
   }, [user?.id]);
 
@@ -133,6 +136,38 @@ const MyPage: React.FC = () => {
     }
   };
 
+  // 사용자 정보 새로고침 함수
+  const refreshUserData = async () => {
+    if (!user?.id) return;
+
+    try {
+      console.log('🔄 사용자 정보 새로고침 시작');
+      // 사용자 프로필 정보 다시 가져오기
+      const profileResponse = await api.get<User>(`/auth/profile`);
+      if (profileResponse.success && profileResponse.data) {
+        console.log('✅ 사용자 프로필 정보 업데이트:', profileResponse.data);
+        setUser(profileResponse.data);
+
+        // 팀 정보가 있으면 팀 정보도 로드
+        if (profileResponse.data.teamId) {
+          try {
+            const teamResponse = await teamApi.getById(
+              profileResponse.data.teamId
+            );
+            if (teamResponse.success && teamResponse.data) {
+              console.log('✅ 팀 정보 로드 성공:', teamResponse.data);
+              setTeamInfo(teamResponse.data);
+            }
+          } catch (teamError) {
+            console.error('❌ 팀 정보 로드 실패:', teamError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ 사용자 정보 새로고침 실패:', error);
+    }
+  };
+
   // 팀 가입 처리
   const handleJoinTeam = async () => {
     if (!teamCode.trim() || !user) {
@@ -156,19 +191,29 @@ const MyPage: React.FC = () => {
 
       if (response && response.success === true) {
         console.log('✅ 팀 가입 성공');
-        // 성공 시 사용자 정보 업데이트
+        console.log('🔍 업데이트할 사용자 데이터:', response.data);
+
+        // 성공 시 사용자 정보 업데이트 - 백엔드에서 반환된 전체 사용자 정보 사용
         const updatedUser = {
           ...user,
-          teamId: response.data?.teamId || response.data?.id,
+          ...response.data, // 백엔드에서 반환된 전체 사용자 정보로 업데이트
         };
+
+        console.log('🔍 업데이트된 사용자 정보:', updatedUser);
         setUser(updatedUser);
         setTeamCode('');
         setTeamInfo(null);
         setTeamValidationError('');
+
+        // 사용자 정보 새로고침
+        await refreshUserData();
+
         alert('팀 가입이 완료되었습니다!');
 
-        // 페이지 새로고침으로 최신 사용자 정보 로드
-        window.location.reload();
+        // 데이터 다시 로드
+        setTimeout(async () => {
+          await loadUserData(user.id);
+        }, 500);
       } else {
         console.error('❌ 팀 가입 실패:', response?.error || '알 수 없는 오류');
         setTeamValidationError(response?.error || '팀 가입에 실패했습니다.');

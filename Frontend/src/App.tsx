@@ -6,6 +6,7 @@ import Layout from './components/layout/Layout';
 import AdminGuard from './components/guards/AdminGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import UserDashboard from './components/common/UserDashboard';
+import { Icon } from './utils/icons';
 
 // 동적 import로 페이지 로딩 최적화
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));

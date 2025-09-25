@@ -238,15 +238,24 @@ export class UsersController {
     @Req() req: any,
   ) {
     try {
+      console.log('🔍 팀 가입 요청:', { userId: id, teamCode: body.teamCode });
+
       const user = req.user;
       const userId = parseInt(id);
 
       if (!user) {
+        console.log('❌ 인증 실패');
         return { success: false, error: '인증이 필요합니다.' };
       }
 
+      console.log('🔍 사용자 정보:', {
+        userId: user.id,
+        adminLevel: user.adminLevel,
+      });
+
       // 본인의 정보이거나 슈퍼 관리자인 경우만 수정 가능
       if (user.id !== userId && user.adminLevel !== 'SUPER_ADMIN') {
+        console.log('❌ 권한 없음');
         return {
           success: false,
           error: '팀 가입 권한이 없습니다.',
@@ -254,11 +263,14 @@ export class UsersController {
       }
 
       // 팀 코드 유효성 검증
+      console.log('🔍 팀 코드 검증 시작');
       const teamValidation = await this.teamsService.validateTeamCode(
         body.teamCode,
       );
+      console.log('🔍 팀 코드 검증 결과:', teamValidation);
 
       if (!teamValidation.valid) {
+        console.log('❌ 팀 코드 검증 실패:', teamValidation.message);
         return {
           success: false,
           error: teamValidation.message || '유효하지 않은 팀 코드입니다.',
@@ -266,25 +278,33 @@ export class UsersController {
       }
 
       // 사용자 정보 업데이트 (팀 ID 설정)
+      console.log('🔍 사용자 정보 업데이트 시작:', {
+        userId,
+        teamId: teamValidation.team?.id,
+      });
       const result = await this.usersService.updateUser(userId, {
         teamId: teamValidation.team?.id,
         // 팀 가입 시 자동으로 팀 관리자 권한 부여 (선택사항)
         // adminLevel: 'TEAM_ADMIN',
       });
+      console.log('🔍 사용자 정보 업데이트 결과:', result);
 
       if (!result.success) {
+        console.log('❌ 사용자 정보 업데이트 실패:', result.error);
         return {
           success: false,
           error: result.error,
         };
       }
 
+      console.log('✅ 팀 가입 성공');
       return {
         success: true,
         data: result.user,
         message: '팀 가입이 완료되었습니다.',
       };
     } catch (error) {
+      console.error('❌ 팀 가입 오류:', error);
       return {
         success: false,
         error: error.message,

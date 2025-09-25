@@ -113,6 +113,9 @@ export class TeamsController {
     },
   })
   async validateTeamCode(@Param('teamCode') teamCode: string) {
-    return this.teamsService.validateTeamCode(teamCode);
+    console.log('🔍 팀 코드 검증 API 호출:', { teamCode });
+    const result = await this.teamsService.validateTeamCode(teamCode);
+    console.log('🔍 팀 코드 검증 API 결과:', result);
+    return result;
   }
 }

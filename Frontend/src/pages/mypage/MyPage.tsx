@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout';
 import { useAuthStore } from '../../stores/authStore';
-import { teamApi, myPageApi } from '../../services/api';
+import { teamApi, myPageApi, userExpApi } from '../../services/api';
 import { Button } from '../../components/ui';
 import { Icon } from '../../utils/icons';
 import type {
@@ -135,25 +135,36 @@ const MyPage: React.FC = () => {
 
   // 팀 가입 처리
   const handleJoinTeam = async () => {
-    if (!teamInfo) {
-      setTeamValidationError('유효한 팀 코드를 입력해주세요.');
+    if (!teamCode.trim() || !user) {
+      setTeamValidationError('팀 코드를 입력해주세요.');
       return;
     }
 
     try {
-      // TODO: 팀 가입 API 호출
-      console.log('팀 가입:', teamInfo);
-      // 성공 시 사용자 정보 업데이트
-      if (user) {
+      console.log('🔍 팀 가입 시작:', { userId: user.id, teamCode: teamCode });
+
+      // 실제 팀 가입 API 호출 (Backend에서 팀 코드 검증 수행)
+      const response = (await userExpApi.joinTeam(user.id, teamCode)) as any;
+      console.log('🔍 팀 가입 API 응답:', response);
+
+      if (response.success) {
+        console.log('✅ 팀 가입 성공');
+        // 성공 시 사용자 정보 업데이트
         setUser({
           ...user,
-          teamId: teamInfo.id,
+          teamId: response.data?.teamId || response.data?.id,
         });
+        setTeamCode('');
+        setTeamInfo(null);
+        setTeamValidationError('');
+        alert('팀 가입이 완료되었습니다!');
+      } else {
+        console.error('❌ 팀 가입 실패:', response.error);
+        setTeamValidationError(response.error || '팀 가입에 실패했습니다.');
       }
-      setTeamCode('');
-      setTeamInfo(null);
     } catch (error) {
-      console.error('팀 가입 실패:', error);
+      console.error('❌ 팀 가입 오류:', error);
+      setTeamValidationError('팀 가입 중 오류가 발생했습니다.');
     }
   };
 
@@ -636,7 +647,7 @@ const MyPage: React.FC = () => {
                     />
                     <Button
                       onClick={handleJoinTeam}
-                      disabled={!teamInfo || isValidatingTeam}
+                      disabled={!teamCode.trim() || isValidatingTeam}
                       className="px-4 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       가입

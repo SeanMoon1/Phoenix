@@ -21,11 +21,13 @@ import {
   FaUsers,
   FaShieldAlt,
   FaMobileAlt,
+  FaGripfire,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
 export const disasterIcons = {
   fire: <FaFire className="text-red-500" />,
+  gripfire: <FaGripfire className="text-red-500" />,
   earthquake: <FaGlobeAmericas className="text-yellow-500" />,
   emergency: <FaAmbulance className="text-green-500" />,
   traffic: <FaCar className="text-blue-500" />,

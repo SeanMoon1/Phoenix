@@ -307,24 +307,68 @@ const ManualPage: React.FC = () => {
                   메뉴얼 활용 가이드
                 </h2>
                 <div className="space-y-6">
+                  {/* 재난 유형별 가이드 */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      📖 탭 기반 메뉴얼 사용법
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Icon
+                        type="fire"
+                        category="disaster"
+                        className="text-red-500"
+                      />
+                      화재 대응
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 상단 탭을 클릭하여 원하는 재난 상황 선택</li>
-                      <li>• 각 상황별로 체계적으로 정리된 단계별 가이드</li>
-                      <li>• 실제 상황에서 바로 적용 가능한 실용적 정보</li>
+                      <li>• 화재 감지 시 즉시 119 신고</li>
+                      <li>• 연기와 불길을 피해 안전한 경로로 대피</li>
+                      <li>• 초기 진화 시 소화기 P.A.S.S 방법 활용</li>
                     </ul>
                   </div>
+
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🎯 효과적인 학습 방법
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Icon
+                        type="earthquake"
+                        category="disaster"
+                        className="text-yellow-500"
+                      />
+                      지진 대응
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 정기적으로 메뉴얼을 반복 학습하여 숙지</li>
-                      <li>• 가족이나 동료와 함께 학습하여 상호 점검</li>
-                      <li>• 실제 훈련과 연계하여 실전 경험 쌓기</li>
+                      <li>• 지진 발생 시 즉시 책상 아래로 대피</li>
+                      <li>• 진동이 멈춘 후 안전한 장소로 이동</li>
+                      <li>• 가스 밸브 차단 및 전기 차단기 내리기</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Icon
+                        type="emergency"
+                        category="disaster"
+                        className="text-green-500"
+                      />
+                      응급처치
+                    </h3>
+                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                      <li>• 의식 확인 후 119 신고</li>
+                      <li>• 심폐소생술(CPR) 실시</li>
+                      <li>• 자동제세동기(AED) 사용법 숙지</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Icon
+                        type="traffic"
+                        category="disaster"
+                        className="text-blue-500"
+                      />
+                      교통사고
+                    </h3>
+                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                      <li>• 사고 발생 시 즉시 안전한 곳으로 이동</li>
+                      <li>• 119 신고 및 교통 정리</li>
+                      <li>• 부상자 응급처치 및 병원 이송</li>
                     </ul>
                   </div>
                 </div>

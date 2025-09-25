@@ -72,6 +72,65 @@ export default function ProgressBar({
     </div>
   );
 
+  // modal 애니메이션용 상태: 모달이 열릴 때 0%에서 목표(progressPct)로 애니메이션
+  const [animatePct, setAnimatePct] = useState<number>(0);
+  useEffect(() => {
+    if (!mobilePanelModalOpen) {
+      setAnimatePct(0);
+      return;
+    }
+    // 모달 열릴 때 애니메이션 트리거 (double RAF으로 레이아웃 적용 후 transition 실행)
+    let raf1: number | null = null;
+    let raf2: number | null = null;
+    setAnimatePct(0);
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setAnimatePct(progressPct);
+      });
+    });
+    return () => {
+      if (raf1 != null) cancelAnimationFrame(raf1);
+      if (raf2 != null) cancelAnimationFrame(raf2);
+      setAnimatePct(0);
+    };
+  }, [mobilePanelModalOpen, progressPct]);
+
+  // 모달 전용 블록 — 인라인 블록(mobileBlock)과 거의 동일하지만 width가 animatePct로 움직임
+  const modalMobileBlock = (
+    <div className="mt-4 grid grid-cols-1 gap-4">
+      <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
+        <img
+          src={phoenixImg}
+          alt="Phoenix Mascot"
+          className="h-24 w-auto mx-auto"
+        />
+        <div className="mt-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-base font-semibold">레벨</h2>
+            <span className="text-xl font-bold">Lv.{level}</span>
+          </div>
+          <div className="mt-2">
+            <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+              <div
+                className={
+                  'h-full bg-emerald-500 dark:bg-emerald-400 ' +
+                  (hideExpFill
+                    ? 'opacity-0 w-0 transition-none'
+                    : 'transition-[width] duration-700')
+                }
+                style={{ width: hideExpFill ? 0 : `${animatePct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs opacity-80">
+              EXP {Math.round(expDisplay)} / {neededExp} (
+              {Math.round(animatePct)}%)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <section className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-4">
       <div className="flex items-baseline justify-between">
@@ -98,7 +157,7 @@ export default function ProgressBar({
               />
               <div className="w-full max-w-lg relative pointer-events-auto">
                 <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4 overflow-hidden">
-                  {mobileBlock}
+                  {modalMobileBlock}
                   <div className="flex justify-end mt-4">
                     <button
                       className="px-4 py-2 bg-emerald-500 text-white rounded-lg"

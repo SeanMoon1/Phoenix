@@ -50,7 +50,9 @@ export class UsersService {
   }
 
   async getAllUsers() {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      relations: ['team'],
+    });
   }
 
   async getUsersByTeam(teamId: number) {

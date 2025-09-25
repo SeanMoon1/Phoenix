@@ -21,25 +21,25 @@ interface TeamStats {
   completedParticipants: number;
 }
 
-interface TeamMemberStats {
-  userId: number;
-  userName: string;
-  userCode: string;
-  totalTrainings: number;
-  totalScore: number;
-  averageScore: number;
-  bestScore: number;
-  currentLevel: number;
-  currentTier: string;
-  lastTrainingAt?: Date;
-}
+// interface TeamMemberStats {
+//   userId: number;
+//   userName: string;
+//   userCode: string;
+//   totalTrainings: number;
+//   totalScore: number;
+//   averageScore: number;
+//   bestScore: number;
+//   currentLevel: number;
+//   currentTier: string;
+//   lastTrainingAt?: Date;
+// }
 
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'scripts' | 'approval' | 'users' | 'training' | 'teams' | 'admins'
   >('training');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
-  const [memberStats, setMemberStats] = useState<TeamMemberStats[]>([]);
+  // const [memberStats, setMemberStats] = useState<TeamMemberStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
@@ -232,7 +232,7 @@ const AdminPage: React.FC = () => {
     try {
       const response = await trainingResultApi.getTeamMemberStats(user.teamId);
       if (response.success && response.data) {
-        setMemberStats((response.data as any).memberStats || []);
+        // setMemberStats((response.data as any).memberStats || []);
       }
     } catch (error) {
       console.error('팀원 통계 로드 실패:', error);
@@ -632,189 +632,128 @@ const AdminPage: React.FC = () => {
                 훈련 관리
               </h2>
 
-              {/* 팀 통계 카드 */}
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-gray-600 dark:text-gray-400">
-                    로딩 중...
-                  </div>
-                </div>
-              ) : teamStats ? (
-                <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
-                        <span className="text-2xl">🎯</span>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                          총 세션 수
-                        </p>
-                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                          {teamStats.totalSessions}
-                        </p>
-                      </div>
+              {/* 시나리오 타입 생성 안내 */}
+              <div className="mb-8">
+                <div className="p-6 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <Icon
+                        type="info"
+                        category="status"
+                        className="text-2xl text-blue-500"
+                      />
                     </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
-                        <span className="text-2xl">▶️</span>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                          진행 중인 세션
-                        </p>
-                        <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                          {teamStats.activeSessions}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
-                        <span className="text-2xl">👥</span>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                          총 참가자 수
-                        </p>
-                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                          {teamStats.totalParticipants}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
-                        <span className="text-2xl">✅</span>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                          완료한 참가자
-                        </p>
-                        <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                          {teamStats.completedParticipants}
+                    <div className="ml-4">
+                      <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100">
+                        시나리오 타입 관리
+                      </h3>
+                      <p className="mt-2 text-blue-700 dark:text-blue-300">
+                        새로운 훈련 타입을 생성할 수 있습니다. 타입을 생성하고
+                        시나리오를 작성해주세요.
+                      </p>
+                      <div className="mt-4">
+                        <p className="text-sm text-blue-600 dark:text-blue-400">
+                          💡 <strong>시나리오 생성 도구</strong>에서 구체적인
+                          시나리오를 작성할 수 있습니다.
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <div className="text-gray-600 dark:text-gray-400">
-                    팀 통계를 불러올 수 없습니다.
+              </div>
+
+              {/* 시나리오 타입 목록 */}
+              <div className="mb-8">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                  현재 시나리오 타입
+                </h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div className="flex items-center">
+                      <Icon
+                        type="fire"
+                        category="disaster"
+                        className="text-2xl text-red-500 mr-3"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          화재
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Fire Training
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div className="flex items-center">
+                      <Icon
+                        type="earthquake"
+                        category="disaster"
+                        className="text-2xl text-yellow-500 mr-3"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          지진
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Earthquake Training
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div className="flex items-center">
+                      <Icon
+                        type="traffic"
+                        category="disaster"
+                        className="text-2xl text-blue-500 mr-3"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          교통사고
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Traffic Accident
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div className="flex items-center">
+                      <Icon
+                        type="emergency"
+                        category="disaster"
+                        className="text-2xl text-green-500 mr-3"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          응급처치
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Emergency First Aid
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* 팀원별 상세 통계 */}
-              {memberStats.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                    팀원별 상세 통계
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white rounded-lg shadow dark:bg-gray-800">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            사용자
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            훈련 횟수
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            총 점수
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            평균 점수
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            최고 점수
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            레벨/등급
-                          </th>
-                          <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                            마지막 훈련
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                        {memberStats.map(member => (
-                          <tr
-                            key={member.userId}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {member.userName}
-                                </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {member.userCode}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
-                              {member.totalTrainings}회
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
-                              {member.totalScore.toLocaleString()}점
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
-                              {member.averageScore.toFixed(1)}점
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">
-                              {member.bestScore}점
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  Lv.{member.currentLevel}
-                                </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {member.currentTier}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
-                              {member.lastTrainingAt
-                                ? new Date(
-                                    member.lastTrainingAt
-                                  ).toLocaleDateString()
-                                : '없음'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* 훈련 세션 관리 버튼들 */}
-              <div className="flex flex-wrap gap-4 mt-8">
+              {/* 액션 버튼들 */}
+              <div className="flex justify-end space-x-4">
                 <Button
                   onClick={() => setShowCreateScenarioModal(true)}
-                  className="bg-primary-600 hover:bg-primary-700"
+                  className="bg-orange-600 hover:bg-orange-700"
                 >
-                  새 시나리오 생성
+                  <Icon type="chart" category="ui" className="inline mr-2" />새
+                  시나리오 타입 생성
                 </Button>
                 <Button
-                  onClick={() => {
-                    loadTeamStats();
-                    loadMemberStats();
-                  }}
-                  className="bg-gray-600 hover:bg-gray-700"
+                  onClick={() => window.open('/admin/scripts', '_blank')}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  통계 새로고침
+                  <Icon type="chart" category="ui" className="inline mr-2" />
+                  시나리오 생성 도구
                 </Button>
               </div>
             </div>
@@ -965,6 +904,116 @@ const AdminPage: React.FC = () => {
                   </Button>
                 </div>
               )}
+
+              {/* 팀 통계 섹션 */}
+              <div className="mb-8">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                  팀 통계
+                </h3>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-gray-600 dark:text-gray-400">
+                      로딩 중...
+                    </div>
+                  </div>
+                ) : teamStats ? (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                      <div className="flex items-center">
+                        <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
+                          <Icon
+                            type="chart"
+                            category="ui"
+                            className="text-2xl text-blue-500"
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                            총 세션 수
+                          </p>
+                          <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                            {teamStats.totalSessions}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <div className="flex items-center">
+                        <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
+                          <Icon
+                            type="success"
+                            category="status"
+                            className="text-2xl text-green-500"
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                            진행 중인 세션
+                          </p>
+                          <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                            {teamStats.activeSessions}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                      <div className="flex items-center">
+                        <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
+                          <Icon
+                            type="user"
+                            category="ui"
+                            className="text-2xl text-purple-500"
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                            총 참가자 수
+                          </p>
+                          <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                            {teamStats.totalParticipants}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                      <div className="flex items-center">
+                        <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
+                          <Icon
+                            type="trophy"
+                            category="ui"
+                            className="text-2xl text-orange-500"
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                            완료한 참가자
+                          </p>
+                          <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                            {teamStats.completedParticipants}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <div className="text-gray-600 dark:text-gray-400">
+                      팀 통계를 불러올 수 없습니다.
+                    </div>
+                    <Button
+                      onClick={() => {
+                        loadTeamStats();
+                      }}
+                      className="mt-4 bg-blue-600 hover:bg-blue-700"
+                    >
+                      통계 새로고침
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               {/* 팀 목록 */}
               <div className="bg-white rounded-lg shadow dark:bg-gray-800">

@@ -1,5 +1,7 @@
 // src/components/common/CharacterPanel.tsx
 import phoenixImg from '@/assets/images/phoenix.png';
+import magicianImg from '@/assets/images/magician.png';
+import { useAuthStore } from '@/stores/authStore';
 
 type Props = {
   level: number;
@@ -20,12 +22,19 @@ export default function CharacterPanel({
   hideExpFill = false,
   playerName = '플레이어 이름',
 }: Props) {
+  const { user } = useAuthStore();
+  // 관리자이면 magician 이미지 사용, 아니면 기본 phoenix
+  const avatarSrc =
+    (user as any)?.role === 'admin' || (user as any)?.isAdmin
+      ? magicianImg
+      : phoenixImg;
+
   return (
     <aside className="hidden md:flex md:flex-col md:gap-4">
       <div className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4">
         <img
-          src={phoenixImg}
-          alt="Phoenix Mascot"
+          src={avatarSrc}
+          alt="Mascot"
           className="w-full max-w-[240px] object-contain"
         />
       </div>

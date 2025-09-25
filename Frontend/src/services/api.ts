@@ -1160,6 +1160,8 @@ export const userExpApi = {
    */
   joinTeam: async (userId: number, teamCode: string) => {
     const response = await api.post(`/users/${userId}/join-team`, { teamCode });
+    console.log('🔍 팀 가입 API 원본 응답:', response);
+    console.log('🔍 팀 가입 API 응답 데이터:', response.data);
     return response.data;
   },
 };

@@ -154,20 +154,24 @@ const MyPage: React.FC = () => {
         error: response.error,
       });
 
-      if (response.success) {
+      if (response && response.success === true) {
         console.log('✅ 팀 가입 성공');
         // 성공 시 사용자 정보 업데이트
-        setUser({
+        const updatedUser = {
           ...user,
           teamId: response.data?.teamId || response.data?.id,
-        });
+        };
+        setUser(updatedUser);
         setTeamCode('');
         setTeamInfo(null);
         setTeamValidationError('');
         alert('팀 가입이 완료되었습니다!');
+
+        // 페이지 새로고침으로 최신 사용자 정보 로드
+        window.location.reload();
       } else {
-        console.error('❌ 팀 가입 실패:', response.error);
-        setTeamValidationError(response.error || '팀 가입에 실패했습니다.');
+        console.error('❌ 팀 가입 실패:', response?.error || '알 수 없는 오류');
+        setTeamValidationError(response?.error || '팀 가입에 실패했습니다.');
       }
     } catch (error) {
       console.error('❌ 팀 가입 오류:', error);

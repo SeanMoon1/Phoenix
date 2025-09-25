@@ -52,6 +52,9 @@ interface UseScenarioGameReturn {
 
   // 현재 훈련에서의 정답 개수
   currentCorrect: number;
+
+  // 실제 문제 수 (order가 999인 #END 슬라이드 제외)
+  actualQuestionCount: number;
 }
 
 export function useScenarioGame({
@@ -85,6 +88,11 @@ export function useScenarioGame({
     () => scenarios[current] || null,
     [scenarios, current]
   );
+
+  // 실제 문제 수 계산 (order가 999인 #END 슬라이드 제외)
+  const actualQuestionCount = useMemo(() => {
+    return scenarios.filter(scene => scene.order !== 999).length;
+  }, [scenarios]);
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -214,6 +222,7 @@ export function useScenarioGame({
       // newly exposed
       answered,
       currentCorrect,
+      actualQuestionCount,
     }),
     [
       scenarios,
@@ -233,6 +242,7 @@ export function useScenarioGame({
       choiceDisabled,
       answered,
       currentCorrect,
+      actualQuestionCount,
       // setter 함수들은 의존성에서 제외 (무한 루프 방지)
     ]
   );

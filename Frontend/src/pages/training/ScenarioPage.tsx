@@ -119,7 +119,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
           totalCorrect: gameState.currentCorrect,
         },
         gameStateSummary: {
-          scenariosCount: gameState.scenarios.length,
+          scenariosCount: gameState.actualQuestionCount, // 실제 문제 수 사용
           startTimeMs: startTime,
           failedThisRun: gameState.failedThisRun,
         },

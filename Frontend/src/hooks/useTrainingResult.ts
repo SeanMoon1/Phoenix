@@ -53,6 +53,9 @@ export function useTrainingResult() {
         };
         const session = await trainingApi.createSession(sessionData as any);
         const sessionId = (session.data as any)?.id;
+        // 실제 문제 수 사용 (이미 order가 999인 #END 슬라이드가 제외된 값)
+        const actualQuestionCount = opts.gameStateSummary.scenariosCount;
+
         const resultData = {
           sessionId,
           // participantId는 제거 - 서버에서 자동으로 생성하도록 함
@@ -61,11 +64,9 @@ export function useTrainingResult() {
           userId: user.id,
           resultCode: `RESULT${Date.now()}`,
           accuracyScore:
-            opts.gameStateSummary.scenariosCount > 0
+            actualQuestionCount > 0
               ? Math.round(
-                  (opts.expSystemState.totalCorrect /
-                    opts.gameStateSummary.scenariosCount) *
-                    100
+                  (opts.expSystemState.totalCorrect / actualQuestionCount) * 100
                 )
               : 0,
           speedScore:
@@ -73,10 +74,9 @@ export function useTrainingResult() {
               ? 100
               : Math.max(0, Math.round(100 - (timeSpent - 45) / 3)), // 45초 이내 = 100점, 그 이후 3초당 1점 감점
           totalScore:
-            opts.gameStateSummary.scenariosCount > 0
+            actualQuestionCount > 0
               ? Math.round(
-                  (opts.expSystemState.totalCorrect /
-                    opts.gameStateSummary.scenariosCount) *
+                  (opts.expSystemState.totalCorrect / actualQuestionCount) *
                     100 *
                     0.7 + // 정확도 70% 가중치
                     (timeSpent <= 45
@@ -86,7 +86,7 @@ export function useTrainingResult() {
                 )
               : 0,
           completionTime: timeSpent,
-          feedback: `${opts.scenarioSetName} 완료 - 레벨 ${opts.expSystemState.level}, 정답 ${opts.expSystemState.totalCorrect}/${opts.gameStateSummary.scenariosCount}`,
+          feedback: `${opts.scenarioSetName} 완료 - 레벨 ${opts.expSystemState.level}, 정답 ${opts.expSystemState.totalCorrect}/${actualQuestionCount}`,
           completedAt: new Date().toISOString(),
         };
         console.log('📤 훈련 결과 저장 시도:', {
@@ -108,9 +108,7 @@ export function useTrainingResult() {
         // 서버에 경험치 정보 전송
         try {
           const expToAdd = Math.round(
-            (opts.expSystemState.totalCorrect /
-              opts.gameStateSummary.scenariosCount) *
-              50
+            (opts.expSystemState.totalCorrect / actualQuestionCount) * 50
           ); // 정답률에 따른 경험치
           await userExpApi.updateUserExp({
             userId: user.id,

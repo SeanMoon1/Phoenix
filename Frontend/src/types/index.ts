@@ -152,6 +152,7 @@ export interface Scenario {
   content?: string;
   sceneScript?: string;
   options?: ChoiceOption[];
+  order?: number; // 시나리오 순서 (999는 #END 슬라이드)
   // 관계 데이터 (선택적)
   scenes?: ScenarioScene[];
   events?: ScenarioEvent[];

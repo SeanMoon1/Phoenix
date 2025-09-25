@@ -593,8 +593,8 @@
         "reaction": "처음 문제부터 다시 시작합니다.",
         "nextId": "#REVIEW",
         "points": {
-          "speed": 10,
-          "accuracy": 10
+          "speed": 0,
+          "accuracy": 0
         },
         "exp": 0
       },
@@ -604,8 +604,8 @@
         "reaction": "다음 시나리오로 이동합니다.",
         "nextId": "#SCENARIO_SELECT",
         "points": {
-          "speed": 10,
-          "accuracy": 10
+          "speed": 0,
+          "accuracy": 0
         },
         "exp": 0
       }

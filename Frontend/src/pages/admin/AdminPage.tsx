@@ -6,6 +6,7 @@ import {
   scenarioApi,
   trainingResultApi,
   adminApi,
+  apiClient,
 } from '../../services/api';
 import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
@@ -49,6 +50,7 @@ const AdminPage: React.FC = () => {
   );
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const [adminRefreshTrigger, setAdminRefreshTrigger] = useState(0);
+  const [downloadingExcel, setDownloadingExcel] = useState<number | null>(null);
 
   // 시나리오 생성 관련 상태
   const [showCreateScenarioModal, setShowCreateScenarioModal] = useState(false);
@@ -70,6 +72,42 @@ const AdminPage: React.FC = () => {
   const [pendingScenarios, setPendingScenarios] = useState<any[]>([]);
   const [loadingScenarios, setLoadingScenarios] = useState(false);
   const { user } = useAuthStore();
+
+  // 엑셀 다운로드 함수
+  const handleDownloadTeamExcel = async (teamId: number) => {
+    try {
+      setDownloadingExcel(teamId);
+      const response = await apiClient.get(
+        `/excel-export/team/${teamId}/training-results`,
+        {
+          responseType: 'blob',
+        }
+      );
+      const blob = response.data;
+
+      // 파일명 생성
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const fileName = `팀훈련결과_${teamId}_${dateStr}.xlsx`;
+
+      // Blob을 다운로드 링크로 변환
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert('엑셀 파일이 다운로드되었습니다.');
+    } catch (error) {
+      console.error('엑셀 다운로드 실패:', error);
+      alert('엑셀 파일 다운로드에 실패했습니다.');
+    } finally {
+      setDownloadingExcel(null);
+    }
+  };
 
   // 관리자 권한 체크
   if (
@@ -947,6 +985,23 @@ const AdminPage: React.FC = () => {
                                   ).toLocaleDateString()}
                                 </div>
                               </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                onClick={() => handleDownloadTeamExcel(team.id)}
+                                disabled={downloadingExcel === team.id}
+                                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+                                size="sm"
+                              >
+                                {downloadingExcel === team.id ? (
+                                  <>
+                                    <div className="w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+                                    다운로드 중...
+                                  </>
+                                ) : (
+                                  <>엑셀 다운로드</>
+                                )}
+                              </Button>
                             </div>
                           </div>
                         </div>

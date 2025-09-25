@@ -23,6 +23,7 @@ import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
 import { AdminAuthController } from './presentation/controllers/admin-auth.controller';
 import { ContactController } from './presentation/controllers/contact.controller';
+import { ExcelExportController } from './presentation/controllers/excel-export.controller';
 
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
@@ -34,6 +35,7 @@ import { UserExpService } from './application/services/user-exp.service';
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { EmailService } from './application/services/email.service';
+import { ExcelExportService } from './application/services/excel-export.service';
 
 // Domain Layer - Services
 import { UserDomainService } from './domain/services/user-domain.service';
@@ -143,6 +145,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     AdminController,
     AdminAuthController,
     ContactController,
+    ExcelExportController,
   ],
   providers: [
     AppService,
@@ -155,6 +158,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     TeamsService,
     AdminService,
     EmailService,
+    ExcelExportService,
     // Domain Services
     UserDomainService,
     // Use Cases

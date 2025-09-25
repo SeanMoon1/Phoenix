@@ -1131,4 +1131,19 @@ export const userExpApi = {
       error?: string;
     }>(`/user-exp/${userId}/info`);
   },
+
+  /**
+   * 팀 훈련 결과 엑셀 다운로드
+   * @param teamId 팀 ID
+   * @returns 엑셀 파일 Blob
+   */
+  downloadTeamTrainingResults: async (teamId: number) => {
+    const response = await apiClient.get(
+      `/excel-export/team/${teamId}/training-results`,
+      {
+        responseType: 'blob',
+      }
+    );
+    return response.data;
+  },
 };

@@ -137,6 +137,9 @@ export function useScenarioGame({
       const isCorrect = (option.accuracyPoints || 0) > 0;
       const alreadyAnswered = answered.includes(current);
 
+      // 마지막 문제(END 씬)는 점수 계산에서 제외
+      const isEndScene = scenario?.sceneId === '#END';
+
       // 항상 선택은 적용(피드백 등)
       setSelected(option);
       setFeedback(option.reactionText || null);
@@ -148,6 +151,11 @@ export function useScenarioGame({
 
       // 첫 응답인 경우 marked
       setAnswered(prev => [...prev, current]);
+
+      // 마지막 문제는 점수 계산에서 제외
+      if (isEndScene) {
+        return { shouldAwardExp: false, isCorrect: false };
+      }
 
       // 첫 응답이고 정답이면 경험치 지급 대상일 수 있음
       const shouldAwardExp =

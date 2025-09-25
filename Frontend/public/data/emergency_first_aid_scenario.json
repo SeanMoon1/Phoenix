@@ -390,7 +390,7 @@
     "sceneId": "#5-1",
     "title": "기도폐쇄 응급처치",
     "content": "식사 중 음식이 기도에 걸려 숨을 쉬기 어려운 상황이 발생했습니다. 환자가 목을 움켜쥐고 있고, 말을 할 수 없는 상태입니다.",
-    "sceneScript": "기도폐쇄 응급상황입니다. 환자가 말을 할 수 없고 숨을 쉬기 어려워합니다. 어떻게 하시겠습니까?",
+    "sceneScript": "기도폐쇄 응급상황입니다. 어떻게 하시겠습니까?",
     "approvalStatus": "DRAFT",
     "createdAt": "2025-01-15T00:00:00.000Z",
     "createdBy": 1,
@@ -499,7 +499,7 @@
         "answer": "훈련 내용을 복습하기",
         "reaction": "처음 문제부터 다시 시작합니다.",
         "nextId": "#REVIEW",
-        "points": { "speed": 0, "accuracy": 0 },
+        "points": { "speed": 10, "accuracy": 10 },
         "exp": 0
       },
       {
@@ -507,7 +507,7 @@
         "answer": "다음 시나리오로 넘어가기",
         "reaction": "다음 시나리오로 이동합니다.",
         "nextId": "#SCENARIO_SELECT",
-        "points": { "speed": 0, "accuracy": 0 },
+        "points": { "speed": 10, "accuracy": 10 },
         "exp": 0
       }
     ]

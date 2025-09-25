@@ -205,10 +205,10 @@ const MyPage: React.FC = () => {
         setTeamInfo(null);
         setTeamValidationError('');
 
-        // 사용자 정보 새로고침
-        await refreshUserData();
-
         alert('팀 가입이 완료되었습니다!');
+
+        // 사용자 정보 새로고침 (팀 정보 포함)
+        await refreshUserData();
 
         // 데이터 다시 로드
         setTimeout(async () => {

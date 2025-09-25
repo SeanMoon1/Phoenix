@@ -1162,6 +1162,12 @@ export const userExpApi = {
     const response = await api.post(`/users/${userId}/join-team`, { teamCode });
     console.log('🔍 팀 가입 API 원본 응답:', response);
     console.log('🔍 팀 가입 API 응답 데이터:', response.data);
-    return response.data;
+    console.log('🔍 팀 가입 API 응답 전체 구조:', {
+      success: response.success,
+      data: response.data,
+      message: response.message,
+      error: response.error,
+    });
+    return response; // 전체 응답 객체 반환
   },
 };

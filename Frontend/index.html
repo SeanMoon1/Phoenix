@@ -16,8 +16,15 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@300;400;500;700;900&display=swap"
       rel="stylesheet"
-      onerror="console.warn('Google Fonts 로딩 실패')"
+      onerror="console.warn('Google Fonts 로딩 실패 - 시스템 폰트 사용')"
     />
+    <style>
+      /* 폰트 로딩 실패 시 대체 폰트 설정 */
+      body {
+        font-family: 'Gmarket Sans', -apple-system, BlinkMacSystemFont,
+          'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🔥재난훈련ON</title>
   </head>

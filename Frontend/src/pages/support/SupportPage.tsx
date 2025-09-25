@@ -398,8 +398,8 @@ const SupportPage: React.FC = () => {
                           : `bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-${tab.color}-100 dark:hover:bg-${tab.color}-900/30`
                       }`}
                     >
-                      <span className="text-xl">{tab.icon}</span>
-                      <span>{tab.name}</span>
+                      <span className="text-xl leading-none">{tab.icon}</span>
+                      <span className="leading-none">{tab.name}</span>
                     </button>
                   ))}
                 </div>

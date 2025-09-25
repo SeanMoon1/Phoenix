@@ -147,6 +147,13 @@ const MyPage: React.FC = () => {
       const response = (await userExpApi.joinTeam(user.id, teamCode)) as any;
       console.log('🔍 팀 가입 API 응답:', response);
 
+      console.log('🔍 응답 상세 분석:', {
+        success: response.success,
+        data: response.data,
+        message: response.message,
+        error: response.error,
+      });
+
       if (response.success) {
         console.log('✅ 팀 가입 성공');
         // 성공 시 사용자 정보 업데이트

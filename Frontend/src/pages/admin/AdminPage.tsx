@@ -51,6 +51,9 @@ const AdminPage: React.FC = () => {
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const [adminRefreshTrigger, setAdminRefreshTrigger] = useState(0);
   const [downloadingExcel, setDownloadingExcel] = useState<number | null>(null);
+  const [showDownloadModal, setShowDownloadModal] = useState<number | null>(
+    null
+  );
 
   // 시나리오 생성 관련 상태
   const [showCreateScenarioModal, setShowCreateScenarioModal] = useState(false);
@@ -73,14 +76,18 @@ const AdminPage: React.FC = () => {
   const [loadingScenarios, setLoadingScenarios] = useState(false);
   const { user } = useAuthStore();
 
-  // 엑셀 다운로드 함수
-  const handleDownloadTeamExcel = async (teamId: number) => {
+  // 파일 다운로드 함수
+  const handleDownloadTeamFile = async (
+    teamId: number,
+    format: 'excel' | 'pdf'
+  ) => {
     try {
       setDownloadingExcel(teamId);
       const response = await apiClient.get(
         `/excel-export/team/${teamId}/training-results`,
         {
           responseType: 'blob',
+          params: { format },
         }
       );
       const blob = response.data;
@@ -88,7 +95,8 @@ const AdminPage: React.FC = () => {
       // 파일명 생성
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
-      const fileName = `팀훈련결과_${teamId}_${dateStr}.xlsx`;
+      const extension = format === 'excel' ? 'xlsx' : 'pdf';
+      const fileName = `팀훈련결과_${teamId}_${dateStr}.${extension}`;
 
       // Blob을 다운로드 링크로 변환
       const url = window.URL.createObjectURL(blob);
@@ -100,12 +108,15 @@ const AdminPage: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      alert('엑셀 파일이 다운로드되었습니다.');
+      alert(
+        `${format === 'excel' ? '엑셀' : 'PDF'} 파일이 다운로드되었습니다.`
+      );
     } catch (error) {
-      console.error('엑셀 다운로드 실패:', error);
-      alert('엑셀 파일 다운로드에 실패했습니다.');
+      console.error('파일 다운로드 실패:', error);
+      alert('파일 다운로드에 실패했습니다.');
     } finally {
       setDownloadingExcel(null);
+      setShowDownloadModal(null);
     }
   };
 
@@ -988,7 +999,7 @@ const AdminPage: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                               <Button
-                                onClick={() => handleDownloadTeamExcel(team.id)}
+                                onClick={() => setShowDownloadModal(team.id)}
                                 disabled={downloadingExcel === team.id}
                                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
                                 size="sm"
@@ -999,7 +1010,7 @@ const AdminPage: React.FC = () => {
                                     다운로드 중...
                                   </>
                                 ) : (
-                                  <>엑셀 다운로드</>
+                                  <>📊 통계 다운로드</>
                                 )}
                               </Button>
                             </div>
@@ -1471,6 +1482,44 @@ const AdminPage: React.FC = () => {
             setAdminRefreshTrigger(prev => prev + 1); // 관리자 목록 새로고침
           }}
         />
+
+        {/* 다운로드 형식 선택 모달 */}
+        {showDownloadModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg p-6 w-96 dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                통계 다운로드 형식 선택
+              </h3>
+              <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                팀 훈련 결과를 어떤 형식으로 다운로드하시겠습니까?
+              </p>
+              <div className="flex space-x-4">
+                <Button
+                  onClick={() =>
+                    handleDownloadTeamFile(showDownloadModal, 'excel')
+                  }
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  📊 엑셀 파일
+                </Button>
+                <Button
+                  onClick={() =>
+                    handleDownloadTeamFile(showDownloadModal, 'pdf')
+                  }
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                >
+                  📄 PDF 파일
+                </Button>
+              </div>
+              <Button
+                onClick={() => setShowDownloadModal(null)}
+                className="w-full mt-4 bg-gray-500 hover:bg-gray-600"
+              >
+                취소
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

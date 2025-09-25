@@ -1133,15 +1133,20 @@ export const userExpApi = {
   },
 
   /**
-   * 팀 훈련 결과 엑셀 다운로드
+   * 팀 훈련 결과 파일 다운로드 (엑셀/PDF)
    * @param teamId 팀 ID
-   * @returns 엑셀 파일 Blob
+   * @param format 파일 형식 ('excel' | 'pdf')
+   * @returns 파일 Blob
    */
-  downloadTeamTrainingResults: async (teamId: number) => {
+  downloadTeamTrainingResults: async (
+    teamId: number,
+    format: 'excel' | 'pdf' = 'excel'
+  ) => {
     const response = await apiClient.get(
       `/excel-export/team/${teamId}/training-results`,
       {
         responseType: 'blob',
+        params: { format },
       }
     );
     return response.data;

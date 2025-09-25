@@ -36,6 +36,7 @@ import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { EmailService } from './application/services/email.service';
 import { ExcelExportService } from './application/services/excel-export.service';
+import { PdfExportService } from './application/services/pdf-export.service';
 
 // Domain Layer - Services
 import { UserDomainService } from './domain/services/user-domain.service';
@@ -159,6 +160,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     AdminService,
     EmailService,
     ExcelExportService,
+    PdfExportService,
     // Domain Services
     UserDomainService,
     // Use Cases

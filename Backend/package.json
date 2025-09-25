@@ -51,6 +51,7 @@
     "passport-kakao": "^1.0.1",
     "passport-local": "^1.0.0",
     "passport-naver": "^1.0.6",
+    "pdf-lib": "^1.17.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.26"

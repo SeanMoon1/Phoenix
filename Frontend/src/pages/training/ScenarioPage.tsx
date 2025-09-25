@@ -57,7 +57,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
-  // ref that points to the main scenario content section (SituationCard)
   const contentRef = useRef<HTMLElement | null>(null);
   const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
 
@@ -117,7 +116,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         scenarioType,
         expSystemState: {
           level: expSystem.level,
-          totalCorrect: gameState.currentCorrect, // 현재 훈련의 정답 개수 사용
+          totalCorrect: gameState.currentCorrect,
         },
         gameStateSummary: {
           scenariosCount: gameState.scenarios.length,
@@ -134,7 +133,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const handleChoice = (option: ChoiceOption) => {
     // 이전에 이미 답한 문제인지(ANSWERED 기준) 확인 -> 경험치 지급 방지
     if (gameState.answered?.includes(gameState.current)) {
-      gameState.handleChoice(option); // 선택/피드백만 처리
+      gameState.handleChoice(option); // 선택, 피드백만 처리
       return;
     }
 
@@ -142,7 +141,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     if (result?.shouldAwardExp) {
       expSystem.awardExp(BASE_EXP);
       expSystem.incrementTotalCorrect();
-      // 지급한 것을 훅에도 알려 중복 지급 방지
       gameState.setAwardedExpThisScene(true);
     }
   };
@@ -201,10 +199,14 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.setCurrent(prev);
     gameState.resetSceneFlags();
 
-    // mirror scroll logic for prev
+    // 스크롤 위치 조정
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const targetEl = contentRef.current ?? topRef.current;
+        const isWide =
+          typeof window !== 'undefined' && window.innerWidth >= 768;
+        const targetEl = isWide
+          ? topRef.current
+          : contentRef.current ?? topRef.current;
         if (!targetEl) return;
 
         const header = document.querySelector('header');
@@ -217,7 +219,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     });
   };
 
-  // 로딩/에러 처리
+  // 로딩, 에러 처리
   if (gameState.loading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827] dark:text-white">
@@ -233,6 +235,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     );
   }
 
+  // 시나리오가 없거나 현재 시나리오를 찾을 수 없는 경우
   if (!gameState.scenarios.length || !gameState.scenario) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827] dark:text-white">

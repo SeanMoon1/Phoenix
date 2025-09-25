@@ -231,7 +231,7 @@ const MyPage: React.FC = () => {
     {
       id: 'records',
       name: '훈련기록',
-      icon: '📊',
+      icon: <Icon type="chart" category="ui" className="text-lg" />,
       color: 'indigo',
       activeClass: 'bg-indigo-600',
       hoverClass: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
@@ -239,7 +239,7 @@ const MyPage: React.FC = () => {
     {
       id: 'scores',
       name: '점수조회',
-      icon: '🏆',
+      icon: <Icon type="trophy" category="ui" className="text-lg" />,
       color: 'yellow',
       activeClass: 'bg-yellow-600',
       hoverClass: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
@@ -247,7 +247,7 @@ const MyPage: React.FC = () => {
     {
       id: 'profile',
       name: '개인정보',
-      icon: '👤',
+      icon: <Icon type="user" category="ui" className="text-lg" />,
       color: 'purple',
       activeClass: 'bg-purple-600',
       hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
@@ -256,7 +256,13 @@ const MyPage: React.FC = () => {
 
   const recordsContent = {
     title: '훈련 기록',
-    icon: '📊',
+    icon: (
+      <Icon
+        type="chart"
+        category="ui"
+        className="text-indigo-600 dark:text-indigo-400"
+      />
+    ),
     color: 'indigo',
     iconBgClass: 'bg-indigo-100 dark:bg-indigo-900/30',
     content: (
@@ -371,7 +377,13 @@ const MyPage: React.FC = () => {
 
   const scoresContent = {
     title: '점수 조회',
-    icon: '🏆',
+    icon: (
+      <Icon
+        type="trophy"
+        category="ui"
+        className="text-yellow-600 dark:text-yellow-400"
+      />
+    ),
     color: 'yellow',
     iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (
@@ -536,7 +548,13 @@ const MyPage: React.FC = () => {
 
   const profileContent = {
     title: '개인정보',
-    icon: '👤',
+    icon: (
+      <Icon
+        type="user"
+        category="ui"
+        className="text-purple-600 dark:text-purple-400"
+      />
+    ),
     color: 'purple',
     iconBgClass: 'bg-purple-100 dark:bg-purple-900/30',
     content: (
@@ -776,8 +794,13 @@ const MyPage: React.FC = () => {
                 </h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      📊 훈련기록
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Icon
+                        type="chart"
+                        category="ui"
+                        className="text-indigo-600 dark:text-indigo-400"
+                      />
+                      훈련기록
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 나의 모든 훈련 기록을 확인</li>
@@ -786,8 +809,13 @@ const MyPage: React.FC = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      🏆 점수조회
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Icon
+                        type="trophy"
+                        category="ui"
+                        className="text-yellow-600 dark:text-yellow-400"
+                      />
+                      점수조회
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 전체 및 유형별 점수 분석</li>
@@ -796,8 +824,13 @@ const MyPage: React.FC = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      👤 개인정보
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Icon
+                        type="user"
+                        category="ui"
+                        className="text-purple-600 dark:text-purple-400"
+                      />
+                      개인정보
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 기본 정보 수정 및 관리</li>

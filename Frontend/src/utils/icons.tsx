@@ -12,6 +12,9 @@ import {
   FaTimesCircle,
   FaInfoCircle,
   FaExclamation,
+  FaChartBar,
+  FaTrophy,
+  FaUser,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
@@ -42,13 +45,21 @@ export const statusIcons = {
   alert: <FaExclamation className="text-red-500" />,
 };
 
+// UI 아이콘 매핑
+export const uiIcons = {
+  chart: <FaChartBar />,
+  trophy: <FaTrophy />,
+  user: <FaUser />,
+};
+
 // 아이콘 컴포넌트 타입
 export interface IconProps {
   type:
     | keyof typeof disasterIcons
     | keyof typeof difficultyIcons
-    | keyof typeof statusIcons;
-  category: 'disaster' | 'difficulty' | 'status';
+    | keyof typeof statusIcons
+    | keyof typeof uiIcons;
+  category: 'disaster' | 'difficulty' | 'status' | 'ui';
   className?: string;
 }
 
@@ -73,6 +84,9 @@ export const Icon: React.FC<IconProps> = ({
       break;
     case 'status':
       icon = statusIcons[type as keyof typeof statusIcons] || statusIcons.info;
+      break;
+    case 'ui':
+      icon = uiIcons[type as keyof typeof uiIcons] || uiIcons.user;
       break;
     default:
       icon = disasterIcons.unknown;

@@ -118,17 +118,23 @@ const MyPage: React.FC = () => {
     setTeamValidationError('');
 
     try {
+      console.log('🔍 팀 코드 검증 시작:', { teamCode: code });
       const response = await teamApi.validateTeamCode(code);
+      console.log('🔍 팀 코드 검증 응답:', response);
+
       if (response.success && response.data?.valid) {
+        console.log('✅ 팀 코드 검증 성공:', response.data.team);
         setTeamInfo(response.data.team);
         setTeamValidationError('');
       } else {
+        console.log('❌ 팀 코드 검증 실패:', response.data?.message);
         setTeamInfo(null);
         setTeamValidationError(
           response.data?.message || '유효하지 않은 팀 코드입니다.'
         );
       }
     } catch (error) {
+      console.error('❌ 팀 코드 검증 오류:', error);
       setTeamInfo(null);
       setTeamValidationError('팀 코드 검증 중 오류가 발생했습니다.');
     } finally {
@@ -697,7 +703,13 @@ const MyPage: React.FC = () => {
                       value={teamCode}
                       onChange={e => {
                         setTeamCode(e.target.value);
-                        validateTeamCode(e.target.value);
+                        // 팀 가입 성공 후에는 실시간 검증 비활성화
+                        if (e.target.value.length >= 3) {
+                          validateTeamCode(e.target.value);
+                        } else {
+                          setTeamValidationError('');
+                          setTeamInfo(null);
+                        }
                       }}
                       className="flex-1 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />

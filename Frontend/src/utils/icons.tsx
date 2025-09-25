@@ -12,11 +12,22 @@ import {
   FaTimesCircle,
   FaInfoCircle,
   FaExclamation,
+  FaChartBar,
+  FaTrophy,
+  FaUser,
+  FaGamepad,
+  FaPlay,
+  FaRedo,
+  FaUsers,
+  FaShieldAlt,
+  FaMobileAlt,
+  FaGripfire,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
 export const disasterIcons = {
   fire: <FaFire className="text-red-500" />,
+  gripfire: <FaGripfire className="text-red-500" />,
   earthquake: <FaGlobeAmericas className="text-yellow-500" />,
   emergency: <FaAmbulance className="text-green-500" />,
   traffic: <FaCar className="text-blue-500" />,
@@ -42,13 +53,33 @@ export const statusIcons = {
   alert: <FaExclamation className="text-red-500" />,
 };
 
+// UI 아이콘 매핑
+export const uiIcons = {
+  chart: <FaChartBar />,
+  trophy: <FaTrophy />,
+  user: <FaUser />,
+};
+
+// 훈련 시스템 아이콘 매핑
+export const trainingIcons = {
+  vr: <FaGamepad />,
+  scenario: <FaPlay />,
+  analytics: <FaChartBar />,
+  repeat: <FaRedo />,
+  teamwork: <FaUsers />,
+  safety: <FaShieldAlt />,
+  mobile: <FaMobileAlt />,
+};
+
 // 아이콘 컴포넌트 타입
 export interface IconProps {
   type:
     | keyof typeof disasterIcons
     | keyof typeof difficultyIcons
-    | keyof typeof statusIcons;
-  category: 'disaster' | 'difficulty' | 'status';
+    | keyof typeof statusIcons
+    | keyof typeof uiIcons
+    | keyof typeof trainingIcons;
+  category: 'disaster' | 'difficulty' | 'status' | 'ui' | 'training';
   className?: string;
 }
 
@@ -73,6 +104,13 @@ export const Icon: React.FC<IconProps> = ({
       break;
     case 'status':
       icon = statusIcons[type as keyof typeof statusIcons] || statusIcons.info;
+      break;
+    case 'ui':
+      icon = uiIcons[type as keyof typeof uiIcons] || uiIcons.user;
+      break;
+    case 'training':
+      icon =
+        trainingIcons[type as keyof typeof trainingIcons] || trainingIcons.vr;
       break;
     default:
       icon = disasterIcons.unknown;

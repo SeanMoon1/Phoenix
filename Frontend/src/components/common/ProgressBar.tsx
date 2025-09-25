@@ -38,7 +38,31 @@ export default function ProgressBar({
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  const mobileBlock = (
+  // modal 애니메이션용 상태: 모달이 열릴 때 0%에서 목표(progressPct)로 애니메이션
+  const [animatePct, setAnimatePct] = useState<number>(0);
+  useEffect(() => {
+    if (!mobilePanelModalOpen) {
+      setAnimatePct(0);
+      return;
+    }
+    // 모달 열릴 때 애니메이션 트리거 (double RAF으로 레이아웃 적용 후 transition 실행)
+    let raf1: number | null = null;
+    let raf2: number | null = null;
+    setAnimatePct(0);
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setAnimatePct(progressPct);
+      });
+    });
+    return () => {
+      if (raf1 != null) cancelAnimationFrame(raf1);
+      if (raf2 != null) cancelAnimationFrame(raf2);
+      setAnimatePct(0);
+    };
+  }, [mobilePanelModalOpen, progressPct]);
+
+  // 모달 전용 블록 — 인라인 블록(mobileBlock)과 거의 동일하지만 width가 animatePct로 움직임
+  const modalMobileBlock = (
     <div className="mt-4 grid grid-cols-1 gap-4">
       <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
         <img
@@ -58,13 +82,14 @@ export default function ProgressBar({
                   'h-full bg-emerald-500 dark:bg-emerald-400 ' +
                   (hideExpFill
                     ? 'opacity-0 w-0 transition-none'
-                    : 'transition-[width] duration-500')
+                    : 'transition-[width] duration-700')
                 }
-                style={{ width: hideExpFill ? 0 : `${progressPct}%` }}
+                style={{ width: hideExpFill ? 0 : `${animatePct}%` }}
               />
             </div>
             <p className="mt-1 text-xs opacity-80">
-              EXP {Math.round(expDisplay)} / {neededExp} ({progressPct}%)
+              EXP {Math.round(expDisplay)} / {neededExp} (
+              {Math.round(animatePct)}%)
             </p>
           </div>
         </div>

@@ -6,6 +6,7 @@ import Layout from './components/layout/Layout';
 import AdminGuard from './components/guards/AdminGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import UserDashboard from './components/common/UserDashboard';
+import { Icon } from './utils/icons';
 
 // 동적 import로 페이지 로딩 최적화
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -81,8 +82,13 @@ const HomePage: React.FC = () => {
                 animation="fadeIn"
                 className="mb-6 sm:mb-8"
               >
-                <h1 className="text-4xl font-bold text-orange-600 sm:text-5xl md:text-6xl dark:text-orange-400">
-                  재난훈련ON🔥
+                <h1 className="text-4xl font-bold text-orange-600 sm:text-5xl md:text-6xl dark:text-orange-400 flex items-center justify-center lg:justify-start gap-1">
+                  재난훈련ON
+                  <Icon
+                    type="gripfire"
+                    category="disaster"
+                    className="text-4xl sm:text-5xl md:text-6xl text-red-500"
+                  />
                 </h1>
               </AnimatedText>
 

@@ -304,7 +304,7 @@ const MyPage: React.FC = () => {
     {
       id: 'records',
       name: '훈련기록',
-      icon: '📊',
+      icon: <Icon type="chart" category="ui" className="text-lg" />,
       color: 'indigo',
       activeClass: 'bg-indigo-600',
       hoverClass: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
@@ -312,7 +312,7 @@ const MyPage: React.FC = () => {
     {
       id: 'scores',
       name: '점수조회',
-      icon: '🏆',
+      icon: <Icon type="trophy" category="ui" className="text-lg" />,
       color: 'yellow',
       activeClass: 'bg-yellow-600',
       hoverClass: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
@@ -320,7 +320,7 @@ const MyPage: React.FC = () => {
     {
       id: 'profile',
       name: '개인정보',
-      icon: '👤',
+      icon: <Icon type="user" category="ui" className="text-lg" />,
       color: 'purple',
       activeClass: 'bg-purple-600',
       hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
@@ -329,7 +329,13 @@ const MyPage: React.FC = () => {
 
   const recordsContent = {
     title: '훈련 기록',
-    icon: '📊',
+    icon: (
+      <Icon
+        type="chart"
+        category="ui"
+        className="text-indigo-600 dark:text-indigo-400"
+      />
+    ),
     color: 'indigo',
     iconBgClass: 'bg-indigo-100 dark:bg-indigo-900/30',
     content: (
@@ -362,7 +368,9 @@ const MyPage: React.FC = () => {
           ) : trainingRecords.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">📊</div>
+                <div className="mb-4 text-4xl text-gray-400">
+                  <Icon type="chart" category="ui" />
+                </div>
                 <p className="text-gray-600 dark:text-gray-300">
                   아직 훈련 기록이 없습니다.
                 </p>
@@ -444,7 +452,13 @@ const MyPage: React.FC = () => {
 
   const scoresContent = {
     title: '점수 조회',
-    icon: '🏆',
+    icon: (
+      <Icon
+        type="trophy"
+        category="ui"
+        className="text-yellow-600 dark:text-yellow-400"
+      />
+    ),
     color: 'yellow',
     iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (

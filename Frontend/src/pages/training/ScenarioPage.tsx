@@ -67,7 +67,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const nextScenarioPath = props?.nextScenarioPath || '/training';
   const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
 
-  // 시작 시간
+  // 시작시간
   const startTime = useMemo(() => Date.now(), []);
 
   // 커스텀 훅들

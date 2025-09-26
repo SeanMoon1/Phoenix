@@ -2,8 +2,11 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
+import { EmailService } from './email.service';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
+import { FindIdDto } from '../../presentation/dto/find-id.dto';
+import { RequestPasswordResetDto, VerifyResetCodeDto, ResetPasswordDto } from '../../presentation/dto/reset-password.dto';
 import { PasswordUtil } from '../../utils/password.util';
 
 @Injectable()
@@ -12,6 +15,7 @@ export class AuthService {
     private usersService: UsersService,
     private teamsService: TeamsService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(loginId: string, password: string): Promise<any> {
@@ -366,5 +370,226 @@ export class AuthService {
     }
 
     return loginId;
+  }
+
+  /**
+   * 아이디 찾기
+   * @param findIdDto 이름과 이메일 정보
+   * @returns 일치하는 로그인 ID
+   */
+  async findId(findIdDto: FindIdDto) {
+    try {
+      console.log('🔍 아이디 찾기 시작:', { name: findIdDto.name, email: findIdDto.email });
+      
+      const user = await this.usersService.findByEmail(findIdDto.email);
+      
+      if (!user) {
+        console.log('❌ 사용자를 찾을 수 없음');
+        return {
+          success: false,
+          message: '입력하신 정보와 일치하는 계정을 찾을 수 없습니다.',
+        };
+      }
+
+      // 이름도 일치하는지 확인
+      if (user.name !== findIdDto.name) {
+        console.log('❌ 이름이 일치하지 않음');
+        return {
+          success: false,
+          message: '입력하신 정보와 일치하는 계정을 찾을 수 없습니다.',
+        };
+      }
+
+      console.log('✅ 아이디 찾기 성공:', { loginId: user.loginId });
+      return {
+        success: true,
+        message: '아이디를 찾았습니다.',
+        data: {
+          loginId: user.loginId,
+        },
+      };
+    } catch (error) {
+      console.error('❌ 아이디 찾기 오류:', error);
+      return {
+        success: false,
+        message: '아이디 찾기 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 비밀번호 재설정 요청 (이메일로 인증 코드 전송)
+   * @param requestPasswordResetDto 이메일 정보
+   * @returns 인증 코드 전송 결과
+   */
+  async requestPasswordReset(requestPasswordResetDto: RequestPasswordResetDto) {
+    try {
+      console.log('🔐 비밀번호 재설정 요청:', { email: requestPasswordResetDto.email });
+      
+      const user = await this.usersService.findByEmail(requestPasswordResetDto.email);
+      
+      if (!user) {
+        console.log('❌ 사용자를 찾을 수 없음');
+        return {
+          success: false,
+          message: '입력하신 이메일로 등록된 계정을 찾을 수 없습니다.',
+        };
+      }
+
+      // 6자리 인증 코드 생성
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // 인증 코드를 임시로 저장 (실제로는 Redis나 DB에 저장해야 함)
+      // 여기서는 간단히 메모리에 저장
+      if (!global.resetCodes) {
+        global.resetCodes = new Map();
+      }
+      global.resetCodes.set(requestPasswordResetDto.email, {
+        code: verificationCode,
+        timestamp: Date.now(),
+        userId: user.id,
+      });
+
+      // 이메일로 인증 코드 전송
+      const emailSent = await this.emailService.sendPasswordResetCode(
+        requestPasswordResetDto.email,
+        user.name,
+        verificationCode,
+      );
+
+      if (!emailSent) {
+        console.log('❌ 이메일 전송 실패');
+        return {
+          success: false,
+          message: '인증 코드 전송에 실패했습니다. 다시 시도해주세요.',
+        };
+      }
+
+      console.log('✅ 인증 코드 전송 성공');
+      return {
+        success: true,
+        message: '인증 코드가 이메일로 전송되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 비밀번호 재설정 요청 오류:', error);
+      return {
+        success: false,
+        message: '비밀번호 재설정 요청 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 인증 코드 검증
+   * @param verifyResetCodeDto 이메일과 인증 코드
+   * @returns 인증 코드 검증 결과
+   */
+  async verifyResetCode(verifyResetCodeDto: VerifyResetCodeDto) {
+    try {
+      console.log('🔐 인증 코드 검증:', { email: verifyResetCodeDto.email });
+      
+      if (!global.resetCodes) {
+        return {
+          success: false,
+          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
+        };
+      }
+
+      const resetData = global.resetCodes.get(verifyResetCodeDto.email);
+      
+      if (!resetData) {
+        console.log('❌ 인증 코드 데이터 없음');
+        return {
+          success: false,
+          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
+        };
+      }
+
+      // 인증 코드 만료 시간 확인 (10분)
+      const now = Date.now();
+      const codeAge = now - resetData.timestamp;
+      const maxAge = 10 * 60 * 1000; // 10분
+
+      if (codeAge > maxAge) {
+        console.log('❌ 인증 코드 만료');
+        global.resetCodes.delete(verifyResetCodeDto.email);
+        return {
+          success: false,
+          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
+        };
+      }
+
+      if (resetData.code !== verifyResetCodeDto.code) {
+        console.log('❌ 인증 코드 불일치');
+        return {
+          success: false,
+          message: '인증 코드가 일치하지 않습니다.',
+        };
+      }
+
+      console.log('✅ 인증 코드 검증 성공');
+      return {
+        success: true,
+        message: '인증 코드가 확인되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 인증 코드 검증 오류:', error);
+      return {
+        success: false,
+        message: '인증 코드 검증 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 비밀번호 재설정
+   * @param resetPasswordDto 이메일, 인증 코드, 새 비밀번호
+   * @returns 비밀번호 재설정 결과
+   */
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    try {
+      console.log('🔐 비밀번호 재설정:', { email: resetPasswordDto.email });
+      
+      // 인증 코드 재검증
+      const verifyResult = await this.verifyResetCode({
+        email: resetPasswordDto.email,
+        code: resetPasswordDto.code,
+      });
+
+      if (!verifyResult.success) {
+        return verifyResult;
+      }
+
+      // 새 비밀번호 해시화
+      const hashedPassword = await PasswordUtil.hashPassword(resetPasswordDto.newPassword);
+
+      // 사용자 비밀번호 업데이트
+      const user = await this.usersService.findByEmail(resetPasswordDto.email);
+      if (!user) {
+        return {
+          success: false,
+          message: '사용자를 찾을 수 없습니다.',
+        };
+      }
+
+      await this.usersService.update(user.id, { password: hashedPassword });
+
+      // 인증 코드 삭제
+      if (global.resetCodes) {
+        global.resetCodes.delete(resetPasswordDto.email);
+      }
+
+      console.log('✅ 비밀번호 재설정 성공');
+      return {
+        success: true,
+        message: '비밀번호가 성공적으로 변경되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 비밀번호 재설정 오류:', error);
+      return {
+        success: false,
+        message: '비밀번호 재설정 중 오류가 발생했습니다.',
+      };
+    }
   }
 }

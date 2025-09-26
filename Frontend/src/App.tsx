@@ -12,6 +12,8 @@ import { Icon } from './utils/icons';
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
+const FindIdPage = lazy(() => import('./pages/auth/FindIdPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const ScriptToolPage = lazy(() => import('./pages/admin/ScriptToolPage'));
 const FireScenarioPage = lazy(
   () => import('@/pages/training/FireScenarioPage')
@@ -358,6 +360,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/find-id" element={<FindIdPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* 훈련하기 */}
             <Route path="/manual" element={<ManualPage />} />

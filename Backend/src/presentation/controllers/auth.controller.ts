@@ -19,6 +19,12 @@ import { AuthService } from '../../application/services/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { OAuthRegisterDto } from '../dto/oauth-register.dto';
+import { FindIdDto } from '../dto/find-id.dto';
+import {
+  RequestPasswordResetDto,
+  VerifyResetCodeDto,
+  ResetPasswordDto,
+} from '../dto/reset-password.dto';
 import { LocalAuthGuard } from '../../shared/guards/local-auth.guard';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
@@ -90,5 +96,43 @@ export class AuthController {
   })
   async checkLoginIdAvailability(@Param('loginId') loginId: string) {
     return this.authService.checkLoginIdAvailability(loginId);
+  }
+
+  @Post('find-id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '아이디 찾기' })
+  @ApiResponse({ status: 200, description: '아이디 찾기 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  async findId(@Body() findIdDto: FindIdDto) {
+    return this.authService.findId(findIdDto);
+  }
+
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '비밀번호 재설정 요청' })
+  @ApiResponse({ status: 200, description: '인증 코드 전송 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  async requestPasswordReset(
+    @Body() requestPasswordResetDto: RequestPasswordResetDto,
+  ) {
+    return this.authService.requestPasswordReset(requestPasswordResetDto);
+  }
+
+  @Post('verify-reset-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '인증 코드 검증' })
+  @ApiResponse({ status: 200, description: '인증 코드 검증 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  async verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto) {
+    return this.authService.verifyResetCode(verifyResetCodeDto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '비밀번호 재설정' })
+  @ApiResponse({ status: 200, description: '비밀번호 재설정 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

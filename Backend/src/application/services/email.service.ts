@@ -86,6 +86,182 @@ Phoenix 재난훈련 시스템
   }
 
   /**
+   * 비밀번호 재설정 인증 코드 이메일 전송
+   * @param email 수신자 이메일
+   * @param name 수신자 이름
+   * @param code 인증 코드
+   * @returns 전송 성공 여부
+   */
+  async sendPasswordResetCode(
+    email: string,
+    name: string,
+    code: string,
+  ): Promise<boolean> {
+    try {
+      const fromEmail = this.configService.get<string>(
+        'AWS_SES_FROM_EMAIL',
+        'phoenix4team@gmail.com',
+      );
+
+      const command = new SendEmailCommand({
+        FromEmailAddress: fromEmail,
+        Destination: {
+          ToAddresses: [email],
+        },
+        Content: {
+          Simple: {
+            Subject: {
+              Data: '[Phoenix] 비밀번호 재설정 인증 코드',
+            },
+            Body: {
+              Html: {
+                Data: this.generatePasswordResetEmailHTML(name, code),
+              },
+              Text: {
+                Data: `Phoenix 비밀번호 재설정
+
+안녕하세요 ${name}님,
+
+비밀번호 재설정을 위한 인증 코드입니다.
+
+인증 코드: ${code}
+
+이 코드는 10분간 유효합니다.
+만약 비밀번호 재설정을 요청하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.
+
+---
+Phoenix 재난훈련 시스템
+전송 시간: ${new Date().toLocaleString('ko-KR')}`,
+              },
+            },
+          },
+        },
+      });
+
+      const result = await this.sesClient.send(command);
+      console.log('✅ 비밀번호 재설정 이메일 전송 성공:', result.MessageId);
+      return true;
+    } catch (error) {
+      console.error('❌ 비밀번호 재설정 이메일 전송 실패:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 비밀번호 재설정 이메일 HTML 템플릿 생성
+   * @param name 수신자 이름
+   * @param code 인증 코드
+   * @returns HTML 형식의 이메일 템플릿
+   */
+  private generatePasswordResetEmailHTML(name: string, code: string): string {
+    return `
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix 비밀번호 재설정</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .code-container {
+            background-color: #f8f9fa;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #856404;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔥 Phoenix</div>
+            <div class="title">비밀번호 재설정 인증 코드</div>
+        </div>
+        
+        <p>안녕하세요 <strong>${name}</strong>님,</p>
+        
+        <p>Phoenix 재난훈련 시스템에서 비밀번호 재설정을 요청하셨습니다.</p>
+        
+        <div class="code-container">
+            <p style="margin: 0 0 10px 0; color: #666;">아래 인증 코드를 입력해주세요:</p>
+            <div class="code">${code}</div>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ 주의사항:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>이 인증 코드는 <strong>10분간</strong> 유효합니다.</li>
+                <li>코드는 한 번만 사용할 수 있습니다.</li>
+                <li>비밀번호 재설정을 요청하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.</li>
+            </ul>
+        </div>
+        
+        <p>보안을 위해 인증 코드를 타인과 공유하지 마세요.</p>
+        
+        <div class="footer">
+            <p>Phoenix 재난훈련 시스템</p>
+            <p>전송 시간: ${new Date().toLocaleString('ko-KR')}</p>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
+
+  /**
    * 문의 이메일 HTML 템플릿 생성
    * @param data 문의 데이터
    * @returns HTML 형식의 이메일 템플릿

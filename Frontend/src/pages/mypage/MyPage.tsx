@@ -645,91 +645,99 @@ const MyPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* 통계 데이터 - 가로로 배치 */}
-                      <div className="flex items-center space-x-6">
-                        {/* 평균 점수 */}
-                        <div className="text-center">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Icon
-                              type="chart"
-                              category="ui"
-                              className="text-sm text-blue-500"
-                            />
-                            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                              평균 점수
-                            </span>
+                      {/* 통계 데이터 - 2x3 그리드 레이아웃 */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* 첫 번째 줄: 평균 점수, 정확도 */}
+                        <div className="flex items-center space-x-4">
+                          {/* 평균 점수 */}
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1 space-x-2">
+                              <Icon
+                                type="chart"
+                                category="ui"
+                                className="text-sm text-blue-500"
+                              />
+                              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                                평균 점수
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                              {stat.averageScore.toFixed(1)}점
+                            </p>
                           </div>
-                          <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                            {stat.averageScore.toFixed(1)}점
-                          </p>
+
+                          {/* 정확도 */}
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1 space-x-2">
+                              <Icon
+                                type="success"
+                                category="status"
+                                className="text-sm text-green-500"
+                              />
+                              <span className="text-sm font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+                                정확도
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold text-green-900 dark:text-green-100">
+                              {stat.accuracyRate}%
+                            </p>
+                          </div>
                         </div>
 
-                        {/* 정확도 */}
-                        <div className="text-center">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Icon
-                              type="success"
-                              category="status"
-                              className="text-sm text-green-500"
-                            />
-                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                              정확도
-                            </span>
+                        {/* 두 번째 줄: 평균 시간, 최고 점수 */}
+                        <div className="flex items-center space-x-4">
+                          {/* 평균 시간 */}
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1 space-x-2">
+                              <Icon
+                                type="info"
+                                category="status"
+                                className="text-sm text-purple-500"
+                              />
+                              <span className="text-sm font-medium text-purple-600 dark:text-purple-400 whitespace-nowrap">
+                                평균 시간
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                              {formatTime(stat.averageTimeSpent)}
+                            </p>
                           </div>
-                          <p className="text-lg font-bold text-green-900 dark:text-green-100">
-                            {stat.accuracyRate}%
-                          </p>
+
+                          {/* 최고 점수 */}
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1 space-x-2">
+                              <Icon
+                                type="trophy"
+                                category="ui"
+                                className="text-sm text-yellow-500"
+                              />
+                              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
+                                최고 점수
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold text-yellow-900 dark:text-yellow-100">
+                              {stat.bestScore}점
+                            </p>
+                          </div>
                         </div>
 
-                        {/* 훈련 시간 */}
-                        <div className="text-center">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Icon
-                              type="info"
-                              category="status"
-                              className="text-sm text-purple-500"
-                            />
-                            <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                              평균 시간
-                            </span>
+                        {/* 세 번째 줄: 누적 점수 (중앙 정렬) */}
+                        <div className="flex justify-center col-span-2">
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1 space-x-2">
+                              <Icon
+                                type="chart"
+                                category="ui"
+                                className="text-sm text-indigo-500"
+                              />
+                              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                                누적 점수
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
+                              {stat.totalScore}점
+                            </p>
                           </div>
-                          <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                            {formatTime(stat.averageTimeSpent)}
-                          </p>
-                        </div>
-
-                        {/* 최고 점수 */}
-                        <div className="text-center">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Icon
-                              type="trophy"
-                              category="ui"
-                              className="text-sm text-yellow-500"
-                            />
-                            <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                              최고 점수
-                            </span>
-                          </div>
-                          <p className="text-lg font-bold text-yellow-900 dark:text-yellow-100">
-                            {stat.bestScore}점
-                          </p>
-                        </div>
-
-                        {/* 누적 점수 */}
-                        <div className="text-center">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Icon
-                              type="chart"
-                              category="ui"
-                              className="text-sm text-indigo-500"
-                            />
-                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                              누적 점수
-                            </span>
-                          </div>
-                          <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
-                            {stat.totalScore}점
-                          </p>
                         </div>
                       </div>
 
@@ -1072,21 +1080,21 @@ const MyPage: React.FC = () => {
                   <Icon
                     type="warning"
                     category="status"
-                    className="text-red-500 text-2xl mr-3"
+                    className="mr-3 text-2xl text-red-500"
                   />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     회원 탈퇴 확인
                   </h3>
                 </div>
                 <div className="mb-6">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  <p className="mb-4 text-gray-600 dark:text-gray-300">
                     정말로 회원 탈퇴를 진행하시겠습니까?
                   </p>
-                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                  <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+                    <h4 className="mb-2 font-semibold text-red-800 dark:text-red-200">
                       🚨 삭제되는 데이터
                     </h4>
-                    <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                    <ul className="space-y-1 text-sm text-red-700 dark:text-red-300">
                       <li>• 개인 정보 (이름, 이메일, 전화번호)</li>
                       <li>• 훈련 기록 및 성과</li>
                       <li>• 경험치 및 레벨</li>
@@ -1122,14 +1130,14 @@ const MyPage: React.FC = () => {
                   <Icon
                     type="success"
                     category="status"
-                    className="text-green-500 text-2xl mr-3"
+                    className="mr-3 text-2xl text-green-500"
                   />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     이메일 인증
                   </h3>
                 </div>
                 <div className="mb-6">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  <p className="mb-4 text-gray-600 dark:text-gray-300">
                     <strong>{deleteEmail}</strong>로 인증 코드가 전송되었습니다.
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1159,7 +1167,7 @@ const MyPage: React.FC = () => {
                   <Icon
                     type="info"
                     category="status"
-                    className="text-blue-500 text-2xl mr-3"
+                    className="mr-3 text-2xl text-blue-500"
                   />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     인증 코드 입력
@@ -1178,7 +1186,7 @@ const MyPage: React.FC = () => {
                       )
                     }
                     placeholder="123456"
-                    className="w-full px-3 py-2 text-center text-lg font-mono border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 font-mono text-lg text-center border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     maxLength={6}
                   />
                   {deleteError && (
@@ -1211,14 +1219,14 @@ const MyPage: React.FC = () => {
                   <Icon
                     type="success"
                     category="status"
-                    className="text-green-500 text-2xl mr-3"
+                    className="mr-3 text-2xl text-green-500"
                   />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     탈퇴 완료
                   </h3>
                 </div>
                 <div className="mb-6">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  <p className="mb-4 text-gray-600 dark:text-gray-300">
                     회원 탈퇴가 완료되었습니다.
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">

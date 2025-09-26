@@ -56,6 +56,26 @@ export function useTrainingResult() {
         // 실제 문제 수 사용 (이미 order가 999인 #END 슬라이드가 제외된 값)
         const actualQuestionCount = opts.gameStateSummary.scenariosCount;
 
+        // 정확도 계산 (모든 문제를 맞춘 경우 100%)
+        const accuracyPercentage =
+          actualQuestionCount > 0
+            ? Math.round(
+                (opts.expSystemState.totalCorrect / actualQuestionCount) * 100
+              )
+            : 0;
+
+        // 속도 점수 계산
+        const speedScore =
+          timeSpent <= 45
+            ? 100
+            : Math.max(0, Math.round(100 - (timeSpent - 45) / 3));
+
+        // 총 점수 계산 (정확도 70% + 속도 30%)
+        const totalScore =
+          actualQuestionCount > 0
+            ? Math.round(accuracyPercentage * 0.7 + speedScore * 0.3)
+            : 0;
+
         const resultData = {
           sessionId,
           // participantId는 제거 - 서버에서 자동으로 생성하도록 함
@@ -63,28 +83,9 @@ export function useTrainingResult() {
           scenarioType: getScenarioTypeForApi(opts.scenarioType || 'fire'), // 시나리오 타입 추가
           userId: user.id,
           resultCode: `RESULT${Date.now()}`,
-          accuracyScore:
-            actualQuestionCount > 0
-              ? Math.round(
-                  (opts.expSystemState.totalCorrect / actualQuestionCount) * 100
-                )
-              : 0,
-          speedScore:
-            timeSpent <= 45
-              ? 100
-              : Math.max(0, Math.round(100 - (timeSpent - 45) / 3)), // 45초 이내 = 100점, 그 이후 3초당 1점 감점
-          totalScore:
-            actualQuestionCount > 0
-              ? Math.round(
-                  (opts.expSystemState.totalCorrect / actualQuestionCount) *
-                    100 *
-                    0.7 + // 정확도 70% 가중치
-                    (timeSpent <= 45
-                      ? 100
-                      : Math.max(0, Math.round(100 - (timeSpent - 45) / 3))) *
-                      0.3 // 속도 30% 가중치
-                )
-              : 0,
+          accuracyScore: accuracyPercentage,
+          speedScore: speedScore,
+          totalScore: totalScore,
           completionTime: timeSpent,
           feedback: `${opts.scenarioSetName} 완료 - 레벨 ${opts.expSystemState.level}, 정답 ${opts.expSystemState.totalCorrect}/${actualQuestionCount}`,
           completedAt: new Date().toISOString(),

@@ -58,38 +58,21 @@ export class TeamsService {
     teamCode: string,
   ): Promise<{ valid: boolean; team?: Team; message?: string }> {
     try {
-      console.log('🔍 팀 코드 검증 시작:', { teamCode });
-
       const team = await this.teamRepository.findOne({ where: { teamCode } });
-      console.log('🔍 팀 조회 결과:', { team });
 
       if (!team) {
-        console.log('❌ 팀을 찾을 수 없음');
         return {
           valid: false,
           message: '존재하지 않는 팀 코드입니다.',
         };
       }
 
-      console.log('🔍 팀 상태 확인:', {
-        isActive: team.isActive,
-        deletedAt: team.deletedAt,
-        status: team.status,
-      });
-
       if (!team.isActive || team.deletedAt) {
-        console.log('❌ 비활성화된 팀');
         return {
           valid: false,
           message: '비활성화된 팀입니다.',
         };
       }
-
-      console.log('✅ 팀 코드 검증 성공:', {
-        id: team.id,
-        name: team.name,
-        teamCode: team.teamCode,
-      });
 
       return {
         valid: true,

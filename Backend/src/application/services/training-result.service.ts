@@ -25,20 +25,11 @@ export class TrainingResultService {
     data: Partial<TrainingResult>,
   ): Promise<TrainingResult> {
     try {
-      console.log('🔍 훈련 결과 생성 시작:', data);
-
       // 데이터베이스 연결 상태 확인 (간단한 방식)
       try {
         await this.trainingResultRepository.manager.query('SELECT 1');
-        console.log('✅ 데이터베이스 연결 상태 정상');
       } catch (dbError) {
         console.error('❌ 데이터베이스 연결 실패:', dbError);
-        console.error('🔧 해결 방법:');
-        console.error('1. 로컬 MySQL 데이터베이스가 실행 중인지 확인하세요');
-        console.error(
-          '2. Database/phoenix_complete_schema.sql 파일을 실행하세요',
-        );
-        console.error('3. 백엔드 서버의 데이터베이스 연결 설정을 확인하세요');
         throw new Error(
           '데이터베이스 연결에 실패했습니다. 로컬 데이터베이스가 실행 중인지 확인해주세요.',
         );
@@ -54,13 +45,11 @@ export class TrainingResultService {
       // participantId가 없으면 자동으로 참가자 생성
       let participantId = data.participantId;
       if (!participantId) {
-        console.log('🔍 participantId가 없어서 자동 생성합니다.');
         participantId = await this.createOrGetParticipant(
           data.userId!,
           data.sessionId!,
           data.scenarioId!,
         );
-        console.log('✅ 참가자 생성/조회 완료:', { participantId });
       }
 
       // 결과 코드 생성 (이미 있으면 사용, 없으면 생성)
@@ -98,39 +87,13 @@ export class TrainingResultService {
             console.log('🔄 트랜잭션 시작 - 훈련 결과 저장');
             const result =
               await transactionalEntityManager.save(trainingResult);
-            console.log('✅ 트랜잭션 내 훈련 결과 저장 완료:', {
-              id: result.id,
-              resultCode: result.resultCode,
-            });
             return result;
           },
         );
-      console.log('✅ 훈련 결과 생성 완료:', {
-        id: savedResult.id,
-        resultCode,
-        participantId,
-        scenarioType: savedResult.scenarioType,
-        totalScore: savedResult.totalScore,
-        accuracyScore: savedResult.accuracyScore,
-        speedScore: savedResult.speedScore,
-        completionTime: savedResult.completionTime,
-        userId: savedResult.userId,
-        sessionId: savedResult.sessionId,
-        scenarioId: savedResult.scenarioId,
-        feedback: savedResult.feedback,
-        completedAt: savedResult.completedAt,
-        isActive: savedResult.isActive,
-      });
 
       // 데이터베이스에 실제로 저장되었는지 확인
       const verifyResult = await this.trainingResultRepository.findOne({
         where: { id: savedResult.id },
-      });
-      console.log('🔍 저장 검증:', {
-        found: !!verifyResult,
-        resultId: verifyResult?.id,
-        scenarioType: verifyResult?.scenarioType,
-        totalScore: verifyResult?.totalScore,
       });
 
       // 사용자 경험치 업데이트
@@ -141,11 +104,6 @@ export class TrainingResultService {
           expToAdd,
           totalScore: data.totalScore || 0,
           completedScenarios: 1, // 시나리오 1개 완료
-        });
-        console.log('✅ 사용자 경험치 업데이트 완료:', {
-          userId: data.userId,
-          expAdded: expToAdd,
-          totalScore: data.totalScore,
         });
       } catch (expError) {
         console.error(
@@ -174,24 +132,10 @@ export class TrainingResultService {
 
   async getTrainingResultsByUser(userId: number): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 사용자 훈련 결과 조회:', { userId });
-
       const results = await this.trainingResultRepository.find({
         where: { userId, isActive: true },
         relations: ['session', 'scenario', 'user', 'participant'],
         order: { completedAt: 'DESC' },
-      });
-
-      console.log('✅ 사용자 훈련 결과 조회 완료:', {
-        userId,
-        count: results.length,
-        results: results.map((r) => ({
-          id: r.id,
-          sessionId: r.sessionId,
-          scenarioId: r.scenarioId,
-          totalScore: r.totalScore,
-          completedAt: r.completedAt,
-        })),
       });
       return results;
     } catch (error) {
@@ -204,15 +148,11 @@ export class TrainingResultService {
     sessionId: number,
   ): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 세션별 훈련 결과 조회:', { sessionId });
-
       const results = await this.trainingResultRepository.find({
         where: { sessionId, isActive: true },
         relations: ['user', 'scenario'],
         order: { completedAt: 'DESC' },
       });
-
-      console.log('✅ 세션별 훈련 결과 조회 완료:', { count: results.length });
       return results;
     } catch (error) {
       console.error('❌ 세션별 훈련 결과 조회 실패:', error);
@@ -222,8 +162,6 @@ export class TrainingResultService {
 
   async getTrainingStatistics(userId: number): Promise<any> {
     try {
-      console.log('🔍 사용자 훈련 통계 조회:', { userId });
-
       const results = await this.trainingResultRepository.find({
         where: { userId, isActive: true },
         relations: ['scenario'],
@@ -270,7 +208,6 @@ export class TrainingResultService {
         lastTrainingDate,
       };
 
-      console.log('✅ 사용자 훈련 통계 조회 완료:', statistics);
       return statistics;
     } catch (error) {
       console.error('❌ 사용자 훈련 통계 조회 실패:', error);
@@ -280,15 +217,11 @@ export class TrainingResultService {
 
   async getUserChoiceLogs(resultId: number): Promise<UserChoiceLog[]> {
     try {
-      console.log('🔍 사용자 선택 로그 조회:', { resultId });
-
       const logs = await this.userChoiceLogRepository.find({
         where: { resultId, isActive: true },
         relations: ['event', 'choice'],
         order: { selectedAt: 'ASC' },
       });
-
-      console.log('✅ 사용자 선택 로그 조회 완료:', { count: logs.length });
       return logs;
     } catch (error) {
       console.error('❌ 사용자 선택 로그 조회 실패:', error);
@@ -300,8 +233,6 @@ export class TrainingResultService {
     data: Partial<UserChoiceLog>,
   ): Promise<UserChoiceLog> {
     try {
-      console.log('🔍 사용자 선택 로그 생성 시작:', data);
-
       // 필수 필드 검증
       if (!data.resultId || !data.eventId || !data.choiceId) {
         throw new Error(
@@ -414,48 +345,23 @@ export class TrainingResultService {
    */
   async getTrainingResultsByTeam(teamId: number): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 팀별 훈련 결과 조회:', { teamId });
+      // 🚀 최적화: 데이터베이스 레벨에서 필터링
+      const results = await this.trainingResultRepository
+        .createQueryBuilder('tr')
+        .leftJoinAndSelect('tr.session', 'session')
+        .leftJoinAndSelect('tr.scenario', 'scenario')
+        .leftJoinAndSelect('tr.user', 'user')
+        .leftJoinAndSelect('tr.participant', 'participant')
+        .where('tr.isActive = :isActive', { isActive: true })
+        .andWhere(
+          '(user.teamId = :teamId OR session.teamId = :teamId OR participant.teamId = :teamId)',
+          { teamId },
+        )
+        .orderBy('tr.completedAt', 'DESC')
+        .limit(1000) // 🚀 결과 수 제한으로 성능 향상
+        .getMany();
 
-      const results = await this.trainingResultRepository.find({
-        where: { isActive: true },
-        relations: ['session', 'scenario', 'user', 'participant'],
-        order: { completedAt: 'DESC' },
-      });
-
-      // 팀에 속한 사용자들의 결과만 필터링
-      const teamResults = results.filter((result) => {
-        // 사용자의 팀 ID가 일치하는 경우 (가장 중요한 조건)
-        if (result.user?.teamId === teamId) {
-          return true;
-        }
-
-        // 세션의 팀 ID가 일치하는 경우
-        if (result.session?.teamId === teamId) {
-          return true;
-        }
-
-        // 참가자의 팀 ID가 일치하는 경우
-        if (result.participant?.teamId === teamId) {
-          return true;
-        }
-
-        return false;
-      });
-
-      console.log('✅ 팀별 훈련 결과 조회 완료:', {
-        teamId,
-        totalResults: results.length,
-        teamResults: teamResults.length,
-        teamResultsDetails: teamResults.map((r) => ({
-          id: r.id,
-          userId: r.userId,
-          sessionTeamId: r.session?.teamId,
-          participantTeamId: r.participant?.teamId,
-          userTeamId: r.user?.teamId,
-          totalScore: r.totalScore,
-        })),
-      });
-      return teamResults;
+      return results;
     } catch (error) {
       console.error('❌ 팀별 훈련 결과 조회 실패:', error);
       throw error;

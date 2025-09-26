@@ -17,20 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('🔍 JWT 토큰 검증:', {
-      sub: payload.sub,
-      loginId: payload.loginId,
-      teamId: payload.teamId,
-      adminLevel: payload.adminLevel,
-      isAdmin: payload.isAdmin,
-      type: payload.type,
-      iat: payload.iat,
-      exp: payload.exp,
-    });
-
     // Access Token만 허용 (type 검증)
     if (payload.type !== 'access') {
-      console.log('❌ Access Token이 아님:', payload.type);
       return null;
     }
 
@@ -45,13 +33,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       isAdmin: payload.isAdmin || false,
     };
 
-    console.log('✅ JWT 토큰 검증 성공:', {
-      id: user.id,
-      loginId: user.loginId,
-      adminLevel: user.adminLevel,
-      isAdmin: user.isAdmin,
-      teamId: user.teamId,
-    });
     return user;
   }
 }

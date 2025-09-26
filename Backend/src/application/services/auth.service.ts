@@ -36,31 +36,23 @@ export class AuthService {
   ) {}
 
   async validateUser(loginId: string, password: string): Promise<any> {
-    console.log('🔍 validateUser 호출:', { loginId });
     const user = await this.usersService.findByLoginId(loginId);
-    console.log('👤 사용자 조회 결과:', user ? '사용자 존재' : '사용자 없음');
 
     if (user) {
-      console.log('🔐 비밀번호 검증 시작');
       const isPasswordValid = await PasswordUtil.comparePassword(
         password,
         user.password,
       );
-      console.log('🔐 비밀번호 검증 결과:', isPasswordValid ? '성공' : '실패');
 
       if (isPasswordValid) {
         const { password: _, ...result } = user;
-        console.log('✅ 로그인 성공');
         return result;
       }
     }
-    console.log('❌ 로그인 실패');
     return null;
   }
 
   async login(user: any) {
-    console.log('🔑 로그인 처리 시작:', { userId: user.id, email: user.email });
-
     // Refresh Token 시스템 사용
     const tokenPair = await this.refreshTokenService.generateTokenPair(
       user.id,
@@ -92,10 +84,6 @@ export class AuthService {
       },
     };
 
-    console.log('✅ 로그인 응답 생성 완료:', {
-      success: response.success,
-      userId: user.id,
-    });
     return response;
   }
 
@@ -121,8 +109,6 @@ export class AuthService {
         token: token.substring(0, 20) + '...',
       });
 
-      console.log('✅ 로그아웃 완료:', { userId });
-
       return {
         success: true,
         message: '로그아웃이 성공적으로 완료되었습니다.',
@@ -143,14 +129,11 @@ export class AuthService {
    */
   async refreshToken(refreshToken: string) {
     try {
-      console.log('🔄 토큰 갱신 시도');
-
       // Refresh Token 검증
       const validation =
         await this.refreshTokenService.validateRefreshToken(refreshToken);
 
       if (!validation.valid || !validation.userId || !validation.loginId) {
-        console.log('❌ Refresh Token 검증 실패');
         return {
           success: false,
           message: '유효하지 않은 Refresh Token입니다.',
@@ -160,7 +143,6 @@ export class AuthService {
       // 사용자 정보 조회
       const user = await this.usersService.findById(validation.userId);
       if (!user) {
-        console.log('❌ 사용자 정보 조회 실패');
         return {
           success: false,
           message: '사용자 정보를 찾을 수 없습니다.',
@@ -175,8 +157,6 @@ export class AuthService {
         null, // 일반 사용자는 관리자 레벨 없음
         false, // 일반 사용자는 관리자 아님
       );
-
-      console.log('✅ 토큰 갱신 완료:', { userId: user.id });
 
       return {
         success: true,

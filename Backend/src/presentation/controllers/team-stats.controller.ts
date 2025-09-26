@@ -55,18 +55,34 @@ export class TeamStatsController {
       // 모든 팀 조회
       const teams = await this.teamsService.findAll();
 
-      // 각 팀별 통계 계산
-      const teamStats = await Promise.all(
-        teams.map(async (team) => {
-          const stats = await this.calculateTeamStats(team.id);
-          return {
-            teamId: team.id,
-            teamName: team.name,
-            teamCode: team.teamCode,
-            ...stats,
-          };
-        }),
-      );
+      // 🚀 최적화: 배치 처리로 성능 향상
+      const teamStats = [];
+      const batchSize = 5; // 동시 처리할 팀 수 제한
+
+      for (let i = 0; i < teams.length; i += batchSize) {
+        const batch = teams.slice(i, i + batchSize);
+        const batchStats = await Promise.all(
+          batch.map(async (team) => {
+            try {
+              const stats = await this.calculateTeamStats(team.id);
+              return {
+                teamId: team.id,
+                teamName: team.name,
+                teamCode: team.teamCode,
+                ...stats,
+              };
+            } catch (error) {
+              return {
+                teamId: team.id,
+                teamName: team.name,
+                teamCode: team.teamCode,
+                error: '통계 계산 실패',
+              };
+            }
+          }),
+        );
+        teamStats.push(...batchStats);
+      }
 
       return {
         success: true,

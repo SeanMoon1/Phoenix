@@ -14,12 +14,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       port: this.configService.get<number>('REDIS_PORT', 6379),
       password: this.configService.get<string>('REDIS_PASSWORD'),
       db: this.configService.get<number>('REDIS_DB', 0),
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 2,
       lazyConnect: true,
-    });
-
-    this.client.on('connect', () => {
-      console.log('✅ Redis 연결 성공');
+      // 🚀 타임아웃 설정 추가
+      connectTimeout: 10000, // 10초
+      commandTimeout: 5000, // 5초
     });
 
     this.client.on('error', (error) => {

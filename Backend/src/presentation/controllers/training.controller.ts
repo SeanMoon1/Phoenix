@@ -33,27 +33,9 @@ export class TrainingController {
   @ApiResponse({ status: 201, description: '훈련 세션 생성 성공' })
   @TeamAccess('CREATE_SESSION')
   async create(@Body() createTrainingSessionDto: CreateTrainingSessionDto) {
-    console.log('🔍 TrainingController.create 호출됨');
-    console.log('📝 받은 훈련 세션 데이터:', {
-      sessionName: createTrainingSessionDto.sessionName,
-      scenarioId: createTrainingSessionDto.scenarioId,
-      teamId: createTrainingSessionDto.teamId,
-      startTime: createTrainingSessionDto.startTime,
-      endTime: createTrainingSessionDto.endTime,
-      status: createTrainingSessionDto.status,
-      createdBy: createTrainingSessionDto.createdBy,
-    });
-
     try {
       const result = await this.trainingService.create(
         createTrainingSessionDto,
-      );
-      console.log('✅ TrainingController.create 성공');
-      console.log('🔍 반환된 result:', result);
-      console.log('🔍 result 타입:', typeof result);
-      console.log(
-        '🔍 result 키들:',
-        result ? Object.keys(result) : 'result is null/undefined',
       );
       return { success: true, data: result };
     } catch (error) {
@@ -67,7 +49,6 @@ export class TrainingController {
   @ApiResponse({ status: 200, description: '훈련 세션 목록 조회 성공' })
   async findAll() {
     const sessions = await this.trainingService.findAll();
-    console.log('🔍 DB에서 조회된 세션들:', sessions);
     return { success: true, data: sessions };
   }
 

@@ -22,6 +22,26 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          envs: |
+            NODE_ENV=production
+            PORT=3000
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+            API_URL=${{ secrets.API_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_DATABASE=${{ secrets.DB_DATABASE }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
           script: |
             # 애플리케이션 디렉토리로 이동
             cd /home/ubuntu/Phoenix
@@ -35,6 +55,35 @@ jobs:
             
             # Backend 디렉토리로 이동
             cd Backend
+            
+            # .env 파일 생성 (환경변수 주입)
+            cat > .env << EOF
+            NODE_ENV=production
+            PORT=3000
+            CORS_ORIGIN=$CORS_ORIGIN
+            API_URL=$API_URL
+            FRONTEND_URL=$FRONTEND_URL
+            DB_HOST=$DB_HOST
+            DB_PORT=3306
+            DB_USERNAME=$DB_USERNAME
+            DB_PASSWORD=$DB_PASSWORD
+            DB_DATABASE=$DB_DATABASE
+            JWT_SECRET=$JWT_SECRET
+            JWT_EXPIRES_IN=7d
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            GOOGLE_CALLBACK_URL=$API_URL/auth/google/callback
+            NAVER_CLIENT_ID=$NAVER_CLIENT_ID
+            NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET
+            NAVER_CALLBACK_URL=$API_URL/auth/naver/callback
+            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+            KAKAO_CALLBACK_URL=$API_URL/auth/kakao/callback
+            AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            AWS_REGION=$AWS_REGION
+            LOG_LEVEL=info
+            EOF
             
             # 의존성 설치 (production only)
             npm ci --only=production

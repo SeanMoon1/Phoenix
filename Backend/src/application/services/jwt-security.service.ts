@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { RedisService } from './redis.service';
+import { MemoryAuthService } from './memory-auth.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtSecurityService {
+  private blacklistedTokens = new Map<string, number>();
+  private userLogoutTimes = new Map<number, number>();
+
   constructor(
-    private readonly redisService: RedisService,
+    private readonly memoryAuthService: MemoryAuthService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -23,9 +26,17 @@ export class JwtSecurityService {
 
       if (exp && exp > now) {
         // 토큰이 아직 유효한 경우에만 블랙리스트에 추가
-        const ttl = exp - now;
-        await this.redisService.setex(`blacklist:${token}`, ttl, '1');
-        console.log(`🚫 JWT 토큰 무효화: ${token.substring(0, 20)}...`);
+        const ttl = (exp - now) * 1000; // 밀리초로 변환
+        this.blacklistedTokens.set(token, Date.now() + ttl);
+
+        // TTL 후 자동 삭제
+        setTimeout(() => {
+          this.blacklistedTokens.delete(token);
+        }, ttl);
+
+        console.log(
+          `🚫 JWT 토큰 무효화 (메모리): ${token.substring(0, 20)}...`,
+        );
       }
     } catch (error) {
       console.error('❌ JWT 토큰 무효화 실패:', error);
@@ -38,13 +49,18 @@ export class JwtSecurityService {
    */
   async invalidateAllUserTokens(userId: number): Promise<void> {
     try {
-      // 사용자별 토큰 무효화 키 설정
-      await this.redisService.setex(
-        `user_logout:${userId}`,
-        24 * 60 * 60,
-        Date.now().toString(),
+      // 사용자별 로그아웃 시간 저장
+      this.userLogoutTimes.set(userId, Date.now());
+
+      // 24시간 후 자동 삭제
+      setTimeout(
+        () => {
+          this.userLogoutTimes.delete(userId);
+        },
+        24 * 60 * 60 * 1000,
       );
-      console.log(`🚫 사용자 ${userId}의 모든 토큰 무효화`);
+
+      console.log(`🚫 사용자 ${userId}의 모든 토큰 무효화 (메모리)`);
     } catch (error) {
       console.error('❌ 사용자 토큰 무효화 실패:', error);
     }
@@ -57,8 +73,16 @@ export class JwtSecurityService {
    */
   async isTokenBlacklisted(token: string): Promise<boolean> {
     try {
-      const result = await this.redisService.get(`blacklist:${token}`);
-      return result === '1';
+      const expiryTime = this.blacklistedTokens.get(token);
+      if (!expiryTime) return false;
+
+      // 만료된 토큰은 삭제
+      if (Date.now() > expiryTime) {
+        this.blacklistedTokens.delete(token);
+        return false;
+      }
+
+      return true;
     } catch (error) {
       console.error('❌ 토큰 블랙리스트 확인 실패:', error);
       return false;
@@ -81,10 +105,10 @@ export class JwtSecurityService {
 
       if (!tokenIat) return false;
 
-      const logoutTime = await this.redisService.get(`user_logout:${userId}`);
+      const logoutTime = this.userLogoutTimes.get(userId);
       if (!logoutTime) return false;
 
-      return tokenIat < parseInt(logoutTime);
+      return tokenIat * 1000 < logoutTime; // 토큰 발급 시간을 밀리초로 변환
     } catch (error) {
       console.error('❌ 로그아웃 후 토큰 사용 확인 실패:', error);
       return false;
@@ -107,13 +131,7 @@ export class JwtSecurityService {
       };
 
       console.log(`🔒 보안 이벤트: ${event}`, logData);
-
-      // Redis에 보안 이벤트 저장 (선택적)
-      await this.redisService.setex(
-        `security_event:${Date.now()}`,
-        7 * 24 * 60 * 60, // 7일 보관
-        JSON.stringify(logData),
-      );
+      // 메모리 기반에서는 콘솔 로깅만 수행
     } catch (error) {
       console.error('❌ 보안 이벤트 로깅 실패:', error);
     }

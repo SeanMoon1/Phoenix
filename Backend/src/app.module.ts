@@ -42,7 +42,7 @@ import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { EmailService } from './application/services/email.service';
 import { GmailService } from './application/services/gmail.service';
-import { RedisService } from './application/services/redis.service';
+import { MemoryAuthService } from './application/services/memory-auth.service';
 import { ExcelExportService } from './application/services/excel-export.service';
 import { PdfExportService } from './application/services/pdf-export.service';
 
@@ -172,7 +172,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     GmailService,
     JwtSecurityService,
     RefreshTokenService,
-    RedisService,
+    MemoryAuthService,
     ExcelExportService,
     PdfExportService,
     // Domain Services

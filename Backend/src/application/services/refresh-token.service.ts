@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RedisService } from './redis.service';
+import { MemoryAuthService } from './memory-auth.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RefreshTokenService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
+    private readonly memoryAuthService: MemoryAuthService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -27,11 +27,12 @@ export class RefreshTokenService {
     // Refresh Token은 7일 유효
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-    // Redis에 Refresh Token 저장 (7일)
-    await this.redisService.setex(
-      `refresh_token:${userId}`,
-      7 * 24 * 60 * 60, // 7일
+    // 메모리에 Refresh Token 저장 (7일)
+    await this.memoryAuthService.setRefreshToken(
+      userId,
       refreshToken,
+      loginId,
+      7 * 24 * 60 * 60, // 7일
     );
 
     console.log(`🔄 Refresh Token 생성: ${userId}`);
@@ -88,9 +89,9 @@ export class RefreshTokenService {
         return { valid: false };
       }
 
-      // Redis에서 Refresh Token 확인
-      const storedToken = await this.redisService.get(
-        `refresh_token:${decoded.sub}`,
+      // 메모리에서 Refresh Token 확인
+      const storedToken = await this.memoryAuthService.getRefreshToken(
+        decoded.sub,
       );
       if (!storedToken || storedToken !== refreshToken) {
         return { valid: false };
@@ -113,7 +114,7 @@ export class RefreshTokenService {
    */
   async invalidateRefreshToken(userId: number): Promise<void> {
     try {
-      await this.redisService.setex(`refresh_token:${userId}`, 0, '');
+      await this.memoryAuthService.deleteRefreshToken(userId);
       console.log(`🚫 Refresh Token 무효화: ${userId}`);
     } catch (error) {
       console.error('❌ Refresh Token 무효화 실패:', error);

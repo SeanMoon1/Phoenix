@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
 import { EmailService } from './email.service';
-import { RedisService } from './redis.service';
+import { MemoryAuthService } from './memory-auth.service';
 import { JwtSecurityService } from './jwt-security.service';
 import { RefreshTokenService } from './refresh-token.service';
 import { RegisterDto } from '../../presentation/dto/register.dto';
@@ -29,7 +29,7 @@ export class AuthService {
     private teamsService: TeamsService,
     private jwtService: JwtService,
     private emailService: EmailService,
-    private redisService: RedisService,
+    private memoryAuthService: MemoryAuthService,
     private jwtSecurityService: JwtSecurityService,
     private refreshTokenService: RefreshTokenService,
     private configService: ConfigService,
@@ -524,7 +524,7 @@ export class AuthService {
       });
 
       // 기존 인증 코드가 있는지 확인 (중복 요청 방지)
-      const existingData = await this.redisService.getResetCode(
+      const existingData = await this.memoryAuthService.getResetCode(
         requestPasswordResetDto.email,
       );
 
@@ -564,15 +564,15 @@ export class AuthService {
       // 인증 코드를 해시화하여 저장 (보안 강화)
       const hashedCode = await PasswordUtil.hashPassword(verificationCode);
 
-      // Redis에 인증 코드 저장 (10분 TTL)
-      await this.redisService.setResetCode(
+      // 메모리에 인증 코드 저장 (10분 TTL)
+      await this.memoryAuthService.setResetCode(
         requestPasswordResetDto.email,
         {
           hashedCode: hashedCode,
           userId: user.id,
           attempts: 0, // 시도 횟수 제한
         },
-        this.configService.get<number>('REDIS_TTL', 600), // 환경 변수에서 가져오기
+        600, // 10분
       );
 
       // 이메일로 인증 코드 전송
@@ -613,7 +613,7 @@ export class AuthService {
     try {
       console.log('🔐 인증 코드 검증:', { email: verifyResetCodeDto.email });
 
-      const resetData = await this.redisService.getResetCode(
+      const resetData = await this.memoryAuthService.getResetCode(
         verifyResetCodeDto.email,
       );
 
@@ -632,7 +632,7 @@ export class AuthService {
       );
       if (resetData.attempts >= maxAttempts) {
         console.log('❌ 인증 코드 시도 횟수 초과');
-        await this.redisService.deleteResetCode(verifyResetCodeDto.email);
+        await this.memoryAuthService.deleteResetCode(verifyResetCodeDto.email);
         return {
           success: false,
           message: '인증 코드 시도 횟수를 초과했습니다. 다시 요청해주세요.',
@@ -646,7 +646,7 @@ export class AuthService {
 
       if (codeAge > maxAge) {
         console.log('❌ 인증 코드 만료');
-        await this.redisService.deleteResetCode(verifyResetCodeDto.email);
+        await this.memoryAuthService.deleteResetCode(verifyResetCodeDto.email);
         return {
           success: false,
           message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
@@ -662,7 +662,7 @@ export class AuthService {
       if (!isCodeValid) {
         console.log('❌ 인증 코드 불일치');
         // 시도 횟수 증가
-        await this.redisService.updateResetCode(verifyResetCodeDto.email, {
+        await this.memoryAuthService.updateResetCode(verifyResetCodeDto.email, {
           attempts: resetData.attempts + 1,
         });
 
@@ -675,7 +675,7 @@ export class AuthService {
       console.log('✅ 인증 코드 검증 성공');
 
       // 인증 성공 시 시도 횟수 초기화
-      await this.redisService.updateResetCode(verifyResetCodeDto.email, {
+      await this.memoryAuthService.updateResetCode(verifyResetCodeDto.email, {
         attempts: 0,
       });
 
@@ -728,10 +728,7 @@ export class AuthService {
       await this.usersService.update(user.id, { password: hashedPassword });
 
       // 인증 코드 삭제
-      await this.redisService.deleteResetCode(resetPasswordDto.email);
-
-      // Redis 정리 (만료된 코드들 삭제)
-      await this.redisService.cleanupExpiredCodes();
+      await this.memoryAuthService.deleteResetCode(resetPasswordDto.email);
 
       console.log('✅ 비밀번호 재설정 성공');
       return {
@@ -748,28 +745,27 @@ export class AuthService {
   }
 
   /**
-   * Redis 헬스체크
-   * @returns Redis 상태 정보
+   * 메모리 인증 헬스체크
+   * @returns 메모리 인증 상태 정보
    */
-  async checkRedisHealth() {
+  async checkMemoryAuthHealth() {
     try {
-      const isConnected = await this.redisService.isConnected();
-      const stats = await this.redisService.getStats();
+      const stats = this.memoryAuthService.getMemoryStats();
 
       return {
         success: true,
         data: {
-          connected: isConnected,
+          connected: true,
           stats: stats,
           timestamp: new Date().toISOString(),
         },
-        message: isConnected ? 'Redis 연결 정상' : 'Redis 연결 실패',
+        message: '메모리 인증 시스템 정상',
       };
     } catch (error) {
-      console.error('❌ Redis 헬스체크 오류:', error);
+      console.error('❌ 메모리 인증 헬스체크 오류:', error);
       return {
         success: false,
-        error: 'Redis 헬스체크 중 오류가 발생했습니다.',
+        error: '메모리 인증 헬스체크 중 오류가 발생했습니다.',
       };
     }
   }
@@ -786,7 +782,7 @@ export class AuthService {
       });
 
       // 기존 인증 코드가 있는지 확인 (중복 요청 방지)
-      const existingData = await this.redisService.getResetCode(
+      const existingData = await this.memoryAuthService.getResetCode(
         requestDeletionDto.email,
       );
 
@@ -826,15 +822,15 @@ export class AuthService {
       // 인증 코드를 해시화하여 저장 (보안 강화)
       const hashedCode = await PasswordUtil.hashPassword(verificationCode);
 
-      // Redis에 인증 코드 저장 (10분 TTL)
-      await this.redisService.setResetCode(
+      // 메모리에 인증 코드 저장 (10분 TTL)
+      await this.memoryAuthService.setResetCode(
         requestDeletionDto.email,
         {
           hashedCode: hashedCode,
           userId: user.id,
           attempts: 0, // 시도 횟수 제한
         },
-        this.configService.get<number>('REDIS_TTL', 600),
+        600, // 10분
       );
 
       // 이메일로 인증 코드 전송
@@ -877,7 +873,7 @@ export class AuthService {
         email: verifyDeletionCodeDto.email,
       });
 
-      const resetData = await this.redisService.getResetCode(
+      const resetData = await this.memoryAuthService.getResetCode(
         verifyDeletionCodeDto.email,
       );
 
@@ -896,7 +892,9 @@ export class AuthService {
       );
       if (resetData.attempts >= maxAttempts) {
         console.log('❌ 인증 코드 시도 횟수 초과');
-        await this.redisService.deleteResetCode(verifyDeletionCodeDto.email);
+        await this.memoryAuthService.deleteResetCode(
+          verifyDeletionCodeDto.email,
+        );
         return {
           success: false,
           message: '인증 코드 시도 횟수를 초과했습니다. 다시 요청해주세요.',
@@ -910,7 +908,9 @@ export class AuthService {
 
       if (codeAge > maxAge) {
         console.log('❌ 인증 코드 만료');
-        await this.redisService.deleteResetCode(verifyDeletionCodeDto.email);
+        await this.memoryAuthService.deleteResetCode(
+          verifyDeletionCodeDto.email,
+        );
         return {
           success: false,
           message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
@@ -926,9 +926,12 @@ export class AuthService {
       if (!isCodeValid) {
         console.log('❌ 인증 코드 불일치');
         // 시도 횟수 증가
-        await this.redisService.updateResetCode(verifyDeletionCodeDto.email, {
-          attempts: resetData.attempts + 1,
-        });
+        await this.memoryAuthService.updateResetCode(
+          verifyDeletionCodeDto.email,
+          {
+            attempts: resetData.attempts + 1,
+          },
+        );
 
         return {
           success: false,
@@ -939,9 +942,12 @@ export class AuthService {
       console.log('✅ 회원 탈퇴 인증 코드 검증 성공');
 
       // 인증 성공 시 시도 횟수 초기화
-      await this.redisService.updateResetCode(verifyDeletionCodeDto.email, {
-        attempts: 0,
-      });
+      await this.memoryAuthService.updateResetCode(
+        verifyDeletionCodeDto.email,
+        {
+          attempts: 0,
+        },
+      );
 
       return {
         success: true,
@@ -988,7 +994,7 @@ export class AuthService {
       await this.usersService.delete(user.id);
 
       // 인증 코드 삭제
-      await this.redisService.deleteResetCode(deleteAccountDto.email);
+      await this.memoryAuthService.deleteResetCode(deleteAccountDto.email);
 
       console.log('✅ 회원 탈퇴 완료:', { userId: user.id, email: user.email });
 

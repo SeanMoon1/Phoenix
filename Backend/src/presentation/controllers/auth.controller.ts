@@ -142,12 +142,12 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
-  @Get('redis/health')
+  @Get('memory-auth/health')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Redis 헬스체크' })
-  @ApiResponse({ status: 200, description: 'Redis 상태 확인' })
-  async checkRedisHealth() {
-    return this.authService.checkRedisHealth();
+  @ApiOperation({ summary: '메모리 인증 헬스체크' })
+  @ApiResponse({ status: 200, description: '메모리 인증 상태 확인' })
+  async checkMemoryAuthHealth() {
+    return this.authService.checkMemoryAuthHealth();
   }
 
   @Post('request-account-deletion')

@@ -72,12 +72,12 @@ export default function ProgressBar({
     displayPct?: number;
     anim?: boolean;
   }) => (
-    <div className="mt-4 grid grid-cols-1 gap-4">
-      <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4">
+    <div className="grid grid-cols-1 gap-4 mt-4">
+      <div className="p-4 shadow bg-white/90 dark:bg-black/40 rounded-2xl">
         <img
           src={phoenixImg}
           alt="Phoenix Mascot"
-          className="h-24 w-auto mx-auto"
+          className="w-auto h-24 mx-auto"
         />
         <div className="mt-4">
           <div className="flex items-baseline justify-between">
@@ -107,14 +107,14 @@ export default function ProgressBar({
   );
 
   return (
-    <section className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-4">
+    <section className="p-4 mb-4 shadow-md bg-white/80 dark:bg-black/40 rounded-2xl">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-semibold">진행</h2>
         <span className="text-2xl font-bold">
           {currentIndex + 1} / {total}
         </span>
       </div>
-      <div className="h-3 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-3">
+      <div className="w-full h-3 mt-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className="h-full bg-emerald-500 dark:bg-emerald-400 transition-[width] duration-300"
           style={{ width: `${percentAll}%` }}
@@ -130,8 +130,8 @@ export default function ProgressBar({
                 className="absolute inset-0 bg-black/50"
                 onClick={() => onCloseMobilePanel?.()}
               />
-              <div className="w-full max-w-lg relative pointer-events-auto">
-                <div className="bg-white/90 dark:bg-black/40 rounded-2xl shadow p-4 overflow-hidden">
+              <div className="relative w-full max-w-lg pointer-events-auto">
+                <div className="p-4 overflow-hidden shadow bg-white/90 dark:bg-black/40 rounded-2xl">
                   {/* 모달에서는 애니메이션용 animatePct 사용 */}
                   <MobileExpBlock
                     pct={animatePct}
@@ -140,7 +140,7 @@ export default function ProgressBar({
                   />
                   <div className="flex justify-end mt-4">
                     <button
-                      className="px-4 py-2 bg-emerald-500 text-white rounded-lg"
+                      className="px-4 py-2 text-white rounded-lg bg-emerald-500"
                       onClick={() => onCloseMobilePanel?.()}
                     >
                       확인

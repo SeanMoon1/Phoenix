@@ -1,12 +1,23 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
 import { EmailService } from './email.service';
+import { RedisService } from './redis.service';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
 import { FindIdDto } from '../../presentation/dto/find-id.dto';
-import { RequestPasswordResetDto, VerifyResetCodeDto, ResetPasswordDto } from '../../presentation/dto/reset-password.dto';
+import {
+  RequestPasswordResetDto,
+  VerifyResetCodeDto,
+  ResetPasswordDto,
+} from '../../presentation/dto/reset-password.dto';
+import {
+  RequestAccountDeletionDto,
+  VerifyDeletionCodeDto,
+  DeleteAccountDto,
+} from '../../presentation/dto/delete-account.dto';
 import { PasswordUtil } from '../../utils/password.util';
 
 @Injectable()
@@ -16,6 +27,8 @@ export class AuthService {
     private teamsService: TeamsService,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private redisService: RedisService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(loginId: string, password: string): Promise<any> {
@@ -379,10 +392,13 @@ export class AuthService {
    */
   async findId(findIdDto: FindIdDto) {
     try {
-      console.log('🔍 아이디 찾기 시작:', { name: findIdDto.name, email: findIdDto.email });
-      
+      console.log('🔍 아이디 찾기 시작:', {
+        name: findIdDto.name,
+        email: findIdDto.email,
+      });
+
       const user = await this.usersService.findByEmail(findIdDto.email);
-      
+
       if (!user) {
         console.log('❌ 사용자를 찾을 수 없음');
         return {
@@ -424,10 +440,35 @@ export class AuthService {
    */
   async requestPasswordReset(requestPasswordResetDto: RequestPasswordResetDto) {
     try {
-      console.log('🔐 비밀번호 재설정 요청:', { email: requestPasswordResetDto.email });
-      
-      const user = await this.usersService.findByEmail(requestPasswordResetDto.email);
-      
+      console.log('🔐 비밀번호 재설정 요청:', {
+        email: requestPasswordResetDto.email,
+      });
+
+      // 기존 인증 코드가 있는지 확인 (중복 요청 방지)
+      const existingData = await this.redisService.getResetCode(
+        requestPasswordResetDto.email,
+      );
+
+      if (existingData) {
+        const now = Date.now();
+        const codeAge = now - existingData.timestamp;
+        const minInterval =
+          this.configService.get<number>('REDIS_RATE_LIMIT', 60) * 1000; // 환경 변수에서 가져오기
+
+        if (codeAge < minInterval) {
+          console.log('❌ 인증 코드 요청 간격이 너무 짧음');
+          return {
+            success: false,
+            message:
+              '인증 코드 요청 간격이 너무 짧습니다. 잠시 후 다시 시도해주세요.',
+          };
+        }
+      }
+
+      const user = await this.usersService.findByEmail(
+        requestPasswordResetDto.email,
+      );
+
       if (!user) {
         console.log('❌ 사용자를 찾을 수 없음');
         return {
@@ -437,18 +478,23 @@ export class AuthService {
       }
 
       // 6자리 인증 코드 생성
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // 인증 코드를 임시로 저장 (실제로는 Redis나 DB에 저장해야 함)
-      // 여기서는 간단히 메모리에 저장
-      if (!global.resetCodes) {
-        global.resetCodes = new Map();
-      }
-      global.resetCodes.set(requestPasswordResetDto.email, {
-        code: verificationCode,
-        timestamp: Date.now(),
-        userId: user.id,
-      });
+      const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+
+      // 인증 코드를 해시화하여 저장 (보안 강화)
+      const hashedCode = await PasswordUtil.hashPassword(verificationCode);
+
+      // Redis에 인증 코드 저장 (10분 TTL)
+      await this.redisService.setResetCode(
+        requestPasswordResetDto.email,
+        {
+          hashedCode: hashedCode,
+          userId: user.id,
+          attempts: 0, // 시도 횟수 제한
+        },
+        this.configService.get<number>('REDIS_TTL', 600), // 환경 변수에서 가져오기
+      );
 
       // 이메일로 인증 코드 전송
       const emailSent = await this.emailService.sendPasswordResetCode(
@@ -487,16 +533,11 @@ export class AuthService {
   async verifyResetCode(verifyResetCodeDto: VerifyResetCodeDto) {
     try {
       console.log('🔐 인증 코드 검증:', { email: verifyResetCodeDto.email });
-      
-      if (!global.resetCodes) {
-        return {
-          success: false,
-          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
-        };
-      }
 
-      const resetData = global.resetCodes.get(verifyResetCodeDto.email);
-      
+      const resetData = await this.redisService.getResetCode(
+        verifyResetCodeDto.email,
+      );
+
       if (!resetData) {
         console.log('❌ 인증 코드 데이터 없음');
         return {
@@ -505,22 +546,47 @@ export class AuthService {
         };
       }
 
-      // 인증 코드 만료 시간 확인 (10분)
+      // 시도 횟수 제한 (환경 변수에서 가져오기)
+      const maxAttempts = this.configService.get<number>(
+        'REDIS_MAX_ATTEMPTS',
+        5,
+      );
+      if (resetData.attempts >= maxAttempts) {
+        console.log('❌ 인증 코드 시도 횟수 초과');
+        await this.redisService.deleteResetCode(verifyResetCodeDto.email);
+        return {
+          success: false,
+          message: '인증 코드 시도 횟수를 초과했습니다. 다시 요청해주세요.',
+        };
+      }
+
+      // 인증 코드 만료 시간 확인 (환경 변수에서 가져오기)
       const now = Date.now();
       const codeAge = now - resetData.timestamp;
-      const maxAge = 10 * 60 * 1000; // 10분
+      const maxAge = this.configService.get<number>('REDIS_TTL', 600) * 1000; // 환경 변수에서 가져오기
 
       if (codeAge > maxAge) {
         console.log('❌ 인증 코드 만료');
-        global.resetCodes.delete(verifyResetCodeDto.email);
+        await this.redisService.deleteResetCode(verifyResetCodeDto.email);
         return {
           success: false,
           message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
         };
       }
 
-      if (resetData.code !== verifyResetCodeDto.code) {
+      // 해시화된 코드와 비교
+      const isCodeValid = await PasswordUtil.comparePassword(
+        verifyResetCodeDto.code,
+        resetData.hashedCode,
+      );
+
+      if (!isCodeValid) {
         console.log('❌ 인증 코드 불일치');
+        // 시도 횟수 증가
+        await this.redisService.updateResetCode(verifyResetCodeDto.email, {
+          attempts: resetData.attempts + 1,
+        });
+
         return {
           success: false,
           message: '인증 코드가 일치하지 않습니다.',
@@ -528,6 +594,12 @@ export class AuthService {
       }
 
       console.log('✅ 인증 코드 검증 성공');
+
+      // 인증 성공 시 시도 횟수 초기화
+      await this.redisService.updateResetCode(verifyResetCodeDto.email, {
+        attempts: 0,
+      });
+
       return {
         success: true,
         message: '인증 코드가 확인되었습니다.',
@@ -549,7 +621,7 @@ export class AuthService {
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     try {
       console.log('🔐 비밀번호 재설정:', { email: resetPasswordDto.email });
-      
+
       // 인증 코드 재검증
       const verifyResult = await this.verifyResetCode({
         email: resetPasswordDto.email,
@@ -561,7 +633,9 @@ export class AuthService {
       }
 
       // 새 비밀번호 해시화
-      const hashedPassword = await PasswordUtil.hashPassword(resetPasswordDto.newPassword);
+      const hashedPassword = await PasswordUtil.hashPassword(
+        resetPasswordDto.newPassword,
+      );
 
       // 사용자 비밀번호 업데이트
       const user = await this.usersService.findByEmail(resetPasswordDto.email);
@@ -575,9 +649,10 @@ export class AuthService {
       await this.usersService.update(user.id, { password: hashedPassword });
 
       // 인증 코드 삭제
-      if (global.resetCodes) {
-        global.resetCodes.delete(resetPasswordDto.email);
-      }
+      await this.redisService.deleteResetCode(resetPasswordDto.email);
+
+      // Redis 정리 (만료된 코드들 삭제)
+      await this.redisService.cleanupExpiredCodes();
 
       console.log('✅ 비밀번호 재설정 성공');
       return {
@@ -589,6 +664,264 @@ export class AuthService {
       return {
         success: false,
         message: '비밀번호 재설정 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * Redis 헬스체크
+   * @returns Redis 상태 정보
+   */
+  async checkRedisHealth() {
+    try {
+      const isConnected = await this.redisService.isConnected();
+      const stats = await this.redisService.getStats();
+
+      return {
+        success: true,
+        data: {
+          connected: isConnected,
+          stats: stats,
+          timestamp: new Date().toISOString(),
+        },
+        message: isConnected ? 'Redis 연결 정상' : 'Redis 연결 실패',
+      };
+    } catch (error) {
+      console.error('❌ Redis 헬스체크 오류:', error);
+      return {
+        success: false,
+        error: 'Redis 헬스체크 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 회원 탈퇴 요청 (이메일 인증 코드 전송)
+   * @param requestDeletionDto 이메일 정보
+   * @returns 인증 코드 전송 결과
+   */
+  async requestAccountDeletion(requestDeletionDto: RequestAccountDeletionDto) {
+    try {
+      console.log('🗑️ 회원 탈퇴 요청:', {
+        email: requestDeletionDto.email,
+      });
+
+      // 기존 인증 코드가 있는지 확인 (중복 요청 방지)
+      const existingData = await this.redisService.getResetCode(
+        requestDeletionDto.email,
+      );
+
+      if (existingData) {
+        const now = Date.now();
+        const codeAge = now - existingData.timestamp;
+        const minInterval =
+          this.configService.get<number>('REDIS_RATE_LIMIT', 60) * 1000;
+
+        if (codeAge < minInterval) {
+          console.log('❌ 회원 탈퇴 요청 간격이 너무 짧음');
+          return {
+            success: false,
+            message:
+              '회원 탈퇴 요청 간격이 너무 짧습니다. 잠시 후 다시 시도해주세요.',
+          };
+        }
+      }
+
+      const user = await this.usersService.findByEmail(
+        requestDeletionDto.email,
+      );
+
+      if (!user) {
+        console.log('❌ 사용자를 찾을 수 없음');
+        return {
+          success: false,
+          message: '입력하신 이메일로 등록된 계정을 찾을 수 없습니다.',
+        };
+      }
+
+      // 6자리 인증 코드 생성
+      const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+
+      // 인증 코드를 해시화하여 저장 (보안 강화)
+      const hashedCode = await PasswordUtil.hashPassword(verificationCode);
+
+      // Redis에 인증 코드 저장 (10분 TTL)
+      await this.redisService.setResetCode(
+        requestDeletionDto.email,
+        {
+          hashedCode: hashedCode,
+          userId: user.id,
+          attempts: 0, // 시도 횟수 제한
+        },
+        this.configService.get<number>('REDIS_TTL', 600),
+      );
+
+      // 이메일로 인증 코드 전송
+      const emailSent = await this.emailService.sendAccountDeletionCode(
+        requestDeletionDto.email,
+        user.name,
+        verificationCode,
+      );
+
+      if (!emailSent) {
+        console.log('❌ 이메일 전송 실패');
+        return {
+          success: false,
+          message: '인증 코드 전송에 실패했습니다. 다시 시도해주세요.',
+        };
+      }
+
+      console.log('✅ 회원 탈퇴 인증 코드 전송 성공');
+      return {
+        success: true,
+        message: '회원 탈퇴를 위한 인증 코드가 이메일로 전송되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 회원 탈퇴 요청 오류:', error);
+      return {
+        success: false,
+        message: '회원 탈퇴 요청 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 회원 탈퇴 인증 코드 검증
+   * @param verifyDeletionCodeDto 이메일과 인증 코드
+   * @returns 인증 코드 검증 결과
+   */
+  async verifyDeletionCode(verifyDeletionCodeDto: VerifyDeletionCodeDto) {
+    try {
+      console.log('🔐 회원 탈퇴 인증 코드 검증:', {
+        email: verifyDeletionCodeDto.email,
+      });
+
+      const resetData = await this.redisService.getResetCode(
+        verifyDeletionCodeDto.email,
+      );
+
+      if (!resetData) {
+        console.log('❌ 인증 코드 데이터 없음');
+        return {
+          success: false,
+          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
+        };
+      }
+
+      // 시도 횟수 제한 (환경 변수에서 가져오기)
+      const maxAttempts = this.configService.get<number>(
+        'REDIS_MAX_ATTEMPTS',
+        5,
+      );
+      if (resetData.attempts >= maxAttempts) {
+        console.log('❌ 인증 코드 시도 횟수 초과');
+        await this.redisService.deleteResetCode(verifyDeletionCodeDto.email);
+        return {
+          success: false,
+          message: '인증 코드 시도 횟수를 초과했습니다. 다시 요청해주세요.',
+        };
+      }
+
+      // 인증 코드 만료 시간 확인 (환경 변수에서 가져오기)
+      const now = Date.now();
+      const codeAge = now - resetData.timestamp;
+      const maxAge = this.configService.get<number>('REDIS_TTL', 600) * 1000;
+
+      if (codeAge > maxAge) {
+        console.log('❌ 인증 코드 만료');
+        await this.redisService.deleteResetCode(verifyDeletionCodeDto.email);
+        return {
+          success: false,
+          message: '인증 코드가 만료되었습니다. 다시 요청해주세요.',
+        };
+      }
+
+      // 해시화된 코드와 비교
+      const isCodeValid = await PasswordUtil.comparePassword(
+        verifyDeletionCodeDto.code,
+        resetData.hashedCode,
+      );
+
+      if (!isCodeValid) {
+        console.log('❌ 인증 코드 불일치');
+        // 시도 횟수 증가
+        await this.redisService.updateResetCode(verifyDeletionCodeDto.email, {
+          attempts: resetData.attempts + 1,
+        });
+
+        return {
+          success: false,
+          message: '인증 코드가 일치하지 않습니다.',
+        };
+      }
+
+      console.log('✅ 회원 탈퇴 인증 코드 검증 성공');
+
+      // 인증 성공 시 시도 횟수 초기화
+      await this.redisService.updateResetCode(verifyDeletionCodeDto.email, {
+        attempts: 0,
+      });
+
+      return {
+        success: true,
+        message: '인증 코드가 확인되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 회원 탈퇴 인증 코드 검증 오류:', error);
+      return {
+        success: false,
+        message: '인증 코드 검증 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 회원 탈퇴 실행
+   * @param deleteAccountDto 이메일, 인증 코드
+   * @returns 회원 탈퇴 결과
+   */
+  async deleteAccount(deleteAccountDto: DeleteAccountDto) {
+    try {
+      console.log('🗑️ 회원 탈퇴 실행:', { email: deleteAccountDto.email });
+
+      // 인증 코드 재검증
+      const verifyResult = await this.verifyDeletionCode({
+        email: deleteAccountDto.email,
+        code: deleteAccountDto.code,
+      });
+
+      if (!verifyResult.success) {
+        return verifyResult;
+      }
+
+      // 사용자 정보 조회
+      const user = await this.usersService.findByEmail(deleteAccountDto.email);
+      if (!user) {
+        return {
+          success: false,
+          message: '사용자를 찾을 수 없습니다.',
+        };
+      }
+
+      // 사용자 삭제 (관련 데이터도 함께 삭제)
+      await this.usersService.delete(user.id);
+
+      // 인증 코드 삭제
+      await this.redisService.deleteResetCode(deleteAccountDto.email);
+
+      console.log('✅ 회원 탈퇴 완료:', { userId: user.id, email: user.email });
+
+      return {
+        success: true,
+        message: '회원 탈퇴가 완료되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 회원 탈퇴 오류:', error);
+      return {
+        success: false,
+        message: '회원 탈퇴 중 오류가 발생했습니다.',
       };
     }
   }

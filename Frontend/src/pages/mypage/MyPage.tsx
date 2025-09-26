@@ -27,6 +27,16 @@ const MyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 회원 탈퇴 관련 상태
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<
+    'confirm' | 'email' | 'verify' | 'complete'
+  >('confirm');
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleteCode, setDeleteCode] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   // 데이터 로딩 함수
   const loadUserData = async (userId?: number) => {
     const targetUserId = userId || user?.id;
@@ -228,6 +238,89 @@ const MyPage: React.FC = () => {
       console.error('❌ 팀 가입 오류:', error);
       setTeamValidationError('팀 가입 중 오류가 발생했습니다.');
     }
+  };
+
+  // 회원 탈퇴 관련 함수들
+  const handleDeleteAccount = async () => {
+    if (!user?.email) {
+      setDeleteError('사용자 이메일을 찾을 수 없습니다.');
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    try {
+      const response = await api.post('/auth/request-account-deletion', {
+        email: user.email,
+      });
+
+      if (response.success) {
+        setDeleteEmail(user.email);
+        setDeleteStep('email');
+      } else {
+        setDeleteError(response.message || '탈퇴 요청에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('회원 탈퇴 요청 오류:', error);
+      setDeleteError('탈퇴 요청 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!deleteCode || deleteCode.length !== 6) {
+      setDeleteError('6자리 인증 코드를 입력해주세요.');
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    try {
+      // 인증 코드 검증
+      const verifyResponse = await api.post('/auth/verify-deletion-code', {
+        email: deleteEmail,
+        code: deleteCode,
+      });
+
+      if (verifyResponse.success) {
+        // 인증 성공 시 바로 최종 탈퇴 실행
+        const deleteResponse = await api.post('/auth/delete-account', {
+          email: deleteEmail,
+          code: deleteCode,
+        });
+
+        if (deleteResponse.success) {
+          setDeleteStep('complete');
+          // 로그아웃 처리
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        } else {
+          setDeleteError(deleteResponse.message || '회원 탈퇴에 실패했습니다.');
+        }
+      } else {
+        setDeleteError(
+          verifyResponse.message || '인증 코드가 일치하지 않습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('회원 탈퇴 처리 오류:', error);
+      setDeleteError('회원 탈퇴 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const resetDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteStep('confirm');
+    setDeleteEmail('');
+    setDeleteCode('');
+    setDeleteError('');
+    setIsDeleting(false);
   };
 
   // 시나리오 타입 정보 정의
@@ -830,9 +923,15 @@ const MyPage: React.FC = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-between mt-6">
             <button className="px-6 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700">
               정보 수정
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-6 py-2 text-white transition-colors duration-200 bg-red-600 rounded-lg hover:bg-red-700"
+            >
+              회원 탈퇴
             </button>
           </div>
         </div>
@@ -962,6 +1061,183 @@ const MyPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 회원 탈퇴 모달 */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl dark:bg-gray-800">
+            {deleteStep === 'confirm' && (
+              <div>
+                <div className="flex items-center mb-4">
+                  <Icon
+                    type="warning"
+                    category="status"
+                    className="text-red-500 text-2xl mr-3"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    회원 탈퇴 확인
+                  </h3>
+                </div>
+                <div className="mb-6">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    정말로 회원 탈퇴를 진행하시겠습니까?
+                  </p>
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                      🚨 삭제되는 데이터
+                    </h4>
+                    <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                      <li>• 개인 정보 (이름, 이메일, 전화번호)</li>
+                      <li>• 훈련 기록 및 성과</li>
+                      <li>• 경험치 및 레벨</li>
+                      <li>• 팀 정보 및 역할</li>
+                      <li>• 시나리오 진행 기록</li>
+                    </ul>
+                    <p className="mt-2 text-sm font-semibold text-red-800 dark:text-red-200">
+                      ⚠️ 모든 데이터는 영구적으로 삭제되며 복구가 불가능합니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={resetDeleteModal}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {isDeleting ? '처리 중...' : '탈퇴 진행'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {deleteStep === 'email' && (
+              <div>
+                <div className="flex items-center mb-4">
+                  <Icon
+                    type="success"
+                    category="status"
+                    className="text-green-500 text-2xl mr-3"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    이메일 인증
+                  </h3>
+                </div>
+                <div className="mb-6">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    <strong>{deleteEmail}</strong>로 인증 코드가 전송되었습니다.
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    이메일을 확인하고 6자리 인증 코드를 입력해주세요.
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={resetDeleteModal}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={() => setDeleteStep('verify')}
+                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    인증 코드 입력
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {deleteStep === 'verify' && (
+              <div>
+                <div className="flex items-center mb-4">
+                  <Icon
+                    type="info"
+                    category="status"
+                    className="text-blue-500 text-2xl mr-3"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    인증 코드 입력
+                  </h3>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    인증 코드 (6자리)
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteCode}
+                    onChange={e =>
+                      setDeleteCode(
+                        e.target.value.replace(/\D/g, '').slice(0, 6)
+                      )
+                    }
+                    placeholder="123456"
+                    className="w-full px-3 py-2 text-center text-lg font-mono border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    maxLength={6}
+                  />
+                  {deleteError && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      {deleteError}
+                    </p>
+                  )}
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setDeleteStep('email')}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+                  >
+                    이전
+                  </button>
+                  <button
+                    onClick={handleVerifyCode}
+                    disabled={isDeleting || deleteCode.length !== 6}
+                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {isDeleting ? '검증 중...' : '인증 확인'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {deleteStep === 'complete' && (
+              <div>
+                <div className="flex items-center mb-4">
+                  <Icon
+                    type="success"
+                    category="status"
+                    className="text-green-500 text-2xl mr-3"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    탈퇴 완료
+                  </h3>
+                </div>
+                <div className="mb-6">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    회원 탈퇴가 완료되었습니다.
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    잠시 후 로그인 페이지로 이동합니다.
+                  </p>
+                </div>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => (window.location.href = '/login')}
+                    className="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700"
+                  >
+                    로그인 페이지로 이동
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

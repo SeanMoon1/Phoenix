@@ -25,6 +25,11 @@ import {
   VerifyResetCodeDto,
   ResetPasswordDto,
 } from '../dto/reset-password.dto';
+import {
+  RequestAccountDeletionDto,
+  VerifyDeletionCodeDto,
+  DeleteAccountDto,
+} from '../dto/delete-account.dto';
 import { LocalAuthGuard } from '../../shared/guards/local-auth.guard';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
@@ -134,5 +139,41 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Get('redis/health')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Redis 헬스체크' })
+  @ApiResponse({ status: 200, description: 'Redis 상태 확인' })
+  async checkRedisHealth() {
+    return this.authService.checkRedisHealth();
+  }
+
+  @Post('request-account-deletion')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '회원 탈퇴 요청 (이메일 인증 코드 전송)' })
+  @ApiResponse({ status: 200, description: '인증 코드 전송 결과' })
+  async requestAccountDeletion(
+    @Body() requestDeletionDto: RequestAccountDeletionDto,
+  ) {
+    return this.authService.requestAccountDeletion(requestDeletionDto);
+  }
+
+  @Post('verify-deletion-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '회원 탈퇴 인증 코드 검증' })
+  @ApiResponse({ status: 200, description: '인증 코드 검증 결과' })
+  async verifyDeletionCode(
+    @Body() verifyDeletionCodeDto: VerifyDeletionCodeDto,
+  ) {
+    return this.authService.verifyDeletionCode(verifyDeletionCodeDto);
+  }
+
+  @Post('delete-account')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '회원 탈퇴 실행' })
+  @ApiResponse({ status: 200, description: '회원 탈퇴 결과' })
+  async deleteAccount(@Body() deleteAccountDto: DeleteAccountDto) {
+    return this.authService.deleteAccount(deleteAccountDto);
   }
 }

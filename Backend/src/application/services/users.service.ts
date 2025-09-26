@@ -49,6 +49,27 @@ export class UsersService {
     return this.updateUserUseCase.execute({ id, ...data });
   }
 
+  async delete(id: number) {
+    try {
+      console.log('🗑️ 사용자 삭제 시작:', { userId: id });
+
+      // 사용자 존재 확인
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new Error('사용자를 찾을 수 없습니다.');
+      }
+
+      // 사용자 삭제 (관련 데이터도 함께 삭제됨 - CASCADE 설정에 의해)
+      await this.userRepository.remove(user);
+
+      console.log('✅ 사용자 삭제 완료:', { userId: id, email: user.email });
+      return { success: true };
+    } catch (error) {
+      console.error('❌ 사용자 삭제 실패:', error);
+      throw error;
+    }
+  }
+
   async getAllUsers() {
     return this.userRepository.find({
       relations: ['team'],

@@ -6,9 +6,11 @@ Phoenix 훈련 플랫폼의 백엔드 API 서버입니다.
 
 - **Framework**: NestJS
 - **Language**: TypeScript
-- **Database**: MySQL
+- **Database**: MySQL (AWS RDS)
+- **Cache**: Redis (AWS ElastiCache)
 - **ORM**: TypeORM
 - **Authentication**: JWT + Passport
+- **Email**: AWS SES
 - **Documentation**: Swagger
 - **Validation**: class-validator
 
@@ -47,7 +49,19 @@ npm install
 
 ### 2. 환경 변수 설정
 
-`.env.example` 파일을 참고하여 `.env` 파일을 생성하고 필요한 값들을 설정하세요.
+#### 개발 환경
+
+```bash
+npm run setup:dev
+```
+
+#### 운영 환경
+
+```bash
+npm run setup:prod
+```
+
+또는 수동으로 `.env.development` 또는 `.env.production` 파일을 `.env`로 복사하세요.
 
 ```bash
 # Database Configuration
@@ -66,11 +80,23 @@ NODE_ENV=development
 PORT=3000
 ```
 
-### 3. 데이터베이스 설정
+### 3. Redis 설정
+
+#### 개발 환경
+
+- **로컬 Redis**: `localhost:6379`
+- **설정**: `.env.development` 파일 사용
+
+#### 운영 환경
+
+- **AWS ElastiCache**: `phoenix-redis-cluster.c9kciawyijr0.cache.amazonaws.com:6379`
+- **설정**: `.env.production` 파일 사용
+
+### 4. 데이터베이스 설정
 
 MySQL 데이터베이스를 생성하고 연결 정보를 `.env` 파일에 설정하세요.
 
-### 4. 개발 서버 실행
+### 5. 개발 서버 실행
 
 ```bash
 # 개발 모드 (핫 리로드)
@@ -81,41 +107,63 @@ npm run build
 npm run start:prod
 ```
 
+## 환경별 설정
+
+### 개발 환경
+
+- **Redis**: 로컬 Docker 또는 로컬 Redis
+- **Database**: 로컬 MySQL
+- **OAuth**: 개발용 클라이언트 ID
+- **Email**: 개발용 AWS SES 설정
+
+### 운영 환경
+
+- **Redis**: AWS ElastiCache
+- **Database**: AWS RDS
+- **OAuth**: 운영용 클라이언트 ID
+- **Email**: 운영용 AWS SES 설정
+
 ## API 문서
 
 서버 실행 후 다음 URL에서 Swagger API 문서를 확인할 수 있습니다:
 
 - **개발 환경**: http://localhost:3000/api
-- **프로덕션 환경**: http://your-domain/api
+- **운영 환경**: https://api.phoenix-4.com/api
 
 ## 주요 기능
 
 ### 인증 (Auth)
+
 - 사용자 회원가입/로그인
 - JWT 토큰 기반 인증
 - 비밀번호 암호화
 
 ### 사용자 관리 (Users)
+
 - 사용자 CRUD 작업
 - 프로필 관리
 - 역할 기반 접근 제어
 
 ### 팀 관리 (Teams)
+
 - 팀 생성 및 관리
 - 팀원 관리
 - 팀 상태 관리
 
 ### 시나리오 관리 (Scenarios)
+
 - 훈련 시나리오 생성/수정
 - 시나리오 타입별 분류
 - 난이도 설정
 
 ### 훈련 세션 (Training)
+
 - 훈련 세션 스케줄링
 - 훈련 진행 상태 관리
 - 훈련 결과 저장
 
 ### 관리자 (Admin)
+
 - 시스템 통계 조회
 - 대시보드 데이터
 - 전체 시스템 관리
@@ -172,4 +220,3 @@ npm run start:prod
 ## 라이선스
 
 이 프로젝트는 비공개 라이선스입니다.
-

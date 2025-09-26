@@ -537,4 +537,198 @@ Phoenix 재난훈련 시스템
     };
     return textColorMap[this.getTypeColor(type)] || '#374151';
   }
+
+  /**
+   * 회원 탈퇴 인증 코드 이메일 전송
+   * @param email 이메일 주소
+   * @param name 사용자 이름
+   * @param code 인증 코드
+   * @returns 전송 성공 여부
+   */
+  async sendAccountDeletionCode(
+    email: string,
+    name: string,
+    code: string,
+  ): Promise<boolean> {
+    try {
+      const fromEmail = this.configService.get<string>(
+        'AWS_SES_FROM_EMAIL',
+        'phoenix4team@gmail.com',
+      );
+
+      const command = new SendEmailCommand({
+        FromEmailAddress: fromEmail,
+        Destination: {
+          ToAddresses: [email],
+        },
+        Content: {
+          Simple: {
+            Subject: {
+              Data: '[Phoenix] 회원 탈퇴 인증 코드',
+            },
+            Body: {
+              Html: {
+                Data: this.generateAccountDeletionEmailHTML(name, code),
+              },
+              Text: {
+                Data: `Phoenix 회원 탈퇴 인증
+
+안녕하세요 ${name}님,
+
+회원 탈퇴를 위한 인증 코드입니다.
+
+인증 코드: ${code}
+
+이 코드는 10분간 유효합니다.
+회원 탈퇴를 요청하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.
+
+⚠️ 주의사항:
+- 회원 탈퇴 시 모든 데이터가 영구적으로 삭제됩니다.
+- 탈퇴 후 복구가 불가능합니다.
+- 훈련 기록, 경험치, 팀 정보 등이 모두 삭제됩니다.
+
+---
+Phoenix 재난훈련 시스템
+전송 시간: ${new Date().toLocaleString('ko-KR')}`,
+              },
+            },
+          },
+        },
+      });
+
+      const result = await this.sesClient.send(command);
+      console.log('✅ 회원 탈퇴 인증 이메일 전송 성공:', result.MessageId);
+      return true;
+    } catch (error) {
+      console.error('❌ 회원 탈퇴 인증 이메일 전송 실패:', error);
+      return false;
+    }
+  }
+
+  private generateAccountDeletionEmailHTML(name: string, code: string): string {
+    return `
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix 회원 탈퇴 인증</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .code-container {
+            background-color: #f8f9fa;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .warning {
+            background-color: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #dc2626;
+        }
+        .danger {
+            background-color: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 15px;
+            margin: 20px 0;
+            color: #dc2626;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔥 Phoenix</div>
+            <div class="title">회원 탈퇴 인증 코드</div>
+        </div>
+
+        <p>안녕하세요 <strong>${name}</strong>님,</p>
+
+        <p>Phoenix 재난훈련 시스템에서 회원 탈퇴를 요청하셨습니다.</p>
+
+        <div class="code-container">
+            <p style="margin: 0 0 10px 0; color: #666;">아래 인증 코드를 입력해주세요:</p>
+            <div class="code">${code}</div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ 회원 탈퇴 주의사항:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>이 인증 코드는 <strong>10분간</strong> 유효합니다.</li>
+                <li>코드는 한 번만 사용할 수 있습니다.</li>
+                <li>회원 탈퇴를 요청하지 않으셨다면, 이 이메일을 무시하셔도 됩니다.</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <strong>🚨 중요: 회원 탈퇴 시 삭제되는 데이터</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>개인 정보 (이름, 이메일, 전화번호)</li>
+                <li>훈련 기록 및 성과</li>
+                <li>경험치 및 레벨</li>
+                <li>팀 정보 및 역할</li>
+                <li>시나리오 진행 기록</li>
+                <li>모든 데이터는 <strong>영구적으로 삭제</strong>되며 복구가 불가능합니다.</li>
+            </ul>
+        </div>
+
+        <p>보안을 위해 인증 코드를 타인과 공유하지 마세요.</p>
+
+        <div class="footer">
+            <p>Phoenix 재난훈련 시스템</p>
+            <p>전송 시간: ${new Date().toLocaleString('ko-KR')}</p>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
 }

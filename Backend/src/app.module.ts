@@ -24,6 +24,8 @@ import { AdminController } from './presentation/controllers/admin.controller';
 import { AdminAuthController } from './presentation/controllers/admin-auth.controller';
 import { ContactController } from './presentation/controllers/contact.controller';
 import { ExcelExportController } from './presentation/controllers/excel-export.controller';
+import { GmailController } from './presentation/controllers/gmail.controller';
+import { TeamStatsController } from './presentation/controllers/team-stats.controller';
 
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
@@ -35,6 +37,7 @@ import { UserExpService } from './application/services/user-exp.service';
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { EmailService } from './application/services/email.service';
+import { GmailService } from './application/services/gmail.service';
 import { RedisService } from './application/services/redis.service';
 import { ExcelExportService } from './application/services/excel-export.service';
 import { PdfExportService } from './application/services/pdf-export.service';
@@ -148,6 +151,8 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     AdminAuthController,
     ContactController,
     ExcelExportController,
+    GmailController,
+    TeamStatsController,
   ],
   providers: [
     AppService,
@@ -160,6 +165,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     TeamsService,
     AdminService,
     EmailService,
+    GmailService,
     RedisService,
     ExcelExportService,
     PdfExportService,

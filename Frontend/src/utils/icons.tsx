@@ -23,6 +23,7 @@ import {
   FaShieldAlt,
   FaMobileAlt,
   FaGripfire,
+  FaEnvelope,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
@@ -60,6 +61,7 @@ export const uiIcons = {
   chart: <FaChartBar />,
   trophy: <FaTrophy />,
   user: <FaUser />,
+  mail: <FaEnvelope />,
 };
 
 // 훈련 시스템 아이콘 매핑

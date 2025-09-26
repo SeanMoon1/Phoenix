@@ -5,6 +5,8 @@ import { UsersService } from './users.service';
 import { TeamsService } from './teams.service';
 import { EmailService } from './email.service';
 import { RedisService } from './redis.service';
+import { JwtSecurityService } from './jwt-security.service';
+import { RefreshTokenService } from './refresh-token.service';
 import { RegisterDto } from '../../presentation/dto/register.dto';
 import { OAuthRegisterDto } from '../../presentation/dto/oauth-register.dto';
 import { FindIdDto } from '../../presentation/dto/find-id.dto';
@@ -28,6 +30,8 @@ export class AuthService {
     private jwtService: JwtService,
     private emailService: EmailService,
     private redisService: RedisService,
+    private jwtSecurityService: JwtSecurityService,
+    private refreshTokenService: RefreshTokenService,
     private configService: ConfigService,
   ) {}
 
@@ -57,23 +61,22 @@ export class AuthService {
   async login(user: any) {
     console.log('🔑 로그인 처리 시작:', { userId: user.id, email: user.email });
 
-    const payload = {
-      id: user.id,
-      loginId: user.loginId,
-      name: user.name,
-      email: user.email,
-      teamId: user.teamId,
-      adminLevel: null, // 일반 사용자는 관리자 레벨 없음
-      isAdmin: false, // 일반 사용자는 관리자 아님
-      sub: user.id, // 호환성을 위해 유지
-    };
-    const accessToken = this.jwtService.sign(payload);
+    // Refresh Token 시스템 사용
+    const tokenPair = await this.refreshTokenService.generateTokenPair(
+      user.id,
+      user.loginId,
+      user.teamId,
+      null, // 일반 사용자는 관리자 레벨 없음
+      false, // 일반 사용자는 관리자 아님
+    );
 
     const response = {
       success: true,
       message: '로그인이 성공적으로 완료되었습니다.',
       data: {
-        access_token: accessToken,
+        access_token: tokenPair.accessToken,
+        refresh_token: tokenPair.refreshToken,
+        expires_in: tokenPair.expiresIn,
         user: {
           id: user.id,
           email: user.email,
@@ -94,6 +97,102 @@ export class AuthService {
       userId: user.id,
     });
     return response;
+  }
+
+  /**
+   * 로그아웃 (토큰 무효화)
+   * @param token 무효화할 JWT 토큰
+   * @param userId 사용자 ID
+   * @returns 로그아웃 결과
+   */
+  async logout(token: string, userId: number) {
+    try {
+      console.log('🚪 로그아웃 처리 시작:', { userId });
+
+      // 1. 현재 토큰을 블랙리스트에 추가
+      await this.jwtSecurityService.invalidateToken(token, userId);
+
+      // 2. 사용자의 모든 토큰 무효화 (선택적)
+      await this.jwtSecurityService.invalidateAllUserTokens(userId);
+
+      // 3. 보안 이벤트 로깅
+      await this.jwtSecurityService.logSecurityEvent('USER_LOGOUT', {
+        userId,
+        token: token.substring(0, 20) + '...',
+      });
+
+      console.log('✅ 로그아웃 완료:', { userId });
+
+      return {
+        success: true,
+        message: '로그아웃이 성공적으로 완료되었습니다.',
+      };
+    } catch (error) {
+      console.error('❌ 로그아웃 실패:', error);
+      return {
+        success: false,
+        message: '로그아웃 처리 중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  /**
+   * 토큰 갱신 (Refresh Token 사용)
+   * @param refreshToken Refresh Token
+   * @returns 새로운 Access Token
+   */
+  async refreshToken(refreshToken: string) {
+    try {
+      console.log('🔄 토큰 갱신 시도');
+
+      // Refresh Token 검증
+      const validation =
+        await this.refreshTokenService.validateRefreshToken(refreshToken);
+
+      if (!validation.valid || !validation.userId || !validation.loginId) {
+        console.log('❌ Refresh Token 검증 실패');
+        return {
+          success: false,
+          message: '유효하지 않은 Refresh Token입니다.',
+        };
+      }
+
+      // 사용자 정보 조회
+      const user = await this.usersService.findById(validation.userId);
+      if (!user) {
+        console.log('❌ 사용자 정보 조회 실패');
+        return {
+          success: false,
+          message: '사용자 정보를 찾을 수 없습니다.',
+        };
+      }
+
+      // 새로운 Access Token 생성
+      const newAccessToken = await this.refreshTokenService.generateAccessToken(
+        user.id,
+        user.loginId,
+        user.teamId,
+        null, // 일반 사용자는 관리자 레벨 없음
+        false, // 일반 사용자는 관리자 아님
+      );
+
+      console.log('✅ 토큰 갱신 완료:', { userId: user.id });
+
+      return {
+        success: true,
+        message: '토큰이 성공적으로 갱신되었습니다.',
+        data: {
+          access_token: newAccessToken,
+          expires_in: 15 * 60, // 15분
+        },
+      };
+    } catch (error) {
+      console.error('❌ 토큰 갱신 실패:', error);
+      return {
+        success: false,
+        message: '토큰 갱신 중 오류가 발생했습니다.',
+      };
+    }
   }
 
   /**

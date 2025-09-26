@@ -27,6 +27,10 @@ import { ExcelExportController } from './presentation/controllers/excel-export.c
 import { GmailController } from './presentation/controllers/gmail.controller';
 import { TeamStatsController } from './presentation/controllers/team-stats.controller';
 
+// Security Services
+import { JwtSecurityService } from './application/services/jwt-security.service';
+import { RefreshTokenService } from './application/services/refresh-token.service';
+
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
 import { UsersService } from './application/services/users.service';
@@ -131,7 +135,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
         secret:
           configService.get<string>('JWT_SECRET') ||
           'default-jwt-secret-change-in-production',
-        signOptions: { expiresIn: '24h' },
+        signOptions: { expiresIn: '15m' }, // 15분으로 단축
       }),
       inject: [ConfigService],
     }),
@@ -166,6 +170,8 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     AdminService,
     EmailService,
     GmailService,
+    JwtSecurityService,
+    RefreshTokenService,
     RedisService,
     ExcelExportService,
     PdfExportService,

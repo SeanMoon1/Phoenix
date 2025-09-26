@@ -72,6 +72,15 @@ export class AuthController {
     return req.user;
   }
 
+  @Post('refresh')
+  @ApiOperation({ summary: '토큰 갱신' })
+  @ApiResponse({ status: 200, description: '토큰 갱신 성공' })
+  @ApiResponse({ status: 401, description: '유효하지 않은 Refresh Token' })
+  async refreshToken(@Body() body: { refresh_token: string }) {
+    console.log('🔄 토큰 갱신 요청');
+    return this.authService.refreshToken(body.refresh_token);
+  }
+
   @Post('oauth/register')
   @ApiOperation({ summary: 'OAuth 회원가입 및 로그인' })
   @ApiResponse({ status: 201, description: 'OAuth 회원가입 및 로그인 성공' })

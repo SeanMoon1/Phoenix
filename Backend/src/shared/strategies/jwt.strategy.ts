@@ -11,34 +11,34 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey:
         configService.get<string>('JWT_SECRET') || 'default-jwt-secret',
+      // alg:none 공격 방어를 위한 알고리즘 검증
+      algorithms: ['HS256', 'HS384', 'HS512'],
     });
   }
 
   async validate(payload: any) {
     console.log('🔍 JWT 토큰 검증:', {
-      id: payload.id,
+      sub: payload.sub,
       loginId: payload.loginId,
-      email: payload.email,
-      name: payload.name,
       teamId: payload.teamId,
       adminLevel: payload.adminLevel,
       isAdmin: payload.isAdmin,
-      sub: payload.sub, // sub 필드도 확인
+      type: payload.type,
       iat: payload.iat,
       exp: payload.exp,
     });
 
-    // id가 없으면 sub 필드를 사용 (호환성)
-    const userId = payload.id || payload.sub;
+    // Access Token만 허용 (type 검증)
+    if (payload.type !== 'access') {
+      console.log('❌ Access Token이 아님:', payload.type);
+      return null;
+    }
 
-    // 관리자인 경우와 일반 사용자인 경우를 구분하여 처리
     const user = {
-      id: userId,
-      userId: userId, // 호환성을 위해 userId도 설정
+      id: payload.sub,
+      userId: payload.sub, // 호환성을 위해 userId도 설정
       loginId: payload.loginId,
       username: payload.loginId, // 호환성을 위해 username도 설정
-      name: payload.name,
-      email: payload.email,
       teamId: payload.teamId,
       adminLevel: payload.adminLevel,
       adminLevelId: payload.adminLevelId,
@@ -50,9 +50,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       loginId: user.loginId,
       adminLevel: user.adminLevel,
       isAdmin: user.isAdmin,
-      userId: user.userId,
-      email: user.email,
-      name: user.name,
       teamId: user.teamId,
     });
     return user;

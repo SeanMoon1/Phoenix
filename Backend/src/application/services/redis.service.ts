@@ -205,4 +205,33 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       };
     }
   }
+
+  /**
+   * 키-값 저장 (TTL 포함)
+   * @param key 키
+   * @param ttl 만료 시간 (초)
+   * @param value 값
+   */
+  async setex(key: string, ttl: number, value: string): Promise<void> {
+    try {
+      await this.client.setex(key, ttl, value);
+    } catch (error) {
+      console.error('❌ Redis setex 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 키 값 조회
+   * @param key 키
+   * @returns 값 또는 null
+   */
+  async get(key: string): Promise<string | null> {
+    try {
+      return await this.client.get(key);
+    } catch (error) {
+      console.error('❌ Redis get 실패:', error);
+      return null;
+    }
+  }
 }

@@ -9,7 +9,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -21,6 +21,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
+
     console.log('🔍 JWT 인증 시도:', {
       url: request.url,
       method: request.method,
@@ -28,6 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       authHeader: authHeader ? authHeader.substring(0, 20) + '...' : '없음',
     });
 
-    return super.canActivate(context);
+    const result = super.canActivate(context);
+    return result as boolean | Promise<boolean>;
   }
 }

@@ -113,6 +113,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { loginId } });
   }
 
+  async findById(id: number) {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
   async findByOAuthProvider(provider: string, providerId: string) {
     return this.userRepository.findOne({
       where: {

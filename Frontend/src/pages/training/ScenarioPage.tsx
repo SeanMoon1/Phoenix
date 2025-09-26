@@ -24,6 +24,9 @@ import PlayMoreButton from '@/components/common/PlayMoreButton';
 import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
+import apartmentFireImg from '@/assets/images/apartment_fire.png';
+// 추가 시나리오별 이미지는 src/assets/images/에 추가한 뒤 아래에 import 하고 map에 넣으세요.
+// 예: import quakeHero from '@/assets/images/quake_hero.png';
 
 interface ScenarioPageProps {
   scenarioSetName?: string;
@@ -280,12 +283,37 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               mobilePanelModalOpen={showMobilePanelModal}
               onCloseMobilePanel={() => setShowMobilePanelModal(false)}
             />
-            <SituationCard
-              ref={contentRef}
-              title={gameState.scenario.title ?? ''}
-              content={gameState.scenario.content ?? ''}
-              sceneScript={gameState.scenario.sceneScript ?? ''}
-            />
+            {(() => {
+              const s = gameState.scenario ?? {};
+              // 우선적으로 JSON의 disasterType 필드를 사용
+              const dt = (s.disasterType || '').toString().toLowerCase();
+              // 간단 매핑: fire -> apartmentFireImg, 그 외는 현재 미할당(이미지 추가시 import 후 map 확장)
+              const map: Record<string, string | undefined> = {
+                fire: apartmentFireImg,
+                earthquake: undefined, // 추가 이미지가 있으면 교체
+                emergency: undefined,
+                traffic: undefined,
+              };
+              const heroSrc = map[dt];
+              const showHeroImage =
+                gameState.current === 0 &&
+                !(
+                  Array.isArray(gameState.answered) &&
+                  gameState.answered.includes(0)
+                ) &&
+                !!heroSrc;
+
+              return (
+                <SituationCard
+                  ref={contentRef}
+                  title={gameState.scenario.title ?? ''}
+                  content={gameState.scenario.content ?? ''}
+                  sceneScript={gameState.scenario.sceneScript ?? ''}
+                  showHeroImage={showHeroImage}
+                  heroSrc={heroSrc}
+                />
+              );
+            })()}
             <OptionsList
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}

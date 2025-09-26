@@ -2,10 +2,11 @@ name: Backend Deploy to EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'Backend/**'  # Backend 폴더 변경 시에만 실행
-  workflow_dispatch:  # 수동 실행 가능
+      - "Backend/**" # Backend 폴더 변경 시에만 실행
+  workflow_dispatch: # 수동 실행 가능
+  workflow_call: # 재사용 가능한 워크플로우로 호출 가능
 
 jobs:
   deploy:
@@ -25,36 +26,36 @@ jobs:
           script: |
             # 애플리케이션 디렉토리로 이동
             cd /home/ubuntu/Phoenix
-            
+
             # 기존 프로세스 중지
             pm2 stop phoenix-backend || true
-            
+
             # 최신 코드 가져오기
             git fetch origin
             git reset --hard origin/main
-            
+
             # Backend 디렉토리로 이동
             cd Backend
-            
+
             # 의존성 설치 (production only)
             npm ci --only=production
-            
+
             # TypeScript 빌드
             npm run build
-            
+
             # 데이터베이스 마이그레이션 실행 (필요한 경우)
             npm run migration:run || true
-            
+
             # PM2로 애플리케이션 시작/재시작
             pm2 start ecosystem.config.js || pm2 restart phoenix-backend
-            
+
             # PM2 프로세스 저장
             pm2 save
-            
+
             # 헬스체크
             sleep 10
             curl -f http://localhost:3000/health || exit 1
-            
+
             echo "✅ Backend deployment completed successfully!"
 
       - name: Deployment Status Check

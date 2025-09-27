@@ -94,10 +94,10 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
-            /home/runner/work/Phoenix/Phoenix/Backend/dist/**
-            /home/runner/work/Phoenix/Phoenix/Backend/package.json
-            /home/runner/work/Phoenix/Phoenix/Backend/package-lock.json
-            /home/runner/work/Phoenix/Phoenix/Backend/.env
+            dist/**
+            package.json
+            package-lock.json
+            .env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
       # 서버에서 pm2 restart

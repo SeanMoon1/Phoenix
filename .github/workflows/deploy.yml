@@ -74,60 +74,60 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.BACK_USER }}@${{ secrets.BACK_HOST }} << 'EOF'
             cd /home/ubuntu/apps/Phoenix/Backend
 
-            cat > .env <<'EOL'
-APP_NAME=${APP_NAME}
-APP_VERSION=${APP_VERSION}
-NODE_ENV=${NODE_ENV}
-PORT=${PORT}
+            # ✅ .env 파일 작성 (echo 방식)
+            echo "APP_NAME=${APP_NAME}" > .env
+            echo "APP_VERSION=${APP_VERSION}" >> .env
+            echo "NODE_ENV=${NODE_ENV}" >> .env
+            echo "PORT=${PORT}" >> .env
 
-CORS_ORIGIN=${CORS_ORIGIN}
-API_URL=${API_URL}
-FRONTEND_URL=${FRONTEND_URL}
+            echo "CORS_ORIGIN=${CORS_ORIGIN}" >> .env
+            echo "API_URL=${API_URL}" >> .env
+            echo "FRONTEND_URL=${FRONTEND_URL}" >> .env
 
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-DB_DATABASE=${DB_DATABASE}
+            echo "DB_HOST=${DB_HOST}" >> .env
+            echo "DB_PORT=${DB_PORT}" >> .env
+            echo "DB_USERNAME=${DB_USERNAME}" >> .env
+            echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+            echo "DB_DATABASE=${DB_DATABASE}" >> .env
 
-JWT_SECRET=${JWT_SECRET}
-JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+            echo "JWT_SECRET=${JWT_SECRET}" >> .env
+            echo "JWT_EXPIRES_IN=${JWT_EXPIRES_IN}" >> .env
 
-OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE}
-OAUTH_SUCCESS_REDIRECT=${OAUTH_SUCCESS_REDIRECT}
-OAUTH_FAILURE_REDIRECT=${OAUTH_FAILURE_REDIRECT}
+            echo "OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE}" >> .env
+            echo "OAUTH_SUCCESS_REDIRECT=${OAUTH_SUCCESS_REDIRECT}" >> .env
+            echo "OAUTH_FAILURE_REDIRECT=${OAUTH_FAILURE_REDIRECT}" >> .env
 
-GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
-GOOGLE_CALLBACK_PATH=${GOOGLE_CALLBACK_PATH}
+            echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> .env
+            echo "GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}" >> .env
+            echo "GOOGLE_CALLBACK_PATH=${GOOGLE_CALLBACK_PATH}" >> .env
 
-NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
-NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
-NAVER_CALLBACK_URL=${NAVER_CALLBACK_URL}
-NAVER_CALLBACK_PATH=${NAVER_CALLBACK_PATH}
-NAVER_SERVICE_URL=${NAVER_SERVICE_URL}
+            echo "NAVER_CLIENT_ID=${NAVER_CLIENT_ID}" >> .env
+            echo "NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}" >> .env
+            echo "NAVER_CALLBACK_URL=${NAVER_CALLBACK_URL}" >> .env
+            echo "NAVER_CALLBACK_PATH=${NAVER_CALLBACK_PATH}" >> .env
+            echo "NAVER_SERVICE_URL=${NAVER_SERVICE_URL}" >> .env
 
-KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-KAKAO_CALLBACK_URL=${KAKAO_CALLBACK_URL}
-KAKAO_CALLBACK_PATH=${KAKAO_CALLBACK_PATH}
+            echo "KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}" >> .env
+            echo "KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}" >> .env
+            echo "KAKAO_CALLBACK_URL=${KAKAO_CALLBACK_URL}" >> .env
+            echo "KAKAO_CALLBACK_PATH=${KAKAO_CALLBACK_PATH}" >> .env
 
-INITIAL_ADMIN_LOGIN_ID=${INITIAL_ADMIN_LOGIN_ID}
-INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
-INITIAL_ADMIN_NAME=${INITIAL_ADMIN_NAME}
-INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
-INITIAL_ADMIN_PHONE=${INITIAL_ADMIN_PHONE}
+            echo "INITIAL_ADMIN_LOGIN_ID=${INITIAL_ADMIN_LOGIN_ID}" >> .env
+            echo "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}" >> .env
+            echo "INITIAL_ADMIN_NAME=${INITIAL_ADMIN_NAME}" >> .env
+            echo "INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}" >> .env
+            echo "INITIAL_ADMIN_PHONE=${INITIAL_ADMIN_PHONE}" >> .env
 
-AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-AWS_REGION=${AWS_REGION}
-AWS_SES_FROM_EMAIL=${AWS_SES_FROM_EMAIL}
-AWS_SES_TO_EMAIL=${AWS_SES_TO_EMAIL}
+            echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> .env
+            echo "AWS_REGION=${AWS_REGION}" >> .env
+            echo "AWS_SES_FROM_EMAIL=${AWS_SES_FROM_EMAIL}" >> .env
+            echo "AWS_SES_TO_EMAIL=${AWS_SES_TO_EMAIL}" >> .env
 
-LOG_LEVEL=${LOG_LEVEL}
-EOL
+            echo "LOG_LEVEL=${LOG_LEVEL}" >> .env
 
+            # ✅ 빌드 & 재시작
             git pull origin main
             npm install
             npm run build
@@ -153,11 +153,11 @@ EOL
           ssh -o StrictHostKeyChecking=no ${{ secrets.FRONT_USER }}@${{ secrets.FRONT_HOST }} << 'EOF'
             cd /home/ubuntu/apps/Phoenix/Frontend
 
-            cat > .env.production <<EOL
-VITE_API_BASE_URL=${VITE_API_BASE_URL}
-VITE_SCENARIO_DATA_SOURCE=${VITE_SCENARIO_DATA_SOURCE}
-EOL
+            # ✅ .env.production 작성
+            echo "VITE_API_BASE_URL=${VITE_API_BASE_URL}" > .env.production
+            echo "VITE_SCENARIO_DATA_SOURCE=${VITE_SCENARIO_DATA_SOURCE}" >> .env.production
 
+            # ✅ 빌드 & 배포
             git pull origin main
             npm install
             npm run build

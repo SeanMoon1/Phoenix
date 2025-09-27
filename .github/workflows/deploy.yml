@@ -78,7 +78,7 @@ jobs:
         script: |
           cd /home/ubuntu/apps/Phoenix/Backend
           echo "✅ 서버에서 npm install & build 시작"
-          npm ci
+          npm install
           npm run build
           pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
 

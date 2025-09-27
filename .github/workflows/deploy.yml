@@ -43,6 +43,7 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
+            Backend/dist/**
             Backend/package.json
             Backend/package-lock.json
           target: "/home/ubuntu/apps/Phoenix/Backend/"

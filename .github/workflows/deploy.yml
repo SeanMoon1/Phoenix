@@ -79,10 +79,10 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
-            Phoenix/Backend/dist/**
-            Phoenix/Backend/package.json
-            Phoenix/Backend/package-lock.json
-            Phoenix/Backend/.env
+            Backend/dist/**
+            Backend/package.json
+            Backend/package-lock.json
+            Backend/.env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
 

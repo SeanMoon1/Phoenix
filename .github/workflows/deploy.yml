@@ -14,7 +14,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20.19.0
           cache: 'npm'
 
       - name: Install dependencies & Build
@@ -22,14 +22,15 @@ jobs:
           cd Backend
           npm ci
           npm run build
+          ls -al dist/src   # ✅ 빌드 결과 확인
 
-      # ✅ rsync으로 dist만 빠르게 배포
-      - name: Copy dist to server (rsync)
+      # ✅ rsync으로 dist/src만 빠르게 배포 (불필요한 비교/삭제 제거)
+      - name: Copy dist to server (rsync optimized)
         uses: burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --delete
-          path: Backend/dist/
-          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist
+          switches: -avzr --exclude=node_modules --exclude=logs --exclude=uploads
+          path: Backend/dist/src/
+          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist/src
           remote_host: ${{ secrets.BACK_HOST }}
           remote_user: ${{ secrets.BACK_USER }}
           remote_key: ${{ secrets.BACK_SSH_KEY }}
@@ -63,16 +64,6 @@ jobs:
             APP_VERSION=${APP_VERSION}
             NODE_ENV=${NODE_ENV}
             PORT=${PORT}
-            CORS_ORIGIN=${CORS_ORIGIN}
-            API_URL=${API_URL}
-            FRONTEND_URL=${FRONTEND_URL}
-            DB_HOST=${DB_HOST}
-            DB_PORT=${DB_PORT}
-            DB_USERNAME=${DB_USERNAME}
-            DB_PASSWORD=${DB_PASSWORD}
-            DB_DATABASE=${DB_DATABASE}
-            JWT_SECRET=${JWT_SECRET}
-            JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
             ...
             LOG_LEVEL=${LOG_LEVEL}
             EOL

@@ -184,8 +184,8 @@ async function bootstrap() {
       origin: [
         'http://localhost:3000',
         'http://localhost:3001',
-        'https://www.phoenix-4.com',
-        'https://phoenix-4.com',
+        'https://www.phoenix-4.shop',
+        'https://phoenix-4.shop',
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

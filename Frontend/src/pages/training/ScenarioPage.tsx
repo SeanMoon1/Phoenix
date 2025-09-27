@@ -55,7 +55,7 @@ const getScenarioSetName = (type: string): string => {
 export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
@@ -218,6 +218,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
       });
     });
   };
+
+  // 인증 체크
+  if (!isAuthenticated) {
+    navigate('/login');
+    return null;
+  }
 
   // 로딩, 에러 처리
   if (gameState.loading) {

@@ -23,10 +23,10 @@ jobs:
             cd /home/ubuntu/apps/Phoenix/Backend
 
             cat > .env <<EOL
-APP_NAME=${{ secrets.APP_NAME }}
-APP_VERSION=${{ secrets.APP_VERSION }}
-NODE_ENV=${{ secrets.NODE_ENV }}
-PORT=${{ secrets.PORT }}
+APP_NAME="${{ secrets.APP_NAME }}"
+APP_VERSION="${{ secrets.APP_VERSION }}"
+NODE_ENV="${{ secrets.NODE_ENV }}"
+PORT="${{ secrets.PORT }}"
 
 CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
 API_URL=${{ secrets.API_URL }}

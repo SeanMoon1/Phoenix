@@ -669,27 +669,31 @@ export class AuthService {
   }
 
   async deleteAccount(deleteAccountDto: DeleteAccountDto) {
-  try {
-    const verifyResult = await this.verifyDeletionCode({
-      email: deleteAccountDto.email,
-      code: deleteAccountDto.code,
-    });
+    try {
+      const verifyResult = await this.verifyDeletionCode({
+        email: deleteAccountDto.email,
+        code: deleteAccountDto.code,
+      });
 
-    if (!verifyResult.success) {
-      return verifyResult;
+      if (!verifyResult.success) {
+        return verifyResult;
+      }
+
+      // 실제 삭제 로직 - 이메일로 사용자를 찾아서 ID로 삭제
+      const user = await this.usersService.findByEmail(deleteAccountDto.email);
+      if (user) {
+        await this.usersService.remove(user.id);
+      }
+
+      return {
+        success: true,
+        message: '계정이 성공적으로 삭제되었습니다.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '회원 탈퇴 중 오류가 발생했습니다.',
+      };
     }
-
-    // 실제 삭제 로직 (예: usersService.remove 등)
-    await this.usersService.deleteByEmail(deleteAccountDto.email);
-
-    return {
-      success: true,
-      message: '계정이 성공적으로 삭제되었습니다.',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: '회원 탈퇴 중 오류가 발생했습니다.',
-    };
   }
 }

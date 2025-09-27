@@ -15,6 +15,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies & Build
         run: |
@@ -22,14 +23,27 @@ jobs:
           npm ci
           npm run build
 
-      # dist 파일 및 package.json만 서버로 복사
-      - name: Copy dist to server
+      # ✅ rsync으로 dist만 빠르게 배포
+      - name: Copy dist to server (rsync)
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete
+          path: Backend/dist/
+          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist
+          remote_host: ${{ secrets.BACK_HOST }}
+          remote_user: ${{ secrets.BACK_USER }}
+          remote_key: ${{ secrets.BACK_SSH_KEY }}
+
+      # ✅ package.json만 별도 전송
+      - name: Copy package.json
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.BACK_HOST }}
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
-          source: "Backend/dist/*,Backend/package*.json"
+          source: |
+            Backend/package.json
+            Backend/package-lock.json
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
       # 서버에서 pm2 restart
@@ -59,36 +73,10 @@ jobs:
             DB_DATABASE=${DB_DATABASE}
             JWT_SECRET=${JWT_SECRET}
             JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-            OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE}
-            OAUTH_SUCCESS_REDIRECT=${OAUTH_SUCCESS_REDIRECT}
-            OAUTH_FAILURE_REDIRECT=${OAUTH_FAILURE_REDIRECT}
-            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-            GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
-            GOOGLE_CALLBACK_PATH=${GOOGLE_CALLBACK_PATH}
-            NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
-            NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
-            NAVER_CALLBACK_URL=${NAVER_CALLBACK_URL}
-            NAVER_CALLBACK_PATH=${NAVER_CALLBACK_PATH}
-            NAVER_SERVICE_URL=${NAVER_SERVICE_URL}
-            KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-            KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-            KAKAO_CALLBACK_URL=${KAKAO_CALLBACK_URL}
-            KAKAO_CALLBACK_PATH=${KAKAO_CALLBACK_PATH}
-            INITIAL_ADMIN_LOGIN_ID=${INITIAL_ADMIN_LOGIN_ID}
-            INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
-            INITIAL_ADMIN_NAME=${INITIAL_ADMIN_NAME}
-            INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
-            INITIAL_ADMIN_PHONE=${INITIAL_ADMIN_PHONE}
-            AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            AWS_REGION=${AWS_REGION}
-            AWS_SES_FROM_EMAIL=${AWS_SES_FROM_EMAIL}
-            AWS_SES_TO_EMAIL=${AWS_SES_TO_EMAIL}
+            ...
             LOG_LEVEL=${LOG_LEVEL}
             EOL
 
-            # pm2로 실행
             npm ci --omit=dev
             pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
 
@@ -102,6 +90,7 @@ jobs:
         with:
           node-version: 20.19.0
           cache: 'npm'
+
       - name: Build frontend
         run: |
           cd Frontend
@@ -117,7 +106,7 @@ jobs:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "Frontend/dist/*"
+          source: "Frontend/dist/**"
           target: "/home/ubuntu/apps/Phoenix/Frontend/dist"
 
       - name: Restart nginx

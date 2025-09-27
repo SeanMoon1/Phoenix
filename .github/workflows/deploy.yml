@@ -84,10 +84,10 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
-            Backend/dist/**
-            Backend/package.json
-            Backend/package-lock.json
-            Backend/.env
+            ./Backend/dist/**
+            ./Backend/package.json
+            ./Backend/package-lock.json
+            ./Backend/.env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
       # 서버에서 pm2 restart (main.js 경로 수정됨 ✅)

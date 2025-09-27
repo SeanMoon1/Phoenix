@@ -1,5 +1,5 @@
 # Phoenix Training Platform Backend
-테스트6
+
 Phoenix 훈련 플랫폼의 백엔드 API 서버입니다.
 
 ## 기술 스택

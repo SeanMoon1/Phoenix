@@ -245,11 +245,10 @@ export class AuthService {
       return {
         success: true,
         message: 'OAuth 로그인 성공',
-        data: {
-          access_token: tokenPair.accessToken,
-          refresh_token: tokenPair.refreshToken,
-          expires_in: tokenPair.expiresIn,
-          user,
+        access_token: tokenPair.accessToken,
+        refresh_token: tokenPair.refreshToken,
+        expires_in: tokenPair.expiresIn,
+        user,
         },
       };
     } catch (error) {
@@ -680,4 +679,5 @@ export class AuthService {
       if (!verifyResult.success) {
         return verifyResult;
       }
-
+    }
+  }

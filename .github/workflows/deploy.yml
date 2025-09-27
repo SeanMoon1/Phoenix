@@ -7,112 +7,81 @@ on:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.19.0
-          cache: 'npm'
+    # ✅ .env 파일 생성
+    - name: Create .env file
+      run: |
+        cat > Backend/.env <<EOL
+        APP_NAME=${{ secrets.APP_NAME }}
+        APP_VERSION=${{ secrets.APP_VERSION }}
+        NODE_ENV=${{ secrets.NODE_ENV }}
+        PORT=${{ secrets.PORT }}
+        CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+        API_URL=${{ secrets.API_URL }}
+        FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_PORT=${{ secrets.DB_PORT }}
+        DB_USERNAME=${{ secrets.DB_USERNAME }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DB_DATABASE=${{ secrets.DB_DATABASE }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+        OAUTH_REDIRECT_BASE=${{ secrets.OAUTH_REDIRECT_BASE }}
+        OAUTH_SUCCESS_REDIRECT=${{ secrets.OAUTH_SUCCESS_REDIRECT }}
+        OAUTH_FAILURE_REDIRECT=${{ secrets.OAUTH_FAILURE_REDIRECT }}
+        GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+        GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+        GOOGLE_CALLBACK_PATH=${{ secrets.GOOGLE_CALLBACK_PATH }}
+        NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+        NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+        NAVER_CALLBACK_URL=${{ secrets.NAVER_CALLBACK_URL }}
+        NAVER_CALLBACK_PATH=${{ secrets.NAVER_CALLBACK_PATH }}
+        NAVER_SERVICE_URL=${{ secrets.NAVER_SERVICE_URL }}
+        KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+        KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+        KAKAO_CALLBACK_URL=${{ secrets.KAKAO_CALLBACK_URL }}
+        KAKAO_CALLBACK_PATH=${{ secrets.KAKAO_CALLBACK_PATH }}
+        INITIAL_ADMIN_LOGIN_ID=${{ secrets.INITIAL_ADMIN_LOGIN_ID }}
+        INITIAL_ADMIN_PASSWORD=${{ secrets.INITIAL_ADMIN_PASSWORD }}
+        INITIAL_ADMIN_NAME=${{ secrets.INITIAL_ADMIN_NAME }}
+        INITIAL_ADMIN_EMAIL=${{ secrets.INITIAL_ADMIN_EMAIL }}
+        INITIAL_ADMIN_PHONE=${{ secrets.INITIAL_ADMIN_PHONE }}
+        AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION=${{ secrets.AWS_REGION }}
+        AWS_SES_FROM_EMAIL=${{ secrets.AWS_SES_FROM_EMAIL }}
+        AWS_SES_TO_EMAIL=${{ secrets.AWS_SES_TO_EMAIL }}
+        LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+        EOL
 
-      - name: Install dependencies & Build
-        run: |
-          cd Backend
+    # ✅ 코드 + .env만 서버로 복사
+    - name: Copy backend source to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.BACK_HOST }}
+        username: ${{ secrets.BACK_USER }}
+        key: ${{ secrets.BACK_SSH_KEY }}
+        source: "Backend/**"
+        target: "/home/ubuntu/apps/Phoenix/"
+
+    # ✅ 서버에서 빌드 + pm2 재시작
+    - name: Build & Restart backend on server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.BACK_HOST }}
+        username: ${{ secrets.BACK_USER }}
+        key: ${{ secrets.BACK_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/apps/Phoenix/Backend
+          echo "✅ 서버에서 npm install & build 시작"
           npm ci
           npm run build
-          echo "✅ 현재 위치 확인:"
-          pwd
-          echo "✅ dist 폴더 구조:"
-          ls -alh dist || true
-          echo "✅ dist/src 폴더 구조:"
-          ls -alh dist/src || true
+          pm2 restart phoenix-backend || pm2 start dist/main.js --name phoenix-backend
 
-      # ✅ .env 파일 생성 (Secrets → .env)
-      - name: Create .env file
-        run: |
-          cat > Backend/.env <<EOL
-          APP_NAME=${{ secrets.APP_NAME }}
-          APP_VERSION=${{ secrets.APP_VERSION }}
-          NODE_ENV=${{ secrets.NODE_ENV }}
-          PORT=${{ secrets.PORT }}
-          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
-          API_URL=${{ secrets.API_URL }}
-          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          DB_USERNAME=${{ secrets.DB_USERNAME }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_DATABASE=${{ secrets.DB_DATABASE }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
-          OAUTH_REDIRECT_BASE=${{ secrets.OAUTH_REDIRECT_BASE }}
-          OAUTH_SUCCESS_REDIRECT=${{ secrets.OAUTH_SUCCESS_REDIRECT }}
-          OAUTH_FAILURE_REDIRECT=${{ secrets.OAUTH_FAILURE_REDIRECT }}
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
-          GOOGLE_CALLBACK_PATH=${{ secrets.GOOGLE_CALLBACK_PATH }}
-          NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
-          NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
-          NAVER_CALLBACK_URL=${{ secrets.NAVER_CALLBACK_URL }}
-          NAVER_CALLBACK_PATH=${{ secrets.NAVER_CALLBACK_PATH }}
-          NAVER_SERVICE_URL=${{ secrets.NAVER_SERVICE_URL }}
-          KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
-          KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
-          KAKAO_CALLBACK_URL=${{ secrets.KAKAO_CALLBACK_URL }}
-          KAKAO_CALLBACK_PATH=${{ secrets.KAKAO_CALLBACK_PATH }}
-          INITIAL_ADMIN_LOGIN_ID=${{ secrets.INITIAL_ADMIN_LOGIN_ID }}
-          INITIAL_ADMIN_PASSWORD=${{ secrets.INITIAL_ADMIN_PASSWORD }}
-          INITIAL_ADMIN_NAME=${{ secrets.INITIAL_ADMIN_NAME }}
-          INITIAL_ADMIN_EMAIL=${{ secrets.INITIAL_ADMIN_EMAIL }}
-          INITIAL_ADMIN_PHONE=${{ secrets.INITIAL_ADMIN_PHONE }}
-          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION=${{ secrets.AWS_REGION }}
-          AWS_SES_FROM_EMAIL=${{ secrets.AWS_SES_FROM_EMAIL }}
-          AWS_SES_TO_EMAIL=${{ secrets.AWS_SES_TO_EMAIL }}
-          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
-          EOL
-
-      # ✅ 복사 전에 반드시 확인
-      - name: Debug before copy
-        run: |
-          echo "✅ Backend 파일 확인"
-          ls -alh ./Backend || true
-          ls -alh ./Backend/dist || true
-          ls -alh ./Backend/dist/src || true
-          ls -alh ./Backend/.env || true
-          ls -alh ./Backend/package.json || true
-
-      # ✅ dist + package.json + .env 전송
-      - name: Copy dist + package.json to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.BACK_HOST }}
-          username: ${{ secrets.BACK_USER }}
-          key: ${{ secrets.BACK_SSH_KEY }}
-          source: |
-            dist/**
-            package.json
-            package-lock.json
-            .env
-          target: "/home/ubuntu/apps/Phoenix/Backend/"
-
-      # 서버에서 pm2 restart
-      - name: Restart backend with pm2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.BACK_HOST }}
-          username: ${{ secrets.BACK_USER }}
-          key: ${{ secrets.BACK_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/apps/Phoenix/Backend
-            echo "✅ 서버에서 dist 확인:"
-            ls -alh dist || true
-            npm ci --omit=dev
-            pm2 restart phoenix-backend || pm2 start dist/main.js --name phoenix-backend
 
   frontend:
     runs-on: ubuntu-latest

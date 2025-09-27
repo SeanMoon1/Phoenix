@@ -90,7 +90,7 @@ jobs:
             Backend/.env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
-      # 서버에서 pm2 restart
+      # 서버에서 pm2 restart (main.js 경로 수정됨 ✅)
       - name: Restart backend with pm2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -101,9 +101,8 @@ jobs:
             cd /home/ubuntu/apps/Phoenix/Backend
             echo "✅ 서버에서 dist 확인:"
             ls -alh dist || true
-            ls -alh dist/src || true
             npm ci --omit=dev
-            pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
+            pm2 restart phoenix-backend || pm2 start dist/main.js --name phoenix-backend
 
   frontend:
     runs-on: ubuntu-latest

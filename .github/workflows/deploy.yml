@@ -22,15 +22,15 @@ jobs:
           cd Backend
           npm ci
           npm run build
-          ls -al dist/src   # ✅ 빌드 결과 확인
+          ls -R dist   # ✅ 빌드 결과 확인 (루트 + src 확인)
 
-      # ✅ rsync으로 dist/src만 빠르게 배포 (불필요한 비교/삭제 제거)
+      # ✅ dist 전체 전송 (루트 main.js, ormconfig.js 포함)
       - name: Copy dist to server (rsync optimized)
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --exclude=node_modules --exclude=logs --exclude=uploads
-          path: Backend/dist/src/
-          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist/src
+          path: Backend/dist/
+          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist
           remote_host: ${{ secrets.BACK_HOST }}
           remote_user: ${{ secrets.BACK_USER }}
           remote_key: ${{ secrets.BACK_SSH_KEY }}

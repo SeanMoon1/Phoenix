@@ -22,21 +22,10 @@ jobs:
           cd Backend
           npm ci
           npm run build
-          ls -R dist   # ✅ 빌드 결과 확인 (루트 + src 확인)
+          ls -R dist   # ✅ 빌드 결과 확인
 
-      # ✅ dist 전체 전송 (루트 main.js, ormconfig.js 포함)
-      - name: Copy dist to server (rsync optimized)
-        uses: burnett01/rsync-deployments@5.2
-        with:
-          switches: -avzr --exclude=node_modules --exclude=logs --exclude=uploads
-          path: Backend/dist/
-          remote_path: /home/ubuntu/apps/Phoenix/Backend/dist
-          remote_host: ${{ secrets.BACK_HOST }}
-          remote_user: ${{ secrets.BACK_USER }}
-          remote_key: ${{ secrets.BACK_SSH_KEY }}
-
-      # ✅ package.json만 별도 전송
-      - name: Copy package.json
+      # ✅ dist + package.json 같이 전송 (scp-action 단일 사용)
+      - name: Copy dist + package.json to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.BACK_HOST }}

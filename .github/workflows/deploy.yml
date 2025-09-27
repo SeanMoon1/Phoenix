@@ -1,0 +1,114 @@
+name: Deploy Phoenix
+
+on:
+  push:
+    branches:
+      - main   # main 브랜치에 push될 때 실행
+
+jobs:
+  backend:
+    if: contains(github.event.head_commit.message, '[backend]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.BACK_SSH_KEY }}
+
+      - name: Deploy Backend
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.BACK_USER }}@${{ secrets.BACK_HOST }} << 'EOF'
+            cd /home/ubuntu/apps/Phoenix/Backend
+
+            # ✅ .env 생성
+            cat > .env <<EOL
+APP_NAME=${{ secrets.APP_NAME }}
+APP_VERSION=${{ secrets.APP_VERSION }}
+NODE_ENV=${{ secrets.NODE_ENV }}
+PORT=${{ secrets.PORT }}
+
+CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+API_URL=${{ secrets.API_URL }}
+FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+
+DB_HOST=${{ secrets.DB_HOST }}
+DB_PORT=${{ secrets.DB_PORT }}
+DB_USERNAME=${{ secrets.DB_USERNAME }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+DB_DATABASE=${{ secrets.DB_DATABASE }}
+
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+
+OAUTH_REDIRECT_BASE=${{ secrets.OAUTH_REDIRECT_BASE }}
+OAUTH_SUCCESS_REDIRECT=${{ secrets.OAUTH_SUCCESS_REDIRECT }}
+OAUTH_FAILURE_REDIRECT=${{ secrets.OAUTH_FAILURE_REDIRECT }}
+
+GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+GOOGLE_CALLBACK_PATH=${{ secrets.GOOGLE_CALLBACK_PATH }}
+
+NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+NAVER_CALLBACK_URL=${{ secrets.NAVER_CALLBACK_URL }}
+NAVER_CALLBACK_PATH=${{ secrets.NAVER_CALLBACK_PATH }}
+NAVER_SERVICE_URL=${{ secrets.NAVER_SERVICE_URL }}
+
+KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+KAKAO_CALLBACK_URL=${{ secrets.KAKAO_CALLBACK_URL }}
+KAKAO_CALLBACK_PATH=${{ secrets.KAKAO_CALLBACK_PATH }}
+
+INITIAL_ADMIN_LOGIN_ID=${{ secrets.INITIAL_ADMIN_LOGIN_ID }}
+INITIAL_ADMIN_PASSWORD=${{ secrets.INITIAL_ADMIN_PASSWORD }}
+INITIAL_ADMIN_NAME=${{ secrets.INITIAL_ADMIN_NAME }}
+INITIAL_ADMIN_EMAIL=${{ secrets.INITIAL_ADMIN_EMAIL }}
+INITIAL_ADMIN_PHONE=${{ secrets.INITIAL_ADMIN_PHONE }}
+
+AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+AWS_REGION=${{ secrets.AWS_REGION }}
+AWS_SES_FROM_EMAIL=${{ secrets.AWS_SES_FROM_EMAIL }}
+AWS_SES_TO_EMAIL=${{ secrets.AWS_SES_TO_EMAIL }}
+
+LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+EOL
+
+            # ✅ 빌드 & 재시작
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
+          EOF
+
+  frontend:
+    if: contains(github.event.head_commit.message, '[frontend]') || contains(github.event.head_commit.message, '[all]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.FRONT_SSH_KEY }}
+
+      - name: Deploy Frontend
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.FRONT_USER }}@${{ secrets.FRONT_HOST }} << 'EOF'
+            cd /home/ubuntu/apps/Phoenix/Frontend
+
+            # ✅ .env.production 생성 (Vite 환경변수)
+            cat > .env.production <<EOL
+VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}
+EOL
+
+            # ✅ 빌드 & 배포
+            git pull origin main
+            npm install
+            npm run build
+            sudo systemctl restart nginx
+          EOF

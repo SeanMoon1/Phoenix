@@ -38,7 +38,7 @@ export class OAuthController {
     const redirectBase = this.configService.get<string>('OAUTH_REDIRECT_BASE');
     const callbackPath = this.configService.get<string>('GOOGLE_CALLBACK_PATH');
 
-    const baseUrl = redirectBase || 'https://phoenix-4.com';
+    const baseUrl = redirectBase || 'https://phoenix-4.shop';
     return {
       configured: !!(clientId && clientSecret && redirectBase && callbackPath),
       clientId: clientId ? `${clientId.substring(0, 10)}...` : 'Not configured',
@@ -60,7 +60,7 @@ export class OAuthController {
     const redirectBase = this.configService.get<string>('OAUTH_REDIRECT_BASE');
     const callbackPath = this.configService.get<string>('NAVER_CALLBACK_PATH');
 
-    const baseUrl = redirectBase || 'https://phoenix-4.com';
+    const baseUrl = redirectBase || 'https://phoenix-4.shop';
     return {
       configured: !!(clientId && clientSecret && redirectBase && callbackPath),
       clientId: clientId ? `${clientId.substring(0, 10)}...` : 'Not configured',
@@ -149,7 +149,7 @@ export class OAuthController {
         console.log(`❌ ${provider} OAuth 사용자 정보 없음`);
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
-          'https://phoenix-4.com';
+          'https://phoenix-4.shop';
         return res.redirect(
           `${redirectBase}/auth/callback?error=user_not_found`,
         );
@@ -169,7 +169,7 @@ export class OAuthController {
         });
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
-          'https://phoenix-4.com';
+          'https://phoenix-4.shop';
         return res.redirect(
           `${redirectBase}/auth/callback?error=incomplete_user_info`,
         );
@@ -208,7 +208,7 @@ export class OAuthController {
         // 성공 시 JWT 토큰과 사용자 정보를 함께 프론트엔드로 리디렉션
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
-          'https://phoenix-4.com';
+          'https://phoenix-4.shop';
         const userParam = encodeURIComponent(
           JSON.stringify({
             id: result.user.id,
@@ -225,7 +225,7 @@ export class OAuthController {
         console.log(`❌ ${provider} OAuth 인증 실패 - 토큰 생성 실패`);
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
-          'https://phoenix-4.com';
+          'https://phoenix-4.shop';
         return res.redirect(
           `${redirectBase}/auth/callback?error=authentication_failed`,
         );
@@ -238,7 +238,7 @@ export class OAuthController {
       });
       const redirectBase =
         this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
-        'https://phoenix-4.com';
+        'https://phoenix-4.shop';
       return res.redirect(
         `${redirectBase}/auth/callback?error=server_error&details=${encodeURIComponent(error.message)}`,
       );

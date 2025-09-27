@@ -79,7 +79,7 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
-            Backend/dist/src/**
+            Backend/dist/**
             Backend/package.json
             Backend/package-lock.json
             Backend/.env

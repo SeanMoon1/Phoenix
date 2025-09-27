@@ -99,8 +99,8 @@ jobs:
           cd Frontend
           npm ci
           npm install --save-dev rollup
-          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env.production
-          echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env.production
+          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
+          echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
           npm run build
           echo "✅ Frontend/dist 구조:"
           ls -alh dist || true

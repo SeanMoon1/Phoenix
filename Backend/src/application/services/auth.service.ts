@@ -249,7 +249,6 @@ export class AuthService {
         refresh_token: tokenPair.refreshToken,
         expires_in: tokenPair.expiresIn,
         user,
-        },
       };
     } catch (error) {
       throw new BadRequestException(error.message);

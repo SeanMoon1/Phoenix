@@ -7,8 +7,8 @@ on:
 
 jobs:
   backend:
-    if: contains(github.event.head_commit.message, '[backend]') || contains(github.event.head_commit.message, '[all]')
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[backend]') || contains(github.event.head_commit.message, '[all]')
     steps:
       - uses: actions/checkout@v3
 
@@ -22,7 +22,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.BACK_USER }}@${{ secrets.BACK_HOST }} << 'EOF'
             cd /home/ubuntu/apps/Phoenix/Backend
 
-            # ✅ .env 생성
             cat > .env <<EOL
 APP_NAME=${{ secrets.APP_NAME }}
 APP_VERSION=${{ secrets.APP_VERSION }}
@@ -77,7 +76,6 @@ AWS_SES_TO_EMAIL=${{ secrets.AWS_SES_TO_EMAIL }}
 LOG_LEVEL=${{ secrets.LOG_LEVEL }}
 EOL
 
-            # ✅ 빌드 & 재시작
             git pull origin main
             npm install
             npm run build
@@ -85,8 +83,8 @@ EOL
           EOF
 
   frontend:
-    if: contains(github.event.head_commit.message, '[frontend]') || contains(github.event.head_commit.message, '[all]')
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[frontend]') || contains(github.event.head_commit.message, '[all]')
     steps:
       - uses: actions/checkout@v3
 
@@ -100,13 +98,11 @@ EOL
           ssh -o StrictHostKeyChecking=no ${{ secrets.FRONT_USER }}@${{ secrets.FRONT_HOST }} << 'EOF'
             cd /home/ubuntu/apps/Phoenix/Frontend
 
-            # ✅ .env.production 생성 (Vite 환경변수)
             cat > .env.production <<EOL
 VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}
 EOL
 
-            # ✅ 빌드 & 배포
             git pull origin main
             npm install
             npm run build

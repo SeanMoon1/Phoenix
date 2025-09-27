@@ -22,7 +22,12 @@ jobs:
           cd Backend
           npm ci
           npm run build
-          ls -R dist   # ✅ 빌드 결과 확인
+          echo "✅ 현재 위치 확인:"
+          pwd
+          echo "✅ dist 폴더 구조:"
+          ls -alh dist || true
+          echo "✅ dist/src 폴더 구조:"
+          ls -alh dist/src || true
 
       # ✅ .env 파일 생성 (Secrets → .env)
       - name: Create .env file
@@ -85,7 +90,6 @@ jobs:
             Backend/.env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
-
       # 서버에서 pm2 restart
       - name: Restart backend with pm2
         uses: appleboy/ssh-action@v1.0.0
@@ -95,6 +99,9 @@ jobs:
           key: ${{ secrets.BACK_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Backend
+            echo "✅ 서버에서 dist 확인:"
+            ls -alh dist || true
+            ls -alh dist/src || true
             npm ci --omit=dev
             pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
 
@@ -117,6 +124,8 @@ jobs:
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env.production
           echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env.production
           npm run build
+          echo "✅ Frontend/dist 구조:"
+          ls -alh dist || true
 
       - name: Copy dist to server
         uses: appleboy/scp-action@v0.1.7
@@ -134,4 +143,6 @@ jobs:
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
+            echo "✅ 서버에서 Frontend/dist 확인:"
+            ls -alh /home/ubuntu/apps/Phoenix/Frontend/dist || true
             sudo systemctl restart nginx

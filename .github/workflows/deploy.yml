@@ -74,7 +74,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.BACK_USER }}@${{ secrets.BACK_HOST }} << 'EOF'
             cd /home/ubuntu/apps/Phoenix/Backend
 
-            cat > .env <<EOL
+            cat > .env <<'EOL'
 APP_NAME=${APP_NAME}
 APP_VERSION=${APP_VERSION}
 NODE_ENV=${NODE_ENV}

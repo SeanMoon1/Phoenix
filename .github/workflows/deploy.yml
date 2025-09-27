@@ -76,7 +76,17 @@ jobs:
           LOG_LEVEL=${{ secrets.LOG_LEVEL }}
           EOL
 
-      # ✅ dist + package.json + .env 같이 전송
+      # ✅ 복사 전에 반드시 확인
+      - name: Debug before copy
+        run: |
+          echo "✅ Backend 파일 확인"
+          ls -alh ./Backend || true
+          ls -alh ./Backend/dist || true
+          ls -alh ./Backend/dist/src || true
+          ls -alh ./Backend/.env || true
+          ls -alh ./Backend/package.json || true
+
+      # ✅ dist + package.json + .env 전송
       - name: Copy dist + package.json to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -84,22 +94,13 @@ jobs:
           username: ${{ secrets.BACK_USER }}
           key: ${{ secrets.BACK_SSH_KEY }}
           source: |
-            ./Backend/dist/**/*
+            ./Backend/dist/**
             ./Backend/package.json
             ./Backend/package-lock.json
             ./Backend/.env
           target: "/home/ubuntu/apps/Phoenix/Backend/"
 
-      - name: Debug before copy
-        run: |
-         echo "✅ Backend 파일 확인"
-         ls -alh ./Backend/dist || true
-         ls -alh ./Backend/dist/src || true
-         ls -alh ./Backend/.env || true
-         ls -alh ./Backend/package.json || true
-    
-
-      # 서버에서 pm2 restart (main.js 경로 수정됨 ✅)
+      # 서버에서 pm2 restart
       - name: Restart backend with pm2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -134,6 +135,12 @@ jobs:
           npm run build
           echo "✅ Frontend/dist 구조:"
           ls -alh dist || true
+
+      # ✅ 복사 전에 반드시 확인
+      - name: Debug frontend before copy
+        run: |
+          echo "✅ Frontend 파일 확인"
+          ls -alh ./Frontend/dist || true
 
       - name: Copy dist to server
         uses: appleboy/scp-action@v0.1.7

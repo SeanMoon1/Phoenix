@@ -19,17 +19,19 @@ jobs:
           filters: |
             frontend:
               - 'Frontend/**'
+              - '.github/workflows/frontend-deploy.yml'
             backend:
               - 'Backend/**'
+              - '.github/workflows/backend-deploy.yml'
 
   deploy-frontend:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    if: ${{ needs.changes.outputs.frontend == 'true' || contains(github.event.head_commit.modified, '.github/workflows/frontend-deploy.yml') }}
     uses: ./.github/workflows/frontend-deploy.yml
     secrets: inherit
 
   deploy-backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }}
+    if: ${{ needs.changes.outputs.backend == 'true' || contains(github.event.head_commit.modified, '.github/workflows/backend-deploy.yml') }}
     uses: ./.github/workflows/backend-deploy.yml
     secrets: inherit

@@ -815,7 +815,7 @@ const AdminPage: React.FC = () => {
                   시나리오 타입 생성
                 </Button>
                 <Button
-                  onClick={() => window.open('/admin/scripts', '_blank')}
+                  onClick={() => window.open('/admin/script-tool', '_blank')}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Icon type="chart" category="ui" className="inline mr-2" />

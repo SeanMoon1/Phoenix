@@ -348,23 +348,20 @@ export class AuthService {
         }
       }
 
-      // 5. JWT 토큰 생성 및 반환
+      // 5. JWT 토큰 생성 및 반환 (RefreshTokenService 사용)
       console.log('🔑 JWT 토큰 생성 시작:', {
         userId: user.id,
         email: user.email,
       });
       try {
-        const payload = {
-          id: user.id,
-          loginId: user.loginId,
-          name: user.name,
-          email: user.email,
-          teamId: user.teamId,
-          adminLevel: null, // 일반 사용자는 관리자 레벨 없음
-          isAdmin: false, // 일반 사용자는 관리자 아님
-          sub: user.id, // 호환성을 위해 유지
-        };
-        const accessToken = this.jwtService.sign(payload);
+        // RefreshTokenService를 사용하여 일관된 토큰 생성
+        const accessToken = await this.refreshTokenService.generateAccessToken(
+          user.id,
+          user.loginId,
+          user.teamId,
+          null, // 일반 사용자는 관리자 레벨 없음
+          false, // 일반 사용자는 관리자 아님
+        );
         console.log('🔑 JWT 토큰 생성 완료');
 
         const result = {

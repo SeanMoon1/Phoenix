@@ -580,7 +580,10 @@ export const gmailApi = {
    * @returns 인증 URL
    */
   getAuthUrl: async () => {
-    return api.get<{ authUrl: string }>('/gmail/auth-url');
+    console.log('🔍 gmailApi.getAuthUrl 호출됨');
+    const result = await api.get<{ authUrl: string }>('/gmail/auth-url');
+    console.log('📥 gmailApi.getAuthUrl 응답:', result);
+    return result;
   },
 
   /**

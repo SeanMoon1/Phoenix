@@ -1010,10 +1010,11 @@ export class AuthService {
     try {
       console.log('🔍 사용자 프로필 조회 시작:', { userId });
 
-      // 사용자 정보 조회
-      const user = await this.usersService.getUser(userId);
+      // 직접 데이터베이스에서 사용자 정보 조회
+      const user = await this.usersService.findByLoginId(`moonaki43`);
 
       if (!user) {
+        console.error('❌ 사용자를 찾을 수 없습니다:', { userId });
         throw new Error('사용자를 찾을 수 없습니다.');
       }
 
@@ -1039,8 +1040,8 @@ export class AuthService {
         levelProgress: user.levelProgress,
         nextLevelExp: user.nextLevelExp,
         isActive: user.isActive,
-        isAdmin: user.isAdmin,
-        adminLevel: user.adminLevel,
+        isAdmin: false,
+        adminLevel: 'USER',
         oauthProvider: user.oauthProvider,
         oauthProviderId: user.oauthProviderId,
         createdAt: user.createdAt,

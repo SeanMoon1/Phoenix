@@ -107,8 +107,8 @@ const AuthCallbackPage: React.FC = () => {
               teamId: profileData.teamId || 0,
               userCode: profileData.userCode || '',
               loginId: profileData.loginId || '',
-              email: profileData.email,
-              name: profileData.name,
+              email: profileData.email || userData.email,
+              name: profileData.name || userData.name,
               useYn: profileData.useYn || 'Y',
               userLevel: profileData.userLevel || 1,
               userExp: profileData.userExp || 0,
@@ -123,8 +123,9 @@ const AuthCallbackPage: React.FC = () => {
               isAdmin: profileData.isAdmin || false,
               adminLevel: profileData.adminLevel || 'USER',
               // OAuth 관련 정보 추가
-              oauthProvider: profileData.oauthProvider,
-              oauthProviderId: profileData.oauthProviderId,
+              oauthProvider: profileData.oauthProvider || userData.provider,
+              oauthProviderId:
+                profileData.oauthProviderId || userData.providerId,
             };
 
             console.log('✅ Setting auth state with backend data:', {
@@ -179,8 +180,8 @@ const AuthCallbackPage: React.FC = () => {
                   teamId: retryProfileData.teamId || 0,
                   userCode: retryProfileData.userCode || '',
                   loginId: retryProfileData.loginId || '',
-                  email: retryProfileData.email,
-                  name: retryProfileData.name,
+                  email: retryProfileData.email || userData.email,
+                  name: retryProfileData.name || userData.name,
                   useYn: retryProfileData.useYn || 'Y',
                   userLevel: retryProfileData.userLevel || 1,
                   userExp: retryProfileData.userExp || 0,
@@ -196,8 +197,10 @@ const AuthCallbackPage: React.FC = () => {
                     retryProfileData.updatedAt || new Date().toISOString(),
                   isAdmin: retryProfileData.isAdmin || false,
                   adminLevel: retryProfileData.adminLevel || 'USER',
-                  oauthProvider: retryProfileData.oauthProvider,
-                  oauthProviderId: retryProfileData.oauthProviderId,
+                  oauthProvider:
+                    retryProfileData.oauthProvider || userData.provider,
+                  oauthProviderId:
+                    retryProfileData.oauthProviderId || userData.providerId,
                 };
 
                 setAuth({

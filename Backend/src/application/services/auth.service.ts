@@ -531,8 +531,7 @@ export class AuthService {
       if (existingData) {
         const now = Date.now();
         const codeAge = now - existingData.timestamp;
-        const minInterval =
-          this.configService.get<number>('REDIS_RATE_LIMIT', 60) * 1000; // 환경 변수에서 가져오기
+        const minInterval = 60 * 1000; // 1분 간격 제한
 
         if (codeAge < minInterval) {
           console.log('❌ 인증 코드 요청 간격이 너무 짧음');
@@ -625,11 +624,8 @@ export class AuthService {
         };
       }
 
-      // 시도 횟수 제한 (환경 변수에서 가져오기)
-      const maxAttempts = this.configService.get<number>(
-        'REDIS_MAX_ATTEMPTS',
-        5,
-      );
+      // 시도 횟수 제한 (최대 5회)
+      const maxAttempts = 5;
       if (resetData.attempts >= maxAttempts) {
         console.log('❌ 인증 코드 시도 횟수 초과');
         await this.memoryAuthService.deleteResetCode(verifyResetCodeDto.email);
@@ -642,7 +638,7 @@ export class AuthService {
       // 인증 코드 만료 시간 확인 (환경 변수에서 가져오기)
       const now = Date.now();
       const codeAge = now - resetData.timestamp;
-      const maxAge = this.configService.get<number>('REDIS_TTL', 600) * 1000; // 환경 변수에서 가져오기
+      const maxAge = 10 * 60 * 1000; // 10분 (600초)
 
       if (codeAge > maxAge) {
         console.log('❌ 인증 코드 만료');
@@ -885,11 +881,8 @@ export class AuthService {
         };
       }
 
-      // 시도 횟수 제한 (환경 변수에서 가져오기)
-      const maxAttempts = this.configService.get<number>(
-        'REDIS_MAX_ATTEMPTS',
-        5,
-      );
+      // 시도 횟수 제한 (최대 5회)
+      const maxAttempts = 5;
       if (resetData.attempts >= maxAttempts) {
         console.log('❌ 인증 코드 시도 횟수 초과');
         await this.memoryAuthService.deleteResetCode(

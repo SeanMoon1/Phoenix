@@ -11,6 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # ✅ Secrets 확인
+      - name: Check Secrets
+        run: |
+          echo "BACK_HOST: ${{ secrets.BACK_HOST }}"
+          echo "BACK_USER: ${{ secrets.BACK_USER }}"
+          echo "BACK_SSH_KEY exists: ${{ secrets.BACK_SSH_KEY != '' }}"
+
       # ✅ .env 파일 생성
       - name: Create .env file
         run: |
@@ -58,6 +65,18 @@ jobs:
           LOG_LEVEL=${{ secrets.LOG_LEVEL }}
           EOL
 
+      # ✅ SSH 연결 테스트
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.BACK_HOST }}
+          username: ${{ secrets.BACK_USER }}
+          key: ${{ secrets.BACK_SSH_KEY }}
+          script: |
+            echo "✅ SSH 연결 성공"
+            whoami
+            pwd
+
       # ✅ 코드 + .env만 서버로 복사
       - name: Copy backend source to server
         uses: appleboy/scp-action@v0.1.7
@@ -93,6 +112,13 @@ jobs:
           node-version: 20.19.0
           cache: "npm"
 
+      # ✅ Secrets 확인
+      - name: Check Secrets
+        run: |
+          echo "FRONT_HOST: ${{ secrets.FRONT_HOST }}"
+          echo "FRONT_USER: ${{ secrets.FRONT_USER }}"
+          echo "FRONT_SSH_KEY exists: ${{ secrets.FRONT_SSH_KEY != '' }}"
+
       - name: Build frontend
         run: |
           cd Frontend
@@ -109,6 +135,18 @@ jobs:
         run: |
           echo "✅ Frontend 파일 확인"
           ls -alh ./Frontend/dist || true
+
+      # ✅ SSH 연결 테스트
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FRONT_HOST }}
+          username: ${{ secrets.FRONT_USER }}
+          key: ${{ secrets.FRONT_SSH_KEY }}
+          script: |
+            echo "✅ SSH 연결 성공"
+            whoami
+            pwd
 
       - name: Copy dist to server
         uses: appleboy/scp-action@v0.1.7

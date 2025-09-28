@@ -1,9 +1,15 @@
 import React from 'react';
 
-type Props = { title: string; content: string; sceneScript: string };
+type Props = { 
+  title: string; 
+  content: string; 
+  sceneScript: string;
+  showHeroImage?: boolean;
+  heroSrc?: string;
+};
 
 const SituationCard = React.forwardRef<HTMLElement, Props>(
-  ({ title, content, sceneScript }, ref) => {
+  ({ title, content, sceneScript, showHeroImage, heroSrc }, ref) => {
     const paragraphs = (content ?? '').trim().split(/\n{2,}/);
 
     return (

@@ -23,7 +23,7 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 import phoenixImg from '@/assets/images/phoenix.png';
 import apartmentFireImg from '@/assets/images/apartment_fire.png';
 import earthquakeImg from '@/assets/images/earthquake_panic.png';
-import { getScenarioSetName } from '@/utils/scenarioMaps';
+import { getScenarioSetName } from '../../utils/scenarioMaps';
 
 interface ScenarioPageProps {
   scenarioSetName?: string;

@@ -530,6 +530,117 @@ export const trainingResultApi = {
   },
 };
 
+// 팀 통계 관련 API
+export const teamStatsApi = {
+  /**
+   * 모든 팀 통계 조회 (슈퍼 관리자용)
+   * @returns 전체 팀 통계
+   */
+  getAllTeamStats: async () => {
+    return api.get<any[]>('/team-stats/all');
+  },
+
+  /**
+   * 특정 팀 통계 조회
+   * @param teamId 팀 ID
+   * @returns 팀 통계
+   */
+  getTeamStats: async (teamId: number) => {
+    return api.get<any>(`/team-stats/${teamId}`);
+  },
+};
+
+// Gmail 관련 API
+export const gmailApi = {
+  /**
+   * Gmail OAuth 인증 URL 생성
+   * @returns 인증 URL
+   */
+  getAuthUrl: async () => {
+    return api.get<{ authUrl: string }>('/gmail/auth-url');
+  },
+
+  /**
+   * Gmail OAuth 인증
+   * @param code 인증 코드
+   * @returns 인증 결과
+   */
+  authenticate: async (code: string) => {
+    return api.post<{ success: boolean; message: string }>('/gmail/auth', {
+      code,
+    });
+  },
+
+  /**
+   * 이메일 목록 조회
+   * @param maxResults 최대 결과 수
+   * @param pageToken 페이지 토큰
+   * @returns 이메일 목록
+   */
+  getEmails: async (maxResults?: number, pageToken?: string) => {
+    return api.get<{
+      messages: Array<{ id: string; threadId: string }>;
+      nextPageToken?: string;
+      resultSizeEstimate: number;
+    }>('/gmail/emails', { params: { maxResults, pageToken } });
+  },
+
+  /**
+   * 특정 이메일 상세 조회
+   * @param messageId 메시지 ID
+   * @returns 이메일 상세 정보
+   */
+  getEmailById: async (messageId: string) => {
+    return api.get<any>(`/gmail/emails/${messageId}`);
+  },
+
+  /**
+   * 스레드 조회
+   * @param threadId 스레드 ID
+   * @returns 스레드 정보
+   */
+  getThreadById: async (threadId: string) => {
+    return api.get<any>(`/gmail/threads/${threadId}`);
+  },
+
+  /**
+   * 이메일 답장 전송
+   * @param messageId 원본 메시지 ID
+   * @param replyContent 답장 내용
+   * @param adminName 관리자 이름
+   * @returns 전송 결과
+   */
+  sendReply: async (
+    messageId: string,
+    replyContent: string,
+    adminName?: string
+  ) => {
+    return api.post<{ success: boolean; message: string }>('/gmail/reply', {
+      messageId,
+      replyContent,
+      adminName,
+    });
+  },
+
+  /**
+   * 이메일 HTML 본문 조회
+   * @param messageId 메시지 ID
+   * @returns HTML 본문
+   */
+  getEmailHtml: async (messageId: string) => {
+    return api.get<{ html: string }>(`/gmail/emails/${messageId}/html`);
+  },
+
+  /**
+   * 이메일 텍스트 본문 조회
+   * @param messageId 메시지 ID
+   * @returns 텍스트 본문
+   */
+  getEmailText: async (messageId: string) => {
+    return api.get<{ text: string }>(`/gmail/emails/${messageId}/text`);
+  },
+};
+
 // 사용자 관련 API 함수들 (Database 스키마 기준)
 export const userApi = {
   /**

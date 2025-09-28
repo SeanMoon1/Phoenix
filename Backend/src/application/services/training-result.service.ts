@@ -93,11 +93,17 @@ export class TrainingResultService {
 
             // 2. 사용자 경험치 업데이트 (같은 트랜잭션 내에서)
             try {
-              const expToAdd = this.calculateExpFromScore(data.totalScore || 0);
+              // 정답률 기반 경험치 계산 (50점 만점 기준)
+              const accuracyPercentage = data.totalScore
+                ? (data.totalScore / 50) * 100
+                : 0;
+              const expToAdd = Math.round(accuracyPercentage * 0.5); // 정답률의 50%를 경험치로
+
               console.log('🔍 경험치 업데이트 시작:', {
                 userId: data.userId,
                 expToAdd,
                 totalScore: data.totalScore || 0,
+                accuracyPercentage,
               });
 
               // 사용자 조회
@@ -136,9 +142,12 @@ export class TrainingResultService {
 
               console.log('✅ 사용자 경험치 업데이트 완료:', {
                 userId: data.userId,
+                oldLevel: user.userLevel,
                 newLevel,
+                oldExp: user.userExp,
                 newExp,
                 tier,
+                expAdded: expToAdd,
               });
             } catch (expError) {
               console.error('❌ 트랜잭션 내 경험치 업데이트 실패:', expError);

@@ -91,7 +91,6 @@ const SituationCard = React.forwardRef<HTMLElement, Props>(
         <section className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-5 md:p-6 mb-6 leading-relaxed relative overflow-hidden">
           {/* 보이는 본문(렌더용). 측정용 텍스트 블록(시각적으로 숨김) */}
           <div
-            // 측정블록: 실제 텍스트와 동일한 마크업/스타일을 가지며 시각적으로 숨김
             ref={measureRef}
             aria-hidden
             className="invisible absolute left-0 top-0 w-full pointer-events-none"

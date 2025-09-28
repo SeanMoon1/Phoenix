@@ -199,25 +199,25 @@ const ManualPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           {/* 페이지 헤더 */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
               행동메뉴얼
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+            <p className="max-w-3xl text-lg text-gray-600 dark:text-gray-300">
               다양한 재난 상황에 대한 체계적인 대응 방법을 학습하고 실전에
               적용할 수 있습니다.
             </p>
           </div>
 
           {/* 메인 콘텐츠 영역 - 7:3 비율 */}
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start">
+          <div className="grid items-start grid-cols-1 gap-8 lg:grid-cols-10">
             {/* 좌측 메뉴얼 콘텐츠 섹션 (7/10) */}
             <div className="lg:col-span-7">
               {/* 탭 네비게이션 */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+              <div className="p-6 mb-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
                 <div className="flex flex-wrap gap-2">
                   {tabs.map(tab => (
                     <button
@@ -229,22 +229,22 @@ const ManualPage: React.FC = () => {
                           : `bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-${tab.color}-100 dark:hover:bg-${tab.color}-900/30`
                       }`}
                     >
-                      <span className="text-xl">{tab.icon}</span>
-                      <span>{tab.name}</span>
+                      <span className="text-lg leading-none">{tab.icon}</span>
+                      <span className="text-lg leading-none">{tab.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* 선택된 탭의 메뉴얼 내용 */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+              <div className="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800">
                 <div className="mb-8">
                   <div
                     className={`w-20 h-20 bg-${currentContent.color}-100 dark:bg-${currentContent.color}-900/30 rounded-full flex items-center justify-center mb-4`}
                   >
                     <span className="text-4xl">{currentContent.icon}</span>
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
                     {currentContent.title}
                   </h2>
                   <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -258,7 +258,7 @@ const ManualPage: React.FC = () => {
                   {currentContent.content.map((step, index) => (
                     <div
                       key={index}
-                      className="border-l-4 border-gray-300 dark:border-gray-600 pl-6"
+                      className="pl-6 border-l-4 border-gray-300 dark:border-gray-600"
                     >
                       <div className="flex items-start space-x-4">
                         <div
@@ -271,10 +271,10 @@ const ManualPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                          <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
                             {step.title}
                           </h3>
-                          <p className="text-gray-600 dark:text-gray-300 mb-4">
+                          <p className="mb-4 text-gray-600 dark:text-gray-300">
                             {step.description}
                           </p>
                           <ul className="space-y-2">
@@ -283,7 +283,7 @@ const ManualPage: React.FC = () => {
                                 key={detailIndex}
                                 className="flex items-start space-x-2"
                               >
-                                <span className="text-gray-400 dark:text-gray-500 mt-1">
+                                <span className="mt-1 text-gray-400 dark:text-gray-500">
                                   •
                                 </span>
                                 <span className="text-gray-700 dark:text-gray-300">
@@ -302,29 +302,73 @@ const ManualPage: React.FC = () => {
 
             {/* 우측 가이드 섹션 (3/10) */}
             <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-8 self-start">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+              <div className="sticky self-start p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 top-8">
+                <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
                   메뉴얼 활용 가이드
                 </h2>
                 <div className="space-y-6">
+                  {/* 재난 유형별 가이드 */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      📖 탭 기반 메뉴얼 사용법
+                    <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <Icon
+                        type="fire"
+                        category="disaster"
+                        className="text-red-500"
+                      />
+                      화재 대응
                     </h3>
-                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 상단 탭을 클릭하여 원하는 재난 상황 선택</li>
-                      <li>• 각 상황별로 체계적으로 정리된 단계별 가이드</li>
-                      <li>• 실제 상황에서 바로 적용 가능한 실용적 정보</li>
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <li>• 화재 감지 시 즉시 119 신고</li>
+                      <li>• 연기와 불길을 피해 안전한 경로로 대피</li>
+                      <li>• 초기 진화 시 소화기 P.A.S.S 방법 활용</li>
                     </ul>
                   </div>
+
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🎯 효과적인 학습 방법
+                    <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <Icon
+                        type="earthquake"
+                        category="disaster"
+                        className="text-yellow-500"
+                      />
+                      지진 대응
                     </h3>
-                    <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
-                      <li>• 정기적으로 메뉴얼을 반복 학습하여 숙지</li>
-                      <li>• 가족이나 동료와 함께 학습하여 상호 점검</li>
-                      <li>• 실제 훈련과 연계하여 실전 경험 쌓기</li>
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <li>• 지진 발생 시 즉시 책상 아래로 대피</li>
+                      <li>• 진동이 멈춘 후 안전한 장소로 이동</li>
+                      <li>• 가스 밸브 차단 및 전기 차단기 내리기</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <Icon
+                        type="emergency"
+                        category="disaster"
+                        className="text-green-500"
+                      />
+                      응급처치
+                    </h3>
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <li>• 의식 확인 후 119 신고</li>
+                      <li>• 심폐소생술(CPR) 실시</li>
+                      <li>• 자동제세동기(AED) 사용법 숙지</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="flex items-center gap-2 mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <Icon
+                        type="traffic"
+                        category="disaster"
+                        className="text-blue-500"
+                      />
+                      교통사고
+                    </h3>
+                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <li>• 사고 발생 시 즉시 안전한 곳으로 이동</li>
+                      <li>• 119 신고 및 교통 정리</li>
+                      <li>• 부상자 응급처치 및 병원 이송</li>
                     </ul>
                   </div>
                 </div>

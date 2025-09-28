@@ -166,7 +166,9 @@ export class ExcelExportService {
 
     results.forEach((result) => {
       const userId = result.userId.toString();
-      const userName = result.user?.userName || `사용자${userId}`;
+      // 실제 사용자 이름 사용 (user.name 또는 user.userName)
+      const userName =
+        result.user?.name || result.user?.userName || `사용자${userId}`;
       const scenarioType = this.getScenarioTypeName(result.scenarioType);
 
       if (!userResults[userId]) {
@@ -233,6 +235,10 @@ export class ExcelExportService {
    */
   private getScenarioTypeName(scenarioType: string): string {
     const typeMap: Record<string, string> = {
+      FIRE: '화재',
+      EARTHQUAKE: '지진',
+      TRAFFIC: '교통사고',
+      EMERGENCY: '응급처치',
       fire: '화재',
       earthquake: '지진',
       traffic: '교통사고',

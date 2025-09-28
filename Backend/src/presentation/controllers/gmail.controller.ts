@@ -35,7 +35,43 @@ export class GetEmailsDto {
 @Controller('gmail')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class GmailController {
-  constructor(private readonly gmailService: GmailService) {}
+  constructor(private readonly gmailService: GmailService) {
+    // Gmail 서비스 초기화 확인
+    try {
+      // 서비스가 제대로 초기화되었는지 확인
+      console.log('🔍 Gmail 컨트롤러 초기화 완료');
+    } catch (error) {
+      console.error('❌ Gmail 컨트롤러 초기화 실패:', error);
+    }
+  }
+
+  /**
+   * Gmail 설정 상태 확인
+   */
+  @Get('health')
+  checkGmailConfig(): { status: string; config: any } {
+    try {
+      const config = {
+        hasClientId: !!process.env.GMAIL_CLIENT_ID,
+        hasClientSecret: !!process.env.GMAIL_CLIENT_SECRET,
+        hasRedirectUris: !!process.env.GMAIL_REDIRECT_URIS,
+        hasScopes: !!process.env.GMAIL_SCOPES,
+      };
+
+      const allConfigured = Object.values(config).every(Boolean);
+
+      return {
+        status: allConfigured ? 'healthy' : 'misconfigured',
+        config,
+      };
+    } catch (error) {
+      console.error('❌ Gmail 설정 확인 실패:', error);
+      return {
+        status: 'error',
+        config: {},
+      };
+    }
+  }
 
   /**
    * Gmail OAuth 인증 URL 생성
@@ -47,6 +83,15 @@ export class GmailController {
       return { authUrl };
     } catch (error) {
       console.error('❌ Gmail 인증 URL 생성 실패:', error);
+
+      // 환경 변수 관련 오류인 경우 더 구체적인 메시지 제공
+      if (error.message && error.message.includes('환경 변수')) {
+        throw new HttpException(
+          `Gmail 설정 오류: ${error.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
       throw new HttpException(
         'Gmail 인증 URL을 생성할 수 없습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -86,8 +86,9 @@ jobs:
             LOG_LEVEL=info
             EOF
 
-            # 의존성 설치 (production only)
-            npm ci --only=production
+            # Rollup 의존성 문제 해결을 위한 정리 후 설치
+            rm -rf node_modules package-lock.json
+            npm install --only=production
 
             # TypeScript 빌드
             npm run build

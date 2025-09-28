@@ -27,8 +27,11 @@ jobs:
           cache: "npm"
           cache-dependency-path: "./Frontend/package-lock.json"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean and reinstall dependencies
+        run: |
+          # Rollup 의존성 문제 해결을 위한 정리
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build project
         run: npm run build

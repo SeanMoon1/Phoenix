@@ -51,17 +51,31 @@ const AuthCallbackPage: React.FC = () => {
           const userData = JSON.parse(decodeURIComponent(userParam));
           console.log('👤 Parsed user data:', userData);
 
-          // 필수 필드 검증
-          if (!userData.id || !userData.email || !userData.name) {
-            console.error('❌ Missing required user data:', {
-              hasId: !!userData.id,
-              hasEmail: !!userData.email,
-              hasName: !!userData.name,
-              userData,
-            });
+          // 필수 필드 검증 및 기본값 설정
+          if (!userData.id) {
+            console.error('❌ Missing user ID:', userData);
             navigate('/login?error=incomplete_user_data');
             return;
           }
+
+          // 이메일이 없으면 기본값 설정
+          if (!userData.email) {
+            console.warn('⚠️ Missing email, using default');
+            userData.email = `user_${userData.id}@oauth.local`;
+          }
+
+          // 이름이 없으면 기본값 설정
+          if (!userData.name) {
+            console.warn('⚠️ Missing name, using default');
+            userData.name = 'OAuth 사용자';
+          }
+
+          console.log('✅ User data validation passed:', {
+            id: userData.id,
+            email: userData.email,
+            name: userData.name,
+            provider: userData.provider,
+          });
 
           // 백엔드에서 실제 사용자 정보를 가져오기 위해 API 호출
           try {
@@ -207,8 +221,8 @@ const AuthCallbackPage: React.FC = () => {
             teamId: 0, // OAuth 사용자는 기본값
             userCode: '', // OAuth 사용자는 기본값
             loginId: '', // OAuth 사용자는 기본값
-            email: userData.email,
-            name: userData.name,
+            email: userData.email || `user_${userData.id}@oauth.local`,
+            name: userData.name || 'OAuth 사용자',
             useYn: 'Y',
             userLevel: 1, // 기본 레벨
             userExp: 0,
@@ -223,8 +237,8 @@ const AuthCallbackPage: React.FC = () => {
             isAdmin: false, // OAuth 사용자는 기본적으로 일반 사용자
             adminLevel: 'USER',
             // OAuth 관련 정보 추가
-            oauthProvider: userData.provider,
-            oauthProviderId: userData.providerId,
+            oauthProvider: userData.provider || 'unknown',
+            oauthProviderId: userData.providerId || userData.id,
           };
 
           console.log('✅ Setting auth state:', {

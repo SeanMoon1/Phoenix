@@ -24,6 +24,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         id: profile.id,
         username: profile.username,
         _json: profile._json,
+        rawProfile: JSON.stringify(profile, null, 2),
       });
 
       const { id, username, _json } = profile;
@@ -31,12 +32,44 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       // 이메일 정보 안전하게 추출
       const email = _json?.kakao_account?.email || null;
 
+      // 이메일이 없으면 에러
+      if (!email) {
+        console.error('❌ Kakao OAuth: 이메일 정보 없음');
+        done(
+          new Error('Kakao OAuth에서 이메일 정보를 가져올 수 없습니다.'),
+          null,
+        );
+        return;
+      }
+
       // 이름 정보 안전하게 추출
       let fullName = '';
-      if (username) {
-        fullName = username;
-      } else if (_json?.kakao_account?.profile?.nickname) {
-        fullName = _json.kakao_account.profile.nickname;
+
+      // 1. username 우선 사용
+      if (username && username.trim()) {
+        fullName = username.trim();
+      }
+
+      // 2. kakao_account.profile.nickname 사용
+      if (
+        !fullName &&
+        _json?.kakao_account?.profile?.nickname &&
+        _json.kakao_account.profile.nickname.trim()
+      ) {
+        fullName = _json.kakao_account.profile.nickname.trim();
+      }
+
+      // 3. 이름이 없으면 이메일에서 추출
+      if (!fullName && email) {
+        const emailName = email.split('@')[0];
+        fullName = emailName
+          .replace(/[._-]/g, ' ')
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+      }
+
+      // 4. 최종적으로 이름이 없으면 기본값
+      if (!fullName) {
+        fullName = 'Kakao 사용자';
       }
 
       // 프로필 이미지 안전하게 추출
@@ -54,11 +87,11 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       };
 
       console.log('✅ Kakao OAuth 사용자 정보 파싱 완료:', {
-        email: user.email || 'undefined',
-        name: user.name || 'undefined',
+        email: user.email,
+        name: user.name,
         provider: user.provider,
-        providerId: user.providerId || 'undefined',
-        profileImage: user.profileImage || 'undefined',
+        providerId: user.providerId,
+        profileImage: user.profileImage ? '있음' : '없음',
         emailType: typeof user.email,
         nameType: typeof user.name,
         providerIdType: typeof user.providerId,

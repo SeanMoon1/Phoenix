@@ -1,17 +1,14 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import /* trainingApi, trainingResultApi */ '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ChoiceOption } from '@/types/index';
 
-// 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
 import { useExpSystem } from '@/hooks/useExpSystem';
 import { useModals } from '@/hooks/useModals';
 import { useTrainingResult } from '@/hooks/useTrainingResult';
 
-// 컴포넌트 imports
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -26,6 +23,7 @@ import LevelUpToast from '@/components/common/LevelUpToast';
 import phoenixImg from '@/assets/images/phoenix.png';
 import apartmentFireImg from '@/assets/images/apartment_fire.png';
 import earthquakeImg from '@/assets/images/earthquake_panic.png';
+import { getScenarioSetName } from '@/utils/scenarioMaps';
 
 interface ScenarioPageProps {
   scenarioSetName?: string;
@@ -36,23 +34,7 @@ interface ScenarioPageProps {
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 
-// 시나리오 타입별 이름 매핑
-const getScenarioSetName = (type: string): string => {
-  switch (type) {
-    case 'fire':
-      return '화재 대응';
-    case 'first-aid':
-      return '응급처치';
-    case 'traffic-accident':
-      return '교통사고 대응';
-    case 'earthquake':
-      return '지진 대응';
-    case 'flood':
-      return '홍수 대응';
-    default:
-      return '재난 대응';
-  }
-};
+// getScenarioSetName imported from utils
 
 export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();

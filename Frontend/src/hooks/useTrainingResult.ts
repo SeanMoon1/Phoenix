@@ -1,18 +1,7 @@
 import { useCallback } from 'react';
 import { trainingApi, trainingResultApi, userExpApi } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
-
-// 시나리오 타입을 API용으로 변환하는 함수
-const getScenarioTypeForApi = (scenarioType: string): string => {
-  const typeMap: Record<string, string> = {
-    fire: 'FIRE',
-    'first-aid': 'EMERGENCY',
-    'traffic-accident': 'TRAFFIC',
-    earthquake: 'EARTHQUAKE',
-    flood: 'FLOOD',
-  };
-  return typeMap[scenarioType] || 'FIRE';
-};
+import { scenarioIdMap, getScenarioTypeForApi } from '@/utils/scenarioMaps';
 
 export function useTrainingResult() {
   const { user } = useAuthStore();
@@ -33,13 +22,6 @@ export function useTrainingResult() {
         const timeSpent = opts.gameStateSummary.startTimeMs
           ? Math.floor((Date.now() - opts.gameStateSummary.startTimeMs) / 1000)
           : 0;
-        const scenarioIdMap: Record<string, number> = {
-          fire: 1, // FIRE
-          'first-aid': 3, // EMERGENCY (응급처치)
-          'traffic-accident': 4, // TRAFFIC (교통사고)
-          earthquake: 2, // EARTHQUAKE (지진)
-          flood: 5, // FLOOD (홍수)
-        };
         const sessionData: any = {
           sessionName: `${opts.scenarioSetName} 훈련`,
           scenarioId: scenarioIdMap[opts.scenarioType || 'fire'] || 1,

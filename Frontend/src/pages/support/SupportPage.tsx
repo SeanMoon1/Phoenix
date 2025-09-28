@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { contactApi } from '../../services/api';
-import { Icon } from '../../utils/icons';
 
 const SupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('faq');
@@ -66,29 +65,13 @@ const SupportPage: React.FC = () => {
   };
 
   const tabs = [
-    {
-      id: 'faq',
-      name: 'FAQ',
-      icon: <Icon type="question" category="status" className="text-lg" />,
-      color: 'blue',
-    },
-    {
-      id: 'contact',
-      name: '문의',
-      icon: <Icon type="user" category="ui" className="text-lg" />,
-      color: 'green',
-    },
+    { id: 'faq', name: 'FAQ', icon: '❓', color: 'blue' },
+    { id: 'contact', name: '문의', icon: '💬', color: 'green' },
   ];
 
   const faqContent = {
     title: '자주 묻는 질문',
-    icon: (
-      <Icon
-        type="question"
-        category="status"
-        className="text-blue-600 dark:text-blue-400"
-      />
-    ),
+    icon: '❓',
     color: 'blue',
     content: (
       <div className="space-y-8">
@@ -191,7 +174,7 @@ const SupportPage: React.FC = () => {
           </h2>
           <div className="text-center">
             <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full dark:bg-blue-900/30">
-              <Icon type="user" category="ui" className="text-2xl" />
+              <span className="text-2xl">💬</span>
             </div>
             <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
               문의하기
@@ -213,13 +196,7 @@ const SupportPage: React.FC = () => {
 
   const contactContent = {
     title: '문의하기',
-    icon: (
-      <Icon
-        type="user"
-        category="ui"
-        className="text-green-600 dark:text-green-400"
-      />
-    ),
+    icon: '💬',
     color: 'green',
     content: (
       <div className="space-y-8">
@@ -421,8 +398,8 @@ const SupportPage: React.FC = () => {
                           : `bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-${tab.color}-100 dark:hover:bg-${tab.color}-900/30`
                       }`}
                     >
-                      <span className="text-xl leading-none">{tab.icon}</span>
-                      <span className="leading-none">{tab.name}</span>
+                      <span className="text-xl">{tab.icon}</span>
+                      <span>{tab.name}</span>
                     </button>
                   ))}
                 </div>
@@ -459,12 +436,7 @@ const SupportPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      <Icon
-                        type="question"
-                        category="status"
-                        className="inline mr-2"
-                      />
-                      FAQ
+                      ❓ FAQ
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 자주 묻는 질문과 답변 확인</li>
@@ -473,8 +445,7 @@ const SupportPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      <Icon type="user" category="ui" className="inline mr-2" />
-                      문의
+                      💬 문의
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 온라인 문의 양식 작성</li>

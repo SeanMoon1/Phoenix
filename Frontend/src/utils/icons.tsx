@@ -7,7 +7,6 @@ import {
   FaWater,
   FaExclamationTriangle,
   FaQuestion,
-  FaQuestionCircle,
   FaCircle,
   FaCheckCircle,
   FaTimesCircle,
@@ -23,7 +22,6 @@ import {
   FaShieldAlt,
   FaMobileAlt,
   FaGripfire,
-  FaEnvelope,
 } from 'react-icons/fa';
 
 // 재난 유형별 아이콘 매핑
@@ -53,7 +51,6 @@ export const statusIcons = {
   warning: <FaExclamationTriangle className="text-yellow-500" />,
   info: <FaInfoCircle className="text-blue-500" />,
   alert: <FaExclamation className="text-red-500" />,
-  question: <FaQuestionCircle className="text-blue-500" />,
 };
 
 // UI 아이콘 매핑
@@ -61,7 +58,6 @@ export const uiIcons = {
   chart: <FaChartBar />,
   trophy: <FaTrophy />,
   user: <FaUser />,
-  mail: <FaEnvelope />,
 };
 
 // 훈련 시스템 아이콘 매핑

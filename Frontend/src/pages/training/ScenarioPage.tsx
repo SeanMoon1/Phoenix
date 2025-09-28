@@ -1,17 +1,14 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import /* trainingApi, trainingResultApi */ '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ChoiceOption } from '@/types/index';
 
-// 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
 import { useExpSystem } from '@/hooks/useExpSystem';
 import { useModals } from '@/hooks/useModals';
 import { useTrainingResult } from '@/hooks/useTrainingResult';
 
-// 컴포넌트 imports
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -24,6 +21,9 @@ import PlayMoreButton from '@/components/common/PlayMoreButton';
 import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
+import apartmentFireImg from '@/assets/images/apartment_fire.png';
+import earthquakeImg from '@/assets/images/earthquake_panic.png';
+import { getScenarioSetName } from '@/utils/scenarioMaps';
 
 interface ScenarioPageProps {
   scenarioSetName?: string;
@@ -34,28 +34,12 @@ interface ScenarioPageProps {
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 
-// 시나리오 타입별 이름 매핑
-const getScenarioSetName = (type: string): string => {
-  switch (type) {
-    case 'fire':
-      return '화재 대응';
-    case 'first-aid':
-      return '응급처치';
-    case 'traffic-accident':
-      return '교통사고 대응';
-    case 'earthquake':
-      return '지진 대응';
-    case 'flood':
-      return '홍수 대응';
-    default:
-      return '재난 대응';
-  }
-};
+// getScenarioSetName imported from utils
 
 export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
@@ -67,7 +51,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const nextScenarioPath = props?.nextScenarioPath || '/training';
   const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
 
-  // 시작 시간
+  // 시작시간
   const startTime = useMemo(() => Date.now(), []);
 
   // 커스텀 훅들
@@ -219,12 +203,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     });
   };
 
-  // 인증 체크
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
-
   // 로딩, 에러 처리
   if (gameState.loading) {
     return (
@@ -286,12 +264,36 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               mobilePanelModalOpen={showMobilePanelModal}
               onCloseMobilePanel={() => setShowMobilePanelModal(false)}
             />
-            <SituationCard
-              ref={contentRef}
-              title={gameState.scenario.title ?? ''}
-              content={gameState.scenario.content ?? ''}
-              sceneScript={gameState.scenario.sceneScript ?? ''}
-            />
+            {(() => {
+              const s = gameState.scenario ?? {};
+              // 우선적으로 JSON의 disasterType 필드를 사용
+              const dt = (s.disasterType || '').toString().toLowerCase();
+              const map: Record<string, string | undefined> = {
+                fire: apartmentFireImg,
+                earthquake: earthquakeImg,
+                emergency: undefined,
+                traffic: undefined,
+              };
+              const heroSrc = map[dt];
+              const showHeroImage =
+                gameState.current === 0 &&
+                !(
+                  Array.isArray(gameState.answered) &&
+                  gameState.answered.includes(0)
+                ) &&
+                !!heroSrc;
+
+              return (
+                <SituationCard
+                  ref={contentRef}
+                  title={gameState.scenario.title ?? ''}
+                  content={gameState.scenario.content ?? ''}
+                  sceneScript={gameState.scenario.sceneScript ?? ''}
+                  showHeroImage={showHeroImage}
+                  heroSrc={heroSrc}
+                />
+              );
+            })()}
             <OptionsList
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}

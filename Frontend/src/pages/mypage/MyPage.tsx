@@ -27,16 +27,6 @@ const MyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 회원 탈퇴 관련 상태
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteStep, setDeleteStep] = useState<
-    'confirm' | 'email' | 'verify' | 'complete'
-  >('confirm');
-  const [deleteEmail, setDeleteEmail] = useState('');
-  const [deleteCode, setDeleteCode] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
-
   // 데이터 로딩 함수
   const loadUserData = async (userId?: number) => {
     const targetUserId = userId || user?.id;
@@ -240,89 +230,6 @@ const MyPage: React.FC = () => {
     }
   };
 
-  // 회원 탈퇴 관련 함수들
-  const handleDeleteAccount = async () => {
-    if (!user?.email) {
-      setDeleteError('사용자 이메일을 찾을 수 없습니다.');
-      return;
-    }
-
-    setIsDeleting(true);
-    setDeleteError('');
-
-    try {
-      const response = await api.post('/auth/request-account-deletion', {
-        email: user.email,
-      });
-
-      if (response.success) {
-        setDeleteEmail(user.email);
-        setDeleteStep('email');
-      } else {
-        setDeleteError(response.message || '탈퇴 요청에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('회원 탈퇴 요청 오류:', error);
-      setDeleteError('탈퇴 요청 중 오류가 발생했습니다.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    if (!deleteCode || deleteCode.length !== 6) {
-      setDeleteError('6자리 인증 코드를 입력해주세요.');
-      return;
-    }
-
-    setIsDeleting(true);
-    setDeleteError('');
-
-    try {
-      // 인증 코드 검증
-      const verifyResponse = await api.post('/auth/verify-deletion-code', {
-        email: deleteEmail,
-        code: deleteCode,
-      });
-
-      if (verifyResponse.success) {
-        // 인증 성공 시 바로 최종 탈퇴 실행
-        const deleteResponse = await api.post('/auth/delete-account', {
-          email: deleteEmail,
-          code: deleteCode,
-        });
-
-        if (deleteResponse.success) {
-          setDeleteStep('complete');
-          // 로그아웃 처리
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 3000);
-        } else {
-          setDeleteError(deleteResponse.message || '회원 탈퇴에 실패했습니다.');
-        }
-      } else {
-        setDeleteError(
-          verifyResponse.message || '인증 코드가 일치하지 않습니다.'
-        );
-      }
-    } catch (error) {
-      console.error('회원 탈퇴 처리 오류:', error);
-      setDeleteError('회원 탈퇴 중 오류가 발생했습니다.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const resetDeleteModal = () => {
-    setShowDeleteModal(false);
-    setDeleteStep('confirm');
-    setDeleteEmail('');
-    setDeleteCode('');
-    setDeleteError('');
-    setIsDeleting(false);
-  };
-
   // 시나리오 타입 정보 정의
   // 시간을 시/분/초로 변환하는 함수
   const formatTime = (seconds: number): string => {
@@ -397,7 +304,7 @@ const MyPage: React.FC = () => {
     {
       id: 'records',
       name: '훈련기록',
-      icon: <Icon type="chart" category="ui" className="text-lg" />,
+      icon: '📊',
       color: 'indigo',
       activeClass: 'bg-indigo-600',
       hoverClass: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
@@ -405,7 +312,7 @@ const MyPage: React.FC = () => {
     {
       id: 'scores',
       name: '점수조회',
-      icon: <Icon type="trophy" category="ui" className="text-lg" />,
+      icon: '🏆',
       color: 'yellow',
       activeClass: 'bg-yellow-600',
       hoverClass: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
@@ -413,7 +320,7 @@ const MyPage: React.FC = () => {
     {
       id: 'profile',
       name: '개인정보',
-      icon: <Icon type="user" category="ui" className="text-lg" />,
+      icon: '👤',
       color: 'purple',
       activeClass: 'bg-purple-600',
       hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
@@ -422,13 +329,7 @@ const MyPage: React.FC = () => {
 
   const recordsContent = {
     title: '훈련 기록',
-    icon: (
-      <Icon
-        type="chart"
-        category="ui"
-        className="text-indigo-600 dark:text-indigo-400"
-      />
-    ),
+    icon: '📊',
     color: 'indigo',
     iconBgClass: 'bg-indigo-100 dark:bg-indigo-900/30',
     content: (
@@ -461,9 +362,7 @@ const MyPage: React.FC = () => {
           ) : trainingRecords.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">
-                  <Icon type="chart" category="ui" />
-                </div>
+                <div className="mb-4 text-4xl text-gray-400">📊</div>
                 <p className="text-gray-600 dark:text-gray-300">
                   아직 훈련 기록이 없습니다.
                 </p>
@@ -508,28 +407,13 @@ const MyPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                          <span className="flex items-center space-x-1">
-                            <Icon
-                              type="info"
-                              category="status"
-                              className="text-sm"
-                            />
-                            <span>
-                              {new Date(
-                                record.completedAt
-                              ).toLocaleDateString()}
-                            </span>
+                          <span>
+                            📅{' '}
+                            {new Date(record.completedAt).toLocaleDateString()}
                           </span>
-                          <span className="flex items-center space-x-1">
-                            <Icon
-                              type="info"
-                              category="status"
-                              className="text-sm"
-                            />
-                            <span>
-                              {Math.floor((record.completionTime || 0) / 60)}분{' '}
-                              {(record.completionTime || 0) % 60}초
-                            </span>
+                          <span>
+                            ⏱️ {Math.floor((record.completionTime || 0) / 60)}분{' '}
+                            {(record.completionTime || 0) % 60}초
                           </span>
                           <span className="text-xs text-gray-500">
                             총점: {record.totalScore}점
@@ -543,12 +427,7 @@ const MyPage: React.FC = () => {
                         </div>
                         {record.feedback && (
                           <div className="p-2 mt-2 text-xs text-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
-                            <Icon
-                              type="info"
-                              category="status"
-                              className="inline mr-1"
-                            />
-                            {record.feedback}
+                            💬 {record.feedback}
                           </div>
                         )}
                       </div>
@@ -565,13 +444,7 @@ const MyPage: React.FC = () => {
 
   const scoresContent = {
     title: '점수 조회',
-    icon: (
-      <Icon
-        type="trophy"
-        category="ui"
-        className="text-yellow-600 dark:text-yellow-400"
-      />
-    ),
+    icon: '🏆',
     color: 'yellow',
     iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (
@@ -596,9 +469,7 @@ const MyPage: React.FC = () => {
         ) : scenarioTypeStats.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="mb-4 text-4xl text-gray-400">
-                <Icon type="trophy" category="ui" />
-              </div>
+              <div className="mb-4 text-4xl text-gray-400">🏆</div>
               <p className="text-gray-600 dark:text-gray-300">
                 아직 통계 데이터가 없습니다.
               </p>
@@ -618,7 +489,7 @@ const MyPage: React.FC = () => {
             <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
               시나리오 타입별 상세 통계
             </h3>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               {scenarioTypeStats.map((stat, index) => {
                 const typeInfo = getScenarioTypeInfo(stat.scenarioType);
 
@@ -627,129 +498,104 @@ const MyPage: React.FC = () => {
                     key={index}
                     className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"
                   >
-                    <div className="flex items-center justify-between">
-                      {/* 시나리오 타입 정보 */}
-                      <div className="flex items-center space-x-4">
-                        <div
-                          className={`flex items-center justify-center w-12 h-12 ${typeInfo.bgClass} rounded-lg`}
-                        >
-                          <span className="text-2xl">{typeInfo.icon}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                            {typeInfo.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            총 {stat.totalAttempts}회 훈련 완료
-                          </p>
-                        </div>
+                    <div className="flex items-center mb-6">
+                      <div
+                        className={`flex items-center justify-center w-16 h-16 mr-4 ${typeInfo.bgClass} rounded-lg`}
+                      >
+                        <span className="text-3xl">{typeInfo.icon}</span>
                       </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {typeInfo.name}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          총 {stat.totalAttempts}회 훈련 완료
+                        </p>
+                      </div>
+                    </div>
 
-                      {/* 통계 데이터 - 2x3 그리드 레이아웃 */}
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* 첫 번째 줄: 평균 점수, 정확도 */}
-                        <div className="flex items-center space-x-4">
-                          {/* 평균 점수 */}
-                          <div className="text-center">
-                            <div className="flex items-center justify-center mb-1 space-x-2">
-                              <Icon
-                                type="chart"
-                                category="ui"
-                                className="text-sm text-blue-500"
-                              />
-                              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">
-                                평균 점수
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                    {/* 5가지 항목 표시 */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {/* 1. 평균 점수 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                              평균 점수
+                            </p>
+                            <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
                               {stat.averageScore.toFixed(1)}점
                             </p>
                           </div>
+                          <div className="text-3xl">📊</div>
+                        </div>
+                      </div>
 
-                          {/* 정확도 */}
-                          <div className="text-center">
-                            <div className="flex items-center justify-center mb-1 space-x-2">
-                              <Icon
-                                type="success"
-                                category="status"
-                                className="text-sm text-green-500"
-                              />
-                              <span className="text-sm font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
-                                정확도
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold text-green-900 dark:text-green-100">
+                      {/* 2. 정확도 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                              정확도
+                            </p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                               {stat.accuracyRate}%
                             </p>
                           </div>
+                          <div className="text-3xl">🎯</div>
                         </div>
+                      </div>
 
-                        {/* 두 번째 줄: 평균 시간, 최고 점수 */}
-                        <div className="flex items-center space-x-4">
-                          {/* 평균 시간 */}
-                          <div className="text-center">
-                            <div className="flex items-center justify-center mb-1 space-x-2">
-                              <Icon
-                                type="info"
-                                category="status"
-                                className="text-sm text-purple-500"
-                              />
-                              <span className="text-sm font-medium text-purple-600 dark:text-purple-400 whitespace-nowrap">
-                                평균 시간
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                      {/* 3. 훈련 시간 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                              평균 훈련 시간
+                            </p>
+                            <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
                               {formatTime(stat.averageTimeSpent)}
                             </p>
                           </div>
+                          <div className="text-3xl">⏱️</div>
+                        </div>
+                      </div>
 
-                          {/* 최고 점수 */}
-                          <div className="text-center">
-                            <div className="flex items-center justify-center mb-1 space-x-2">
-                              <Icon
-                                type="trophy"
-                                category="ui"
-                                className="text-sm text-yellow-500"
-                              />
-                              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
-                                최고 점수
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold text-yellow-900 dark:text-yellow-100">
+                      {/* 4. 최고 점수 */}
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                              최고 점수
+                            </p>
+                            <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
                               {stat.bestScore}점
                             </p>
                           </div>
-                        </div>
-
-                        {/* 세 번째 줄: 누적 점수 (중앙 정렬) */}
-                        <div className="flex justify-center col-span-2">
-                          <div className="text-center">
-                            <div className="flex items-center justify-center mb-1 space-x-2">
-                              <Icon
-                                type="chart"
-                                category="ui"
-                                className="text-sm text-indigo-500"
-                              />
-                              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-                                누적 점수
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
-                              {stat.totalScore}점
-                            </p>
-                          </div>
+                          <div className="text-3xl">🏆</div>
                         </div>
                       </div>
+                    </div>
 
-                      {/* 마지막 훈련 정보 */}
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          마지막 훈련
-                        </p>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {new Date(stat.lastCompletedAt).toLocaleDateString()}
-                        </p>
+                    {/* 5. 누적 점수 (전체 너비) */}
+                    <div className="p-4 mt-4 rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            누적 점수
+                          </p>
+                          <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">
+                            {stat.totalScore}점
+                          </p>
+                        </div>
+                        <div className="text-4xl">💎</div>
                       </div>
+                    </div>
+
+                    {/* 추가 정보 */}
+                    <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                      마지막 훈련:{' '}
+                      {new Date(stat.lastCompletedAt).toLocaleDateString()}
                     </div>
                   </div>
                 );
@@ -763,13 +609,7 @@ const MyPage: React.FC = () => {
 
   const profileContent = {
     title: '개인정보',
-    icon: (
-      <Icon
-        type="user"
-        category="ui"
-        className="text-purple-600 dark:text-purple-400"
-      />
-    ),
+    icon: '👤',
     color: 'purple',
     iconBgClass: 'bg-purple-100 dark:bg-purple-900/30',
     content: (
@@ -800,9 +640,7 @@ const MyPage: React.FC = () => {
           ) : !user ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">
-                  <Icon type="user" category="ui" />
-                </div>
+                <div className="mb-4 text-4xl text-gray-400">👤</div>
                 <p className="text-gray-600 dark:text-gray-300">
                   사용자 정보를 불러올 수 없습니다.
                 </p>
@@ -931,15 +769,9 @@ const MyPage: React.FC = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-between mt-6">
+          <div className="flex justify-end mt-6">
             <button className="px-6 py-2 text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700">
               정보 수정
-            </button>
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="px-6 py-2 text-white transition-colors duration-200 bg-red-600 rounded-lg hover:bg-red-700"
-            >
-              회원 탈퇴
             </button>
           </div>
         </div>
@@ -1024,12 +856,7 @@ const MyPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      <Icon
-                        type="chart"
-                        category="ui"
-                        className="inline mr-2"
-                      />
-                      훈련기록
+                      📊 훈련기록
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 나의 모든 훈련 기록을 확인</li>
@@ -1039,12 +866,7 @@ const MyPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      <Icon
-                        type="trophy"
-                        category="ui"
-                        className="inline mr-2"
-                      />
-                      점수조회
+                      🏆 점수조회
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 전체 및 유형별 점수 분석</li>
@@ -1054,8 +876,7 @@ const MyPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      <Icon type="user" category="ui" className="inline mr-2" />
-                      개인정보
+                      👤 개인정보
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 기본 정보 수정 및 관리</li>
@@ -1069,183 +890,6 @@ const MyPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* 회원 탈퇴 모달 */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl dark:bg-gray-800">
-            {deleteStep === 'confirm' && (
-              <div>
-                <div className="flex items-center mb-4">
-                  <Icon
-                    type="warning"
-                    category="status"
-                    className="mr-3 text-2xl text-red-500"
-                  />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    회원 탈퇴 확인
-                  </h3>
-                </div>
-                <div className="mb-6">
-                  <p className="mb-4 text-gray-600 dark:text-gray-300">
-                    정말로 회원 탈퇴를 진행하시겠습니까?
-                  </p>
-                  <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
-                    <h4 className="mb-2 font-semibold text-red-800 dark:text-red-200">
-                      🚨 삭제되는 데이터
-                    </h4>
-                    <ul className="space-y-1 text-sm text-red-700 dark:text-red-300">
-                      <li>• 개인 정보 (이름, 이메일, 전화번호)</li>
-                      <li>• 훈련 기록 및 성과</li>
-                      <li>• 경험치 및 레벨</li>
-                      <li>• 팀 정보 및 역할</li>
-                      <li>• 시나리오 진행 기록</li>
-                    </ul>
-                    <p className="mt-2 text-sm font-semibold text-red-800 dark:text-red-200">
-                      ⚠️ 모든 데이터는 영구적으로 삭제되며 복구가 불가능합니다.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={resetDeleteModal}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleDeleteAccount}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? '처리 중...' : '탈퇴 진행'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {deleteStep === 'email' && (
-              <div>
-                <div className="flex items-center mb-4">
-                  <Icon
-                    type="success"
-                    category="status"
-                    className="mr-3 text-2xl text-green-500"
-                  />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    이메일 인증
-                  </h3>
-                </div>
-                <div className="mb-6">
-                  <p className="mb-4 text-gray-600 dark:text-gray-300">
-                    <strong>{deleteEmail}</strong>로 인증 코드가 전송되었습니다.
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    이메일을 확인하고 6자리 인증 코드를 입력해주세요.
-                  </p>
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={resetDeleteModal}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={() => setDeleteStep('verify')}
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                  >
-                    인증 코드 입력
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {deleteStep === 'verify' && (
-              <div>
-                <div className="flex items-center mb-4">
-                  <Icon
-                    type="info"
-                    category="status"
-                    className="mr-3 text-2xl text-blue-500"
-                  />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    인증 코드 입력
-                  </h3>
-                </div>
-                <div className="mb-6">
-                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    인증 코드 (6자리)
-                  </label>
-                  <input
-                    type="text"
-                    value={deleteCode}
-                    onChange={e =>
-                      setDeleteCode(
-                        e.target.value.replace(/\D/g, '').slice(0, 6)
-                      )
-                    }
-                    placeholder="123456"
-                    className="w-full px-3 py-2 font-mono text-lg text-center border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    maxLength={6}
-                  />
-                  {deleteError && (
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      {deleteError}
-                    </p>
-                  )}
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setDeleteStep('email')}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
-                  >
-                    이전
-                  </button>
-                  <button
-                    onClick={handleVerifyCode}
-                    disabled={isDeleting || deleteCode.length !== 6}
-                    className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {isDeleting ? '검증 중...' : '인증 확인'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {deleteStep === 'complete' && (
-              <div>
-                <div className="flex items-center mb-4">
-                  <Icon
-                    type="success"
-                    category="status"
-                    className="mr-3 text-2xl text-green-500"
-                  />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    탈퇴 완료
-                  </h3>
-                </div>
-                <div className="mb-6">
-                  <p className="mb-4 text-gray-600 dark:text-gray-300">
-                    회원 탈퇴가 완료되었습니다.
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    잠시 후 로그인 페이지로 이동합니다.
-                  </p>
-                </div>
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => (window.location.href = '/login')}
-                    className="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700"
-                  >
-                    로그인 페이지로 이동
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </Layout>
   );
 };

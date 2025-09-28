@@ -19,12 +19,13 @@ import { AdminService } from '../../application/services/admin.service';
 import { TeamsService } from '../../application/services/teams.service';
 import { UsersService } from '../../application/services/users.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { AdminGuard } from '../../shared/guards/admin.guard';
 import { CreateAdminDto } from '../dto/create-admin.dto.js';
 import { CreateTeamDto } from '../dto/create-team.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
   constructor(

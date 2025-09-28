@@ -42,25 +42,38 @@ export const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   config => {
     try {
+      // 일반 사용자 토큰 확인
       const authStorage = localStorage.getItem('auth-storage');
+      let token = null;
+
       if (authStorage) {
         const parsed = JSON.parse(authStorage);
-        const token = parsed?.state?.token;
+        token = parsed?.state?.token;
+      }
 
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+      // 관리자 토큰 확인 (관리자 토큰이 우선)
+      const adminAuthStorage = localStorage.getItem('admin-auth-storage');
+      if (adminAuthStorage) {
+        const parsed = JSON.parse(adminAuthStorage);
+        const adminToken = parsed?.state?.token;
+        if (adminToken) {
+          token = adminToken;
           console.log(
-            '🔑 API 요청에 토큰 추가됨:',
-            token.substring(0, 20) + '...'
-          );
-        } else {
-          console.warn(
-            '⚠️ 토큰이 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
+            '🔑 관리자 토큰 사용:',
+            adminToken.substring(0, 20) + '...'
           );
         }
+      }
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log(
+          '🔑 API 요청에 토큰 추가됨:',
+          token.substring(0, 20) + '...'
+        );
       } else {
         console.warn(
-          '⚠️ auth-storage가 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
+          '⚠️ 토큰이 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
         );
       }
     } catch (error) {
@@ -102,7 +115,17 @@ apiClient.interceptors.response.use(
 
       if (isAdminApi || isAuthApi) {
         console.warn('🔐 관리자/인증 API 인증 실패 - 로그아웃 처리');
-        localStorage.removeItem('auth-storage');
+
+        // 관리자 토큰이 있는지 확인
+        const adminAuthStorage = localStorage.getItem('admin-auth-storage');
+        if (adminAuthStorage) {
+          console.warn('🔐 관리자 로그아웃 처리');
+          localStorage.removeItem('admin-auth-storage');
+        } else {
+          console.warn('🔐 일반 사용자 로그아웃 처리');
+          localStorage.removeItem('auth-storage');
+        }
+
         window.location.href = '/login';
       } else {
         console.warn('🔐 일반 API 인증 실패 - 로그아웃하지 않음');

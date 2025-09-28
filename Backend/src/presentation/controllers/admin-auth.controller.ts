@@ -32,6 +32,7 @@ export class AdminAuthController {
       });
 
       const payload = {
+        sub: admin.id, // JWT 표준 필드
         id: admin.id,
         loginId: admin.loginId,
         name: admin.name,
@@ -40,6 +41,7 @@ export class AdminAuthController {
         adminLevelId: admin.adminLevelId,
         adminLevel: admin.adminLevel, // adminLevel 정보 추가
         isAdmin: true,
+        type: 'access', // JWT 전략에서 요구하는 필드 추가
       };
 
       const token = this.jwtService.sign(payload);

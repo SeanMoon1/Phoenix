@@ -10,7 +10,7 @@ import {
 } from '../../services/api';
 import { Icon } from '../../utils/icons';
 import { ScenarioDataSource } from '../../services/scenarioService';
-import { useAuthStore } from '../../stores/authStore';
+import { useAdminAuthStore } from '../../stores/adminAuthStore';
 import CreateAdminModal from '../../components/admin/CreateAdminModal';
 import AdminList from '../../components/admin/AdminList';
 import EmailManager from '../../components/admin/EmailManager';
@@ -83,7 +83,7 @@ const AdminPage: React.FC = () => {
   // 승인관리 관련 상태
   const [pendingScenarios, setPendingScenarios] = useState<any[]>([]);
   const [loadingScenarios, setLoadingScenarios] = useState(false);
-  const { user } = useAuthStore();
+  const { admin } = useAdminAuthStore();
 
   // 파일 다운로드 함수
   const handleDownloadTeamFile = async (
@@ -131,9 +131,9 @@ const AdminPage: React.FC = () => {
 
   // 관리자 권한 체크
   if (
-    !user?.isAdmin &&
-    user?.adminLevel !== 'SUPER_ADMIN' &&
-    user?.adminLevel !== 'TEAM_ADMIN'
+    !admin?.isAdmin &&
+    admin?.adminLevel !== 'SUPER_ADMIN' &&
+    admin?.adminLevel !== 'TEAM_ADMIN'
   ) {
     return (
       <AdminLayout>
@@ -193,7 +193,7 @@ const AdminPage: React.FC = () => {
     ];
 
     // 슈퍼 관리자만 관리자 탭 접근 가능
-    if (user?.adminLevel !== 'SUPER_ADMIN') {
+    if (admin?.adminLevel !== 'SUPER_ADMIN') {
       return allTabs.filter(tab => tab.id !== 'admins');
     }
 
@@ -205,15 +205,15 @@ const AdminPage: React.FC = () => {
   // 팀 통계 로드 (슈퍼 관리자 또는 팀 관리자)
   useEffect(() => {
     if (
-      user?.adminLevel === 'SUPER_ADMIN' ||
-      (user?.teamId && user.teamId > 0)
+      admin?.adminLevel === 'SUPER_ADMIN' ||
+      (admin?.teamId && admin.teamId > 0)
     ) {
       loadTeamStats();
-      if (user?.teamId && user.teamId > 0) {
+      if (admin?.teamId && admin.teamId > 0) {
         loadMemberStats();
       }
     }
-  }, [user?.adminLevel, user?.teamId]);
+  }, [admin?.adminLevel, admin?.teamId]);
 
   // 사용자 관리 데이터 로드
   useEffect(() => {
@@ -232,7 +232,7 @@ const AdminPage: React.FC = () => {
     setLoading(true);
     try {
       // 슈퍼 관리자인 경우 모든 팀 통계 조회
-      if (user?.adminLevel === 'SUPER_ADMIN') {
+      if (admin?.adminLevel === 'SUPER_ADMIN') {
         const response = await teamStatsApi.getAllTeamStats();
         if (response.success && response.data) {
           setAllTeamStats(response.data);
@@ -272,9 +272,9 @@ const AdminPage: React.FC = () => {
             setTeamStats(totalStats);
           }
         }
-      } else if (user?.teamId && user.teamId > 0) {
+      } else if (admin?.teamId && admin.teamId > 0) {
         // 일반 관리자인 경우 자신의 팀 통계만 조회
-        const response = await teamStatsApi.getTeamStats(user.teamId);
+        const response = await teamStatsApi.getTeamStats(admin.teamId);
         if (response.success && response.data) {
           setTeamStats({
             totalSessions: response.data.totalTrainings,
@@ -292,10 +292,10 @@ const AdminPage: React.FC = () => {
   };
 
   const loadMemberStats = async () => {
-    if (!user?.teamId) return;
+    if (!admin?.teamId) return;
 
     try {
-      const response = await trainingResultApi.getTeamMemberStats(user.teamId);
+      const response = await trainingResultApi.getTeamMemberStats(admin.teamId);
       if (response.success && response.data) {
         // setMemberStats((response.data as any).memberStats || []);
       }
@@ -451,7 +451,7 @@ const AdminPage: React.FC = () => {
       const scenarioCode = `SCEN_${dateStr}_001`;
 
       const response = await scenarioApi.create({
-        teamId: user?.teamId || 1,
+        teamId: admin?.teamId || 1,
         scenarioCode,
         title: newScenarioTitle,
         disasterType: newScenarioDisasterType,
@@ -459,7 +459,7 @@ const AdminPage: React.FC = () => {
         riskLevel: newScenarioRiskLevel,
         occurrenceCondition: newScenarioOccurrenceCondition,
         status: '임시저장',
-        createdBy: user?.id || 1,
+        createdBy: admin?.id || 1,
       });
 
       if (response.success && response.data) {
@@ -498,15 +498,15 @@ const AdminPage: React.FC = () => {
     try {
       let response;
 
-      if (user?.adminLevel === 'SUPER_ADMIN') {
+      if (admin?.adminLevel === 'SUPER_ADMIN') {
         // 슈퍼 관리자: 모든 팀 조회 가능
         response = await adminApi.getTeams();
-      } else if (user?.adminLevel === 'TEAM_ADMIN' && user?.teamId) {
+      } else if (admin?.adminLevel === 'TEAM_ADMIN' && admin?.teamId) {
         // 팀 관리자: 본인 팀만 조회 가능
         const allTeams = await adminApi.getTeams();
         if (allTeams.success && allTeams.data) {
           const userTeam = allTeams.data.filter(
-            team => team.id === user.teamId
+            team => team.id === admin.teamId
           );
           setTeams(userTeam);
           return;
@@ -531,14 +531,14 @@ const AdminPage: React.FC = () => {
       let response;
 
       // 사용자 권한에 따라 다른 API 호출
-      if (user?.adminLevel === 'SUPER_ADMIN') {
+      if (admin?.adminLevel === 'SUPER_ADMIN') {
         // 총괄 관리자: 모든 사용자 조회 가능
         response = selectedTeamId
           ? await adminApi.getUsersByTeam(selectedTeamId)
           : await adminApi.getUsers();
-      } else if (user?.adminLevel === 'TEAM_ADMIN' && user?.teamId) {
+      } else if (admin?.adminLevel === 'TEAM_ADMIN' && admin?.teamId) {
         // 팀 관리자: 본인 팀의 사용자만 조회 가능
-        response = await adminApi.getUsersByTeam(user.teamId);
+        response = await adminApi.getUsersByTeam(admin.teamId);
       } else {
         // 일반 사용자: 접근 불가
         setUsers([]);
@@ -954,7 +954,7 @@ const AdminPage: React.FC = () => {
               </h2>
 
               {/* 팀 생성 버튼 - 슈퍼 관리자만 접근 가능 */}
-              {user?.adminLevel === 'SUPER_ADMIN' && (
+              {admin?.adminLevel === 'SUPER_ADMIN' && (
                 <div className="flex mb-6 space-x-4">
                   <Button
                     onClick={() => setShowCreateTeamModal(true)}
@@ -977,7 +977,7 @@ const AdminPage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     팀 통계
                   </h3>
-                  {user?.adminLevel === 'SUPER_ADMIN' &&
+                  {admin?.adminLevel === 'SUPER_ADMIN' &&
                     allTeamStats.length > 0 && (
                       <div className="flex items-center space-x-4">
                         <select
@@ -1346,7 +1346,7 @@ const AdminPage: React.FC = () => {
               </h2>
 
               {/* 팀 필터 - 총괄 관리자만 모든 팀 선택 가능 */}
-              {user?.adminLevel === 'SUPER_ADMIN' && (
+              {admin?.adminLevel === 'SUPER_ADMIN' && (
                 <div className="mb-6">
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     팀 필터
@@ -1371,17 +1371,17 @@ const AdminPage: React.FC = () => {
               )}
 
               {/* 팀 관리자에게는 현재 팀 정보 표시 */}
-              {user?.adminLevel === 'TEAM_ADMIN' && user?.teamId && (
+              {admin?.adminLevel === 'TEAM_ADMIN' && admin?.teamId && (
                 <div className="mb-6">
                   <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
                       <strong>현재 팀:</strong>{' '}
-                      {teams.find(t => t.id === user.teamId)?.name ||
+                      {teams.find(t => t.id === admin.teamId)?.name ||
                         '알 수 없음'}
-                      {teams.find(t => t.id === user.teamId)?.teamCode && (
+                      {teams.find(t => t.id === admin.teamId)?.teamCode && (
                         <span className="ml-2 text-xs">
                           (코드:{' '}
-                          {teams.find(t => t.id === user.teamId)?.teamCode})
+                          {teams.find(t => t.id === admin.teamId)?.teamCode})
                         </span>
                       )}
                     </p>
@@ -1397,11 +1397,11 @@ const AdminPage: React.FC = () => {
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     사용자 목록{' '}
-                    {user?.adminLevel === 'SUPER_ADMIN' &&
+                    {admin?.adminLevel === 'SUPER_ADMIN' &&
                       selectedTeamId &&
                       `(${teams.find(t => t.id === selectedTeamId)?.name})`}
-                    {user?.adminLevel === 'TEAM_ADMIN' &&
-                      `(${teams.find(t => t.id === user.teamId)?.name})`}
+                    {admin?.adminLevel === 'TEAM_ADMIN' &&
+                      `(${teams.find(t => t.id === admin.teamId)?.name})`}
                   </h3>
                 </div>
                 <div className="p-6">
@@ -1509,7 +1509,7 @@ const AdminPage: React.FC = () => {
                 관리자 관리
               </h2>
               <AdminList
-                teamId={user?.teamId}
+                teamId={admin?.teamId}
                 onCreateAdmin={() => setShowCreateAdminModal(true)}
                 refreshTrigger={adminRefreshTrigger}
               />

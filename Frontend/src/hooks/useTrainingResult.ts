@@ -1,10 +1,15 @@
 import { useCallback } from 'react';
-import { trainingApi, trainingResultApi, userExpApi } from '@/services/api';
+import {
+  trainingApi,
+  trainingResultApi,
+  userExpApi,
+  api,
+} from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import { scenarioIdMap, getScenarioTypeForApi } from '@/utils/scenarioMaps';
 
 export function useTrainingResult() {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
 
   const saveTrainingResult = useCallback(
     async (opts: {
@@ -100,6 +105,21 @@ export function useTrainingResult() {
             completedScenarios: 1,
           });
           console.log('✅ 서버에 경험치 정보 전송 완료');
+
+          // 경험치 업데이트 성공 후 사용자 정보 새로고침
+          try {
+            console.log('🔄 사용자 정보 새로고침 시작');
+            const profileResponse = await api.get(`/auth/profile`);
+            if (profileResponse.success && profileResponse.data) {
+              console.log(
+                '✅ 사용자 프로필 정보 업데이트:',
+                profileResponse.data
+              );
+              setUser(profileResponse.data as any);
+            }
+          } catch (profileError) {
+            console.error('❌ 사용자 프로필 새로고침 실패:', profileError);
+          }
         } catch (expError) {
           console.error('❌ 서버 경험치 업데이트 실패:', expError);
           // 경험치 업데이트 실패해도 훈련 결과는 저장된 상태로 처리

@@ -80,38 +80,74 @@ export class TrainingResultService {
         isActive: true,
       });
 
-      // 트랜잭션을 사용하여 데이터 일관성 보장
+      // 트랜잭션을 사용하여 훈련 결과 저장과 경험치 업데이트를 함께 처리
       const savedResult =
         await this.trainingResultRepository.manager.transaction(
           async (transactionalEntityManager) => {
-            console.log('🔄 트랜잭션 시작 - 훈련 결과 저장');
+            console.log('🔄 트랜잭션 시작 - 훈련 결과 저장 및 경험치 업데이트');
+
+            // 1. 훈련 결과 저장
             const result =
               await transactionalEntityManager.save(trainingResult);
+            console.log('✅ 훈련 결과 저장 완료:', result.id);
+
+            // 2. 사용자 경험치 업데이트 (같은 트랜잭션 내에서)
+            try {
+              const expToAdd = this.calculateExpFromScore(data.totalScore || 0);
+              console.log('🔍 경험치 업데이트 시작:', {
+                userId: data.userId,
+                expToAdd,
+                totalScore: data.totalScore || 0,
+              });
+
+              // 사용자 조회
+              const user = await transactionalEntityManager.findOne(User, {
+                where: { id: data.userId! },
+              });
+
+              if (!user) {
+                throw new Error('사용자를 찾을 수 없습니다.');
+              }
+
+              // 현재 경험치에 추가
+              const newExp = user.userExp + expToAdd;
+
+              // 레벨 계산
+              const { newLevel, remainingExp, tier } =
+                this.calculateLevelAndTier(newExp);
+
+              // 다음 레벨까지 필요한 경험치 계산
+              const nextLevelExp = this.getExpForNextLevel(newLevel);
+
+              // 레벨 진행도 계산 (0-100%)
+              const levelProgress =
+                nextLevelExp > 0 ? (remainingExp / nextLevelExp) * 100 : 0;
+
+              // 사용자 정보 업데이트
+              await transactionalEntityManager.update(User, data.userId!, {
+                userExp: newExp,
+                userLevel: newLevel,
+                currentTier: tier,
+                levelProgress: Math.round(levelProgress * 100) / 100,
+                nextLevelExp,
+                totalScore: user.totalScore + (data.totalScore || 0),
+                completedScenarios: user.completedScenarios + 1,
+              });
+
+              console.log('✅ 사용자 경험치 업데이트 완료:', {
+                userId: data.userId,
+                newLevel,
+                newExp,
+                tier,
+              });
+            } catch (expError) {
+              console.error('❌ 트랜잭션 내 경험치 업데이트 실패:', expError);
+              throw expError; // 트랜잭션 롤백을 위해 에러 재발생
+            }
+
             return result;
           },
         );
-
-      // 데이터베이스에 실제로 저장되었는지 확인
-      const verifyResult = await this.trainingResultRepository.findOne({
-        where: { id: savedResult.id },
-      });
-
-      // 사용자 경험치 업데이트
-      try {
-        const expToAdd = this.calculateExpFromScore(data.totalScore || 0);
-        await this.userExpService.updateUserExp({
-          userId: data.userId!,
-          expToAdd,
-          totalScore: data.totalScore || 0,
-          completedScenarios: 1, // 시나리오 1개 완료
-        });
-      } catch (expError) {
-        console.error(
-          '❌ 사용자 경험치 업데이트 실패 (훈련 결과는 저장됨):',
-          expError,
-        );
-        // 경험치 업데이트 실패해도 훈련 결과는 저장된 상태로 반환
-      }
 
       return savedResult;
     } catch (error) {
@@ -519,5 +555,48 @@ export class TrainingResultService {
     // 기본 경험치: 점수 * 0.5 (최소 10, 최대 100)
     const baseExp = Math.round(totalScore * 0.5);
     return Math.max(10, Math.min(100, baseExp));
+  }
+
+  /**
+   * 경험치로부터 레벨과 등급 계산
+   * @param exp 경험치
+   * @returns 레벨, 남은 경험치, 등급
+   */
+  private calculateLevelAndTier(exp: number): {
+    newLevel: number;
+    remainingExp: number;
+    tier: string;
+  } {
+    let level = 1;
+    let remainingExp = exp;
+
+    // 레벨별 필요 경험치 계산
+    while (remainingExp >= this.getExpForNextLevel(level)) {
+      remainingExp -= this.getExpForNextLevel(level);
+      level++;
+    }
+
+    // 등급 계산
+    let tier = '초급자';
+    if (level >= 20) tier = '전문가';
+    else if (level >= 15) tier = '고급자';
+    else if (level >= 10) tier = '중급자';
+    else if (level >= 5) tier = '숙련자';
+
+    return {
+      newLevel: level,
+      remainingExp,
+      tier,
+    };
+  }
+
+  /**
+   * 다음 레벨까지 필요한 경험치 계산
+   * @param level 현재 레벨
+   * @returns 필요한 경험치
+   */
+  private getExpForNextLevel(level: number): number {
+    // 레벨이 높아질수록 더 많은 경험치 필요
+    return Math.floor(100 * Math.pow(1.2, level - 1));
   }
 }

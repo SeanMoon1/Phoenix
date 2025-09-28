@@ -87,7 +87,7 @@ const AuthCallbackPage: React.FC = () => {
             const profileData = await response.json();
             console.log('👤 백엔드에서 받은 사용자 정보:', profileData);
 
-            // 백엔드에서 받은 실제 사용자 정보 사용
+            // 백엔드에서 받은 실제 사용자 정보 사용 (경험치/레벨 정보 포함)
             const user = {
               id: profileData.id,
               teamId: profileData.teamId || 0,
@@ -136,11 +136,72 @@ const AuthCallbackPage: React.FC = () => {
             return;
           } catch (profileError) {
             console.error('❌ 백엔드에서 사용자 정보 조회 실패:', profileError);
-            // 백엔드 조회 실패 시 기존 방식으로 fallback
+            // 백엔드 조회 실패 시 재시도 또는 기본값 사용
             console.log('🔄 Fallback to callback user data...');
+
+            // 잠시 후 재시도
+            try {
+              console.log('🔄 재시도 중...');
+              await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
+
+              const retryResponse = await fetch(
+                `${
+                  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+                }/auth/profile`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+
+              if (retryResponse.ok) {
+                const retryProfileData = await retryResponse.json();
+                console.log('✅ 재시도 성공:', retryProfileData);
+
+                const user = {
+                  id: retryProfileData.id,
+                  teamId: retryProfileData.teamId || 0,
+                  userCode: retryProfileData.userCode || '',
+                  loginId: retryProfileData.loginId || '',
+                  email: retryProfileData.email,
+                  name: retryProfileData.name,
+                  useYn: retryProfileData.useYn || 'Y',
+                  userLevel: retryProfileData.userLevel || 1,
+                  userExp: retryProfileData.userExp || 0,
+                  totalScore: retryProfileData.totalScore || 0,
+                  completedScenarios: retryProfileData.completedScenarios || 0,
+                  currentTier: retryProfileData.currentTier || '초급자',
+                  levelProgress: retryProfileData.levelProgress || 0,
+                  nextLevelExp: retryProfileData.nextLevelExp || 100,
+                  isActive: retryProfileData.isActive !== false,
+                  createdAt:
+                    retryProfileData.createdAt || new Date().toISOString(),
+                  updatedAt:
+                    retryProfileData.updatedAt || new Date().toISOString(),
+                  isAdmin: retryProfileData.isAdmin || false,
+                  adminLevel: retryProfileData.adminLevel || 'USER',
+                  oauthProvider: retryProfileData.oauthProvider,
+                  oauthProviderId: retryProfileData.oauthProviderId,
+                };
+
+                setAuth({
+                  token,
+                  user,
+                  isAuthenticated: true,
+                });
+
+                console.log('🚀 Redirecting to home page...');
+                navigate('/');
+                return;
+              }
+            } catch (retryError) {
+              console.error('❌ 재시도도 실패:', retryError);
+            }
           }
 
-          // Fallback: Backend에서 받은 사용자 정보를 Frontend User 타입에 맞게 변환
+          // 최종 Fallback: 콜백 데이터를 사용하되 기본값 설정
           const user = {
             id: userData.id,
             teamId: 0, // OAuth 사용자는 기본값
@@ -153,7 +214,7 @@ const AuthCallbackPage: React.FC = () => {
             userExp: 0,
             totalScore: 0,
             completedScenarios: 0,
-            currentTier: 'BRONZE', // 기본 티어
+            currentTier: '초급자', // 기본 티어
             levelProgress: 0,
             nextLevelExp: 100,
             isActive: true,

@@ -101,31 +101,70 @@ const AuthCallbackPage: React.FC = () => {
             const profileData = await response.json();
             console.log('👤 백엔드에서 받은 사용자 정보:', profileData);
 
+            // 백엔드 응답이 빈 객체이거나 필수 필드가 없는 경우 OAuth 데이터 사용
+            const hasValidProfileData =
+              profileData &&
+              (profileData.id || profileData.email || profileData.name) &&
+              Object.keys(profileData).length > 0;
+
+            console.log('🔍 프로필 데이터 유효성 검사:', {
+              hasValidProfileData,
+              profileDataKeys: Object.keys(profileData),
+              profileDataLength: Object.keys(profileData).length,
+            });
+
             // 백엔드에서 받은 실제 사용자 정보 사용 (경험치/레벨 정보 포함)
             const user = {
-              id: profileData.id,
-              teamId: profileData.teamId || 0,
-              userCode: profileData.userCode || '',
-              loginId: profileData.loginId || '',
-              email: profileData.email || userData.email,
-              name: profileData.name || userData.name,
-              useYn: profileData.useYn || 'Y',
-              userLevel: profileData.userLevel || 1,
-              userExp: profileData.userExp || 0,
-              totalScore: profileData.totalScore || 0,
-              completedScenarios: profileData.completedScenarios || 0,
-              currentTier: profileData.currentTier || 'BRONZE',
-              levelProgress: profileData.levelProgress || 0,
-              nextLevelExp: profileData.nextLevelExp || 100,
-              isActive: profileData.isActive !== false,
-              createdAt: profileData.createdAt || new Date().toISOString(),
-              updatedAt: profileData.updatedAt || new Date().toISOString(),
-              isAdmin: profileData.isAdmin || false,
-              adminLevel: profileData.adminLevel || 'USER',
+              id: hasValidProfileData
+                ? profileData.id || userData.id
+                : userData.id,
+              teamId: hasValidProfileData ? profileData.teamId || 0 : 0,
+              userCode: hasValidProfileData ? profileData.userCode || '' : '',
+              loginId: hasValidProfileData ? profileData.loginId || '' : '',
+              email: hasValidProfileData
+                ? profileData.email || userData.email
+                : userData.email,
+              name: hasValidProfileData
+                ? profileData.name || userData.name
+                : userData.name,
+              useYn: hasValidProfileData ? profileData.useYn || 'Y' : 'Y',
+              userLevel: hasValidProfileData ? profileData.userLevel || 1 : 1,
+              userExp: hasValidProfileData ? profileData.userExp || 0 : 0,
+              totalScore: hasValidProfileData ? profileData.totalScore || 0 : 0,
+              completedScenarios: hasValidProfileData
+                ? profileData.completedScenarios || 0
+                : 0,
+              currentTier: hasValidProfileData
+                ? profileData.currentTier || 'BRONZE'
+                : 'BRONZE',
+              levelProgress: hasValidProfileData
+                ? profileData.levelProgress || 0
+                : 0,
+              nextLevelExp: hasValidProfileData
+                ? profileData.nextLevelExp || 100
+                : 100,
+              isActive: hasValidProfileData
+                ? profileData.isActive !== false
+                : true,
+              createdAt: hasValidProfileData
+                ? profileData.createdAt || new Date().toISOString()
+                : new Date().toISOString(),
+              updatedAt: hasValidProfileData
+                ? profileData.updatedAt || new Date().toISOString()
+                : new Date().toISOString(),
+              isAdmin: hasValidProfileData
+                ? profileData.isAdmin || false
+                : false,
+              adminLevel: hasValidProfileData
+                ? profileData.adminLevel || 'USER'
+                : 'USER',
               // OAuth 관련 정보 추가
-              oauthProvider: profileData.oauthProvider || userData.provider,
-              oauthProviderId:
-                profileData.oauthProviderId || userData.providerId,
+              oauthProvider: hasValidProfileData
+                ? profileData.oauthProvider || userData.provider
+                : userData.provider,
+              oauthProviderId: hasValidProfileData
+                ? profileData.oauthProviderId || userData.providerId
+                : userData.providerId,
             };
 
             console.log('✅ Setting auth state with backend data:', {
@@ -175,32 +214,82 @@ const AuthCallbackPage: React.FC = () => {
                 const retryProfileData = await retryResponse.json();
                 console.log('✅ 재시도 성공:', retryProfileData);
 
+                // 재시도에서도 동일한 유효성 검사
+                const hasValidRetryData =
+                  retryProfileData &&
+                  (retryProfileData.id ||
+                    retryProfileData.email ||
+                    retryProfileData.name) &&
+                  Object.keys(retryProfileData).length > 0;
+
+                console.log('🔍 재시도 프로필 데이터 유효성 검사:', {
+                  hasValidRetryData,
+                  retryDataKeys: Object.keys(retryProfileData),
+                  retryDataLength: Object.keys(retryProfileData).length,
+                });
+
                 const user = {
-                  id: retryProfileData.id,
-                  teamId: retryProfileData.teamId || 0,
-                  userCode: retryProfileData.userCode || '',
-                  loginId: retryProfileData.loginId || '',
-                  email: retryProfileData.email || userData.email,
-                  name: retryProfileData.name || userData.name,
-                  useYn: retryProfileData.useYn || 'Y',
-                  userLevel: retryProfileData.userLevel || 1,
-                  userExp: retryProfileData.userExp || 0,
-                  totalScore: retryProfileData.totalScore || 0,
-                  completedScenarios: retryProfileData.completedScenarios || 0,
-                  currentTier: retryProfileData.currentTier || '초급자',
-                  levelProgress: retryProfileData.levelProgress || 0,
-                  nextLevelExp: retryProfileData.nextLevelExp || 100,
-                  isActive: retryProfileData.isActive !== false,
-                  createdAt:
-                    retryProfileData.createdAt || new Date().toISOString(),
-                  updatedAt:
-                    retryProfileData.updatedAt || new Date().toISOString(),
-                  isAdmin: retryProfileData.isAdmin || false,
-                  adminLevel: retryProfileData.adminLevel || 'USER',
-                  oauthProvider:
-                    retryProfileData.oauthProvider || userData.provider,
-                  oauthProviderId:
-                    retryProfileData.oauthProviderId || userData.providerId,
+                  id: hasValidRetryData
+                    ? retryProfileData.id || userData.id
+                    : userData.id,
+                  teamId: hasValidRetryData ? retryProfileData.teamId || 0 : 0,
+                  userCode: hasValidRetryData
+                    ? retryProfileData.userCode || ''
+                    : '',
+                  loginId: hasValidRetryData
+                    ? retryProfileData.loginId || ''
+                    : '',
+                  email: hasValidRetryData
+                    ? retryProfileData.email || userData.email
+                    : userData.email,
+                  name: hasValidRetryData
+                    ? retryProfileData.name || userData.name
+                    : userData.name,
+                  useYn: hasValidRetryData
+                    ? retryProfileData.useYn || 'Y'
+                    : 'Y',
+                  userLevel: hasValidRetryData
+                    ? retryProfileData.userLevel || 1
+                    : 1,
+                  userExp: hasValidRetryData
+                    ? retryProfileData.userExp || 0
+                    : 0,
+                  totalScore: hasValidRetryData
+                    ? retryProfileData.totalScore || 0
+                    : 0,
+                  completedScenarios: hasValidRetryData
+                    ? retryProfileData.completedScenarios || 0
+                    : 0,
+                  currentTier: hasValidRetryData
+                    ? retryProfileData.currentTier || '초급자'
+                    : '초급자',
+                  levelProgress: hasValidRetryData
+                    ? retryProfileData.levelProgress || 0
+                    : 0,
+                  nextLevelExp: hasValidRetryData
+                    ? retryProfileData.nextLevelExp || 100
+                    : 100,
+                  isActive: hasValidRetryData
+                    ? retryProfileData.isActive !== false
+                    : true,
+                  createdAt: hasValidRetryData
+                    ? retryProfileData.createdAt || new Date().toISOString()
+                    : new Date().toISOString(),
+                  updatedAt: hasValidRetryData
+                    ? retryProfileData.updatedAt || new Date().toISOString()
+                    : new Date().toISOString(),
+                  isAdmin: hasValidRetryData
+                    ? retryProfileData.isAdmin || false
+                    : false,
+                  adminLevel: hasValidRetryData
+                    ? retryProfileData.adminLevel || 'USER'
+                    : 'USER',
+                  oauthProvider: hasValidRetryData
+                    ? retryProfileData.oauthProvider || userData.provider
+                    : userData.provider,
+                  oauthProviderId: hasValidRetryData
+                    ? retryProfileData.oauthProviderId || userData.providerId
+                    : userData.providerId,
                 };
 
                 setAuth({

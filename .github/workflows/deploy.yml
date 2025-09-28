@@ -56,6 +56,9 @@ jobs:
           AWS_SES_FROM_EMAIL=${{ secrets.AWS_SES_FROM_EMAIL }}
           AWS_SES_TO_EMAIL=${{ secrets.AWS_SES_TO_EMAIL }}
           LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          MEMORY_AUTH_TTL=${{ secrets.MEMORY_AUTH_TTL }}
+          MEMORY_AUTH_MAX_ATTEMPTS=${{ secrets.MEMORY_AUTH_MAX_ATTEMPTS }}
+          MEMORY_AUTH_CLEANUP_INTERVAL=${{ secrets.MEMORY_AUTH_CLEANUP_INTERVAL }}
           EOL
 
       # ✅ 코드 + .env만 서버로 복사

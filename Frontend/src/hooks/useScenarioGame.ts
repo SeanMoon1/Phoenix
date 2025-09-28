@@ -69,7 +69,7 @@ export function useScenarioGame({
   // 선택/피드백
   const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [choiceDisabled, setChoiceDisabled] = useState(false); // choiceDisabled 선언 추가
+  const [choiceDisabled, setChoiceDisabled] = useState(false);
 
   // 게임 진행 상태
   const [failedThisRun, setFailedThisRun] = useState(false);

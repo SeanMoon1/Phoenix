@@ -60,8 +60,31 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 프로필 조회' })
   @ApiResponse({ status: 200, description: '프로필 조회 성공' })
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    try {
+      console.log('🔍 사용자 프로필 조회 요청:', {
+        userId: req.user.id,
+        loginId: req.user.loginId,
+      });
+
+      // 실제 사용자 정보를 데이터베이스에서 조회
+      const userProfile = await this.authService.getUserProfile(req.user.id);
+
+      console.log('✅ 사용자 프로필 조회 성공:', {
+        id: userProfile.id,
+        email: userProfile.email,
+        name: userProfile.name,
+        userLevel: userProfile.userLevel,
+      });
+
+      return userProfile;
+    } catch (error) {
+      console.error('❌ 사용자 프로필 조회 실패:', error);
+      return {
+        success: false,
+        error: error.message || '프로필 조회에 실패했습니다.',
+      };
+    }
   }
 
   @Post('refresh')

@@ -65,11 +65,23 @@ export class GmailService {
   private gmail: any;
 
   constructor(private configService: ConfigService) {
-    this.oauth2Client = new OAuth2Client(
-      this.configService.get<string>('GMAIL_CLIENT_ID'),
-      this.configService.get<string>('GMAIL_CLIENT_SECRET'),
-      this.configService.get<string>('GMAIL_REDIRECT_URIS'),
-    );
+    const clientId = this.configService.get<string>('GMAIL_CLIENT_ID');
+    const clientSecret = this.configService.get<string>('GMAIL_CLIENT_SECRET');
+    const redirectUris = this.configService.get<string>('GMAIL_REDIRECT_URIS');
+
+    // Gmail 환경 변수 검증
+    if (!clientId || !clientSecret || !redirectUris) {
+      console.error('❌ Gmail 환경 변수가 설정되지 않았습니다:', {
+        GMAIL_CLIENT_ID: !!clientId,
+        GMAIL_CLIENT_SECRET: !!clientSecret,
+        GMAIL_REDIRECT_URIS: !!redirectUris,
+      });
+      throw new Error(
+        'Gmail 환경 변수가 설정되지 않았습니다. GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REDIRECT_URIS를 확인해주세요.',
+      );
+    }
+
+    this.oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUris);
 
     this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
   }
@@ -78,11 +90,18 @@ export class GmailService {
    * OAuth 인증 URL 생성
    */
   getAuthUrl(): string {
-    const scopes = this.configService.get<string>('GMAIL_SCOPES').split(',');
+    const scopes = this.configService.get<string>('GMAIL_SCOPES');
+
+    if (!scopes) {
+      console.error('❌ GMAIL_SCOPES 환경 변수가 설정되지 않았습니다.');
+      throw new Error('GMAIL_SCOPES 환경 변수가 설정되지 않았습니다.');
+    }
+
+    const scopeArray = scopes.split(',');
 
     return this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: scopes,
+      scope: scopeArray,
       prompt: 'consent',
     });
   }

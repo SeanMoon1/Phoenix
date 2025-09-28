@@ -48,13 +48,20 @@ const EmailManager: React.FC = () => {
 
   // Gmail 인증 URL 생성
   const handleGetAuthUrl = async () => {
+    console.log('🔍 Gmail 연결 버튼 클릭됨');
     try {
+      console.log('📤 Gmail 인증 URL 요청 시작');
       const response = await gmailApi.getAuthUrl();
+      console.log('📥 Gmail 인증 URL 응답:', response);
+
       if (response.success && response.data) {
+        console.log('✅ Gmail 인증 URL 생성 성공:', response.data.authUrl);
         setAuthUrl(response.data.authUrl);
+      } else {
+        console.error('❌ Gmail 인증 URL 응답 형식 오류:', response);
       }
     } catch (error) {
-      console.error('❌ 인증 URL 생성 실패:', error);
+      console.error('❌ Gmail 인증 URL 생성 실패:', error);
     }
   };
 
@@ -240,7 +247,10 @@ const EmailManager: React.FC = () => {
         </div>
         {!authenticated && (
           <button
-            onClick={handleGetAuthUrl}
+            onClick={() => {
+              console.log('🔍 Gmail 연결 버튼 클릭 이벤트 발생');
+              handleGetAuthUrl();
+            }}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Gmail 연결하기

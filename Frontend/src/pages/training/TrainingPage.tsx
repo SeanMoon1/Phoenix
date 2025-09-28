@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
+import { useAuthStore } from '../../stores/authStore';
 import { Icon } from '../../utils/icons';
 
 const TrainingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState('fire');
 
   // 탭 클릭 핸들러
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
+  };
+
+  // 훈련 시작 핸들러 - 인증 체크
+  const handleTrainingStart = (path: string) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    navigate(path);
   };
 
   const tabs = [
@@ -102,7 +113,7 @@ const TrainingPage: React.FC = () => {
         {/* 훈련 시작 버튼 - FireScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
-            onClick={() => navigate('/training/fire')}
+            onClick={() => handleTrainingStart('/training/fire')}
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             화재 대응 훈련 시작하기
@@ -175,7 +186,7 @@ const TrainingPage: React.FC = () => {
         {/* 훈련 시작 버튼 - EarthquakeScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
-            onClick={() => navigate('/training/earthquake')}
+            onClick={() => handleTrainingStart('/training/earthquake')}
             className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             지진 대응 훈련 시작하기
@@ -249,7 +260,7 @@ const TrainingPage: React.FC = () => {
         {/* 훈련 시작 버튼 - EmergencyFirstAidScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
-            onClick={() => navigate('/training/first-aid')}
+            onClick={() => handleTrainingStart('/training/first-aid')}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             응급처치 훈련 시작하기
@@ -324,7 +335,7 @@ const TrainingPage: React.FC = () => {
         {/* 훈련 시작 버튼 - TrafficAccidentScenarioPage로 연결 */}
         <div className="mt-24 text-center">
           <button
-            onClick={() => navigate('/training/traffic-accident')}
+            onClick={() => handleTrainingStart('/training/traffic-accident')}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             교통사고 대응 훈련 시작하기

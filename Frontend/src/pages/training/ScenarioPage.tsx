@@ -21,8 +21,6 @@ import PlayMoreButton from '@/components/common/PlayMoreButton';
 import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
-import apartmentFireImg from '@/assets/images/apartment_fire.png';
-import earthquakeImg from '@/assets/images/earthquake_panic.png';
 import { getScenarioSetName } from '../../utils/scenarioMaps';
 
 interface ScenarioPageProps {
@@ -270,36 +268,12 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               mobilePanelModalOpen={showMobilePanelModal}
               onCloseMobilePanel={() => setShowMobilePanelModal(false)}
             />
-            {(() => {
-              const s = gameState.scenario ?? {};
-              // 우선적으로 JSON의 disasterType 필드를 사용
-              const dt = (s.disasterType || '').toString().toLowerCase();
-              const map: Record<string, string | undefined> = {
-                fire: apartmentFireImg,
-                earthquake: earthquakeImg,
-                emergency: undefined,
-                traffic: undefined,
-              };
-              const heroSrc = map[dt];
-              const showHeroImage =
-                gameState.current === 0 &&
-                !(
-                  Array.isArray(gameState.answered) &&
-                  gameState.answered.includes(0)
-                ) &&
-                !!heroSrc;
-
-              return (
-                <SituationCard
-                  ref={contentRef}
-                  title={gameState.scenario.title ?? ''}
-                  content={gameState.scenario.content ?? ''}
-                  sceneScript={gameState.scenario.sceneScript ?? ''}
-                  showHeroImage={showHeroImage}
-                  heroSrc={heroSrc}
-                />
-              );
-            })()}
+            <SituationCard
+              ref={contentRef}
+              title={gameState.scenario.title ?? ''}
+              content={gameState.scenario.content ?? ''}
+              sceneScript={gameState.scenario.sceneScript ?? ''}
+            />
             <OptionsList
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}

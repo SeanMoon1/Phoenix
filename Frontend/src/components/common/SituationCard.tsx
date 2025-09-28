@@ -23,6 +23,18 @@ const SituationCard = React.forwardRef<HTMLElement, Props>(
           </h1>
         </section>
 
+        {showHeroImage && heroSrc && (
+          <section className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-4 mb-6">
+            <div className="flex justify-center">
+              <img
+                src={heroSrc}
+                alt="시나리오 히어로 이미지"
+                className="max-w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </section>
+        )}
+
         <section className="bg-white/90 dark:bg-black/40 rounded-2xl shadow-md p-5 md:p-6 mb-6 leading-relaxed">
           <div className="max-w-[70ch]">
             {paragraphs.map((p, i) => (

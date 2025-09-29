@@ -129,20 +129,20 @@ jobs:
             npm cache verify
 
             # 🔧 최신 npm 사용 (버그 회피)
-            npm install -g npm@latest
+            sudo npm install -g npm@latest
 
             # 🔧 dependencies 설치
-            npm install --legacy-peer-deps
+            sudo npm install --legacy-peer-deps
 
             # 🔧 rollup 명시적 설치 (linux 대응)
-            npm install --save-dev rollup@4.14.3 @rollup/rollup-linux-x64-gnu
+            sudo npm install --save-dev rollup@4.14.3 @rollup/rollup-linux-x64-gnu
 
             # ✅ 환경변수
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
 
             # ✅ 빌드 실행
-            npm run build || (echo "❌ 빌드 실패"; exit 1)
+            sudo npm run build || (echo "❌ 빌드 실패"; exit 1)
 
             echo "✅ 빌드 후 결과물:"
             ls -alh dist || echo "⚠️ dist 폴더 없음"

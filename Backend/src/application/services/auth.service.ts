@@ -1010,8 +1010,8 @@ export class AuthService {
     try {
       console.log('🔍 사용자 프로필 조회 시작:', { userId });
 
-      // 직접 데이터베이스에서 사용자 정보 조회
-      const user = await this.usersService.findByLoginId(`moonaki43`);
+      // 실제 사용자 ID로 데이터베이스에서 사용자 정보 조회
+      const user = await this.usersService.findById(userId);
 
       if (!user) {
         console.error('❌ 사용자를 찾을 수 없습니다:', { userId });

@@ -1,10 +1,80 @@
 import { Injectable } from '@nestjs/common';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { TrainingResultService } from './training-result.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class PdfExportService {
   constructor(private readonly trainingResultService: TrainingResultService) {}
+
+  /**
+   * 한글 지원 폰트 경로 반환
+   * @returns 폰트 파일 경로 또는 null
+   */
+  private getKoreanFontPath(): string | null {
+    const possiblePaths = [
+      // Linux 시스템 폰트 경로
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+      '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+      '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+      '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+      // Windows 시스템 폰트 경로 (WSL 환경)
+      '/mnt/c/Windows/Fonts/malgun.ttf', // 맑은 고딕
+      '/mnt/c/Windows/Fonts/gulim.ttc', // 굴림
+      '/mnt/c/Windows/Fonts/batang.ttc', // 바탕
+      // macOS 시스템 폰트 경로
+      '/System/Library/Fonts/AppleGothic.ttf',
+      '/System/Library/Fonts/Helvetica.ttc',
+    ];
+
+    for (const fontPath of possiblePaths) {
+      if (fs.existsSync(fontPath)) {
+        console.log('✅ 한글 폰트 발견:', fontPath);
+        return fontPath;
+      }
+    }
+
+    console.warn('⚠️ 한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.');
+    return null;
+  }
+
+  /**
+   * 한글 텍스트를 안전하게 처리
+   * @param text 원본 텍스트
+   * @param hasKoreanFont 한글 폰트 사용 가능 여부
+   * @returns 처리된 텍스트
+   */
+  private safeText(text: string, hasKoreanFont: boolean): string {
+    if (hasKoreanFont) {
+      return text;
+    }
+
+    // 한글 폰트가 없을 때 영문으로 대체
+    const replacements: { [key: string]: string } = {
+      '팀 훈련 결과 통계': 'Team Training Results Report',
+      생성일: 'Generated',
+      사용자명: 'User Name',
+      총훈련횟수: 'Total Attempts',
+      평균점수: 'Average Score',
+      최고점수: 'Best Score',
+      완료율: 'Completion Rate',
+      통계: 'Stats',
+      화재: 'Fire',
+      지진: 'Earthquake',
+      응급처치: 'First Aid',
+      교통사고: 'Traffic Accident',
+      복합재난: 'Complex Disaster',
+      '(계속)': '(Continued)',
+    };
+
+    let result = text;
+    for (const [korean, english] of Object.entries(replacements)) {
+      result = result.replace(new RegExp(korean, 'g'), english);
+    }
+
+    return result;
+  }
 
   /**
    * 팀원들의 훈련 결과를 PDF 파일로 생성
@@ -23,29 +93,52 @@ export class PdfExportService {
         throw new Error('팀 훈련 결과가 없습니다.');
       }
 
-      // 사용자별로 그룹화
-      const userResults = this.groupResultsByUser(results);
-
       // PDF 문서 생성
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
       const { width, height } = page.getSize();
 
-      // 폰트 로드
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      // 한글 지원 폰트 로드 (시스템 폰트 사용)
+      let font,
+        boldFont,
+        hasKoreanFont = false;
+      try {
+        // 시스템에 설치된 한글 폰트 사용 시도
+        const fontPath = this.getKoreanFontPath();
+        if (fontPath && fs.existsSync(fontPath)) {
+          const fontBytes = fs.readFileSync(fontPath);
+          font = await pdfDoc.embedFont(fontBytes);
+          boldFont = await pdfDoc.embedFont(fontBytes);
+          hasKoreanFont = true;
+          console.log('✅ 한글 폰트 로드 성공');
+        } else {
+          // 폰트가 없으면 기본 폰트 사용 (한글 대신 영문 표시)
+          font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+          boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+          hasKoreanFont = false;
+          console.log('⚠️ 한글 폰트 없음, 기본 폰트 사용');
+        }
+      } catch (error) {
+        console.warn('⚠️ 한글 폰트 로드 실패, 기본 폰트 사용:', error.message);
+        font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        hasKoreanFont = false;
+      }
+
+      // 사용자별로 그룹화
+      const userResults = this.groupResultsByUser(results, hasKoreanFont);
 
       // 실제 훈련 결과에서 사용된 시나리오 타입만 가져오기
       const scenarioTypes = [
         ...new Set(
           results.map((result) =>
-            this.getScenarioTypeName(result.scenarioType),
+            this.getScenarioTypeName(result.scenarioType, hasKoreanFont),
           ),
         ),
       ];
 
       // 제목
-      page.drawText('팀 훈련 결과 통계', {
+      page.drawText(this.safeText('팀 훈련 결과 통계', hasKoreanFont), {
         x: 50,
         y: height - 50,
         size: 20,
@@ -55,8 +148,10 @@ export class PdfExportService {
 
       // 생성 날짜
       const now = new Date();
-      const dateStr = now.toLocaleDateString('ko-KR');
-      page.drawText(`생성일: ${dateStr}`, {
+      const dateStr = hasKoreanFont
+        ? now.toLocaleDateString('ko-KR')
+        : now.toLocaleDateString('en-US');
+      page.drawText(`${this.safeText('생성일', hasKoreanFont)}: ${dateStr}`, {
         x: 50,
         y: height - 80,
         size: 12,
@@ -71,11 +166,11 @@ export class PdfExportService {
 
       // 기본 헤더
       const headers = [
-        '사용자명',
-        '총훈련횟수',
-        '평균점수',
-        '최고점수',
-        '완료율',
+        this.safeText('사용자명', hasKoreanFont),
+        this.safeText('총훈련횟수', hasKoreanFont),
+        this.safeText('평균점수', hasKoreanFont),
+        this.safeText('최고점수', hasKoreanFont),
+        this.safeText('완료율', hasKoreanFont),
       ];
       let currentX = 50;
 
@@ -111,13 +206,16 @@ export class PdfExportService {
           borderWidth: 1,
         });
 
-        page.drawText(`${type} 통계`, {
-          x: currentX + 5,
-          y: headerY - 15,
-          size: 10,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
+        page.drawText(
+          `${this.safeText(type, hasKoreanFont)} ${this.safeText('통계', hasKoreanFont)}`,
+          {
+            x: currentX + 5,
+            y: headerY - 15,
+            size: 10,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+          },
+        );
 
         currentX += scenarioColWidth * 3;
       });
@@ -130,7 +228,7 @@ export class PdfExportService {
         // 페이지 넘김 체크
         if (currentY < 100) {
           const newPage = pdfDoc.addPage([595.28, 841.89]);
-          page.drawText('(계속)', {
+          page.drawText(this.safeText('(계속)', hasKoreanFont), {
             x: 50,
             y: newPage.getSize().height - 50,
             size: 12,
@@ -230,9 +328,13 @@ export class PdfExportService {
   /**
    * 훈련 결과를 사용자별로 그룹화
    * @param results 훈련 결과 배열
+   * @param hasKoreanFont 한글 폰트 사용 가능 여부
    * @returns 사용자별 그룹화된 데이터
    */
-  private groupResultsByUser(results: any[]): Record<string, any> {
+  private groupResultsByUser(
+    results: any[],
+    hasKoreanFont: boolean,
+  ): Record<string, any> {
     const userResults: Record<string, any> = {};
 
     results.forEach((result) => {
@@ -240,7 +342,10 @@ export class PdfExportService {
       // 실제 사용자 이름 사용 (user.name 또는 user.userName)
       const userName =
         result.user?.name || result.user?.userName || `사용자${userId}`;
-      const scenarioType = this.getScenarioTypeName(result.scenarioType);
+      const scenarioType = this.getScenarioTypeName(
+        result.scenarioType,
+        hasKoreanFont,
+      );
 
       if (!userResults[userId]) {
         userResults[userId] = {
@@ -302,10 +407,14 @@ export class PdfExportService {
   /**
    * 시나리오 타입을 한글명으로 변환
    * @param scenarioType 시나리오 타입
-   * @returns 한글 시나리오 타입명
+   * @param hasKoreanFont 한글 폰트 사용 가능 여부
+   * @returns 한글 또는 영문 시나리오 타입명
    */
-  private getScenarioTypeName(scenarioType: string): string {
-    const typeMap: Record<string, string> = {
+  private getScenarioTypeName(
+    scenarioType: string,
+    hasKoreanFont: boolean = true,
+  ): string {
+    const koreanTypeMap: Record<string, string> = {
       FIRE: '화재',
       EARTHQUAKE: '지진',
       TRAFFIC: '교통사고',
@@ -320,11 +429,32 @@ export class PdfExportService {
       emergency_first_aid: '응급처치',
     };
 
+    const englishTypeMap: Record<string, string> = {
+      FIRE: 'Fire',
+      EARTHQUAKE: 'Earthquake',
+      TRAFFIC: 'Traffic',
+      EMERGENCY: 'Emergency',
+      fire: 'Fire',
+      earthquake: 'Earthquake',
+      traffic: 'Traffic',
+      emergency: 'Emergency',
+      earthquake_training: 'Earthquake',
+      fire_training: 'Fire',
+      traffic_accident: 'Traffic',
+      emergency_first_aid: 'Emergency',
+    };
+
     // 이미 한글이면 그대로 반환
     if (['화재', '지진', '교통사고', '응급처치'].includes(scenarioType)) {
-      return scenarioType;
+      return hasKoreanFont
+        ? scenarioType
+        : this.safeText(scenarioType, hasKoreanFont);
     }
 
-    return typeMap[scenarioType] || scenarioType;
+    if (hasKoreanFont) {
+      return koreanTypeMap[scenarioType] || scenarioType;
+    } else {
+      return englishTypeMap[scenarioType] || scenarioType;
+    }
   }
 }

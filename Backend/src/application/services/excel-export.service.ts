@@ -74,7 +74,7 @@ export class ExcelExportService {
         ),
       ];
 
-      // 헤더 행 생성
+      // 헤더 행 생성 - 시나리오 타입별로 구분된 구조
       const headers = [
         '사용자명',
         '총 훈련 횟수',
@@ -83,12 +83,14 @@ export class ExcelExportService {
         '완료율',
       ];
 
-      // 시나리오별 헤더 추가
+      // 시나리오별 헤더 추가 (타입별로 명확히 구분)
       scenarioTypes.forEach((type) => {
         headers.push(
+          `${type} 시나리오`,
           `${type} 훈련 횟수`,
           `${type} 평균 점수`,
           `${type} 최고 점수`,
+          `${type} 정확도`,
         );
       });
 
@@ -108,17 +110,22 @@ export class ExcelExportService {
           userData.completionRate,
         ];
 
-        // 시나리오별 데이터 추가
+        // 시나리오별 데이터 추가 (타입별로 명확히 구분)
         scenarioTypes.forEach((type) => {
           const scenarioData = userData.scenarios[type] || {
             attempts: 0,
             averageScore: 0,
             bestScore: 0,
           };
+          // 정확도 계산 (평균 점수를 백분율로 변환)
+          const accuracy = Math.round(scenarioData.averageScore * 100) / 100;
+
           row.push(
+            type, // 시나리오 타입
             scenarioData.attempts,
             scenarioData.averageScore,
             scenarioData.bestScore,
+            `${accuracy}%`, // 정확도
           );
         });
 
@@ -128,16 +135,32 @@ export class ExcelExportService {
         });
       });
 
-      // 열 너비 자동 조정
-      worksheet.columns.forEach((column) => {
+      // 열 너비 자동 조정 (개선된 알고리즘)
+      worksheet.columns.forEach((column, index) => {
         let maxLength = 0;
+        let maxContentLength = 0;
+
+        // 헤더와 데이터 셀 모두 확인
         column.eachCell({ includeEmpty: true }, (cell) => {
-          const columnLength = cell.value ? cell.value.toString().length : 10;
-          if (columnLength > maxLength) {
-            maxLength = columnLength;
+          const cellValue = cell.value ? cell.value.toString() : '';
+          const cellLength = cellValue.length;
+
+          if (cellLength > maxLength) {
+            maxLength = cellLength;
+          }
+
+          // 실제 내용 길이 측정 (한글은 2배로 계산)
+          const contentLength = this.calculateContentLength(cellValue);
+          if (contentLength > maxContentLength) {
+            maxContentLength = contentLength;
           }
         });
-        column.width = maxLength < 10 ? 10 : maxLength + 2;
+
+        // 컬럼 타입에 따른 최소 너비 설정
+        const minWidth = this.getMinWidthForColumn(index, headers);
+        const calculatedWidth = Math.max(minWidth, maxContentLength + 2);
+
+        column.width = Math.min(calculatedWidth, 50); // 최대 50으로 제한
       });
 
       // 엑셀 파일을 버퍼로 변환
@@ -226,6 +249,53 @@ export class ExcelExportService {
     });
 
     return userResults;
+  }
+
+  /**
+   * 텍스트 내용의 실제 길이 계산 (한글은 2배로 계산)
+   * @param text 텍스트
+   * @returns 계산된 길이
+   */
+  private calculateContentLength(text: string): number {
+    let length = 0;
+    for (let i = 0; i < text.length; i++) {
+      const char = text.charAt(i);
+      // 한글, 중국어, 일본어는 2배로 계산
+      if (
+        /[\u3131-\u3163\uac00-\ud7a3\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/.test(
+          char,
+        )
+      ) {
+        length += 2;
+      } else {
+        length += 1;
+      }
+    }
+    return length;
+  }
+
+  /**
+   * 컬럼 인덱스에 따른 최소 너비 반환
+   * @param columnIndex 컬럼 인덱스
+   * @param headers 헤더 배열
+   * @returns 최소 너비
+   */
+  private getMinWidthForColumn(columnIndex: number, headers: string[]): number {
+    const header = headers[columnIndex] || '';
+
+    // 기본 컬럼들
+    if (header.includes('사용자명')) return 15;
+    if (header.includes('총 훈련 횟수')) return 12;
+    if (header.includes('평균 점수')) return 12;
+    if (header.includes('최고 점수')) return 12;
+    if (header.includes('완료율')) return 10;
+
+    // 시나리오별 컬럼들
+    if (header.includes('시나리오')) return 12;
+    if (header.includes('훈련 횟수')) return 10;
+    if (header.includes('정확도')) return 10;
+
+    return 8; // 기본값
   }
 
   /**

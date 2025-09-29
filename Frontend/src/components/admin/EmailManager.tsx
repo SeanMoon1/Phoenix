@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { gmailApi } from '../../services/api';
 import { Icon } from '../../utils/icons';
+import { FaCheckCircle, FaTimes } from 'react-icons/fa';
 
 interface EmailMessage {
   id: string;
@@ -336,18 +337,34 @@ const EmailManager: React.FC = () => {
               {gmailConfig.config && (
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <div>
-                    Client ID: {gmailConfig.config.hasClientId ? '✅' : '❌'}
+                    Client ID: {gmailConfig.config.hasClientId ? (
+                      <FaCheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <FaTimes className="w-4 h-4 text-red-500" />
+                    )}
                   </div>
                   <div>
                     Client Secret:{' '}
-                    {gmailConfig.config.hasClientSecret ? '✅' : '❌'}
+                    {gmailConfig.config.hasClientSecret ? (
+                      <FaCheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <FaTimes className="w-4 h-4 text-red-500" />
+                    )}
                   </div>
                   <div>
                     Redirect URI:{' '}
-                    {gmailConfig.config.hasRedirectUris ? '✅' : '❌'}
+                    {gmailConfig.config.hasRedirectUris ? (
+                      <FaCheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <FaTimes className="w-4 h-4 text-red-500" />
+                    )}
                   </div>
                   <div>
-                    Scopes: {gmailConfig.config.hasScopes ? '✅' : '❌'}
+                    Scopes: {gmailConfig.config.hasScopes ? (
+                      <FaCheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <FaTimes className="w-4 h-4 text-red-500" />
+                    )}
                   </div>
                 </div>
               )}

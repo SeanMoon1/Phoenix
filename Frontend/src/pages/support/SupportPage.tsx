@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { contactApi } from '../../services/api';
+import { FaWrench } from 'react-icons/fa';
 
 const SupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('faq');
@@ -345,9 +346,7 @@ const SupportPage: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full dark:bg-blue-900/30">
-                <span className="text-xs text-blue-600 dark:text-blue-400">
-                  🔧
-                </span>
+                <FaWrench className="w-3 h-3 text-blue-600 dark:text-blue-400" />
               </div>
               <span className="text-gray-600 dark:text-gray-300">
                 기술 문의: 48시간 이내

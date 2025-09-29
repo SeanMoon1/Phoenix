@@ -12,6 +12,22 @@ import { ScenarioDataSource } from '../../services/scenarioService';
 import { useAuthStore } from '../../stores/authStore';
 import CreateAdminModal from '../../components/admin/CreateAdminModal';
 import AdminList from '../../components/admin/AdminList';
+import {
+  FaBan,
+  FaBullseye,
+  FaUsers,
+  FaFileAlt,
+  FaCheckCircle,
+  FaUser,
+  FaUserTie,
+  FaSpinner,
+  FaFileExcel,
+  FaFilePdf,
+  FaChartBar,
+  FaTrophy,
+  FaCog,
+  FaInfoCircle,
+} from 'react-icons/fa';
 
 interface TeamStats {
   totalSessions: number;
@@ -170,7 +186,9 @@ const AdminPage: React.FC = () => {
       <AdminLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="mb-4 text-6xl">🚫</div>
+            <div className="mb-4 text-6xl">
+              <FaBan className="w-16 h-16 mx-auto text-red-500" />
+            </div>
             <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
               접근 권한이 없습니다
             </h1>
@@ -186,12 +204,32 @@ const AdminPage: React.FC = () => {
   // 권한에 따른 탭 필터링
   const getAvailableTabs = () => {
     const allTabs = [
-      { id: 'training', label: '훈련 관리', icon: '🎯' },
-      { id: 'teams', label: '팀 관리', icon: '👥' },
-      { id: 'scripts', label: '시나리오 관리', icon: '📝' },
-      { id: 'approval', label: '승인 관리', icon: '✅' },
-      { id: 'users', label: '사용자 관리', icon: '👤' },
-      { id: 'admins', label: '관리자', icon: '👨‍💼' },
+      {
+        id: 'training',
+        label: '훈련 관리',
+        icon: <FaBullseye className="w-5 h-5" />,
+      },
+      { id: 'teams', label: '팀 관리', icon: <FaUsers className="w-5 h-5" /> },
+      {
+        id: 'scripts',
+        label: '시나리오 관리',
+        icon: <FaFileAlt className="w-5 h-5" />,
+      },
+      {
+        id: 'approval',
+        label: '승인 관리',
+        icon: <FaCheckCircle className="w-5 h-5" />,
+      },
+      {
+        id: 'users',
+        label: '사용자 관리',
+        icon: <FaUser className="w-5 h-5" />,
+      },
+      {
+        id: 'admins',
+        label: '관리자',
+        icon: <FaUserTie className="w-5 h-5" />,
+      },
     ];
 
     // 슈퍼 관리자만 관리자 탭 접근 가능
@@ -659,7 +697,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
-                        <span className="text-2xl">🎯</span>
+                        <FaBullseye className="w-6 h-6 text-blue-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
@@ -691,7 +729,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
-                        <span className="text-2xl">👥</span>
+                        <FaUsers className="w-6 h-6 text-purple-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
@@ -707,7 +745,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
-                        <span className="text-2xl">✅</span>
+                        <FaCheckCircle className="w-6 h-6 text-orange-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
@@ -843,8 +881,9 @@ const AdminPage: React.FC = () => {
 
               {/* 데이터 소스 설정 섹션 */}
               <div className="p-6 mb-8 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
-                  📊 시나리오 데이터 소스 설정
+                <h3 className="flex items-center mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                  <FaChartBar className="w-5 h-5 mr-2" />
+                  시나리오 데이터 소스 설정
                 </h3>
                 <div className="mb-4">
                   <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
@@ -882,7 +921,8 @@ const AdminPage: React.FC = () => {
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
                       }`}
                     >
-                      🔄 자동 전환
+                      <FaSpinner className="w-4 h-4 mr-2" />
+                      자동 전환
                     </button>
                   </div>
                 </div>
@@ -939,7 +979,9 @@ const AdminPage: React.FC = () => {
 
               {/* 시나리오 도구 링크 */}
               <div className="py-8 text-center">
-                <div className="mb-4 text-6xl">🛠️</div>
+                <div className="mb-4 text-6xl">
+                  <FaCog className="w-16 h-16 mx-auto text-gray-400" />
+                </div>
                 <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                   시나리오 작성 도구
                 </h3>
@@ -1003,7 +1045,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
-                        <span className="text-2xl">📊</span>
+                        <FaChartBar className="w-6 h-6 text-blue-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
@@ -1019,7 +1061,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
-                        <span className="text-2xl">✅</span>
+                        <FaCheckCircle className="w-6 h-6 text-green-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-green-600 dark:text-green-400">
@@ -1035,7 +1077,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
-                        <span className="text-2xl">👥</span>
+                        <FaUsers className="w-6 h-6 text-purple-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
@@ -1051,7 +1093,7 @@ const AdminPage: React.FC = () => {
                   <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                     <div className="flex items-center">
                       <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
-                        <span className="text-2xl">🏆</span>
+                        <FaTrophy className="w-6 h-6 text-orange-600" />
                       </div>
                       <div className="ml-4">
                         <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
@@ -1136,7 +1178,10 @@ const AdminPage: React.FC = () => {
                                     다운로드 중...
                                   </>
                                 ) : (
-                                  <>📊 통계 다운로드</>
+                                  <>
+                                    <FaChartBar className="w-4 h-4 mr-2" />
+                                    통계 다운로드
+                                  </>
                                 )}
                               </Button>
                             </div>
@@ -1146,7 +1191,9 @@ const AdminPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="py-8 text-center">
-                      <div className="mb-4 text-4xl">👥</div>
+                      <div className="mb-4 text-4xl">
+                        <FaUsers className="w-16 h-16 mx-auto text-gray-400" />
+                      </div>
                       <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                         생성된 팀이 없습니다
                       </h3>
@@ -1239,7 +1286,9 @@ const AdminPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="py-8 text-center">
-                      <div className="mb-4 text-4xl">✅</div>
+                      <div className="mb-4 text-4xl">
+                        <FaCheckCircle className="w-16 h-16 mx-auto text-gray-400" />
+                      </div>
                       <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                         승인 대기 시나리오가 없습니다
                       </h3>
@@ -1401,7 +1450,9 @@ const AdminPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="py-8 text-center">
-                      <div className="mb-4 text-4xl">👥</div>
+                      <div className="mb-4 text-4xl">
+                        <FaUsers className="w-16 h-16 mx-auto text-gray-400" />
+                      </div>
                       <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                         사용자가 없습니다
                       </h3>
@@ -1441,8 +1492,9 @@ const AdminPage: React.FC = () => {
 
               <div className="p-3 mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 팀 코드는 자동으로 생성됩니다. 생성된 팀 코드를 팀원들과
-                  공유하여 팀에 가입할 수 있습니다.
+                  <FaInfoCircle className="w-4 h-4 mr-2" />팀 코드는 자동으로
+                  생성됩니다. 생성된 팀 코드를 팀원들과 공유하여 팀에 가입할 수
+                  있습니다.
                 </p>
               </div>
 
@@ -1626,7 +1678,8 @@ const AdminPage: React.FC = () => {
                   }
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  📊 엑셀 파일
+                  <FaFileExcel className="w-4 h-4 mr-2" />
+                  엑셀 파일
                 </Button>
                 <Button
                   onClick={() =>
@@ -1634,7 +1687,8 @@ const AdminPage: React.FC = () => {
                   }
                   className="flex-1 bg-red-600 hover:bg-red-700"
                 >
-                  📄 PDF 파일
+                  <FaFilePdf className="w-4 h-4 mr-2" />
+                  PDF 파일
                 </Button>
               </div>
               <Button

@@ -4,6 +4,19 @@ import { useAuthStore } from '../../stores/authStore';
 import { teamApi, myPageApi, userExpApi, api } from '../../services/api';
 import { Button } from '../../components/ui';
 import { Icon } from '../../utils/icons';
+import {
+  FaChartBar,
+  FaTrophy,
+  FaUser,
+  FaCalendarAlt,
+  FaClock,
+  FaExclamationTriangle,
+  FaBullseye,
+  FaStopwatch,
+  FaGem,
+  FaCheckCircle,
+  FaSpinner,
+} from 'react-icons/fa';
 import type {
   TrainingResult,
   ScenarioTypeStatistics,
@@ -304,7 +317,7 @@ const MyPage: React.FC = () => {
     {
       id: 'records',
       name: '훈련기록',
-      icon: '📊',
+      icon: <FaChartBar className="w-5 h-5" />,
       color: 'indigo',
       activeClass: 'bg-indigo-600',
       hoverClass: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/30',
@@ -312,7 +325,7 @@ const MyPage: React.FC = () => {
     {
       id: 'scores',
       name: '점수조회',
-      icon: '🏆',
+      icon: <FaTrophy className="w-5 h-5" />,
       color: 'yellow',
       activeClass: 'bg-yellow-600',
       hoverClass: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
@@ -320,7 +333,7 @@ const MyPage: React.FC = () => {
     {
       id: 'profile',
       name: '개인정보',
-      icon: '👤',
+      icon: <FaUser className="w-5 h-5" />,
       color: 'purple',
       activeClass: 'bg-purple-600',
       hoverClass: 'hover:bg-purple-100 dark:hover:bg-purple-900/30',
@@ -329,7 +342,7 @@ const MyPage: React.FC = () => {
 
   const recordsContent = {
     title: '훈련 기록',
-    icon: '📊',
+    icon: <FaChartBar className="w-8 h-8" />,
     color: 'indigo',
     iconBgClass: 'bg-indigo-100 dark:bg-indigo-900/30',
     content: (
@@ -354,7 +367,7 @@ const MyPage: React.FC = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="mb-2 text-lg text-red-500">
-                  <Icon type="warning" category="status" />
+                  <FaExclamationTriangle className="w-6 h-6 mx-auto" />
                 </div>
                 <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
@@ -362,7 +375,9 @@ const MyPage: React.FC = () => {
           ) : trainingRecords.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">📊</div>
+                <div className="mb-4 text-4xl text-gray-400">
+                  <FaChartBar className="w-16 h-16 mx-auto" />
+                </div>
                 <p className="text-gray-600 dark:text-gray-300">
                   아직 훈련 기록이 없습니다.
                 </p>
@@ -407,13 +422,20 @@ const MyPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                          <span>
-                            📅{' '}
-                            {new Date(record.completedAt).toLocaleDateString()}
+                          <span className="flex items-center space-x-1">
+                            <FaCalendarAlt className="w-4 h-4" />
+                            <span>
+                              {new Date(
+                                record.completedAt
+                              ).toLocaleDateString()}
+                            </span>
                           </span>
-                          <span>
-                            ⏱️ {Math.floor((record.completionTime || 0) / 60)}분{' '}
-                            {(record.completionTime || 0) % 60}초
+                          <span className="flex items-center space-x-1">
+                            <FaClock className="w-4 h-4" />
+                            <span>
+                              {Math.floor((record.completionTime || 0) / 60)}분{' '}
+                              {(record.completionTime || 0) % 60}초
+                            </span>
                           </span>
                           <span className="text-xs text-gray-500">
                             총점: {record.totalScore}점
@@ -444,7 +466,7 @@ const MyPage: React.FC = () => {
 
   const scoresContent = {
     title: '점수 조회',
-    icon: '🏆',
+    icon: <FaTrophy className="w-8 h-8" />,
     color: 'yellow',
     iconBgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
     content: (
@@ -462,14 +484,18 @@ const MyPage: React.FC = () => {
         ) : error ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="mb-2 text-lg text-red-500">⚠️</div>
+              <div className="mb-2 text-lg text-red-500">
+                <FaExclamationTriangle className="w-6 h-6 mx-auto" />
+              </div>
               <p className="text-red-600 dark:text-red-400">{error}</p>
             </div>
           </div>
         ) : scenarioTypeStats.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="mb-4 text-4xl text-gray-400">🏆</div>
+              <div className="mb-4 text-4xl text-gray-400">
+                <FaTrophy className="w-16 h-16 mx-auto" />
+              </div>
               <p className="text-gray-600 dark:text-gray-300">
                 아직 통계 데이터가 없습니다.
               </p>
@@ -527,7 +553,9 @@ const MyPage: React.FC = () => {
                               {stat.averageScore.toFixed(1)}점
                             </p>
                           </div>
-                          <div className="text-3xl">📊</div>
+                          <div className="text-3xl">
+                            <FaChartBar className="w-8 h-8" />
+                          </div>
                         </div>
                       </div>
 
@@ -542,7 +570,9 @@ const MyPage: React.FC = () => {
                               {stat.accuracyRate}%
                             </p>
                           </div>
-                          <div className="text-3xl">🎯</div>
+                          <div className="text-3xl">
+                            <FaBullseye className="w-8 h-8" />
+                          </div>
                         </div>
                       </div>
 
@@ -557,7 +587,9 @@ const MyPage: React.FC = () => {
                               {formatTime(stat.averageTimeSpent)}
                             </p>
                           </div>
-                          <div className="text-3xl">⏱️</div>
+                          <div className="text-3xl">
+                            <FaStopwatch className="w-8 h-8" />
+                          </div>
                         </div>
                       </div>
 
@@ -572,7 +604,9 @@ const MyPage: React.FC = () => {
                               {stat.bestScore}점
                             </p>
                           </div>
-                          <div className="text-3xl">🏆</div>
+                          <div className="text-3xl">
+                            <FaTrophy className="w-8 h-8" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -588,7 +622,9 @@ const MyPage: React.FC = () => {
                             {stat.totalScore}점
                           </p>
                         </div>
-                        <div className="text-4xl">💎</div>
+                        <div className="text-4xl">
+                          <FaGem className="w-10 h-10" />
+                        </div>
                       </div>
                     </div>
 
@@ -609,7 +645,7 @@ const MyPage: React.FC = () => {
 
   const profileContent = {
     title: '개인정보',
-    icon: '👤',
+    icon: <FaUser className="w-8 h-8" />,
     color: 'purple',
     iconBgClass: 'bg-purple-100 dark:bg-purple-900/30',
     content: (
@@ -632,7 +668,7 @@ const MyPage: React.FC = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="mb-2 text-lg text-red-500">
-                  <Icon type="warning" category="status" />
+                  <FaExclamationTriangle className="w-6 h-6 mx-auto" />
                 </div>
                 <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
@@ -640,7 +676,9 @@ const MyPage: React.FC = () => {
           ) : !user ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="mb-4 text-4xl text-gray-400">👤</div>
+                <div className="mb-4 text-4xl text-gray-400">
+                  <FaUser className="w-16 h-16 mx-auto" />
+                </div>
                 <p className="text-gray-600 dark:text-gray-300">
                   사용자 정보를 불러올 수 없습니다.
                 </p>
@@ -725,15 +763,15 @@ const MyPage: React.FC = () => {
                   {/* 팀 코드 검증 상태 표시 */}
                   {isValidatingTeam && (
                     <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
-                      <div className="w-4 h-4 mr-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                      팀 코드를 확인하는 중...
+                      <FaSpinner className="w-4 h-4 mr-2 animate-spin" />팀
+                      코드를 확인하는 중...
                     </div>
                   )}
 
                   {teamInfo && !isValidatingTeam && (
                     <div className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
                       <div className="flex items-center text-sm text-green-800 dark:text-green-200">
-                        <span className="mr-2">✅</span>
+                        <FaCheckCircle className="w-4 h-4 mr-2" />
                         <div>
                           <div className="font-medium">{teamInfo.name}</div>
                           {teamInfo.description && (
@@ -855,8 +893,9 @@ const MyPage: React.FC = () => {
                 </h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      📊 훈련기록
+                    <h3 className="flex items-center mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <FaChartBar className="w-5 h-5 mr-2" />
+                      훈련기록
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 나의 모든 훈련 기록을 확인</li>
@@ -865,8 +904,9 @@ const MyPage: React.FC = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      🏆 점수조회
+                    <h3 className="flex items-center mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <FaTrophy className="w-5 h-5 mr-2" />
+                      점수조회
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 전체 및 유형별 점수 분석</li>
@@ -875,8 +915,9 @@ const MyPage: React.FC = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      👤 개인정보
+                    <h3 className="flex items-center mb-3 text-lg font-semibold text-gray-900 dark:text-white">
+                      <FaUser className="w-5 h-5 mr-2" />
+                      개인정보
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                       <li>• 기본 정보 수정 및 관리</li>

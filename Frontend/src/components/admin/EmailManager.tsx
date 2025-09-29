@@ -57,9 +57,16 @@ const EmailManager: React.FC = () => {
       if (response.data) {
         setGmailConfig(response.data);
         console.log('✅ Gmail 설정 상태:', response.data.status);
+      } else {
+        console.error('❌ Gmail 설정 상태 응답 데이터 없음:', response);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Gmail 설정 상태 확인 실패:', error);
+      console.error('❌ 오류 상세:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
     }
   };
 
@@ -90,8 +97,14 @@ const EmailManager: React.FC = () => {
           authUrl: response.data?.authUrl,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Gmail 인증 URL 생성 실패:', error);
+      console.error('❌ 오류 상세:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config,
+      });
     }
   };
 

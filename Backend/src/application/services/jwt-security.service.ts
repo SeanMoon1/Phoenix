@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { MemoryAuthService } from './memory-auth.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtSecurityService {
-  private blacklistedTokens = new Map<string, number>();
+  private blacklistedTokens = new Set<string>();
   private userLogoutTimes = new Map<number, number>();
+  private securityEvents: any[] = [];
 
-  constructor(
-    private readonly memoryAuthService: MemoryAuthService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   /**
    * JWT 토큰을 블랙리스트에 추가 (토큰 무효화)
@@ -26,17 +23,15 @@ export class JwtSecurityService {
 
       if (exp && exp > now) {
         // 토큰이 아직 유효한 경우에만 블랙리스트에 추가
-        const ttl = (exp - now) * 1000; // 밀리초로 변환
-        this.blacklistedTokens.set(token, Date.now() + ttl);
+        this.blacklistedTokens.add(token);
 
-        // TTL 후 자동 삭제
+        // 토큰 만료 시간에 맞춰 자동 삭제 스케줄링
+        const ttl = (exp - now) * 1000; // 밀리초로 변환
         setTimeout(() => {
           this.blacklistedTokens.delete(token);
         }, ttl);
 
-        console.log(
-          `🚫 JWT 토큰 무효화 (메모리): ${token.substring(0, 20)}...`,
-        );
+        console.log(`🚫 JWT 토큰 무효화: ${token.substring(0, 20)}...`);
       }
     } catch (error) {
       console.error('❌ JWT 토큰 무효화 실패:', error);
@@ -49,7 +44,7 @@ export class JwtSecurityService {
    */
   async invalidateAllUserTokens(userId: number): Promise<void> {
     try {
-      // 사용자별 로그아웃 시간 저장
+      // 사용자별 로그아웃 시간 기록
       this.userLogoutTimes.set(userId, Date.now());
 
       // 24시간 후 자동 삭제
@@ -60,7 +55,7 @@ export class JwtSecurityService {
         24 * 60 * 60 * 1000,
       );
 
-      console.log(`🚫 사용자 ${userId}의 모든 토큰 무효화 (메모리)`);
+      console.log(`🚫 사용자 ${userId}의 모든 토큰 무효화`);
     } catch (error) {
       console.error('❌ 사용자 토큰 무효화 실패:', error);
     }
@@ -73,16 +68,7 @@ export class JwtSecurityService {
    */
   async isTokenBlacklisted(token: string): Promise<boolean> {
     try {
-      const expiryTime = this.blacklistedTokens.get(token);
-      if (!expiryTime) return false;
-
-      // 만료된 토큰은 삭제
-      if (Date.now() > expiryTime) {
-        this.blacklistedTokens.delete(token);
-        return false;
-      }
-
-      return true;
+      return this.blacklistedTokens.has(token);
     } catch (error) {
       console.error('❌ 토큰 블랙리스트 확인 실패:', error);
       return false;
@@ -108,7 +94,7 @@ export class JwtSecurityService {
       const logoutTime = this.userLogoutTimes.get(userId);
       if (!logoutTime) return false;
 
-      return tokenIat * 1000 < logoutTime; // 토큰 발급 시간을 밀리초로 변환
+      return tokenIat * 1000 < logoutTime; // 토큰 발급 시간을 밀리초로 변환하여 비교
     } catch (error) {
       console.error('❌ 로그아웃 후 토큰 사용 확인 실패:', error);
       return false;
@@ -131,7 +117,12 @@ export class JwtSecurityService {
       };
 
       console.log(`🔒 보안 이벤트: ${event}`, logData);
-      // 메모리 기반에서는 콘솔 로깅만 수행
+
+      // 메모리에 보안 이벤트 저장 (최대 1000개)
+      this.securityEvents.push(logData);
+      if (this.securityEvents.length > 1000) {
+        this.securityEvents.shift(); // 가장 오래된 이벤트 제거
+      }
     } catch (error) {
       console.error('❌ 보안 이벤트 로깅 실패:', error);
     }

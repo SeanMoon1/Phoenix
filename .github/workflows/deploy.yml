@@ -11,14 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # ✅ Secrets 확인
       - name: Check Secrets
         run: |
           echo "BACK_HOST: ${{ secrets.BACK_HOST }}"
           echo "BACK_USER: ${{ secrets.BACK_USER }}"
           echo "BACK_SSH_KEY exists: ${{ secrets.BACK_SSH_KEY != '' }}"
 
-      # ✅ .env 파일 생성
       - name: Create .env file
         run: |
           cat > Backend/.env <<EOL
@@ -67,21 +65,11 @@ jobs:
           GMAIL_REDIRECT_URIS=${{ secrets.GMAIL_REDIRECT_URIS }}
           GMAIL_SCOPES=${{ secrets.GMAIL_SCOPES }}
           LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          MEMORY_AUTH_TTL=${{ secrets.MEMORY_AUTH_TTL }}
+          MEMORY_AUTH_MAX_ATTEMPTS=${{ secrets.MEMORY_AUTH_MAX_ATTEMPTS }}
+          MEMORY_AUTH_CLEANUP_INTERVAL=${{ secrets.MEMORY_AUTH_CLEANUP_INTERVAL }}
           EOL
 
-      # ✅ SSH 연결 테스트
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.BACK_HOST }}
-          username: ${{ secrets.BACK_USER }}
-          key: ${{ secrets.BACK_SSH_KEY }}
-          script: |
-            echo "✅ SSH 연결 성공"
-            whoami
-            pwd
-
-      # ✅ 코드 + .env만 서버로 복사
       - name: Copy backend source to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -91,7 +79,6 @@ jobs:
           source: "Backend/**"
           target: "/home/ubuntu/apps/Phoenix/"
 
-      # ✅ 서버에서 빌드 + pm2 재시작
       - name: Build & Restart backend on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -100,7 +87,6 @@ jobs:
           key: ${{ secrets.BACK_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Backend
-            echo "✅ 서버에서 npm install & build 시작"
             npm install
             npm run build
             pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
@@ -116,58 +102,41 @@ jobs:
           node-version: 20.19.0
           cache: "npm"
 
-      # ✅ Secrets 확인
-      - name: Check Secrets
-        run: |
-          echo "FRONT_HOST: ${{ secrets.FRONT_HOST }}"
-          echo "FRONT_USER: ${{ secrets.FRONT_USER }}"
-          echo "FRONT_SSH_KEY exists: ${{ secrets.FRONT_SSH_KEY != '' }}"
-
-      - name: Build frontend
-        run: |
-          cd Frontend
-          npm ci
-          npm install --save-dev rollup
-          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
-          echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-          npm run build
-          echo "✅ Frontend/dist 구조:"
-          ls -alh dist || true
-
-      # ✅ 복사 전에 반드시 확인
-      - name: Debug frontend before copy
-        run: |
-          echo "✅ Frontend 파일 확인"
-          ls -alh ./Frontend/dist || true
-
-      # ✅ SSH 연결 테스트
-      - name: Test SSH connection
+      - name: Clean & Clone Frontend repo on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ SSH 연결 성공"
-            whoami
-            pwd
+            echo "✅ 기존 Frontend 삭제"
+            rm -rf /home/ubuntu/apps/Phoenix
+            cd /home/ubuntu/apps
+            echo "✅ Git clone 실행"
+            git clone -b main https://github.com/${{ github.repository }} Phoenix
 
-      - name: Copy dist to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.FRONT_HOST }}
-          username: ${{ secrets.FRONT_USER }}
-          key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "Frontend/dist/**"
-          target: "/home/ubuntu/apps/Phoenix/Frontend/dist"
-
-      - name: Restart nginx
+      - name: Build frontend on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ 서버에서 Frontend/dist 확인:"
-            ls -alh /home/ubuntu/apps/Phoenix/Frontend/dist || true
-            sudo systemctl restart nginx
+            cd /home/ubuntu/apps/Phoenix/Frontend
+            npm install
+            echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
+            echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
+            npm run build
+            echo "✅ 빌드 후 결과물:"
+            ls -alh dist || true
+
+      # ✅ Nginx reload (phoenix-frontend.conf는 dist를 root로 사용)
+      - name: Reload nginx
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FRONT_HOST }}
+          username: ${{ secrets.FRONT_USER }}
+          key: ${{ secrets.FRONT_SSH_KEY }}
+          script: |
+            echo "✅ Nginx reload"
+            sudo systemctl reload nginx

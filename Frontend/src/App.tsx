@@ -325,7 +325,14 @@ function App() {
 
             {/* 훈련하기 */}
             <Route path="/manual" element={<ManualPage />} />
-            <Route path="/training" element={<TrainingPage />} />
+            <Route
+              path="/training"
+              element={
+                <AuthGuard>
+                  <TrainingPage />
+                </AuthGuard>
+              }
+            />
 
             {/* 사용자 대시보드 (권한에 따라 마이페이지 또는 관리자페이지) */}
             <Route path="/mypage" element={<UserDashboard />} />
@@ -344,24 +351,43 @@ function App() {
             />
 
             {/* 화재 훈련 */}
-            <Route path="/training/fire" element={<FireScenarioPage />} />
+            <Route
+              path="/training/fire"
+              element={
+                <AuthGuard>
+                  <FireScenarioPage />
+                </AuthGuard>
+              }
+            />
 
             {/* 지진 훈련 */}
             <Route
               path="/training/earthquake"
-              element={<EarthquakeScenarioPage />}
+              element={
+                <AuthGuard>
+                  <EarthquakeScenarioPage />
+                </AuthGuard>
+              }
             />
 
             {/* 응급처치 훈련 */}
             <Route
               path="/training/first-aid"
-              element={<EmergencyFirstAidScenarioPage />}
+              element={
+                <AuthGuard>
+                  <EmergencyFirstAidScenarioPage />
+                </AuthGuard>
+              }
             />
 
             {/* 교통사고 훈련 */}
             <Route
               path="/training/traffic-accident"
-              element={<TrafficAccidentScenarioPage />}
+              element={
+                <AuthGuard>
+                  <TrafficAccidentScenarioPage />
+                </AuthGuard>
+              }
             />
           </Routes>
         </Suspense>

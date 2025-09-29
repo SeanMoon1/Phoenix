@@ -114,6 +114,9 @@ export class TeamsController {
   })
   async validateTeamCode(@Param('teamCode') teamCode: string) {
     const result = await this.teamsService.validateTeamCode(teamCode);
-    return result;
+    return {
+      success: true,
+      data: result,
+    };
   }
 }

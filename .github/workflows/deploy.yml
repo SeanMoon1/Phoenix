@@ -130,7 +130,7 @@ jobs:
             echo "✅ 빌드 후 결과물:"
             ls -alh dist || true
 
-      # ✅ Nginx reload (phoenix-frontend.conf는 dist를 root로 사용)
+      # ✅ Nginx reload (dist는 root에서 바로 참조)
       - name: Reload nginx
         uses: appleboy/ssh-action@v1.0.0
         with:

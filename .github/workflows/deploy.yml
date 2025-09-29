@@ -99,6 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -113,8 +114,10 @@ jobs:
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
+            echo "✅ 기존 Frontend 삭제"
             rm -rf /home/ubuntu/apps/Phoenix
             cd /home/ubuntu/apps
+            echo "✅ Git clone 실행"
             git clone -b main https://github.com/${{ github.repository }} Phoenix
 
       # ✅ 서버에서 빌드 실행
@@ -126,31 +129,36 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
+            echo "✅ 현재 디렉토리:"; pwd
+            echo "✅ package.json 확인:"; ls -al package.json || true
+
+            # 패키지 설치
             npm ci || npm install
             npm install --save-dev rollup typescript
+
+            # 환경변수 적용
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
+
+            # 빌드
+            echo "✅ npm run build 시작"
             npx tsc -b || true
             npx vite build
+
+            echo "✅ 빌드 후 결과물:"
             ls -alh dist || true
 
-      # ✅ nginx.conf 배포
-      - name: Deploy nginx config
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.FRONT_HOST }}
-          username: ${{ secrets.FRONT_USER }}
-          key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "nginx.conf"
-          target: "/home/ubuntu/nginx.conf"
-
-      - name: Apply nginx config
+      # ✅ dist → nginx 루트 복사 및 재시작
+      - name: Deploy dist to nginx
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            sudo cp /home/ubuntu/nginx.conf /etc/nginx/nginx.conf
-            sudo nginx -t && sudo systemctl reload nginx
-            echo "✅ nginx config updated and reloaded"
+            echo "✅ dist → /var/www/html 배포 시작"
+            sudo rm -rf /var/www/html/*
+            sudo cp -r /home/ubuntu/apps/Phoenix/Frontend/dist/* /var/www/html/
+            echo "✅ Nginx reload"
+            sudo systemctl reload nginx
+

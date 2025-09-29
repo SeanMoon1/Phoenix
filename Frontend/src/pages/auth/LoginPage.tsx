@@ -7,6 +7,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useAdminAuthStore } from '../../stores/adminAuthStore';
 import { Button, Input } from '../../components/ui';
 import Layout from '../../components/layout/Layout';
+import { FaUser, FaCog } from 'react-icons/fa';
 
 const loginSchema = yup.object({
   loginId: yup
@@ -177,7 +178,17 @@ const LoginPage: React.FC = () => {
               onClick={handleModeToggle}
               className="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-600 transition-colors bg-gray-100 rounded-lg sm:text-sm dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
             >
-              {isAdminMode ? '👤 일반 사용자로 전환' : '⚙️ 관리자로 전환'}
+              {isAdminMode ? (
+                <>
+                  <FaUser className="w-4 h-4 mr-2" />
+                  일반 사용자로 전환
+                </>
+              ) : (
+                <>
+                  <FaCog className="w-4 h-4 mr-2" />
+                  관리자로 전환
+                </>
+              )}
             </button>
           </div>
 

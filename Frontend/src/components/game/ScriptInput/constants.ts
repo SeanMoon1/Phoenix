@@ -28,50 +28,50 @@ export interface DefaultScene {
 }
 
 export const DEFAULT_SCENE: DefaultScene = {
-  sceneId: "",
-  sceneScript: "",
-  nextSceneId: "",
-  disasterType: "fire",
-  difficulty: "medium",
+  sceneId: '',
+  sceneScript: '',
+  nextSceneId: '',
+  disasterType: 'fire',
+  difficulty: 'medium',
   timeLimit: 60,
   approvalStatus: ApprovalStatus.DRAFT,
-  createdBy: "",
+  createdBy: '',
   createdAt: new Date().toISOString(),
-  approvedBy: "",
-  approvedAt: "",
-  rejectionReason: "",
+  approvedBy: '',
+  approvedAt: '',
+  rejectionReason: '',
   options: [
     {
-      answer: "",
-      reaction: "",
-      nextId: "",
+      answer: '',
+      reaction: '',
+      nextId: '',
       points: {
         speed: 0,
         accuracy: 0,
       },
     },
   ],
-  sceneType: "disaster",
+  sceneType: 'disaster',
 };
 
 export const DISASTER_TYPES = {
-  FIRE: "fire",
-  EARTHQUAKE: "earthquake",
-  EMERGENCY: "emergency",
-  FLOOD: "flood",
-  COMPLEX: "complex",
+  FIRE: 'fire',
+  EARTHQUAKE: 'earthquake',
+  EMERGENCY: 'emergency',
+  FLOOD: 'flood',
+  COMPLEX: 'complex',
 } as const;
 
 export const DIFFICULTY_LEVELS = {
-  EASY: "easy",
-  MEDIUM: "medium",
-  HARD: "hard",
+  EASY: 'easy',
+  MEDIUM: 'medium',
+  HARD: 'hard',
 } as const;
 
-export const SCENE_TYPE_DISASTER = "disaster";
-export const SCENE_TYPE_ENDING = "ending";
-export const SCENE_TYPE_TRAINING = "training";
-export const SCENE_TYPE_ANALYSIS = "analysis";
+export const SCENE_TYPE_DISASTER = 'disaster';
+export const SCENE_TYPE_ENDING = 'ending';
+export const SCENE_TYPE_TRAINING = 'training';
+export const SCENE_TYPE_ANALYSIS = 'analysis';
 
 export const SCORE_WEIGHTS = {
   SPEED: 0.4,
@@ -85,11 +85,11 @@ export interface ScoreGrade {
 }
 
 export const SCORE_GRADES: Record<string, ScoreGrade> = {
-  EXCELLENT: { min: 90, name: "우수", emoji: "🏆" },
-  GOOD: { min: 80, name: "양호", emoji: "🥈" },
-  AVERAGE: { min: 70, name: "보통", emoji: "🥉" },
-  BELOW_AVERAGE: { min: 60, name: "미흡", emoji: "⚠️" },
-  POOR: { min: 0, name: "불량", emoji: "❌" },
+  EXCELLENT: { min: 90, name: '우수', emoji: '🏆' },
+  GOOD: { min: 80, name: '양호', emoji: '🥈' },
+  AVERAGE: { min: 70, name: '보통', emoji: '🥉' },
+  BELOW_AVERAGE: { min: 60, name: '미흡', emoji: '⚠️' },
+  POOR: { min: 0, name: '불량', emoji: '❌' },
 };
 
 export const APPROVAL_STATUS = {
@@ -105,15 +105,48 @@ export interface ApprovalStatusInfo {
   color: string;
 }
 
-export const APPROVAL_STATUS_INFO: Record<ApprovalStatus, ApprovalStatusInfo> = {
-  [ApprovalStatus.PENDING]: { emoji: "⏳", name: "승인 대기", color: "#FFA500" },
-  [ApprovalStatus.APPROVED]: { emoji: "✅", name: "승인됨", color: "#4CAF50" },
-  [ApprovalStatus.REJECTED]: { emoji: "❌", name: "거부됨", color: "#F44336" },
-  [ApprovalStatus.DRAFT]: { emoji: "📝", name: "초안", color: "#9E9E9E" },
-};
+export const APPROVAL_STATUS_INFO: Record<ApprovalStatus, ApprovalStatusInfo> =
+  {
+    [ApprovalStatus.PENDING]: {
+      emoji: '⏳',
+      name: '승인 대기',
+      color: '#FFA500',
+    },
+    [ApprovalStatus.APPROVED]: {
+      emoji: '✅',
+      name: '승인됨',
+      color: '#4CAF50',
+    },
+    [ApprovalStatus.REJECTED]: {
+      emoji: '❌',
+      name: '거부됨',
+      color: '#F44336',
+    },
+    [ApprovalStatus.DRAFT]: { emoji: '📝', name: '초안', color: '#9E9E9E' },
+  };
 
 export const USER_ROLES = {
   ADMIN: UserRole.ADMIN,
   TRAINER: UserRole.TRAINER,
   VIEWER: UserRole.VIEWER,
+} as const;
+
+export const SCENE_TYPES = {
+  DISASTER: SCENE_TYPE_DISASTER,
+  ENDING: SCENE_TYPE_ENDING,
+  TRAINING: SCENE_TYPE_TRAINING,
+  ANALYSIS: SCENE_TYPE_ANALYSIS,
+} as const;
+
+export const DEFAULT_TIME_LIMIT = 60;
+export const MAX_OPTIONS = 4;
+export const MIN_OPTIONS = 2;
+
+export const VALIDATION_RULES = {
+  MIN_SCENE_SCRIPT_LENGTH: 10,
+  MAX_SCENE_SCRIPT_LENGTH: 1000,
+  MIN_ANSWER_LENGTH: 1,
+  MAX_ANSWER_LENGTH: 200,
+  MIN_REACTION_LENGTH: 1,
+  MAX_REACTION_LENGTH: 500,
 } as const;

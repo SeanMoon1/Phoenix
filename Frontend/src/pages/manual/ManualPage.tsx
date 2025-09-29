@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import { Icon } from '../../utils/icons';
+import { FaBullseye } from 'react-icons/fa';
 
 const ManualPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('fire');
@@ -318,8 +319,9 @@ const ManualPage: React.FC = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      🎯 효과적인 학습 방법
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                      <FaBullseye className="w-5 h-5 mr-2" />
+                      효과적인 학습 방법
                     </h3>
                     <ul className="space-y-2 text-gray-600 dark:text-gray-300 text-sm">
                       <li>• 정기적으로 메뉴얼을 반복 학습하여 숙지</li>

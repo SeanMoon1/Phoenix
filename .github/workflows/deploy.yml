@@ -145,8 +145,9 @@ jobs:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "Frontend/dist/*"
-          target: "/home/ubuntu/apps/Phoenix/Frontend"
+          source: "./Frontend/dist/**"
+          strip_components: 2
+          target: "/home/ubuntu/apps/Phoenix/Frontend/dist/"
 
       - name: Restart nginx
         uses: appleboy/ssh-action@v1.0.0

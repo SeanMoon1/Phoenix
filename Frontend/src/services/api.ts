@@ -42,38 +42,25 @@ export const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   config => {
     try {
-      // 일반 사용자 토큰 확인
       const authStorage = localStorage.getItem('auth-storage');
-      let token = null;
-
       if (authStorage) {
         const parsed = JSON.parse(authStorage);
-        token = parsed?.state?.token;
-      }
+        const token = parsed?.state?.token;
 
-      // 관리자 토큰 확인 (관리자 토큰이 우선)
-      const adminAuthStorage = localStorage.getItem('admin-auth-storage');
-      if (adminAuthStorage) {
-        const parsed = JSON.parse(adminAuthStorage);
-        const adminToken = parsed?.state?.token;
-        if (adminToken) {
-          token = adminToken;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
           console.log(
-            '🔑 관리자 토큰 사용:',
-            adminToken.substring(0, 20) + '...'
+            '🔑 API 요청에 토큰 추가됨:',
+            token.substring(0, 20) + '...'
+          );
+        } else {
+          console.warn(
+            '⚠️ 토큰이 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
           );
         }
-      }
-
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log(
-          '🔑 API 요청에 토큰 추가됨:',
-          token.substring(0, 20) + '...'
-        );
       } else {
         console.warn(
-          '⚠️ 토큰이 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
+          '⚠️ auth-storage가 없습니다. 인증이 필요한 요청이 실패할 수 있습니다.'
         );
       }
     } catch (error) {
@@ -115,17 +102,7 @@ apiClient.interceptors.response.use(
 
       if (isAdminApi || isAuthApi) {
         console.warn('🔐 관리자/인증 API 인증 실패 - 로그아웃 처리');
-
-        // 관리자 토큰이 있는지 확인
-        const adminAuthStorage = localStorage.getItem('admin-auth-storage');
-        if (adminAuthStorage) {
-          console.warn('🔐 관리자 로그아웃 처리');
-          localStorage.removeItem('admin-auth-storage');
-        } else {
-          console.warn('🔐 일반 사용자 로그아웃 처리');
-          localStorage.removeItem('auth-storage');
-        }
-
+        localStorage.removeItem('auth-storage');
         window.location.href = '/login';
       } else {
         console.warn('🔐 일반 API 인증 실패 - 로그아웃하지 않음');
@@ -550,120 +527,6 @@ export const trainingResultApi = {
    */
   getByTeam: async (teamId: number) => {
     return api.get<TrainingResult[]>(`/training-results/team/${teamId}`);
-  },
-};
-
-// 팀 통계 관련 API
-export const teamStatsApi = {
-  /**
-   * 모든 팀 통계 조회 (슈퍼 관리자용)
-   * @returns 전체 팀 통계
-   */
-  getAllTeamStats: async () => {
-    return api.get<any[]>('/team-stats/all');
-  },
-
-  /**
-   * 특정 팀 통계 조회
-   * @param teamId 팀 ID
-   * @returns 팀 통계
-   */
-  getTeamStats: async (teamId: number) => {
-    return api.get<any>(`/team-stats/${teamId}`);
-  },
-};
-
-// Gmail 관련 API
-export const gmailApi = {
-  /**
-   * Gmail OAuth 인증 URL 생성
-   * @returns 인증 URL
-   */
-  getAuthUrl: async () => {
-    console.log('🔍 gmailApi.getAuthUrl 호출됨');
-    const result = await api.get<{ authUrl: string }>('/gmail/auth-url');
-    console.log('📥 gmailApi.getAuthUrl 응답:', result);
-    return result;
-  },
-
-  /**
-   * Gmail OAuth 인증
-   * @param code 인증 코드
-   * @returns 인증 결과
-   */
-  authenticate: async (code: string) => {
-    return api.post<{ success: boolean; message: string }>('/gmail/auth', {
-      code,
-    });
-  },
-
-  /**
-   * 이메일 목록 조회
-   * @param maxResults 최대 결과 수
-   * @param pageToken 페이지 토큰
-   * @returns 이메일 목록
-   */
-  getEmails: async (maxResults?: number, pageToken?: string) => {
-    return api.get<{
-      messages: Array<{ id: string; threadId: string }>;
-      nextPageToken?: string;
-      resultSizeEstimate: number;
-    }>('/gmail/emails', { params: { maxResults, pageToken } });
-  },
-
-  /**
-   * 특정 이메일 상세 조회
-   * @param messageId 메시지 ID
-   * @returns 이메일 상세 정보
-   */
-  getEmailById: async (messageId: string) => {
-    return api.get<any>(`/gmail/emails/${messageId}`);
-  },
-
-  /**
-   * 스레드 조회
-   * @param threadId 스레드 ID
-   * @returns 스레드 정보
-   */
-  getThreadById: async (threadId: string) => {
-    return api.get<any>(`/gmail/threads/${threadId}`);
-  },
-
-  /**
-   * 이메일 답장 전송
-   * @param messageId 원본 메시지 ID
-   * @param replyContent 답장 내용
-   * @param adminName 관리자 이름
-   * @returns 전송 결과
-   */
-  sendReply: async (
-    messageId: string,
-    replyContent: string,
-    adminName?: string
-  ) => {
-    return api.post<{ success: boolean; message: string }>('/gmail/reply', {
-      messageId,
-      replyContent,
-      adminName,
-    });
-  },
-
-  /**
-   * 이메일 HTML 본문 조회
-   * @param messageId 메시지 ID
-   * @returns HTML 본문
-   */
-  getEmailHtml: async (messageId: string) => {
-    return api.get<{ html: string }>(`/gmail/emails/${messageId}/html`);
-  },
-
-  /**
-   * 이메일 텍스트 본문 조회
-   * @param messageId 메시지 ID
-   * @returns 텍스트 본문
-   */
-  getEmailText: async (messageId: string) => {
-    return api.get<{ text: string }>(`/gmail/emails/${messageId}/text`);
   },
 };
 

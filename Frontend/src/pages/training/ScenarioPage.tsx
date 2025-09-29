@@ -39,7 +39,7 @@ const BASE_EXP = 10;
 export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
@@ -53,12 +53,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
 
   // 시작시간
   const startTime = useMemo(() => Date.now(), []);
-
-  // 인증 체크
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
 
   // 커스텀 훅들
   const gameState = useScenarioGame({ scenarioType });

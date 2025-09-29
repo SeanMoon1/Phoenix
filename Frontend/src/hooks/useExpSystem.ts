@@ -60,7 +60,7 @@ export function useExpSystem({
     return Number.isFinite(pct) ? pct : 0;
   }, [EXPDisplay, neededEXP]);
 
-  // 로컬 스토리지 복구 및 서버 데이터 동기화
+  // 로컬 스토리지 복구
   useEffect(() => {
     // 사용자 ID가 없으면 기본값으로 초기화
     if (!userId) {
@@ -71,57 +71,25 @@ export function useExpSystem({
       return;
     }
 
-    // 서버에서 최신 사용자 정보 가져오기
-    const loadServerData = async () => {
+    const userSpecificKey = `${persistKey}_user_${userId}`;
+    const raw = localStorage.getItem(userSpecificKey);
+    if (raw) {
       try {
-        const { userExpApi } = await import('@/services/api');
-        const response = await userExpApi.getUserExpInfo(userId);
-
-        if (response.success && response.data) {
-          console.log('🔄 서버에서 사용자 경험치 정보 로드:', response.data);
-          setEXP((response.data as any).userExp);
-          setLevel((response.data as any).userLevel);
-          setEXPDisplay((response.data as any).userExp);
-          // totalCorrect는 서버에서 제공하지 않으므로 로컬 스토리지에서 가져오기
-          const userSpecificKey = `${persistKey}_user_${userId}`;
-          const raw = localStorage.getItem(userSpecificKey);
-          if (raw) {
-            try {
-              const s: PersistState = JSON.parse(raw);
-              setTotalCorrect(s.totalCorrect ?? 0);
-            } catch {
-              setTotalCorrect(0);
-            }
-          }
-          return; // 서버 데이터 사용
-        }
-      } catch (error) {
-        console.error('❌ 서버에서 사용자 경험치 정보 로드 실패:', error);
+        const s: PersistState = JSON.parse(raw);
+        setEXP(s.EXP ?? 0);
+        setLevel(s.level ?? 1);
+        setTotalCorrect(s.totalCorrect ?? 0);
+        setEXPDisplay(s.EXP ?? 0);
+      } catch {
+        /* ignore */
       }
-
-      // 서버 데이터 로드 실패 시 로컬 스토리지에서 복구
-      const userSpecificKey = `${persistKey}_user_${userId}`;
-      const raw = localStorage.getItem(userSpecificKey);
-      if (raw) {
-        try {
-          const s: PersistState = JSON.parse(raw);
-          setEXP(s.EXP ?? 0);
-          setLevel(s.level ?? 1);
-          setTotalCorrect(s.totalCorrect ?? 0);
-          setEXPDisplay(s.EXP ?? 0);
-        } catch {
-          /* ignore */
-        }
-      } else {
-        // 사용자별 데이터가 없으면 기본값으로 초기화
-        setEXP(0);
-        setLevel(1);
-        setTotalCorrect(0);
-        setEXPDisplay(0);
-      }
-    };
-
-    loadServerData();
+    } else {
+      // 사용자별 데이터가 없으면 기본값으로 초기화
+      setEXP(0);
+      setLevel(1);
+      setTotalCorrect(0);
+      setEXPDisplay(0);
+    }
   }, [persistKey, userId]);
 
   // 로컬 스토리지 저장

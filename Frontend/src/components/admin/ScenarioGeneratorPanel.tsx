@@ -5,13 +5,8 @@
 
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
-import type {
-  ScenarioGeneratorEvent,
-  ConversionOptions,
-  ValidationResult,
-} from '../../types';
+import type { ScenarioGeneratorEvent, ConversionOptions, ValidationResult } from '../../types';
 import { scenarioGeneratorService } from '../../services/scenarioGeneratorService';
-import { Icon } from '../../utils/icons';
 
 const Panel = styled.div`
   background: white;
@@ -37,9 +32,7 @@ const ButtonGroup = styled.div`
   flex-wrap: wrap;
 `;
 
-const Button = styled.button<{
-  $variant?: 'primary' | 'secondary' | 'success' | 'danger';
-}>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'success' | 'danger' }>`
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -87,9 +80,7 @@ const FileInput = styled.input`
   display: none;
 `;
 
-const StatusMessage = styled.div<{
-  $type?: 'success' | 'error' | 'warning' | 'info';
-}>`
+const StatusMessage = styled.div<{ $type?: 'success' | 'error' | 'warning' | 'info' }>`
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -180,27 +171,18 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
   scenarios,
   onScenariosUpdate,
 }) => {
-  const [validationResult, setValidationResult] =
-    useState<ValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: 'success' | 'error' | 'warning' | 'info';
-    text: string;
-  } | null>(null);
-
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; text: string } | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const showMessage = (
-    type: 'success' | 'error' | 'warning' | 'info',
-    text: string
-  ) => {
+  const showMessage = (type: 'success' | 'error' | 'warning' | 'info', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -210,10 +192,7 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
       onScenariosUpdate(data);
       showMessage('success', '시나리오 파일을 성공적으로 로드했습니다.');
     } catch (error) {
-      showMessage(
-        'error',
-        error instanceof Error ? error.message : '파일 로드에 실패했습니다.'
-      );
+      showMessage('error', error instanceof Error ? error.message : '파일 로드에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -227,14 +206,11 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
 
     const result = scenarioGeneratorService.validateScenarioData(scenarios);
     setValidationResult(result);
-
+    
     if (result.valid) {
       showMessage('success', '모든 시나리오가 유효합니다.');
     } else {
-      showMessage(
-        'error',
-        `${result.errors.length}개의 오류가 발견되었습니다.`
-      );
+      showMessage('error', `${result.errors.length}개의 오류가 발견되었습니다.`);
     }
   };
 
@@ -266,58 +242,30 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
     showMessage('success', 'SQL 파일이 다운로드되었습니다.');
   };
 
-  const stats =
-    scenarios.length > 0
-      ? scenarioGeneratorService.generateStatistics(scenarios)
-      : null;
+  const stats = scenarios.length > 0 ? scenarioGeneratorService.generateStatistics(scenarios) : null;
 
   return (
     <Panel>
       <PanelTitle>🔧 시나리오 생성기</PanelTitle>
-
+      
       {message && (
         <StatusMessage $type={message.type}>
-          <span>
-            {message.type === 'success' ? (
-              <Icon type="success" category="status" />
-            ) : message.type === 'error' ? (
-              <Icon type="error" category="status" />
-            ) : message.type === 'warning' ? (
-              <Icon type="warning" category="status" />
-            ) : (
-              <Icon type="info" category="status" />
-            )}
-          </span>
+          <span>{message.type === 'success' ? '✅' : message.type === 'error' ? '❌' : message.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
           {message.text}
         </StatusMessage>
       )}
 
       <ButtonGroup>
-        <Button
-          $variant="secondary"
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <Button $variant="secondary" onClick={() => fileInputRef.current?.click()}>
           📁 파일 가져오기
         </Button>
-        <Button
-          $variant="primary"
-          onClick={handleValidate}
-          disabled={isLoading}
-        >
+        <Button $variant="primary" onClick={handleValidate} disabled={isLoading}>
           🔍 검증하기
         </Button>
-        <Button
-          $variant="success"
-          onClick={handleExportJSON}
-          disabled={scenarios.length === 0}
-        >
+        <Button $variant="success" onClick={handleExportJSON} disabled={scenarios.length === 0}>
           📤 JSON 내보내기
         </Button>
-        <Button
-          $variant="success"
-          onClick={handleExportSQL}
-          disabled={scenarios.length === 0}
-        >
+        <Button $variant="success" onClick={handleExportSQL} disabled={scenarios.length === 0}>
           📤 SQL 내보내기
         </Button>
       </ButtonGroup>
@@ -332,16 +280,10 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
       {validationResult && (
         <ValidationResults>
           <StatusMessage $type={validationResult.valid ? 'success' : 'error'}>
-            <span>
-              {validationResult.valid ? (
-                <Icon type="success" category="status" />
-              ) : (
-                <Icon type="error" category="status" />
-              )}
-            </span>
+            <span>{validationResult.valid ? '✅' : '❌'}</span>
             검증 결과: {validationResult.valid ? '유효함' : '오류 있음'}
           </StatusMessage>
-
+          
           {validationResult.errors.length > 0 && (
             <ErrorList>
               {validationResult.errors.map((error, index) => (
@@ -349,7 +291,7 @@ const ScenarioGeneratorPanel: React.FC<ScenarioGeneratorPanelProps> = ({
               ))}
             </ErrorList>
           )}
-
+          
           {validationResult.warnings.length > 0 && (
             <WarningList>
               {validationResult.warnings.map((warning, index) => (

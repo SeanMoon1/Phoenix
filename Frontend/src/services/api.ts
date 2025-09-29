@@ -922,6 +922,94 @@ export const myPageApi = {
   },
 };
 
+// Gmail 관련 API 함수들
+export const gmailApi = {
+  /**
+   * Gmail 인증 URL 생성
+   * @returns 인증 URL
+   */
+  getAuthUrl: async () => {
+    return api.get<{ authUrl: string }>('/gmail/auth-url');
+  },
+
+  /**
+   * Gmail 인증
+   * @param code 인증 코드
+   * @returns 인증 결과
+   */
+  authenticate: async (code: string) => {
+    return api.post<{ success: boolean }>('/gmail/authenticate', { code });
+  },
+
+  /**
+   * Gmail 이메일 목록 조회
+   * @param maxResults 최대 결과 수
+   * @returns 이메일 목록
+   */
+  getEmails: async (maxResults: number = 10) => {
+    return api.get<{
+      messages: Array<{ id: string; threadId: string }>;
+      nextPageToken?: string;
+      resultSizeEstimate: number;
+    }>(`/gmail/emails?maxResults=${maxResults}`);
+  },
+
+  /**
+   * 특정 이메일 조회
+   * @param messageId 메시지 ID
+   * @returns 이메일 상세 정보
+   */
+  getEmailById: async (messageId: string) => {
+    return api.get<{
+      id: string;
+      threadId: string;
+      snippet: string;
+      payload: {
+        headers: Array<{ name: string; value: string }>;
+        body: {
+          data?: string;
+          size: number;
+        };
+        parts?: Array<{
+          mimeType: string;
+          body: {
+            data?: string;
+            size: number;
+          };
+          headers?: Array<{ name: string; value: string }>;
+        }>;
+      };
+      sizeEstimate: number;
+      historyId: string;
+      labelIds: string[];
+    }>(`/gmail/emails/${messageId}`);
+  },
+
+  /**
+   * 이메일 텍스트 조회
+   * @param messageId 메시지 ID
+   * @returns 이메일 텍스트
+   */
+  getEmailText: async (messageId: string) => {
+    return api.get<{ text: string }>(`/gmail/emails/${messageId}/text`);
+  },
+
+  /**
+   * 이메일 답장 보내기
+   * @param data 답장 데이터
+   * @returns 답장 결과
+   */
+  sendReply: async (data: {
+    messageId: string;
+    threadId: string;
+    to: string;
+    subject: string;
+    content: string;
+  }) => {
+    return api.post<{ success: boolean }>('/gmail/send-reply', data);
+  },
+};
+
 // 지원 관련 API 함수들 (Database 스키마 기준)
 export const supportApi = {
   /**

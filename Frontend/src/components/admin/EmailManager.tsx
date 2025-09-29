@@ -92,13 +92,15 @@ const EmailManager: React.FC = () => {
       if (response.success && response.data) {
         // 각 이메일의 상세 정보 로드
         const emailDetails = await Promise.all(
-          response.data.messages.map(async msg => {
-            const detailResponse = await gmailApi.getEmailById(msg.id);
-            return detailResponse.success ? detailResponse.data : null;
-          })
+          response.data.messages.map(
+            async (msg: { id: string; threadId: string }) => {
+              const detailResponse = await gmailApi.getEmailById(msg.id);
+              return detailResponse.success ? detailResponse.data : null;
+            }
+          )
         );
 
-        setEmails(emailDetails.filter(Boolean));
+        setEmails(emailDetails.filter(Boolean) as EmailMessage[]);
       }
     } catch (error) {
       console.error('❌ 이메일 목록 로드 실패:', error);
@@ -190,11 +192,16 @@ const EmailManager: React.FC = () => {
 
     try {
       setSendingReply(true);
-      const response = await gmailApi.sendReply(
-        selectedEmail.id,
-        replyContent,
-        adminName
-      );
+      const response = await gmailApi.sendReply({
+        messageId: selectedEmail.id,
+        threadId: selectedEmail.threadId,
+        to: getHeaderValue(selectedEmail.payload.headers, 'From'),
+        subject: `Re: ${getHeaderValue(
+          selectedEmail.payload.headers,
+          'Subject'
+        )}`,
+        content: replyContent,
+      });
 
       if (response.success) {
         setReplySuccess('답장이 성공적으로 전송되었습니다.');

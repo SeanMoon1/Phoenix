@@ -54,7 +54,8 @@ const EmailManager: React.FC = () => {
       const response = await gmailApi.getAuthUrl();
       console.log('📥 Gmail 인증 URL 응답:', response);
 
-      if (response.success && response.data) {
+      // 백엔드에서 직접 { authUrl: string } 형태로 반환하므로 response.data.authUrl로 접근
+      if (response.data && response.data.authUrl) {
         console.log('✅ Gmail 인증 URL 생성 성공:', response.data.authUrl);
         setAuthUrl(response.data.authUrl);
       } else {
@@ -72,10 +73,16 @@ const EmailManager: React.FC = () => {
     try {
       setLoading(true);
       const response = await gmailApi.authenticate(authCode);
+      console.log('📥 Gmail 인증 응답:', response);
+
+      // 백엔드에서 { success: boolean; message: string } 형태로 반환
       if (response.success) {
+        console.log('✅ Gmail 인증 성공:', response.message);
         setAuthenticated(true);
         setAuthCode('');
         loadEmails();
+      } else {
+        console.error('❌ Gmail 인증 실패:', response.message);
       }
     } catch (error) {
       console.error('❌ Gmail 인증 실패:', error);
@@ -89,18 +96,29 @@ const EmailManager: React.FC = () => {
     try {
       setLoading(true);
       const response = await gmailApi.getEmails(20);
-      if (response.success && response.data) {
+      console.log('📥 이메일 목록 응답:', response);
+
+      // 백엔드에서 EmailListResponse 타입을 직접 반환하므로 response.data.messages로 접근
+      if (response.data && response.data.messages) {
+        console.log(
+          '✅ 이메일 목록 로드 성공, 메시지 수:',
+          response.data.messages.length
+        );
+
         // 각 이메일의 상세 정보 로드
         const emailDetails = await Promise.all(
           response.data.messages.map(
             async (msg: { id: string; threadId: string }) => {
               const detailResponse = await gmailApi.getEmailById(msg.id);
-              return detailResponse.success ? detailResponse.data : null;
+              // 백엔드에서 GmailMessage 타입을 직접 반환하므로 detailResponse.data가 곧 데이터
+              return detailResponse.data ? detailResponse.data : null;
             }
           )
         );
 
         setEmails(emailDetails.filter(Boolean) as EmailMessage[]);
+      } else {
+        console.error('❌ 이메일 목록 응답 형식 오류:', response);
       }
     } catch (error) {
       console.error('❌ 이메일 목록 로드 실패:', error);
@@ -258,7 +276,7 @@ const EmailManager: React.FC = () => {
               console.log('🔍 Gmail 연결 버튼 클릭 이벤트 발생');
               handleGetAuthUrl();
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             Gmail 연결하기
           </button>
@@ -267,8 +285,8 @@ const EmailManager: React.FC = () => {
 
       {/* Gmail 인증 */}
       {!authenticated && authUrl && (
-        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">
+        <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+          <h3 className="mb-4 text-lg font-semibold text-blue-900 dark:text-blue-100">
             Gmail 인증
           </h3>
           <div className="space-y-4">
@@ -279,7 +297,7 @@ const EmailManager: React.FC = () => {
               href={authUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-block px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Gmail 인증 페이지로 이동
             </a>
@@ -294,7 +312,7 @@ const EmailManager: React.FC = () => {
               <button
                 onClick={handleAuthenticate}
                 disabled={loading || !authCode.trim()}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                className="px-4 py-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
               >
                 {loading ? '인증 중...' : '인증하기'}
               </button>
@@ -305,7 +323,7 @@ const EmailManager: React.FC = () => {
 
       {/* 이메일 목록 */}
       {authenticated && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* 이메일 목록 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -315,13 +333,13 @@ const EmailManager: React.FC = () => {
               <button
                 onClick={loadEmails}
                 disabled={loading}
-                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-3 py-1 text-sm text-gray-700 transition-colors bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               >
                 {loading ? '로딩 중...' : '새로고침'}
               </button>
             </div>
 
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-2 overflow-y-auto max-h-96">
               {emails.filter(isInquiryEmail).map(email => {
                 const from = getHeaderValue(email.payload.headers, 'From');
                 const subject = getHeaderValue(
@@ -342,17 +360,17 @@ const EmailManager: React.FC = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
                           {from}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-sm text-gray-600 truncate dark:text-gray-400">
                           {subject}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500">
                           {date}
                         </p>
                       </div>
-                      <div className="ml-2 flex-shrink-0">
+                      <div className="flex-shrink-0 ml-2">
                         <Icon
                           type="mail"
                           category="ui"
@@ -369,8 +387,8 @@ const EmailManager: React.FC = () => {
           {/* 이메일 상세 및 답장 */}
           {selectedEmail && (
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                   이메일 상세
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -402,11 +420,11 @@ const EmailManager: React.FC = () => {
               </div>
 
               {/* 이메일 본문 */}
-              <div className="p-4 bg-white dark:bg-gray-700 rounded-lg border">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+              <div className="p-4 bg-white border rounded-lg dark:bg-gray-700">
+                <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
                   내용
                 </h4>
-                <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="overflow-y-auto text-sm text-gray-700 whitespace-pre-wrap dark:text-gray-300 max-h-40">
                   {extractTextContent(selectedEmail) || selectedEmail.snippet}
                 </div>
               </div>
@@ -418,7 +436,7 @@ const EmailManager: React.FC = () => {
                 </h4>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     관리자 이름
                   </label>
                   <input
@@ -431,7 +449,7 @@ const EmailManager: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     답장 내용
                   </label>
                   <textarea
@@ -444,7 +462,7 @@ const EmailManager: React.FC = () => {
                 </div>
 
                 {replySuccess && (
-                  <div className="p-3 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded-lg">
+                  <div className="p-3 text-green-800 bg-green-100 rounded-lg dark:bg-green-900/20 dark:text-green-200">
                     {replySuccess}
                   </div>
                 )}
@@ -452,7 +470,7 @@ const EmailManager: React.FC = () => {
                 <button
                   onClick={handleSendReply}
                   disabled={sendingReply || !replyContent.trim()}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                  className="w-full px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   {sendingReply ? '전송 중...' : '답장 전송'}
                 </button>

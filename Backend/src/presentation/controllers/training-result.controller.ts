@@ -176,4 +176,20 @@ export class TrainingResultController {
       return { success: false, error: error.message };
     }
   }
+
+  @Get('team-member-stats/:teamId')
+  @ApiOperation({ summary: '팀원별 통계 조회' })
+  @ApiParam({ name: 'teamId', description: '팀 ID' })
+  @ApiResponse({ status: 200, description: '팀원별 통계 데이터' })
+  @UseGuards(TeamAccessGuard)
+  @TeamAccess('VIEW_RESULTS')
+  async getTeamMemberStats(@Param('teamId') teamId: number) {
+    try {
+      const memberStats =
+        await this.trainingResultService.getTeamMemberStats(teamId);
+      return { success: true, data: { memberStats } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
 }

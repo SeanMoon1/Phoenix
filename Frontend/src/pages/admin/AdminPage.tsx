@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { Button } from '../../components/ui';
 import {
-  trainingApi,
   scenarioApi,
   trainingResultApi,
   adminApi,
@@ -29,13 +28,6 @@ import {
   FaInfoCircle,
 } from 'react-icons/fa';
 
-interface TeamStats {
-  totalSessions: number;
-  activeSessions: number;
-  totalParticipants: number;
-  completedParticipants: number;
-}
-
 interface TeamMemberStats {
   userId: number;
   userName: string;
@@ -53,9 +45,7 @@ const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'scripts' | 'approval' | 'users' | 'training' | 'teams' | 'admins'
   >('training');
-  const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [memberStats, setMemberStats] = useState<TeamMemberStats[]>([]);
-  const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
@@ -242,10 +232,9 @@ const AdminPage: React.FC = () => {
 
   const tabs = getAvailableTabs();
 
-  // 팀 통계 로드 (관리자는 teamId가 없을 수 있음)
+  // 팀원 통계 로드 (관리자는 teamId가 없을 수 있음)
   useEffect(() => {
     if (user?.teamId && user.teamId > 0) {
-      loadTeamStats();
       loadMemberStats();
     }
   }, [user?.teamId]);
@@ -263,32 +252,28 @@ const AdminPage: React.FC = () => {
     }
   }, [activeTab]);
 
-  const loadTeamStats = async () => {
-    if (!user?.teamId) return;
-
-    setLoading(true);
-    try {
-      const response = await trainingApi.getTeamStats(user.teamId);
-      if (response.success && response.data) {
-        setTeamStats(response.data as TeamStats);
-      }
-    } catch (error) {
-      console.error('팀 통계 로드 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadMemberStats = async () => {
-    if (!user?.teamId) return;
+    if (!user?.teamId) {
+      console.log('❌ 팀원 통계 로드 실패: teamId가 없습니다');
+      return;
+    }
 
     try {
+      console.log('🔍 팀원 통계 로드 시작:', { teamId: user.teamId });
       const response = await trainingResultApi.getTeamMemberStats(user.teamId);
+      console.log('📊 팀원 통계 API 응답:', response);
+
       if (response.success && response.data) {
-        setMemberStats((response.data as any).memberStats || []);
+        const memberStats = (response.data as any).memberStats || [];
+        console.log('✅ 팀원 통계 로드 성공:', {
+          memberCount: memberStats.length,
+        });
+        setMemberStats(memberStats);
+      } else {
+        console.error('❌ 팀원 통계 로드 실패:', response.error);
       }
     } catch (error) {
-      console.error('팀원 통계 로드 실패:', error);
+      console.error('❌ 팀원 통계 로드 실패:', error);
     }
   };
 
@@ -459,7 +444,6 @@ const AdminPage: React.FC = () => {
         setNewScenarioRiskLevel('');
         setNewScenarioOccurrenceCondition('');
         // 통계 새로고침
-        loadTeamStats();
         loadMemberStats();
       } else {
         const errorMessage =
@@ -685,86 +669,44 @@ const AdminPage: React.FC = () => {
                 훈련 관리
               </h2>
 
-              {/* 팀 통계 카드 */}
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-gray-600 dark:text-gray-400">
-                    로딩 중...
+              {/* 새로운 훈련 타입 생성 안내 */}
+              <div className="p-8 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-600">
+                <div className="text-center">
+                  <FaCog className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                    새로운 훈련 타입을 생성할 수 있습니다
+                  </h3>
+                  <p className="mb-6 text-gray-600 dark:text-gray-400">
+                    타입을 생성하고 시나리오를 작성해주세요. 구체적인 시나리오는
+                    시나리오 생성 도구로 작성할 수 있습니다.
+                  </p>
+
+                  <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                    <Button
+                      onClick={() =>
+                        window.open(
+                          'https://phoenix-4.com/admin/script-tool',
+                          '_blank'
+                        )
+                      }
+                      className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <FaCog className="w-4 h-4 mr-2" />
+                      시나리오 생성 도구 열기
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        // TODO: 새로운 훈련 타입 생성 모달 열기
+                        alert('새로운 훈련 타입 생성 기능은 개발 중입니다.');
+                      }}
+                      className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <FaBullseye className="w-4 h-4 mr-2" />새 훈련 타입 생성
+                    </Button>
                   </div>
                 </div>
-              ) : teamStats ? (
-                <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
-                        <FaBullseye className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                          총 세션 수
-                        </p>
-                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                          {teamStats.totalSessions}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
-                        <span className="text-2xl">▶️</span>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                          진행 중인 세션
-                        </p>
-                        <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                          {teamStats.activeSessions}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
-                        <FaUsers className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                          총 참가자 수
-                        </p>
-                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                          {teamStats.totalParticipants}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
-                        <FaCheckCircle className="w-6 h-6 text-orange-600" />
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                          완료한 참가자
-                        </p>
-                        <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                          {teamStats.completedParticipants}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <div className="text-gray-600 dark:text-gray-400">
-                    팀 통계를 불러올 수 없습니다.
-                  </div>
-                </div>
-              )}
+              </div>
 
               {/* 팀원별 상세 통계 */}
               {memberStats.length > 0 && (
@@ -851,25 +793,6 @@ const AdminPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
-              {/* 훈련 세션 관리 버튼들 */}
-              <div className="flex flex-wrap gap-4 mt-8">
-                <Button
-                  onClick={() => setShowCreateScenarioModal(true)}
-                  className="bg-primary-600 hover:bg-primary-700"
-                >
-                  새 시나리오 생성
-                </Button>
-                <Button
-                  onClick={() => {
-                    loadTeamStats();
-                    loadMemberStats();
-                  }}
-                  className="bg-gray-600 hover:bg-gray-700"
-                >
-                  통계 새로고침
-                </Button>
-              </div>
             </div>
           )}
 

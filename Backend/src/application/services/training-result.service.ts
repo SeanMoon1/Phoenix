@@ -609,6 +609,84 @@ export class TrainingResultService {
   }
 
   /**
+   * 팀원별 통계 조회
+   * @param teamId 팀 ID
+   * @returns 팀원별 통계 데이터
+   */
+  async getTeamMemberStats(teamId: number): Promise<any[]> {
+    try {
+      console.log('🔍 팀원별 통계 조회:', { teamId });
+
+      // 팀의 모든 사용자 조회
+      const users = await this.trainingResultRepository.manager
+        .createQueryBuilder(User, 'user')
+        .where('user.teamId = :teamId', { teamId })
+        .andWhere('user.isActive = :isActive', { isActive: true })
+        .getMany();
+
+      const memberStats = [];
+
+      for (const user of users) {
+        // 사용자의 훈련 결과 조회
+        const results = await this.trainingResultRepository
+          .createQueryBuilder('tr')
+          .leftJoinAndSelect('tr.session', 'session')
+          .leftJoinAndSelect('tr.scenario', 'scenario')
+          .where('tr.userId = :userId', { userId: user.id })
+          .andWhere('tr.isActive = :isActive', { isActive: true })
+          .orderBy('tr.completedAt', 'DESC')
+          .getMany();
+
+        // 통계 계산
+        const totalTrainings = results.length;
+        const totalScore = results.reduce(
+          (sum, result) => sum + (result.totalScore || 0),
+          0,
+        );
+        const averageScore =
+          totalTrainings > 0 ? totalScore / totalTrainings : 0;
+        const bestScore =
+          results.length > 0
+            ? Math.max(...results.map((r) => r.totalScore || 0))
+            : 0;
+        const lastTrainingAt =
+          results.length > 0 ? results[0].completedAt : null;
+
+        // 레벨 및 등급 계산 (간단한 로직)
+        const currentLevel = Math.floor(totalScore / 1000) + 1;
+        const tiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+        const currentTier =
+          tiers[Math.min(Math.floor(currentLevel / 10), tiers.length - 1)];
+
+        memberStats.push({
+          userId: user.id,
+          userName: user.name,
+          userCode: user.userCode,
+          totalTrainings,
+          totalScore,
+          averageScore: Math.round(averageScore * 100) / 100,
+          bestScore,
+          currentLevel,
+          currentTier,
+          lastTrainingAt,
+        });
+      }
+
+      // 총 점수 기준으로 정렬
+      memberStats.sort((a, b) => b.totalScore - a.totalScore);
+
+      console.log('✅ 팀원별 통계 조회 완료:', {
+        teamId,
+        memberCount: memberStats.length,
+      });
+      return memberStats;
+    } catch (error) {
+      console.error('❌ 팀원별 통계 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 다음 레벨까지 필요한 경험치 계산
    * @param level 현재 레벨
    * @returns 필요한 경험치

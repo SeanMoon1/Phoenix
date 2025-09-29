@@ -36,32 +36,21 @@ export class TrainingResultController {
     description: '훈련 결과가 성공적으로 생성되었습니다.',
   })
   async createTrainingResult(@Body() data: CreateTrainingResultDto) {
-    console.log('🔍 TrainingResultController.createTrainingResult 호출됨');
-    console.log('📝 받은 데이터:', {
-      userId: data.userId,
-      sessionId: data.sessionId,
-      scenarioId: data.scenarioId,
-      participantId: data.participantId,
-      totalScore: data.totalScore,
-      accuracyScore: data.accuracyScore,
-      speedScore: data.speedScore,
-      completionTime: data.completionTime,
-      completedAt: data.completedAt,
-    });
-
     try {
       const result =
         await this.trainingResultService.createTrainingResult(data);
-      console.log('✅ TrainingResultController.createTrainingResult 성공:', {
-        id: result.id,
-        resultCode: result.resultCode,
-      });
       return { success: true, data: result };
     } catch (error) {
-      console.error(
-        '❌ TrainingResultController.createTrainingResult 실패:',
-        error,
-      );
+      console.error('❌ TrainingResultController.createTrainingResult 실패:', {
+        error: error.message,
+        stack: error.stack,
+        data: {
+          userId: data.userId,
+          sessionId: data.sessionId,
+          scenarioId: data.scenarioId,
+          totalScore: data.totalScore,
+        },
+      });
       return { success: false, error: error.message };
     }
   }
@@ -76,17 +65,6 @@ export class TrainingResultController {
   ) {
     try {
       const user = req.user;
-
-      console.log('🔍 훈련 결과 조회 권한 검증:', {
-        userId: userId,
-        userFromToken: user,
-        userType: typeof user,
-        userIdType: typeof userId,
-        userFromTokenId: user?.id,
-        userFromTokenIdType: typeof user?.id,
-        comparison: user?.id === userId,
-        strictComparison: user?.id === Number(userId),
-      });
 
       // 권한 체크: 본인 또는 팀 관리자만 조회 가능
       if (!user) {

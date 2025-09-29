@@ -18,18 +18,21 @@
 - **권한 관리**: 팀관리자, 팀운영자, 일반사용자 권한
 - **데이터 격리**: 팀별 완전한 데이터 분리
 
-### 🔐 인증 시스템
+### 🔐 고급 인증 시스템
 
 - **다중 인증 방식**: 이메일/비밀번호, Google OAuth
+- **이중 토큰 시스템**: Access Token (15분) + Refresh Token (7일)
+- **자동 토큰 갱신**: 사용자 경험 유지하면서 보안 강화
+- **JWT 보안 강화**: alg:none 공격 방어, 토큰 타입 검증
 - **자동 사용자 코드 생성**: 시스템에서 자동 생성 및 관리
 - **팀 코드 기반 가입**: 회원가입 후 팀 코드로 팀 가입
-- **JWT 토큰 기반 인증**: 안전한 세션 관리
 
 ### 📚 시나리오 시스템
 
-- **다양한 재난 유형**: 화재, 지진, 응급처치, 교통사고
+- **4가지 재난 유형**: 🔥 화재, 🌍 지진, 🚑 응급처치, 🚗 교통사고
 - **의사결정 이벤트**: 선택형 및 순차형 이벤트
 - **실시간 피드백**: 즉시 결과 확인 및 학습
+- **아이콘 시스템**: React Icons 기반 통합 아이콘 관리
 - **유연한 데이터 소스**: 정적 파일과 데이터베이스 API 모두 지원
 - **환경별 설정**: 개발/테스트/운영 환경에 맞는 데이터 소스 선택
 
@@ -42,16 +45,28 @@
 ### 📧 고객지원 시스템
 
 - **문의하기 기능**: AWS SES를 통한 이메일 문의 시스템
+- **Gmail 관리자 패널**: 관리자가 Gmail에서 직접 문의 확인 및 답장
+- **이메일 템플릿**: 아름다운 HTML 형식으로 문의 및 답장 처리
 - **FAQ 시스템**: 자주 묻는 질문과 답변
 - **실시간 응답**: 빠른 고객 지원 서비스
+
+### 🔧 시스템 관리
+
+- **PM2 프로세스 관리**: 무중단 서비스 및 자동 재시작
+- **Nginx 리버스 프록시**: SSL/TLS 보안 및 성능 최적화
+- **환경별 설정**: 개발/테스트/운영 환경 분리
+- **자동 초기화**: 첫 배포 시 관리자 계정 및 기본 데이터 자동 생성
+- **보안 강화**: XSS, CSRF 등 웹 보안 취약점 방지
+- **Rate Limiting**: API 남용 방지를 위한 요청 제한 기능
 
 ## 🏗️ 기술 스택
 
 ### Frontend
 
-- **React 18** + **TypeScript**
+- **React 19** + **TypeScript**
 - **Vite** (빌드 도구)
 - **TailwindCSS** (스타일링)
+- **React Icons** (아이콘 시스템)
 - **Zustand** (상태 관리)
 - **React Hook Form** (폼 관리)
 - **React Router** (라우팅)
@@ -61,8 +76,11 @@
 - **NestJS** + **TypeScript** (Clean Architecture)
 - **TypeORM** (ORM)
 - **MySQL** (데이터베이스)
-- **JWT** (인증)
+- **Redis** (캐시 및 토큰 관리)
+- **JWT** (이중 토큰 시스템)
 - **Passport** (OAuth 인증)
+- **AWS SES** (이메일 서비스)
+- **Gmail API** (관리자 이메일 관리)
 - **Swagger** (API 문서)
 - **Class Validator** (유효성 검사)
 
@@ -71,6 +89,10 @@
 - **PM2** (프로세스 관리)
 - **Nginx** (리버스 프록시)
 - **AWS EC2** (클라우드 배포)
+- **AWS SES** (이메일 서비스)
+- **AWS RDS** (관계형 데이터베이스)
+- **AWS ElastiCache** (Redis 캐시)
+- **Docker** (컨테이너화)
 - **GitHub Actions** (CI/CD)
 
 ## 🏛️ Clean Architecture
@@ -136,11 +158,12 @@ Phoenix/
 │   │   ├── 📁 types/               # TypeScript 타입
 │   │   │   └── scenario.ts         # 시나리오 관련 타입 정의
 │   │   ├── 📁 utils/               # 유틸리티 함수
-│   │   │   └── 📁 scenario-generator/  # 시나리오 생성기 유틸리티
-│   │   │       ├── config.ts       # 설정 파일
-│   │   │       ├── converter.ts    # 데이터 변환기
-│   │   │       ├── logger.ts       # 로깅 유틸리티
-│   │   │       └── validator.ts    # 데이터 검증기
+│   │   │   ├── 📁 scenario-generator/  # 시나리오 생성기 유틸리티
+│   │   │   │   ├── config.ts       # 설정 파일
+│   │   │   │   ├── converter.ts    # 데이터 변환기
+│   │   │   │   ├── logger.ts       # 로깅 유틸리티
+│   │   │   │   └── validator.ts    # 데이터 검증기
+│   │   │   └── icons.tsx           # 🎨 통합 아이콘 시스템
 │   │   └── 📁 hooks/               # 커스텀 훅
 │   ├── 📁 scripts/                 # 빌드 및 배포 스크립트
 │   │   ├── 📁 deploy/              # 배포 스크립트
@@ -187,20 +210,22 @@ Phoenix/
 │   └── ecosystem.config.js         # PM2 설정
 │
 ├── 📁 Database/                    # SQL 스키마 및 백업 (운영용)
-│   ├── 📁 schema/                  # SQL 스키마 파일
-│   │   └── phoenix_schema_mysql.sql
-│   ├── 📁 migrations/              # 수동 SQL 마이그레이션
-│   └── 📁 backups/                 # 데이터베이스 백업
+│   └── phoenix_complete_schema.sql # 완전한 MySQL 스키마
 │
+├── 📁 nginx/                       # Nginx 설정
+│   └── nginx.conf                  # 리버스 프록시 설정
 │
 ├── 📁 Docs/                        # 📚 포괄적 문서
 │   ├── 📁 api/                     # ✅ API 문서 및 가이드
+│   │   └── README.md               # API 사용법
 │   ├── 📁 database/                # ✅ DB 설계 및 최적화
+│   │   └── README.md               # 데이터베이스 가이드
 │   └── 📁 deployment/              # ✅ 배포 가이드 및 AWS 최적화
+│       └── README.md               # 배포 가이드
 │
-├── .gitignore
-├── README.md
-├── deploy-direct.sh                # 직접 실행 배포 스크립트
+├── .gitignore                      # Git 무시 파일
+├── env.example                     # 환경 변수 예시
+├── README.md                       # 프로젝트 문서
 └── package.json                    # 루트 패키지
 ```
 
@@ -226,9 +251,10 @@ DB_USERNAME=your_database_username
 DB_PASSWORD=your_secure_password_here
 DB_DATABASE=phoenix
 
-# JWT
+# JWT (이중 토큰 시스템)
 JWT_SECRET=your-super-secret-jwt-key-here
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=15m  # Access Token (15분)
+REFRESH_TOKEN_EXPIRES_IN=7d  # Refresh Token (7일)
 
 # OAuth 설정
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -251,6 +277,21 @@ OAUTH_FAILURE_REDIRECT=https://your-domain.com/login?error=oauth
 # API URL
 API_URL=https://api.your-domain.com
 FRONTEND_URL=https://your-domain.com
+
+# Redis 설정
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+REDIS_DB=0
+
+# Gmail API 설정
+GMAIL_CLIENT_ID=your_gmail_client_id
+GMAIL_CLIENT_SECRET=your_gmail_client_secret
+GMAIL_PROJECT_ID=your_project_id
+GMAIL_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+GMAIL_TOKEN_URI=https://oauth2.googleapis.com/token
+GMAIL_REDIRECT_URIS=https://your-domain.com
+GMAIL_SCOPES=https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/gmail.send
 
 # Server
 PORT=3000
@@ -334,7 +375,7 @@ Phoenix 시스템에는 강력한 시나리오 생성 및 관리 도구가 통�
 
 - **직관적인 편집**: 드래그 앤 드롭으로 시나리오 블록 구성
 - **실시간 미리보기**: 작성 중인 시나리오를 실시간으로 확인
-- **다양한 재난 유형 지원**: 화재, 지진, 응급처치, 홍수, 복합 재난
+- **다양한 재난 유형 지원**: 화재, 지진, 응급처치, 교통사고
 
 ##### 2. 데이터 관리 시스템
 
@@ -361,32 +402,43 @@ Phoenix 시스템에는 강력한 시나리오 생성 및 관리 도구가 통�
 
 ```typescript
 interface ScenarioGeneratorEvent {
-  id: number;
-  teamId: number;
-  scenarioCode: string;
+  id?: number;
+  teamId?: number;
+  scenarioCode?: string;
   sceneId: string;
   title: string;
   content: string;
   sceneScript: string;
-  disasterType: 'fire' | 'earthquake' | 'emergency' | 'flood' | 'complex';
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
-  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+  disasterType: "fire" | "earthquake" | "emergency" | "traffic" | "flood";
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+  difficulty: "easy" | "medium" | "hard" | "expert";
   options: ChoiceOption[];
-  status: 'ACTIVE' | 'INACTIVE';
-  approvalStatus: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt: string;
-  createdBy: number;
-  order: number;
+  status?: "ACTIVE" | "INACTIVE";
+  approvalStatus?: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+  createdAt?: string;
+  createdBy?: number | string;
+  order?: number;
+}
+
+// 선택 옵션 구조
+interface ChoiceOption {
+  answerId: string;
+  answer: string;
+  reaction: string;
+  nextId: string;
+  points: {
+    speed: number;
+    accuracy: number;
+  };
 }
 ```
 
-### 🎮 생성되는 시나리오 유형
+### 🎮 구현된 시나리오 유형
 
-- 🔥 **화재 재난 시나리오**: 건물 화재, 산불, 화학물질 화재 등
-- 🌋 **지진 재난 시나리오**: 지진 발생, 건물 붕괴, 대피 상황 등
-- 🚑 **응급처치 상황**: 심폐소생술, 출혈 응급처치, 골절 응급처치 등
-- 🌊 **침수/홍수 시나리오**: 홍수 대피, 침수 지역 대응 등
-- ⚡ **복합 재난 시나리오**: 여러 재난이 동시에 발생하는 복합 상황
+- 🔥 **화재 재난 시나리오** (`fire`): 건물 화재, 산불, 화학물질 화재 등
+- 🌍 **지진 재난 시나리오** (`earthquake`): 지진 발생, 건물 붕괴, 대피 상황 등
+- 🚑 **응급처치 시나리오** (`emergency`): 심폐소생술, 출혈 응급처치, 화상 응급처치 등
+- 🚗 **교통사고 시나리오** (`traffic`): 교통사고 초기 대응, 부상자 응급처치 등
 
 ### 🔄 데이터 변환 프로세스
 
@@ -403,9 +455,11 @@ interface ScenarioGeneratorEvent {
 
 - **TypeScript 기반**: 타입 안전성 보장
 - **React 통합**: 기존 Phoenix Frontend와 완전 통합
+- **React Icons**: FontAwesome 기반 아이콘 시스템
 - **실시간 검증**: 작성 중 실시간 데이터 유효성 검사
 - **모듈화 설계**: 재사용 가능한 컴포넌트 구조
 - **확장성**: 새로운 재난 유형 쉽게 추가 가능
+- **아이콘 통합**: 웹 페이지와 동일한 아이콘 시스템 사용
 
 ## 🔧 배포
 
@@ -428,6 +482,34 @@ npm run build
 
 ## 🆕 최근 업데이트
 
+### v2.4.0 (2025.01.17) - JWT 보안 강화
+
+- **이중 토큰 시스템**: Access Token (15분) + Refresh Token (7일) 구현
+- **자동 토큰 갱신**: 사용자 경험 유지하면서 보안 강화
+- **JWT 보안 강화**: alg:none 공격 방어, 토큰 타입 검증
+- **Redis 토큰 관리**: Refresh Token을 Redis에 안전하게 저장
+- **토큰 갱신 API**: `/auth/refresh` 엔드포인트 추가
+- **보안 취약점 해결**: JWT 탈취 시 15분 후 자동 만료
+
+### v2.3.0 (2025.01.17) - Gmail 관리자 패널
+
+- **Gmail API 통합**: 관리자가 Gmail에서 직접 문의 확인 및 답장
+- **OAuth 2.0 인증**: Gmail 계정 연동을 위한 안전한 인증
+- **이메일 템플릿**: 아름다운 HTML 형식으로 문의 및 답장 처리
+- **관리자 이메일 관리**: 웹 기반 이메일 관리 인터페이스
+- **문의 추적**: 문의 이력 및 답장 상태 관리
+
+### v2.2.0 (2025.01.17)
+
+- **AWS SES 이메일 시스템**: 고객지원 문의하기 기능에 AWS SES 통합
+- **PM2 프로세스 관리**: 프로덕션 환경에서 안정적인 애플리케이션 실행
+- **Nginx 리버스 프록시**: SSL/TLS 보안 및 성능 최적화
+- **환경별 설정 관리**: 개발/테스트/운영 환경 분리
+- **자동 관리자 계정 생성**: 초기 배포 시 관리자 계정 자동 생성
+- **OAuth 문제 해결**: OAuth 인증 관련 데이터베이스 제약조건 수정
+- **보안 헤더 강화**: XSS, CSRF 등 웹 보안 취약점 방지
+- **Rate Limiting**: API 남용 방지를 위한 요청 제한 기능
+
 ### v2.1.0 (2025.01.16)
 
 - **시나리오 관리 도구 통합**: [game-script-tool](https://github.com/1000ship/game-script-tool) 기반 시나리오 생성기 완전 통합
@@ -435,6 +517,8 @@ npm run build
 - **데이터 관리 시스템**: JSON/SQL 형태로 시나리오 데이터 내보내기/가져오기
 - **실시간 데이터 검증**: 시나리오 작성 중 자동 유효성 검사
 - **관리자 인터페이스 개선**: 웹 기반 시나리오 편집 도구 추가
+- **아이콘 시스템 통합**: React Icons 기반 통합 아이콘 관리 시스템
+- **시나리오 유형 확장**: 4가지 재난 유형 (화재, 지진, 응급처치, 교통사고)
 
 ### v2.0.0 (2025.01.16)
 
@@ -447,14 +531,45 @@ npm run build
 
 ### 주요 변경사항
 
+#### v2.4.0 - JWT 보안 강화
+
+- **이중 토큰 시스템**: Access Token (15분) + Refresh Token (7일)
+- **자동 토큰 갱신**: 사용자 경험 유지하면서 보안 강화
+- **JWT 보안 강화**: alg:none 공격 방어, 토큰 타입 검증
+- **Redis 토큰 관리**: Refresh Token을 Redis에 안전하게 저장
+- **토큰 갱신 API**: `/auth/refresh` 엔드포인트 추가
+
+#### v2.3.0 - Gmail 관리자 패널
+
+- **Gmail API 통합**: 관리자가 Gmail에서 직접 문의 확인 및 답장
+- **OAuth 2.0 인증**: Gmail 계정 연동을 위한 안전한 인증
+- **이메일 템플릿**: 아름다운 HTML 형식으로 문의 및 답장 처리
+- **관리자 이메일 관리**: 웹 기반 이메일 관리 인터페이스
+
+#### v2.2.0 - AWS SES 이메일 시스템
+
+- **AWS SES 이메일 통합**: 고객지원 문의 시 자동 이메일 전송
+- **PM2 기반 프로세스 관리**: 무중단 서비스 및 자동 재시작
+- **Nginx 보안 설정**: SSL/TLS 암호화 및 보안 헤더 적용
+- **환경 변수 관리**: `.env` 파일을 통한 설정 중앙화
+- **자동 초기화**: 첫 배포 시 관리자 계정 및 기본 데이터 자동 생성
+
+#### v2.1.0 - 시나리오 관리 도구
+
 - **시나리오 관리 도구**: 관리자 페이지에서 시나리오 생성/편집 가능
 - **원본 출처 명시**: game-script-tool 기반으로 개발되었음을 명시
-- **재난 유형 확장**: 화재, 지진, 응급처치, 홍수, 복합 재난 시나리오 지원
+- **재난 유형 확장**: 4가지 재난 유형 (화재, 지진, 응급처치, 교통사고) 지원
+- **아이콘 시스템 통합**: React Icons 기반 통합 아이콘 관리 시스템
 - **데이터 변환 기능**: 게임 스크립트 → JSON → SQL 변환 프로세스
-- 회원가입 시 팀 코드와 사용자 코드 입력 필드 제거
-- 로그인 후 마이페이지에서 팀 코드로 팀 가입 가능
-- Google OAuth 로그인 후 메인 페이지로 리다이렉션
-- Clean Architecture 기반의 유지보수성 향상
+
+#### v2.0.0 - Clean Architecture
+
+- **Clean Architecture 적용**: Backend 구조를 Clean Architecture로 전면 개편
+- **OAuth 로그인 지원**: Google OAuth 로그인 기능 추가
+- **팀 코드 시스템**: 회원가입 후 팀 코드로 팀 가입하는 방식으로 변경
+- **자동 사용자 코드 생성**: 시스템에서 사용자 코드 자동 생성 및 관리
+- **타입 안정성 향상**: TypeScript 타입 정의 개선 및 에러 수정
+- **UI/UX 개선**: 회원가입 폼 단순화 및 마이페이지 팀 가입 기능 추가
 
 ## 📊 시나리오 데이터 소스 설정
 
@@ -479,7 +594,7 @@ Phoenix는 시나리오 데이터를 두 가지 방식으로 로드할 수 있�
    - 실패 시 API로 자동 전환
    - 개발과 운영 환경 모두 지원
 
-### ⚙️ 설정 방법
+### 🔧 설정 방법
 
 #### 1. 관리자 페이지에서 설정
 
@@ -505,10 +620,38 @@ ScenarioDataSource.getStatus(); // 현재 상태 확인
 
 ```
 Frontend/public/data/
-├── fire_training_scenario.json          # 화재 대응 시나리오
-├── earthquake_training_scenario.json    # 지진 대응 시나리오
-├── emergency_first_aid_scenario.json    # 응급처치 시나리오
-└── traffic_accident_scenario.json       # 교통사고 시나리오
+├── fire_training_scenario.json          # 🔥 화재 대응 시나리오
+├── earthquake_training_scenario.json    # 🌍 지진 대응 시나리오
+├── emergency_first_aid_scenario.json   # 🚑 응급처치 시나리오
+└── traffic_accident_scenario.json      # 🚗 교통사고 시나리오
+```
+
+### 🎨 아이콘 시스템
+
+Phoenix는 React Icons 기반의 통합 아이콘 시스템을 사용합니다:
+
+#### 재난 유형별 아이콘
+
+```typescript
+// 재난 유형별 아이콘 매핑
+export const disasterIcons = {
+  fire: <FaFire className="text-red-500" />, // 🔥 화재
+  earthquake: <FaGlobeAmericas className="text-yellow-500" />, // 🌍 지진
+  emergency: <FaAmbulance className="text-green-500" />, // 🚑 응급처치
+  traffic: <FaCar className="text-blue-500" />, // 🚗 교통사고
+  complex: <FaExclamationTriangle className="text-orange-500" />, // ⚠️ 복합재난
+};
+```
+
+#### 사용법
+
+```tsx
+// 아이콘 컴포넌트 사용
+<Icon type="fire" category="disaster" />
+<Icon type="earthquake" category="disaster" />
+<Icon type="emergency" category="disaster" />
+<Icon type="traffic" category="disaster" />
+<Icon type="flood" category="disaster" />
 ```
 
 ### 🔄 데이터 동기화
@@ -516,6 +659,136 @@ Frontend/public/data/
 - 관리자가 시나리오를 생성하고 내보내기하면 JSON 파일로 다운로드
 - 이 파일을 `public/data` 폴더에 저장하면 정적 파일 방식으로 사용 가능
 - 또는 "기존 JSON 동기화" 버튼으로 데이터베이스에 자동 동기화
+
+## 🔐 JWT 보안 시스템
+
+### 이중 토큰 시스템
+
+Phoenix는 최신 보안 표준에 따라 이중 토큰 시스템을 구현했습니다:
+
+#### Access Token (15분)
+
+- **용도**: API 요청 인증
+- **특징**: 짧은 유효기간으로 보안 강화
+- **자동 갱신**: 만료 시 Refresh Token으로 자동 갱신
+
+#### Refresh Token (7일)
+
+- **용도**: Access Token 갱신
+- **저장**: Redis에 안전하게 저장
+- **보안**: 서버에서 관리되어 탈취 위험 최소화
+
+### 보안 강화 기능
+
+#### 1. alg:none 공격 방어
+
+```typescript
+// 허용된 알고리즘만 사용
+algorithms: ["HS256", "HS384", "HS512"];
+```
+
+#### 2. 토큰 타입 검증
+
+```typescript
+// Access Token만 허용
+if (payload.type !== "access") {
+  return null;
+}
+```
+
+#### 3. 자동 토큰 갱신
+
+```typescript
+// 토큰 갱신 API
+POST /auth/refresh
+{
+  "refresh_token": "eyJ..."
+}
+```
+
+### API 엔드포인트
+
+#### 로그인
+
+```bash
+POST /auth/login
+# 응답
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "expires_in": 900
+}
+```
+
+#### 토큰 갱신
+
+```bash
+POST /auth/refresh
+{
+  "refresh_token": "eyJ..."
+}
+# 응답
+{
+  "access_token": "eyJ...",
+  "expires_in": 900
+}
+```
+
+## 📧 Gmail 관리자 패널
+
+### Gmail API 통합
+
+관리자가 Gmail에서 직접 문의를 확인하고 답장할 수 있는 시스템입니다:
+
+#### 주요 기능
+
+- **Gmail 연동**: OAuth 2.0을 통한 안전한 Gmail 계정 연동
+- **문의 확인**: Gmail에서 문의 이메일 확인
+- **답장 전송**: 아름다운 HTML 형식으로 답장 전송
+- **문의 추적**: 문의 이력 및 답장 상태 관리
+
+#### 설정 방법
+
+1. **Gmail OAuth 설정**
+
+```env
+# Backend/.env 파일
+GMAIL_CLIENT_ID=your_gmail_client_id
+GMAIL_CLIENT_SECRET=your_gmail_client_secret
+GMAIL_PROJECT_ID=your_project_id
+GMAIL_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+GMAIL_TOKEN_URI=https://oauth2.googleapis.com/token
+GMAIL_REDIRECT_URIS=https://www.phoenix-4.com
+GMAIL_SCOPES=https://www.googleapis.com/auth/gmail.readonly,https://www.googleapis.com/auth/gmail.send
+```
+
+2. **관리자 페이지 접근**
+
+- 관리자 계정으로 로그인
+- "이메일 관리" 탭 선택
+- Gmail 계정 연동
+
+#### 이메일 템플릿
+
+문의 및 답장은 아름다운 HTML 형식으로 처리됩니다:
+
+```html
+<!-- 문의 이메일 -->
+<div class="inquiry-email">
+  <h2>새로운 문의가 접수되었습니다</h2>
+  <p><strong>이름:</strong> {name}</p>
+  <p><strong>이메일:</strong> {email}</p>
+  <p><strong>문의 내용:</strong> {message}</p>
+</div>
+
+<!-- 답장 이메일 -->
+<div class="reply-email">
+  <h2>문의에 대한 답변</h2>
+  <p>안녕하세요 {name}님,</p>
+  <p>{reply_content}</p>
+  <p>감사합니다.</p>
+</div>
+```
 
 ## 📧 AWS SES 설정
 

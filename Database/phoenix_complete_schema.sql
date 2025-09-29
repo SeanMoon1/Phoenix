@@ -272,6 +272,7 @@ CREATE TABLE IF NOT EXISTS training_result (
     scenario_id BIGINT NOT NULL COMMENT '시나리오 ID',
     scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입 (FIRE, EARTHQUAKE, EMERGENCY, TRAFFIC, FLOOD 등)',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
+    team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)',
     result_code VARCHAR(50) NOT NULL COMMENT '결과 코드 (예: RESULT001, RESULT002)',
     accuracy_score INT NOT NULL COMMENT '정확도 점수',
     speed_score INT NOT NULL COMMENT '속도 점수',
@@ -288,6 +289,7 @@ CREATE TABLE IF NOT EXISTS training_result (
     FOREIGN KEY (session_id) REFERENCES training_session(session_id),
     FOREIGN KEY (scenario_id) REFERENCES scenario(scenario_id),
     FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
     UNIQUE KEY uk_participant_result_code (participant_id, result_code),
     CONSTRAINT chk_scenario_type CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'))
 );
@@ -404,7 +406,7 @@ CREATE TABLE IF NOT EXISTS achievement (
 CREATE TABLE IF NOT EXISTS user_scenario_stats (
     stats_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '통계 ID',
     user_id BIGINT NOT NULL COMMENT '사용자 ID',
-    team_id BIGINT NOT NULL COMMENT '팀 ID',
+    team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 통계 가능)',
     scenario_type VARCHAR(50) NOT NULL COMMENT '시나리오 유형',
     completed_count INT NOT NULL DEFAULT 0 COMMENT '완료 횟수',
     total_score BIGINT NOT NULL DEFAULT 0 COMMENT '총점',
@@ -609,7 +611,7 @@ CREATE TRIGGER tr_training_result_after_insert
 AFTER INSERT ON training_result
 FOR EACH ROW
 BEGIN
-    -- user_scenario_stats 테이블 업데이트 (기존 통계 테이블과 연동)
+    -- user_scenario_stats 테이블 업데이트 (팀 소속 없이도 가능)
     INSERT INTO user_scenario_stats (
         user_id, 
         team_id, 
@@ -622,7 +624,7 @@ BEGIN
         last_completed_at
     ) VALUES (
         NEW.user_id,
-        (SELECT team_id FROM user WHERE user_id = NEW.user_id),
+        COALESCE((SELECT team_id FROM user WHERE user_id = NEW.user_id), NULL),
         NEW.scenario_type,
         1,
         NEW.total_score,
@@ -813,10 +815,67 @@ INSERT INTO choice_option (event_id, scene_id, scenario_id, choice_code, choice_
 -- 완료 메시지
 -- =====================================================
 
+-- =====================================================
+-- 자동 마이그레이션 (안전한 방식)
+-- =====================================================
+
+-- 안전한 마이그레이션을 위한 프로시저 생성
+DELIMITER //
+
+CREATE PROCEDURE SafeMigration()
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION BEGIN END;
+    
+    -- 1. training_result 테이블의 team_id 컬럼을 NULL 허용으로 변경
+    ALTER TABLE training_result 
+    MODIFY COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 훈련 가능)';
+    
+    -- 2. user_scenario_stats 테이블의 team_id 컬럼을 NULL 허용으로 변경
+    ALTER TABLE user_scenario_stats 
+    MODIFY COLUMN team_id BIGINT NULL COMMENT '팀 ID (팀 상관없이 통계 가능)';
+    
+    -- 3. scenario_type 컬럼 추가 시도
+    ALTER TABLE training_result 
+    ADD COLUMN scenario_type VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN' COMMENT '시나리오 타입' 
+    AFTER scenario_id;
+    
+    -- 4. 기존 데이터 업데이트
+    UPDATE training_result tr
+    JOIN scenario s ON tr.scenario_id = s.scenario_id
+    SET tr.scenario_type = UPPER(s.disaster_type)
+    WHERE tr.scenario_type = 'UNKNOWN';
+    
+    -- 5. 인덱스 추가 시도
+    CREATE INDEX idx_training_result_scenario_type ON training_result(scenario_type);
+    
+    -- 6. 복합 인덱스 추가 시도
+    CREATE INDEX idx_training_result_user_scenario_type ON training_result(user_id, scenario_type, is_active);
+    
+    -- 7. 제약조건 추가 시도
+    ALTER TABLE training_result 
+    ADD CONSTRAINT chk_scenario_type 
+    CHECK (scenario_type IN ('FIRE', 'EARTHQUAKE', 'EMERGENCY', 'TRAFFIC', 'FLOOD', 'UNKNOWN'));
+    
+END //
+
+DELIMITER ;
+
+-- 마이그레이션 실행
+CALL SafeMigration();
+
+-- 프로시저 삭제
+DROP PROCEDURE IF EXISTS SafeMigration;
+
+-- =====================================================
+-- 완료 메시지
+-- =====================================================
+
 SELECT 'Phoenix Database Schema 생성 완료!' as status;
+-- 데이터베이스 통계 정보 (안전한 방식)
 SELECT '총 테이블 수:' as info, COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE();
 SELECT '총 뷰 수:' as info, COUNT(*) as count FROM information_schema.views WHERE table_schema = DATABASE();
-SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE table_schema = DATABASE() AND routine_type = 'PROCEDURE';
+SELECT '총 프로시저 수:' as info, COUNT(*) as count FROM information_schema.routines WHERE routine_schema = DATABASE() AND routine_type = 'PROCEDURE';
 SELECT '총 트리거 수:' as info, COUNT(*) as count FROM information_schema.triggers WHERE trigger_schema = DATABASE();
 SELECT '시나리오 타입별 통계 기능이 포함되었습니다.' as info;
 SELECT '5가지 항목 통계 (평균점수, 정확도, 훈련시간, 최고점수, 누적점수)를 지원합니다.' as info;
+SELECT '자동 마이그레이션이 완료되었습니다.' as info;

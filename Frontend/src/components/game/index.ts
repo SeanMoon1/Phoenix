@@ -6,5 +6,4 @@ export { default as OptionsList } from '@/components/common/OptionsList';
 export { default as FeedbackBanner } from '@/components/common/FeedbackBanner';
 export { default as NavButtons } from '@/components/common/NavButtons';
 export { default as ClearModal } from '@/components/common/ClearModal';
-export { default as FailModal } from '@/components/common/FailModal';
 export { default as ConfettiOverlay } from '@/components/common/ConfettiOverlay';

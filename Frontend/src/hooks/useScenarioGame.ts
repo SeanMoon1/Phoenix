@@ -49,6 +49,12 @@ interface UseScenarioGameReturn {
 
   // 이미 풀었던 문제 인덱스 목록
   answered: number[];
+
+  // 현재 훈련에서의 정답 개수
+  currentCorrect: number;
+
+  // 실제 문제 수 (order가 999인 #END 슬라이드 제외)
+  actualQuestionCount: number;
 }
 
 export function useScenarioGame({
@@ -63,7 +69,7 @@ export function useScenarioGame({
   // 선택/피드백
   const [selected, setSelected] = useState<ChoiceOption | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [choiceDisabled, setChoiceDisabled] = useState(false); // choiceDisabled 선언 추가
+  const [choiceDisabled, setChoiceDisabled] = useState(false);
 
   // 게임 진행 상태
   const [failedThisRun, setFailedThisRun] = useState(false);
@@ -74,11 +80,19 @@ export function useScenarioGame({
   // 이미 푼 문제 상태
   const [answered, setAnswered] = useState<number[]>([]);
 
+  // 현재 훈련에서의 정답 개수
+  const [currentCorrect, setCurrentCorrect] = useState(0);
+
   // 현재 시나리오
   const scenario = useMemo(
     () => scenarios[current] || null,
     [scenarios, current]
   );
+
+  // 실제 문제 수 계산 (order가 999인 #END 슬라이드 제외)
+  const actualQuestionCount = useMemo(() => {
+    return scenarios.filter(scene => scene.order !== 999).length;
+  }, [scenarios]);
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -114,6 +128,7 @@ export function useScenarioGame({
     setEndModalAutoShown(false);
     setChoiceDisabled(false);
     setAnswered([]);
+    setCurrentCorrect(0);
   }, []);
 
   // 씬 플래그 리셋
@@ -130,6 +145,9 @@ export function useScenarioGame({
       const isCorrect = (option.accuracyPoints || 0) > 0;
       const alreadyAnswered = answered.includes(current);
 
+      // 마지막 문제(END 씬)는 점수 계산에서 제외
+      const isEndScene = scenario?.sceneId === '#END';
+
       // 항상 선택은 적용(피드백 등)
       setSelected(option);
       setFeedback(option.reactionText || null);
@@ -142,9 +160,20 @@ export function useScenarioGame({
       // 첫 응답인 경우 marked
       setAnswered(prev => [...prev, current]);
 
+      // 마지막 문제는 점수 계산에서 제외
+      if (isEndScene) {
+        return { shouldAwardExp: false, isCorrect: false };
+      }
+
       // 첫 응답이고 정답이면 경험치 지급 대상일 수 있음
       const shouldAwardExp =
         isCorrect && !awardedExpThisScene && !wrongTriedInThisScene;
+
+      // 정답이면 현재 훈련 정답 개수 증가
+      if (isCorrect) {
+        setCurrentCorrect(prev => prev + 1);
+      }
+
       // NOTE: 실제 awardedExpThisScene 플래그는 ScenarioPage에서 EXP 지급 시 설정하도록 유지(중복 방지)
       return { shouldAwardExp, isCorrect };
     },
@@ -192,6 +221,8 @@ export function useScenarioGame({
 
       // newly exposed
       answered,
+      currentCorrect,
+      actualQuestionCount,
     }),
     [
       scenarios,
@@ -210,6 +241,8 @@ export function useScenarioGame({
       resetSceneFlags,
       choiceDisabled,
       answered,
+      currentCorrect,
+      actualQuestionCount,
       // setter 함수들은 의존성에서 제외 (무한 루프 방지)
     ]
   );

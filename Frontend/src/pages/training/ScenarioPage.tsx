@@ -1,17 +1,14 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import /* trainingApi, trainingResultApi */ '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import type { ChoiceOption } from '@/types/index';
 
-// 훅 import
 import { useScenarioGame } from '@/hooks/useScenarioGame';
 import { useExpSystem } from '@/hooks/useExpSystem';
 import { useModals } from '@/hooks/useModals';
 import { useTrainingResult } from '@/hooks/useTrainingResult';
 
-// 컴포넌트 imports
 import CharacterPanel from '@/components/common/CharacterPanel';
 import ProgressBar from '@/components/common/ProgressBar';
 import SituationCard from '@/components/common/SituationCard';
@@ -19,12 +16,14 @@ import OptionsList from '@/components/common/OptionsList';
 import FeedbackBanner from '@/components/common/FeedbackBanner';
 import NavButtons from '@/components/common/NavButtons';
 import ClearModal from '@/components/common/ClearModal';
-import FailModal from '@/components/common/FailModal';
 import ConfettiOverlay from '@/components/common/ConfettiOverlay';
 import PlayMoreButton from '@/components/common/PlayMoreButton';
 import LevelUpToast from '@/components/common/LevelUpToast';
 
 import phoenixImg from '@/assets/images/phoenix.png';
+import apartmentFireImg from '@/assets/images/apartment_fire.png';
+import earthquakeImg from '@/assets/images/earthquake_panic.png';
+import { getScenarioSetName } from '@/utils/scenarioMaps';
 
 interface ScenarioPageProps {
   scenarioSetName?: string;
@@ -35,29 +34,15 @@ interface ScenarioPageProps {
 const DEFAULT_PERSIST_KEY = 'phoenix_training_state';
 const BASE_EXP = 10;
 
-// 시나리오 타입별 이름 매핑
-const getScenarioSetName = (type: string): string => {
-  switch (type) {
-    case 'fire':
-      return '화재 대응';
-    case 'first-aid':
-      return '응급처치';
-    case 'traffic-accident':
-      return '교통사고 대응';
-    case 'earthquake':
-      return '지진 대응';
-    case 'flood':
-      return '홍수 대응';
-    default:
-      return '재난 대응';
-  }
-};
+// getScenarioSetName imported from utils
 
 export default function ScenarioPage(props?: ScenarioPageProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const topRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLElement | null>(null);
+  const [showMobilePanelModal, setShowMobilePanelModal] = useState(false);
 
   // URL에서 시나리오 타입 추출
   const scenarioType = location.pathname.split('/').pop() || 'fire';
@@ -66,8 +51,14 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const nextScenarioPath = props?.nextScenarioPath || '/training';
   const persistKey = props?.persistKey || DEFAULT_PERSIST_KEY;
 
-  // 시작 시간
+  // 시작시간
   const startTime = useMemo(() => Date.now(), []);
+
+  // 인증 체크
+  if (!isAuthenticated) {
+    navigate('/login');
+    return null;
+  }
 
   // 커스텀 훅들
   const gameState = useScenarioGame({ scenarioType });
@@ -80,9 +71,24 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.resetSceneFlags();
     gameState.setHistory((h: number[]) => [...h, gameState.current]);
     gameState.setCurrent(index);
-    // 스크롤: 공통 처리
+
     requestAnimationFrame(() => {
-      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 데스크탑 화면에서 다음버튼 누르고 스크롤 맨 위에서 시작하도록 수정
+      requestAnimationFrame(() => {
+        const isWide =
+          typeof window !== 'undefined' && window.innerWidth >= 768;
+        const targetEl = isWide
+          ? topRef.current
+          : contentRef.current ?? topRef.current;
+        if (!targetEl) return;
+
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const rect = targetEl.getBoundingClientRect();
+        const top = window.scrollY + rect.top - headerHeight - 8; // small margin
+
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
     });
   };
 
@@ -100,10 +106,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
         scenarioType,
         expSystemState: {
           level: expSystem.level,
-          totalCorrect: expSystem.totalCorrect,
+          totalCorrect: gameState.currentCorrect,
         },
         gameStateSummary: {
-          scenariosCount: gameState.scenarios.length,
+          scenariosCount: gameState.actualQuestionCount, // 실제 문제 수 사용
           startTimeMs: startTime,
           failedThisRun: gameState.failedThisRun,
         },
@@ -117,7 +123,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
   const handleChoice = (option: ChoiceOption) => {
     // 이전에 이미 답한 문제인지(ANSWERED 기준) 확인 -> 경험치 지급 방지
     if (gameState.answered?.includes(gameState.current)) {
-      gameState.handleChoice(option); // 선택/피드백만 처리
+      gameState.handleChoice(option); // 선택, 피드백만 처리
       return;
     }
 
@@ -125,7 +131,6 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     if (result?.shouldAwardExp) {
       expSystem.awardExp(BASE_EXP);
       expSystem.incrementTotalCorrect();
-      // 지급한 것을 훅에도 알려 중복 지급 방지
       gameState.setAwardedExpThisScene(true);
     }
   };
@@ -183,9 +188,28 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     gameState.setHistory((h: number[]) => h.slice(0, -1));
     gameState.setCurrent(prev);
     gameState.resetSceneFlags();
+
+    // 스크롤 위치 조정
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const isWide =
+          typeof window !== 'undefined' && window.innerWidth >= 768;
+        const targetEl = isWide
+          ? topRef.current
+          : contentRef.current ?? topRef.current;
+        if (!targetEl) return;
+
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const rect = targetEl.getBoundingClientRect();
+        const top = window.scrollY + rect.top - headerHeight - 8;
+
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
   };
 
-  // 로딩/에러 처리
+  // 로딩, 에러 처리
   if (gameState.loading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827] dark:text-white">
@@ -201,6 +225,7 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
     );
   }
 
+  // 시나리오가 없거나 현재 시나리오를 찾을 수 없는 경우
   if (!gameState.scenarios.length || !gameState.scenario) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-neutral-100 text-neutral-900 dark:bg-[#111827] dark:text-white">
@@ -242,12 +267,39 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
               expDisplay={expSystem.EXPDisplay}
               neededExp={expSystem.neededEXP}
               hideExpFill={expSystem.hideExpFill}
+              mobilePanelModalOpen={showMobilePanelModal}
+              onCloseMobilePanel={() => setShowMobilePanelModal(false)}
             />
-            <SituationCard
-              title={gameState.scenario.title ?? ''}
-              content={gameState.scenario.content ?? ''}
-              sceneScript={gameState.scenario.sceneScript ?? ''}
-            />
+            {(() => {
+              const s = gameState.scenario ?? {};
+              // 우선적으로 JSON의 disasterType 필드를 사용
+              const dt = (s.disasterType || '').toString().toLowerCase();
+              const map: Record<string, string | undefined> = {
+                fire: apartmentFireImg,
+                earthquake: earthquakeImg,
+                emergency: undefined,
+                traffic: undefined,
+              };
+              const heroSrc = map[dt];
+              const showHeroImage =
+                gameState.current === 0 &&
+                !(
+                  Array.isArray(gameState.answered) &&
+                  gameState.answered.includes(0)
+                ) &&
+                !!heroSrc;
+
+              return (
+                <SituationCard
+                  ref={contentRef}
+                  title={gameState.scenario.title ?? ''}
+                  content={gameState.scenario.content ?? ''}
+                  sceneScript={gameState.scenario.sceneScript ?? ''}
+                  showHeroImage={showHeroImage}
+                  heroSrc={heroSrc}
+                />
+              );
+            })()}
             <OptionsList
               options={gameState.scenario.options ?? []}
               selected={gameState.selected}
@@ -287,16 +339,10 @@ export default function ScenarioPage(props?: ScenarioPageProps) {
             onClose={() => {
               modals.setClearMsg(null);
               modals.setShowConfetti(false);
-            }}
-          />
-        )}
-        {modals.failMsg && (
-          <FailModal
-            message={modals.failMsg}
-            onClose={() => modals.setFailMsg(null)}
-            onRetry={() => {
-              modals.setFailMsg(null);
-              gameState.resetGame();
+              // 모바일이면 축하 모달 닫은 뒤 캐릭터+EXP 패널을 모달로 띄움
+              if (typeof modals.vw === 'number' && modals.vw < 768) {
+                setShowMobilePanelModal(true);
+              }
             }}
           />
         )}

@@ -113,6 +113,7 @@ export class TeamsController {
     },
   })
   async validateTeamCode(@Param('teamCode') teamCode: string) {
-    return this.teamsService.validateTeamCode(teamCode);
+    const result = await this.teamsService.validateTeamCode(teamCode);
+    return result;
   }
 }

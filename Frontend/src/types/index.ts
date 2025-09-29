@@ -60,8 +60,11 @@ export interface Admin {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // 관리자 권한 관련
+  isAdmin: boolean;
+  adminLevel: string; // levelCode 값
   // 관계 데이터
-  adminLevel?: AdminLevel;
+  adminLevelData?: AdminLevel;
   team?: Team;
 }
 
@@ -152,6 +155,7 @@ export interface Scenario {
   content?: string;
   sceneScript?: string;
   options?: ChoiceOption[];
+  order?: number; // 시나리오 순서 (999는 #END 슬라이드)
   // 관계 데이터 (선택적)
   scenes?: ScenarioScene[];
   events?: ScenarioEvent[];

@@ -27,7 +27,9 @@
     "migration:revert": "npm run typeorm -- migration:revert -d ormconfig.ts",
     "schema:drop": "npm run typeorm -- schema:drop -d ormconfig.ts",
     "schema:sync": "npm run typeorm -- schema:sync -d ormconfig.ts",
-    "fix-admin": "node scripts/fix-admin-permissions.js"
+    "fix-admin": "node scripts/fix-admin-permissions.js",
+    "setup:dev": "./scripts/setup-env.sh development",
+    "setup:prod": "./scripts/setup-env.sh production"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.893.0",
@@ -43,6 +45,10 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "exceljs": "^4.4.0",
+    "google-auth-library": "^10.3.0",
+    "googleapis": "^160.0.0",
+    "ioredis": "^5.8.0",
     "mysql2": "^3.6.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
@@ -50,6 +56,8 @@
     "passport-kakao": "^1.0.1",
     "passport-local": "^1.0.0",
     "passport-naver": "^1.0.6",
+    "pdf-lib": "^1.17.1",
+    "redis": "^4.6.12",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.26"

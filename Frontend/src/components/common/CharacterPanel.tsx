@@ -1,5 +1,11 @@
 // src/components/common/CharacterPanel.tsx
 import phoenixImg from '@/assets/images/phoenix.png';
+import magicianImg from '@/assets/images/magician.png';
+import level2Img from '@/assets/images/level2.png';
+import level3Img from '@/assets/images/level3.png';
+import level4Img from '@/assets/images/level4.png';
+import level5Img from '@/assets/images/level5.png';
+import { useAuthStore } from '@/stores/authStore';
 
 type Props = {
   level: number;
@@ -20,12 +26,33 @@ export default function CharacterPanel({
   hideExpFill = false,
   playerName = '플레이어 이름',
 }: Props) {
+  const { user } = useAuthStore();
+  // 관리자 플래그 안전 체크
+  const isAdminUser = (() => {
+    if (!user) return false;
+    if ((user as any).isAdmin === true) return true;
+    if ((user as any).is_admin === true) return true;
+    if ((user as any).user_type === 'ADMIN') return true;
+    if ((user as any).admin_level) return true;
+    const role = (user as any).role ?? '';
+    if (typeof role === 'string' && role.toLowerCase() === 'admin') return true;
+    return false;
+  })();
+
+  // 레벨 우선 이미지 매핑: 높은 레벨 우선 적용
+  let avatarSrc = phoenixImg;
+  if (level >= 5) avatarSrc = level5Img;
+  else if (level >= 4) avatarSrc = level4Img;
+  else if (level >= 3) avatarSrc = level3Img;
+  else if (level >= 2) avatarSrc = level2Img;
+  else avatarSrc = isAdminUser ? magicianImg : phoenixImg;
+
   return (
     <aside className="hidden md:flex md:flex-col md:gap-4">
       <div className="bg-white/80 dark:bg-black/40 rounded-2xl shadow-md p-4">
         <img
-          src={phoenixImg}
-          alt="Phoenix Mascot"
+          src={avatarSrc}
+          alt="Mascot"
           className="w-full max-w-[240px] object-contain"
         />
       </div>

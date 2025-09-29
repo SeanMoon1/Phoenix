@@ -10,6 +10,7 @@ export interface UpdateUserRequest {
   email?: string;
   profileImageUrl?: string;
   password?: string;
+  teamId?: number;
 }
 
 export interface UpdateUserResponse {
@@ -59,6 +60,7 @@ export class UpdateUserUseCase {
         email: request.email,
         profileImageUrl: request.profileImageUrl,
         password: request.password,
+        teamId: request.teamId,
       });
 
       const updatedUser = await this.userRepository.findOne({

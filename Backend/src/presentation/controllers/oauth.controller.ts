@@ -155,17 +155,11 @@ export class OAuthController {
         );
       }
 
-      // 필수 정보 검증
-      if (!user.email || !user.name || !user.provider || !user.providerId) {
-        console.log(`❌ ${provider} OAuth 사용자 정보 불완전:`, {
-          email: user.email || 'undefined',
-          name: user.name || 'undefined',
+      // 필수 정보 검증 및 기본값 설정
+      if (!user.provider || !user.providerId) {
+        console.log(`❌ ${provider} OAuth 필수 정보 없음:`, {
           provider: user.provider || 'undefined',
           providerId: user.providerId || 'undefined',
-          emailType: typeof user.email,
-          nameType: typeof user.name,
-          providerType: typeof user.provider,
-          providerIdType: typeof user.providerId,
         });
         const redirectBase =
           this.configService.get<string>('OAUTH_REDIRECT_BASE') ||
@@ -174,6 +168,25 @@ export class OAuthController {
           `${redirectBase}/auth/callback?error=incomplete_user_info`,
         );
       }
+
+      // 이메일이 없으면 기본값 설정
+      if (!user.email) {
+        console.warn(`⚠️ ${provider} OAuth: 이메일 정보 없음, 기본값 설정`);
+        user.email = `user_${user.providerId}@${provider}.local`;
+      }
+
+      // 이름이 없으면 기본값 설정
+      if (!user.name) {
+        console.warn(`⚠️ ${provider} OAuth: 이름 정보 없음, 기본값 설정`);
+        user.name = `${provider} 사용자`;
+      }
+
+      console.log(`✅ ${provider} OAuth 사용자 정보 검증 완료:`, {
+        email: user.email,
+        name: user.name,
+        provider: user.provider,
+        providerId: user.providerId,
+      });
 
       console.log(`🔄 ${provider} OAuth 사용자 등록/로그인 처리 시작`);
       console.log('📝 OAuth 사용자 데이터:', {
@@ -212,8 +225,8 @@ export class OAuthController {
         const userParam = encodeURIComponent(
           JSON.stringify({
             id: result.user.id,
-            email: result.user.email,
-            name: result.user.name,
+            email: result.user.email || user.email,
+            name: result.user.name || user.name,
             provider: user.provider,
             providerId: user.providerId,
           }),

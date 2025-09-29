@@ -23,6 +23,13 @@ import { TeamsController } from './presentation/controllers/teams.controller';
 import { AdminController } from './presentation/controllers/admin.controller';
 import { AdminAuthController } from './presentation/controllers/admin-auth.controller';
 import { ContactController } from './presentation/controllers/contact.controller';
+import { ExcelExportController } from './presentation/controllers/excel-export.controller';
+import { GmailController } from './presentation/controllers/gmail.controller';
+import { TeamStatsController } from './presentation/controllers/team-stats.controller';
+
+// Security Services
+import { JwtSecurityService } from './application/services/jwt-security.service';
+import { RefreshTokenService } from './application/services/refresh-token.service';
 
 // Application Layer - Services
 import { AuthService } from './application/services/auth.service';
@@ -34,6 +41,10 @@ import { UserExpService } from './application/services/user-exp.service';
 import { TeamsService } from './application/services/teams.service';
 import { AdminService } from './application/services/admin.service';
 import { EmailService } from './application/services/email.service';
+import { GmailService } from './application/services/gmail.service';
+import { MemoryAuthService } from './application/services/memory-auth.service';
+import { ExcelExportService } from './application/services/excel-export.service';
+import { PdfExportService } from './application/services/pdf-export.service';
 
 // Domain Layer - Services
 import { UserDomainService } from './domain/services/user-domain.service';
@@ -124,7 +135,7 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
         secret:
           configService.get<string>('JWT_SECRET') ||
           'default-jwt-secret-change-in-production',
-        signOptions: { expiresIn: '24h' },
+        signOptions: { expiresIn: '15m' }, // 15분으로 단축
       }),
       inject: [ConfigService],
     }),
@@ -143,6 +154,9 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     AdminController,
     AdminAuthController,
     ContactController,
+    ExcelExportController,
+    GmailController,
+    TeamStatsController,
   ],
   providers: [
     AppService,
@@ -155,6 +169,12 @@ import { AdminStrategy } from './shared/strategies/admin.strategy';
     TeamsService,
     AdminService,
     EmailService,
+    GmailService,
+    JwtSecurityService,
+    RefreshTokenService,
+    MemoryAuthService,
+    ExcelExportService,
+    PdfExportService,
     // Domain Services
     UserDomainService,
     // Use Cases

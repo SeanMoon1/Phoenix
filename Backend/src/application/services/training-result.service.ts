@@ -27,6 +27,23 @@ export class TrainingResultService {
     try {
       console.log('🔍 훈련 결과 생성 시작:', data);
 
+      // 데이터베이스 연결 상태 확인 (간단한 방식)
+      try {
+        await this.trainingResultRepository.manager.query('SELECT 1');
+        console.log('✅ 데이터베이스 연결 상태 정상');
+      } catch (dbError) {
+        console.error('❌ 데이터베이스 연결 실패:', dbError);
+        console.error('🔧 해결 방법:');
+        console.error('1. 로컬 MySQL 데이터베이스가 실행 중인지 확인하세요');
+        console.error(
+          '2. Database/phoenix_complete_schema.sql 파일을 실행하세요',
+        );
+        console.error('3. 백엔드 서버의 데이터베이스 연결 설정을 확인하세요');
+        throw new Error(
+          '데이터베이스 연결에 실패했습니다. 로컬 데이터베이스가 실행 중인지 확인해주세요.',
+        );
+      }
+
       // 필수 필드 검증
       if (!data.userId || !data.sessionId || !data.scenarioId) {
         throw new Error(
@@ -37,96 +54,142 @@ export class TrainingResultService {
       // participantId가 없으면 자동으로 참가자 생성
       let participantId = data.participantId;
       if (!participantId) {
-        console.log('🔍 participantId가 없어서 자동 생성합니다.');
         participantId = await this.createOrGetParticipant(
           data.userId!,
           data.sessionId!,
           data.scenarioId!,
         );
-        console.log('✅ 참가자 생성/조회 완료:', { participantId });
       }
 
       // 결과 코드 생성 (이미 있으면 사용, 없으면 생성)
       const resultCode =
         data.resultCode || `RESULT_${Date.now()}_${data.userId}`;
 
-      // 시나리오 타입 정보 가져오기
-      const scenario = await this.trainingResultRepository.manager.findOne(
-        Scenario,
-        {
-          where: { id: data.scenarioId },
-        },
-      );
-      const scenarioType = scenario?.disasterType
-        ? scenario.disasterType.toUpperCase()
-        : 'UNKNOWN';
+      // 시나리오 타입 정보 가져오기 (Frontend에서 전송된 값 우선 사용)
+      let scenarioType = data.scenarioType;
+      if (!scenarioType) {
+        const scenario = await this.trainingResultRepository.manager.findOne(
+          Scenario,
+          {
+            where: { id: data.scenarioId },
+          },
+        );
+        scenarioType = scenario?.disasterType
+          ? scenario.disasterType.toUpperCase()
+          : 'UNKNOWN';
+      }
 
       const trainingResult = this.trainingResultRepository.create({
         ...data,
         participantId,
         resultCode,
         scenarioType, // 시나리오 타입 추가
+        teamId: null, // 팀 상관없이 훈련 가능
         completedAt: data.completedAt ? new Date(data.completedAt) : new Date(),
         isActive: true,
       });
 
+      // 트랜잭션을 사용하여 훈련 결과 저장과 경험치 업데이트를 함께 처리
       const savedResult =
-        await this.trainingResultRepository.save(trainingResult);
-      console.log('✅ 훈련 결과 생성 완료:', {
-        id: savedResult.id,
-        resultCode,
-        participantId,
-      });
+        await this.trainingResultRepository.manager.transaction(
+          async (transactionalEntityManager) => {
+            console.log('🔄 트랜잭션 시작 - 훈련 결과 저장 및 경험치 업데이트');
 
-      // 사용자 경험치 업데이트
-      try {
-        const expToAdd = this.calculateExpFromScore(data.totalScore || 0);
-        await this.userExpService.updateUserExp({
-          userId: data.userId!,
-          expToAdd,
-          totalScore: data.totalScore || 0,
-          completedScenarios: 1, // 시나리오 1개 완료
-        });
-        console.log('✅ 사용자 경험치 업데이트 완료:', {
-          userId: data.userId,
-          expAdded: expToAdd,
-          totalScore: data.totalScore,
-        });
-      } catch (expError) {
-        console.error(
-          '❌ 사용자 경험치 업데이트 실패 (훈련 결과는 저장됨):',
-          expError,
+            // 1. 훈련 결과 저장
+            const result =
+              await transactionalEntityManager.save(trainingResult);
+            console.log('✅ 훈련 결과 저장 완료:', result.id);
+
+            // 2. 사용자 경험치 업데이트 (같은 트랜잭션 내에서)
+            try {
+              // 정답률 기반 경험치 계산 (50점 만점 기준)
+              const accuracyPercentage = data.totalScore
+                ? (data.totalScore / 50) * 100
+                : 0;
+              const expToAdd = Math.round(accuracyPercentage * 0.5); // 정답률의 50%를 경험치로
+
+              console.log('🔍 경험치 업데이트 시작:', {
+                userId: data.userId,
+                expToAdd,
+                totalScore: data.totalScore || 0,
+                accuracyPercentage,
+              });
+
+              // 사용자 조회
+              const user = await transactionalEntityManager.findOne(User, {
+                where: { id: data.userId! },
+              });
+
+              if (!user) {
+                throw new Error('사용자를 찾을 수 없습니다.');
+              }
+
+              // 현재 경험치에 추가
+              const newExp = user.userExp + expToAdd;
+
+              // 레벨 계산
+              const { newLevel, remainingExp, tier } =
+                this.calculateLevelAndTier(newExp);
+
+              // 다음 레벨까지 필요한 경험치 계산
+              const nextLevelExp = this.getExpForNextLevel(newLevel);
+
+              // 레벨 진행도 계산 (0-100%)
+              const levelProgress =
+                nextLevelExp > 0 ? (remainingExp / nextLevelExp) * 100 : 0;
+
+              // 사용자 정보 업데이트
+              await transactionalEntityManager.update(User, data.userId!, {
+                userExp: newExp,
+                userLevel: newLevel,
+                currentTier: tier,
+                levelProgress: Math.round(levelProgress * 100) / 100,
+                nextLevelExp,
+                totalScore: user.totalScore + (data.totalScore || 0),
+                completedScenarios: user.completedScenarios + 1,
+              });
+
+              console.log('✅ 사용자 경험치 업데이트 완료:', {
+                userId: data.userId,
+                oldLevel: user.userLevel,
+                newLevel,
+                oldExp: user.userExp,
+                newExp,
+                tier,
+                expAdded: expToAdd,
+              });
+            } catch (expError) {
+              console.error('❌ 트랜잭션 내 경험치 업데이트 실패:', expError);
+              throw expError; // 트랜잭션 롤백을 위해 에러 재발생
+            }
+
+            return result;
+          },
         );
-        // 경험치 업데이트 실패해도 훈련 결과는 저장된 상태로 반환
-      }
 
       return savedResult;
     } catch (error) {
-      console.error('❌ 훈련 결과 생성 실패:', error);
+      console.error('❌ 훈련 결과 생성 실패:', {
+        error: error.message,
+        stack: error.stack,
+        data: {
+          userId: data.userId,
+          sessionId: data.sessionId,
+          scenarioId: data.scenarioId,
+          participantId: data.participantId,
+          totalScore: data.totalScore,
+        },
+      });
       throw error;
     }
   }
 
   async getTrainingResultsByUser(userId: number): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 사용자 훈련 결과 조회:', { userId });
-
       const results = await this.trainingResultRepository.find({
         where: { userId, isActive: true },
         relations: ['session', 'scenario', 'user', 'participant'],
         order: { completedAt: 'DESC' },
-      });
-
-      console.log('✅ 사용자 훈련 결과 조회 완료:', {
-        userId,
-        count: results.length,
-        results: results.map((r) => ({
-          id: r.id,
-          sessionId: r.sessionId,
-          scenarioId: r.scenarioId,
-          totalScore: r.totalScore,
-          completedAt: r.completedAt,
-        })),
       });
       return results;
     } catch (error) {
@@ -139,15 +202,11 @@ export class TrainingResultService {
     sessionId: number,
   ): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 세션별 훈련 결과 조회:', { sessionId });
-
       const results = await this.trainingResultRepository.find({
         where: { sessionId, isActive: true },
         relations: ['user', 'scenario'],
         order: { completedAt: 'DESC' },
       });
-
-      console.log('✅ 세션별 훈련 결과 조회 완료:', { count: results.length });
       return results;
     } catch (error) {
       console.error('❌ 세션별 훈련 결과 조회 실패:', error);
@@ -157,8 +216,6 @@ export class TrainingResultService {
 
   async getTrainingStatistics(userId: number): Promise<any> {
     try {
-      console.log('🔍 사용자 훈련 통계 조회:', { userId });
-
       const results = await this.trainingResultRepository.find({
         where: { userId, isActive: true },
         relations: ['scenario'],
@@ -205,7 +262,6 @@ export class TrainingResultService {
         lastTrainingDate,
       };
 
-      console.log('✅ 사용자 훈련 통계 조회 완료:', statistics);
       return statistics;
     } catch (error) {
       console.error('❌ 사용자 훈련 통계 조회 실패:', error);
@@ -215,15 +271,11 @@ export class TrainingResultService {
 
   async getUserChoiceLogs(resultId: number): Promise<UserChoiceLog[]> {
     try {
-      console.log('🔍 사용자 선택 로그 조회:', { resultId });
-
       const logs = await this.userChoiceLogRepository.find({
         where: { resultId, isActive: true },
         relations: ['event', 'choice'],
         order: { selectedAt: 'ASC' },
       });
-
-      console.log('✅ 사용자 선택 로그 조회 완료:', { count: logs.length });
       return logs;
     } catch (error) {
       console.error('❌ 사용자 선택 로그 조회 실패:', error);
@@ -235,8 +287,6 @@ export class TrainingResultService {
     data: Partial<UserChoiceLog>,
   ): Promise<UserChoiceLog> {
     try {
-      console.log('🔍 사용자 선택 로그 생성 시작:', data);
-
       // 필수 필드 검증
       if (!data.resultId || !data.eventId || !data.choiceId) {
         throw new Error(
@@ -349,48 +399,23 @@ export class TrainingResultService {
    */
   async getTrainingResultsByTeam(teamId: number): Promise<TrainingResult[]> {
     try {
-      console.log('🔍 팀별 훈련 결과 조회:', { teamId });
+      // 🚀 최적화: 데이터베이스 레벨에서 필터링
+      const results = await this.trainingResultRepository
+        .createQueryBuilder('tr')
+        .leftJoinAndSelect('tr.session', 'session')
+        .leftJoinAndSelect('tr.scenario', 'scenario')
+        .leftJoinAndSelect('tr.user', 'user')
+        .leftJoinAndSelect('tr.participant', 'participant')
+        .where('tr.isActive = :isActive', { isActive: true })
+        .andWhere(
+          '(user.teamId = :teamId OR session.teamId = :teamId OR participant.teamId = :teamId)',
+          { teamId },
+        )
+        .orderBy('tr.completedAt', 'DESC')
+        .limit(1000) // 🚀 결과 수 제한으로 성능 향상
+        .getMany();
 
-      const results = await this.trainingResultRepository.find({
-        where: { isActive: true },
-        relations: ['session', 'scenario', 'user', 'participant'],
-        order: { completedAt: 'DESC' },
-      });
-
-      // 팀에 속한 사용자들의 결과만 필터링
-      const teamResults = results.filter((result) => {
-        // 사용자의 팀 ID가 일치하는 경우 (가장 중요한 조건)
-        if (result.user?.teamId === teamId) {
-          return true;
-        }
-
-        // 세션의 팀 ID가 일치하는 경우
-        if (result.session?.teamId === teamId) {
-          return true;
-        }
-
-        // 참가자의 팀 ID가 일치하는 경우
-        if (result.participant?.teamId === teamId) {
-          return true;
-        }
-
-        return false;
-      });
-
-      console.log('✅ 팀별 훈련 결과 조회 완료:', {
-        teamId,
-        totalResults: results.length,
-        teamResults: teamResults.length,
-        teamResultsDetails: teamResults.map((r) => ({
-          id: r.id,
-          userId: r.userId,
-          sessionTeamId: r.session?.teamId,
-          participantTeamId: r.participant?.teamId,
-          userTeamId: r.user?.teamId,
-          totalScore: r.totalScore,
-        })),
-      });
-      return teamResults;
+      return results;
     } catch (error) {
       console.error('❌ 팀별 훈련 결과 조회 실패:', error);
       throw error;
@@ -429,7 +454,24 @@ export class TrainingResultService {
         order: { completedAt: 'DESC' },
       });
 
+      console.log('🔍 조회된 훈련 결과:', {
+        userId,
+        resultsCount: results.length,
+        results: results.map((r) => ({
+          id: r.id,
+          scenarioType: r.scenarioType,
+          totalScore: r.totalScore,
+          accuracyScore: r.accuracyScore,
+          speedScore: r.speedScore,
+          completionTime: r.completionTime,
+          completedAt: r.completedAt,
+        })),
+      });
+
       if (results.length === 0) {
+        console.log(
+          '⚠️ 훈련 결과가 없습니다. 사용자가 훈련을 완료했는지 확인하세요.',
+        );
         return [];
       }
 
@@ -531,5 +573,48 @@ export class TrainingResultService {
     // 기본 경험치: 점수 * 0.5 (최소 10, 최대 100)
     const baseExp = Math.round(totalScore * 0.5);
     return Math.max(10, Math.min(100, baseExp));
+  }
+
+  /**
+   * 경험치로부터 레벨과 등급 계산
+   * @param exp 경험치
+   * @returns 레벨, 남은 경험치, 등급
+   */
+  private calculateLevelAndTier(exp: number): {
+    newLevel: number;
+    remainingExp: number;
+    tier: string;
+  } {
+    let level = 1;
+    let remainingExp = exp;
+
+    // 레벨별 필요 경험치 계산
+    while (remainingExp >= this.getExpForNextLevel(level)) {
+      remainingExp -= this.getExpForNextLevel(level);
+      level++;
+    }
+
+    // 등급 계산
+    let tier = '초급자';
+    if (level >= 20) tier = '전문가';
+    else if (level >= 15) tier = '고급자';
+    else if (level >= 10) tier = '중급자';
+    else if (level >= 5) tier = '숙련자';
+
+    return {
+      newLevel: level,
+      remainingExp,
+      tier,
+    };
+  }
+
+  /**
+   * 다음 레벨까지 필요한 경험치 계산
+   * @param level 현재 레벨
+   * @returns 필요한 경험치
+   */
+  private getExpForNextLevel(level: number): number {
+    // 레벨이 높아질수록 더 많은 경험치 필요
+    return Math.floor(100 * Math.pow(1.2, level - 1));
   }
 }

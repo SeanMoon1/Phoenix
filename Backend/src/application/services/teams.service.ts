@@ -84,6 +84,7 @@ export class TeamsService {
         } as Team,
       };
     } catch (error) {
+      console.error('❌ 팀 코드 검증 오류:', error);
       return {
         valid: false,
         message: '팀 코드 검증 중 오류가 발생했습니다.',

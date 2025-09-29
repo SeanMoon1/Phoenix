@@ -142,12 +142,17 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
-            npm ci
-            npm install --save-dev rollup
+            echo "✅ 현재 디렉토리:"
+            pwd
+            echo "✅ package.json 확인:"
+            ls -al package.json || true
+            npm ci--save-dev rollup
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-            npm run build
-            echo "✅ 빌드 완료"
+            echo "✅ npm run build 시작"
+            npm run build || cat npm-debug.log
+            echo "✅ 빌드 후 결과물:"
+            ls -alh dist || true
 
       # ✅ Nginx 재시작
       - name: Restart nginx

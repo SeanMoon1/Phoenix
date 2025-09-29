@@ -89,8 +89,27 @@ export class PdfExportService {
       const results =
         await this.trainingResultService.getTrainingResultsByTeam(teamId);
 
+      console.log('팀 훈련 결과 조회 완료:', {
+        teamId,
+        resultCount: results?.length || 0,
+      });
+
       if (!results || results.length === 0) {
-        throw new Error('팀 훈련 결과가 없습니다.');
+        console.log('팀 훈련 결과가 없음, 빈 PDF 파일 생성');
+        // 빈 PDF 파일 생성
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        page.drawText('팀 훈련 결과가 없습니다.', {
+          x: 50,
+          y: 750,
+          size: 16,
+          font: font,
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        return Buffer.from(pdfBytes);
       }
 
       // PDF 문서 생성
@@ -321,7 +340,34 @@ export class PdfExportService {
       return Buffer.from(pdfBytes);
     } catch (error) {
       console.error('❌ 팀 훈련 결과 PDF 파일 생성 실패:', error);
-      throw error;
+
+      // 에러 발생 시 빈 PDF 파일 생성
+      try {
+        console.log('에러 발생, 빈 PDF 파일 생성 시도');
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+        page.drawText('PDF 생성 중 오류가 발생했습니다.', {
+          x: 50,
+          y: 750,
+          size: 16,
+          font: font,
+        });
+
+        page.drawText(`오류: ${error.message}`, {
+          x: 50,
+          y: 720,
+          size: 12,
+          font: font,
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        return Buffer.from(pdfBytes);
+      } catch (fallbackError) {
+        console.error('빈 PDF 파일 생성도 실패:', fallbackError);
+        throw new Error(`PDF 파일 생성 실패: ${error.message}`);
+      }
     }
   }
 

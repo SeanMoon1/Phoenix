@@ -83,14 +83,29 @@ const AdminPage: React.FC = () => {
   ) => {
     try {
       setDownloadingExcel(teamId);
+      console.log('파일 다운로드 시작:', { teamId, format });
+
       const response = await apiClient.get(
         `/excel-export/team/${teamId}/training-results`,
         {
           responseType: 'blob',
           params: { format },
+          timeout: 30000, // 30초 타임아웃
         }
       );
+
+      console.log('서버 응답 받음:', {
+        status: response.status,
+        headers: response.headers,
+        dataSize: response.data?.size,
+      });
+
       const blob = response.data;
+
+      // Blob 유효성 검사
+      if (!blob || blob.size === 0) {
+        throw new Error('다운로드된 파일이 비어있습니다.');
+      }
 
       // 파일명 생성
       const now = new Date();
@@ -108,12 +123,27 @@ const AdminPage: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
+      console.log('파일 다운로드 완료:', { fileName, fileSize: blob.size });
       alert(
         `${format === 'excel' ? '엑셀' : 'PDF'} 파일이 다운로드되었습니다.`
       );
     } catch (error) {
       console.error('파일 다운로드 실패:', error);
-      alert('파일 다운로드에 실패했습니다.');
+
+      // 에러 타입별 메시지
+      let errorMessage = '파일 다운로드에 실패했습니다.';
+
+      if (error.response?.status === 404) {
+        errorMessage = '팀 데이터를 찾을 수 없습니다.';
+      } else if (error.response?.status === 500) {
+        errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+      } else if (error.message?.includes('비어있습니다')) {
+        errorMessage = '다운로드할 데이터가 없습니다.';
+      }
+
+      alert(errorMessage);
     } finally {
       setDownloadingExcel(null);
       setShowDownloadModal(null);
@@ -939,6 +969,92 @@ const AdminPage: React.FC = () => {
                   </Button>
                 </div>
               )}
+
+              {/* 팀 통계 섹션 */}
+              <div className="mb-8">
+                <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                  팀 통계
+                </h3>
+
+                {/* 팀 선택 드롭다운 */}
+                <div className="mb-6">
+                  <select className="w-full max-w-xs px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">전체 팀</option>
+                    {teams.map(team => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 통계 카드들 */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-800">
+                        <span className="text-2xl">📊</span>
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          총 세션 수
+                        </p>
+                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                          4
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-green-100 rounded-full dark:bg-green-800">
+                        <span className="text-2xl">✅</span>
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                          진행 중인 세션
+                        </p>
+                        <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                          4
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-800">
+                        <span className="text-2xl">👥</span>
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                          총 참가자 수
+                        </p>
+                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                          2
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                    <div className="flex items-center">
+                      <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-800">
+                        <span className="text-2xl">🏆</span>
+                      </div>
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                          완료한 참가자
+                        </p>
+                        <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                          4
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* 팀 목록 */}
               <div className="bg-white rounded-lg shadow dark:bg-gray-800">

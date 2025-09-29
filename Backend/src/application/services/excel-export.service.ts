@@ -20,8 +20,28 @@ export class ExcelExportService {
       const results =
         await this.trainingResultService.getTrainingResultsByTeam(teamId);
 
+      console.log('팀 훈련 결과 조회 완료:', {
+        teamId,
+        resultCount: results?.length || 0,
+      });
+
       if (!results || results.length === 0) {
-        throw new Error('팀 훈련 결과가 없습니다.');
+        console.log('팀 훈련 결과가 없음, 빈 엑셀 파일 생성');
+        // 빈 엑셀 파일 생성
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('팀 훈련 결과');
+
+        // 헤더만 있는 빈 시트 생성
+        worksheet.addRow([
+          '사용자명',
+          '훈련 횟수',
+          '총 점수',
+          '평균 점수',
+          '최고 점수',
+        ]);
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        return Buffer.from(buffer);
       }
 
       // 사용자별로 그룹화
@@ -175,7 +195,35 @@ export class ExcelExportService {
       return Buffer.from(buffer);
     } catch (error) {
       console.error('팀 훈련 결과 엑셀 파일 생성 실패:', error);
-      throw error;
+
+      // 에러 발생 시 빈 엑셀 파일 생성
+      try {
+        console.log('에러 발생, 빈 엑셀 파일 생성 시도');
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('팀 훈련 결과');
+
+        // 에러 메시지 포함 헤더
+        worksheet.addRow([
+          '에러 발생',
+          '훈련 결과를 불러올 수 없습니다',
+          '',
+          '',
+          '',
+        ]);
+        worksheet.addRow([
+          '사용자명',
+          '훈련 횟수',
+          '총 점수',
+          '평균 점수',
+          '최고 점수',
+        ]);
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        return Buffer.from(buffer);
+      } catch (fallbackError) {
+        console.error('빈 엑셀 파일 생성도 실패:', fallbackError);
+        throw new Error(`엑셀 파일 생성 실패: ${error.message}`);
+      }
     }
   }
 

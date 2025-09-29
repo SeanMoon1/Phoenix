@@ -1239,7 +1239,7 @@ const AdminPage: React.FC = () => {
                   </label>
                   <select
                     value={selectedTeamId || ''}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       handleTeamChange(
                         e.target.value ? parseInt(e.target.value) : null
                       )
@@ -1429,7 +1429,9 @@ const AdminPage: React.FC = () => {
                   <input
                     type="text"
                     value={newTeamName}
-                    onChange={e => setNewTeamName(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewTeamName(e.target.value)
+                    }
                     placeholder="팀 이름을 입력하세요"
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -1441,7 +1443,9 @@ const AdminPage: React.FC = () => {
                   </label>
                   <textarea
                     value={newTeamDescription}
-                    onChange={e => setNewTeamDescription(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setNewTeamDescription(e.target.value)
+                    }
                     placeholder="팀에 대한 설명을 입력하세요 (선택사항)"
                     rows={3}
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1490,7 +1494,9 @@ const AdminPage: React.FC = () => {
                   <input
                     type="text"
                     value={newScenarioTitle}
-                    onChange={e => setNewScenarioTitle(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewScenarioTitle(e.target.value)
+                    }
                     placeholder="시나리오 제목을 입력하세요"
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -1502,7 +1508,9 @@ const AdminPage: React.FC = () => {
                   </label>
                   <textarea
                     value={newScenarioDescription}
-                    onChange={e => setNewScenarioDescription(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setNewScenarioDescription(e.target.value)
+                    }
                     placeholder="시나리오 설명을 입력하세요"
                     rows={3}
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1516,7 +1524,9 @@ const AdminPage: React.FC = () => {
                   <input
                     type="text"
                     value={newScenarioDisasterType}
-                    onChange={e => setNewScenarioDisasterType(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewScenarioDisasterType(e.target.value)
+                    }
                     placeholder="재난 유형을 입력하세요 (예: 화재, 지진, 홍수, 테러 등)"
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -1528,7 +1538,9 @@ const AdminPage: React.FC = () => {
                   </label>
                   <select
                     value={newScenarioRiskLevel}
-                    onChange={e => setNewScenarioRiskLevel(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setNewScenarioRiskLevel(e.target.value)
+                    }
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">위험도를 선택하세요</option>
@@ -1546,7 +1558,7 @@ const AdminPage: React.FC = () => {
                   <input
                     type="text"
                     value={newScenarioOccurrenceCondition}
-                    onChange={e =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewScenarioOccurrenceCondition(e.target.value)
                     }
                     placeholder="발생 조건을 입력하세요 (선택사항)"

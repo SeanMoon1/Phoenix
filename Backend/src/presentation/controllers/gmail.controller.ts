@@ -56,9 +56,19 @@ export class GmailController {
         hasClientSecret: !!process.env.GMAIL_CLIENT_SECRET,
         hasRedirectUris: !!process.env.GMAIL_REDIRECT_URIS,
         hasScopes: !!process.env.GMAIL_SCOPES,
+        clientId: process.env.GMAIL_CLIENT_ID?.substring(0, 10) + '...',
+        redirectUris: process.env.GMAIL_REDIRECT_URIS,
+        scopes: process.env.GMAIL_SCOPES,
       };
 
-      const allConfigured = Object.values(config).every(Boolean);
+      const allConfigured = Object.values({
+        hasClientId: config.hasClientId,
+        hasClientSecret: config.hasClientSecret,
+        hasRedirectUris: config.hasRedirectUris,
+        hasScopes: config.hasScopes,
+      }).every(Boolean);
+
+      console.log('🔍 Gmail 설정 상태 확인:', config);
 
       return {
         status: allConfigured ? 'healthy' : 'misconfigured',
@@ -68,7 +78,7 @@ export class GmailController {
       console.error('❌ Gmail 설정 확인 실패:', error);
       return {
         status: 'error',
-        config: {},
+        config: { error: error.message },
       };
     }
   }
@@ -79,7 +89,9 @@ export class GmailController {
   @Get('auth-url')
   getAuthUrl(): { authUrl: string } {
     try {
+      console.log('🔍 Gmail 인증 URL 생성 요청');
       const authUrl = this.gmailService.getAuthUrl();
+      console.log('✅ Gmail 인증 URL 생성 성공:', authUrl);
       return { authUrl };
     } catch (error) {
       console.error('❌ Gmail 인증 URL 생성 실패:', error);

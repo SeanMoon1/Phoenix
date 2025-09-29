@@ -45,6 +45,28 @@ const EmailManager: React.FC = () => {
   const [adminName, setAdminName] = useState('Phoenix 관리자');
   const [sendingReply, setSendingReply] = useState(false);
   const [replySuccess, setReplySuccess] = useState('');
+  const [gmailConfig, setGmailConfig] = useState<any>(null);
+
+  // Gmail 설정 상태 확인
+  const checkGmailConfig = async () => {
+    try {
+      console.log('🔍 Gmail 설정 상태 확인 요청');
+      const response = await gmailApi.checkConfig();
+      console.log('📥 Gmail 설정 상태 응답:', response);
+
+      if (response.data) {
+        setGmailConfig(response.data);
+        console.log('✅ Gmail 설정 상태:', response.data.status);
+      }
+    } catch (error) {
+      console.error('❌ Gmail 설정 상태 확인 실패:', error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 Gmail 설정 상태 확인
+  useEffect(() => {
+    checkGmailConfig();
+  }, []);
 
   // Gmail 인증 URL 생성
   const handleGetAuthUrl = async () => {
@@ -52,7 +74,9 @@ const EmailManager: React.FC = () => {
     try {
       console.log('📤 Gmail 인증 URL 요청 시작');
       const response = await gmailApi.getAuthUrl();
-      console.log('📥 Gmail 인증 URL 응답:', response);
+      console.log('📥 Gmail 인증 URL 응답 전체:', response);
+      console.log('📥 Gmail 인증 URL 응답 데이터:', response.data);
+      console.log('📥 Gmail 인증 URL 응답 성공 여부:', response.success);
 
       // 백엔드에서 직접 { authUrl: string } 형태로 반환하므로 response.data.authUrl로 접근
       if (response.data && response.data.authUrl) {
@@ -60,6 +84,11 @@ const EmailManager: React.FC = () => {
         setAuthUrl(response.data.authUrl);
       } else {
         console.error('❌ Gmail 인증 URL 응답 형식 오류:', response);
+        console.error('❌ 응답 구조 분석:', {
+          hasData: !!response.data,
+          dataKeys: response.data ? Object.keys(response.data) : 'no data',
+          authUrl: response.data?.authUrl,
+        });
       }
     } catch (error) {
       console.error('❌ Gmail 인증 URL 생성 실패:', error);
@@ -270,15 +299,61 @@ const EmailManager: React.FC = () => {
             Gmail을 통해 문의사항을 확인하고 답장할 수 있습니다.
           </p>
         </div>
+        {/* Gmail 설정 상태 표시 */}
+        {gmailConfig && (
+          <div className="p-4 mb-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Gmail 설정 상태
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  상태:
+                </span>
+                <span
+                  className={`px-2 py-1 text-xs rounded ${
+                    gmailConfig.status === 'healthy'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200'
+                  }`}
+                >
+                  {gmailConfig.status === 'healthy' ? '정상' : '설정 필요'}
+                </span>
+              </div>
+              {gmailConfig.config && (
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div>
+                    Client ID: {gmailConfig.config.hasClientId ? '✅' : '❌'}
+                  </div>
+                  <div>
+                    Client Secret:{' '}
+                    {gmailConfig.config.hasClientSecret ? '✅' : '❌'}
+                  </div>
+                  <div>
+                    Redirect URI:{' '}
+                    {gmailConfig.config.hasRedirectUris ? '✅' : '❌'}
+                  </div>
+                  <div>
+                    Scopes: {gmailConfig.config.hasScopes ? '✅' : '❌'}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {!authenticated && (
           <button
             onClick={() => {
               console.log('🔍 Gmail 연결 버튼 클릭 이벤트 발생');
               handleGetAuthUrl();
             }}
-            className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+            disabled={gmailConfig?.status !== 'healthy'}
+            className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
           >
-            Gmail 연결하기
+            {gmailConfig?.status === 'healthy'
+              ? 'Gmail 연결하기'
+              : 'Gmail 설정 필요'}
           </button>
         )}
       </div>

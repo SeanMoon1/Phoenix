@@ -27,10 +27,20 @@ export default defineConfig({
           'query-vendor': ['@tanstack/react-query'],
         },
       },
+      // 4GB 메모리 활용을 위한 병렬 처리 최적화
+      maxParallelFileOps: 4,
     },
     // 청크 크기 경고 임계값 조정
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2000,
     // 압축 최적화 (esbuild 사용)
     minify: 'esbuild',
+    // 4GB 메모리 활용을 위한 최적화 설정
+    target: 'es2020',
+    // 소스맵 활성화 (개발 편의성)
+    sourcemap: true,
+    // 빌드 성능 최적화
+    reportCompressedSize: true,
+    // 메모리 사용량 최적화
+    assetsInlineLimit: 4096,
   },
 });

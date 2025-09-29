@@ -25,11 +25,20 @@ export class TrainingResultService {
     data: Partial<TrainingResult>,
   ): Promise<TrainingResult> {
     try {
+      console.log('🔍 훈련 결과 생성 시작:', data);
+
       // 데이터베이스 연결 상태 확인 (간단한 방식)
       try {
         await this.trainingResultRepository.manager.query('SELECT 1');
+        console.log('✅ 데이터베이스 연결 상태 정상');
       } catch (dbError) {
         console.error('❌ 데이터베이스 연결 실패:', dbError);
+        console.error('🔧 해결 방법:');
+        console.error('1. 로컬 MySQL 데이터베이스가 실행 중인지 확인하세요');
+        console.error(
+          '2. Database/phoenix_complete_schema.sql 파일을 실행하세요',
+        );
+        console.error('3. 백엔드 서버의 데이터베이스 연결 설정을 확인하세요');
         throw new Error(
           '데이터베이스 연결에 실패했습니다. 로컬 데이터베이스가 실행 중인지 확인해주세요.',
         );

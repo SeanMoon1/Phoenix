@@ -11,14 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # ✅ Secrets 확인
       - name: Check Secrets
         run: |
           echo "BACK_HOST: ${{ secrets.BACK_HOST }}"
           echo "BACK_USER: ${{ secrets.BACK_USER }}"
           echo "BACK_SSH_KEY exists: ${{ secrets.BACK_SSH_KEY != '' }}"
 
-      # ✅ .env 파일 생성
       - name: Create .env file
         run: |
           cat > Backend/.env <<EOL
@@ -72,7 +70,6 @@ jobs:
           MEMORY_AUTH_CLEANUP_INTERVAL=${{ secrets.MEMORY_AUTH_CLEANUP_INTERVAL }}
           EOL
 
-      # ✅ 코드 + .env 복사
       - name: Copy backend source to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -82,7 +79,6 @@ jobs:
           source: "Backend/**"
           target: "/home/ubuntu/apps/Phoenix/"
 
-      # ✅ 서버에서 빌드 + pm2 재시작
       - name: Build & Restart backend on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -106,7 +102,6 @@ jobs:
           node-version: 20.19.0
           cache: "npm"
 
-      # ✅ 서버에서 기존 Frontend 삭제 후 최신 코드 클론
       - name: Clean & Clone Frontend repo on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -120,7 +115,6 @@ jobs:
             echo "✅ Git clone 실행"
             git clone -b main https://github.com/${{ github.repository }} Phoenix
 
-      # ✅ 서버에서 빌드 실행
       - name: Build frontend on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -129,36 +123,20 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
-            echo "✅ 현재 디렉토리:"; pwd
-            echo "✅ package.json 확인:"; ls -al package.json || true
-
-            # 패키지 설치
-            npm ci || npm install
-            npm install --save-dev rollup typescript
-
-            # 환경변수 적용
+            npm install
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-
-            # 빌드
-            echo "✅ npm run build 시작"
-            npx tsc -b || true
-            npx vite build
-
+            npm run build
             echo "✅ 빌드 후 결과물:"
             ls -alh dist || true
 
-      # ✅ dist → nginx 루트 복사 및 재시작
-      - name: Deploy dist to nginx
+      # ✅ Nginx reload (dist는 root에서 바로 참조)
+      - name: Reload nginx
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ dist → /var/www/html 배포 시작"
-            sudo rm -rf /var/www/html/*
-            sudo cp -r /home/ubuntu/apps/Phoenix/Frontend/dist/* /var/www/html/
             echo "✅ Nginx reload"
             sudo systemctl reload nginx
-

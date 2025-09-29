@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/layout/Layout';
 import AdminGuard from './components/guards/AdminGuard';
+import AuthGuard from './components/guards/AuthGuard';
 import { AnimatedText, AnimatedButton, VimeoVideo } from './components/ui';
 import UserDashboard from './components/common/UserDashboard';
 import { Icon } from './utils/icons';

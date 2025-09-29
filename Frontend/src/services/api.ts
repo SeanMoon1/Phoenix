@@ -925,6 +925,14 @@ export const myPageApi = {
 // Gmail 관련 API 함수들
 export const gmailApi = {
   /**
+   * Gmail 설정 상태 확인
+   * @returns 설정 상태
+   */
+  checkConfig: async () => {
+    return api.get<{ status: string; config: any }>('/gmail/health');
+  },
+
+  /**
    * Gmail 인증 URL 생성
    * @returns 인증 URL
    */

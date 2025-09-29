@@ -68,6 +68,14 @@ export class GmailService {
     const clientId = this.configService.get<string>('GMAIL_CLIENT_ID');
     const clientSecret = this.configService.get<string>('GMAIL_CLIENT_SECRET');
     const redirectUris = this.configService.get<string>('GMAIL_REDIRECT_URIS');
+    const scopes = this.configService.get<string>('GMAIL_SCOPES');
+
+    console.log('🔍 Gmail 환경 변수 확인:', {
+      GMAIL_CLIENT_ID: !!clientId,
+      GMAIL_CLIENT_SECRET: !!clientSecret,
+      GMAIL_REDIRECT_URIS: !!redirectUris,
+      GMAIL_SCOPES: !!scopes,
+    });
 
     // Gmail 환경 변수 검증
     if (!clientId || !clientSecret || !redirectUris) {
@@ -81,8 +89,13 @@ export class GmailService {
       );
     }
 
-    this.oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUris);
+    if (!scopes) {
+      console.error('❌ GMAIL_SCOPES 환경 변수가 설정되지 않았습니다.');
+      throw new Error('GMAIL_SCOPES 환경 변수가 설정되지 않았습니다.');
+    }
 
+    console.log('✅ Gmail 환경 변수 설정 완료');
+    this.oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUris);
     this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
   }
 

@@ -133,14 +133,24 @@ const AdminPage: React.FC = () => {
       // 에러 타입별 메시지
       let errorMessage = '파일 다운로드에 실패했습니다.';
 
-      if (error.response?.status === 404) {
-        errorMessage = '팀 데이터를 찾을 수 없습니다.';
-      } else if (error.response?.status === 500) {
-        errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-      } else if (error.code === 'ECONNABORTED') {
-        errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
-      } else if (error.message?.includes('비어있습니다')) {
-        errorMessage = '다운로드할 데이터가 없습니다.';
+      // 타입 가드를 사용한 에러 처리
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 404) {
+          errorMessage = '팀 데이터를 찾을 수 없습니다.';
+        } else if (axiosError.response?.status === 500) {
+          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+      } else if (error && typeof error === 'object' && 'code' in error) {
+        const timeoutError = error as any;
+        if (timeoutError.code === 'ECONNABORTED') {
+          errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+        }
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        const messageError = error as any;
+        if (messageError.message?.includes('비어있습니다')) {
+          errorMessage = '다운로드할 데이터가 없습니다.';
+        }
       }
 
       alert(errorMessage);
@@ -1602,7 +1612,7 @@ const AdminPage: React.FC = () => {
         {/* 다운로드 형식 선택 모달 */}
         {showDownloadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg p-6 w-96 dark:bg-gray-800">
+            <div className="p-6 bg-white rounded-lg w-96 dark:bg-gray-800">
               <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                 통계 다운로드 형식 선택
               </h3>

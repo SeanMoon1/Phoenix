@@ -119,13 +119,6 @@ jobs:
           node-version: 20.19.0
           cache: "npm"
 
-      # ✅ Secrets 확인
-      - name: Check Secrets
-        run: |
-          echo "FRONT_HOST: ${{ secrets.FRONT_HOST }}"
-          echo "FRONT_USER: ${{ secrets.FRONT_USER }}"
-          echo "FRONT_SSH_KEY exists: ${{ secrets.FRONT_SSH_KEY != '' }}"
-
       - name: Build frontend
         run: |
           cd Frontend
@@ -134,34 +127,25 @@ jobs:
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
           echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
           npm run build
-          echo "✅ Frontend/dist 구조:"
-          ls -alh dist || true
 
-      # ✅ 복사 전에 반드시 확인
-      - name: Debug frontend before copy
-        run: |
-          echo "✅ Frontend 파일 확인"
-          ls -alh ./Frontend/dist || true
-
-      # ✅ SSH 연결 테스트
-      - name: Test SSH connection
+      # ✅ 서버 dist 초기화
+      - name: Clean old dist on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ SSH 연결 성공"
-            whoami
-            pwd
+            rm -rf /home/ubuntu/apps/Phoenix/Frontend/dist/*
 
+      # ✅ 새로운 dist 복사
       - name: Copy dist to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "Frontend/dist/**"
+          source: "./Frontend/dist/**"
           target: "/home/ubuntu/apps/Phoenix/Frontend/dist"
 
       - name: Restart nginx

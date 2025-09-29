@@ -58,7 +58,6 @@ export const uiIcons = {
   chart: <FaChartBar />,
   trophy: <FaTrophy />,
   user: <FaUser />,
-  mail: <FaUser />, // 임시로 user 아이콘 사용
 };
 
 // 훈련 시스템 아이콘 매핑

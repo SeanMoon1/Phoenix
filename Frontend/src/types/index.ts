@@ -60,11 +60,8 @@ export interface Admin {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // 관리자 권한 관련
-  isAdmin: boolean;
-  adminLevel: string; // levelCode 값
   // 관계 데이터
-  adminLevelData?: AdminLevel;
+  adminLevel?: AdminLevel;
   team?: Team;
 }
 

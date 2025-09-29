@@ -43,21 +43,11 @@ const AdminList: React.FC<AdminListProps> = ({
     if (!admin.adminLevel) return null;
 
     const permissions = [];
-
-    // adminLevel이 문자열인 경우 권한 레벨에 따라 권한 결정
-    if (admin.adminLevel === 'SUPER_ADMIN') {
-      permissions.push(
-        '팀관리',
-        '사용자관리',
-        '시나리오관리',
-        '승인관리',
-        '결과조회'
-      );
-    } else if (admin.adminLevel === 'TEAM_ADMIN') {
-      permissions.push('사용자관리', '시나리오관리', '결과조회');
-    } else {
-      permissions.push('기본권한');
-    }
+    if (admin.adminLevel.canManageTeam) permissions.push('팀관리');
+    if (admin.adminLevel.canManageUsers) permissions.push('사용자관리');
+    if (admin.adminLevel.canManageScenarios) permissions.push('시나리오관리');
+    if (admin.adminLevel.canApproveScenarios) permissions.push('승인관리');
+    if (admin.adminLevel.canViewResults) permissions.push('결과조회');
 
     return permissions.map((permission, index) => (
       <span
@@ -149,7 +139,7 @@ const AdminList: React.FC<AdminListProps> = ({
                           {admin.email} • {admin.phone}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          ID: {admin.loginId} • {admin.adminLevel}
+                          ID: {admin.loginId} • {admin.adminLevel?.levelName}
                         </p>
                       </div>
                     </div>

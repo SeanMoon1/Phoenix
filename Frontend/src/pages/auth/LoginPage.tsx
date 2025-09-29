@@ -301,35 +301,19 @@ const LoginPage: React.FC = () => {
               )}
 
               {!isAdminMode && (
-                <div className="space-y-2 text-center">
+                <div className="text-center">
                   <Link
                     to="/register"
                     className="text-xs text-orange-600 sm:text-sm dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300"
                   >
                     계정이 없으신가요? 회원가입
                   </Link>
-                  
-                  <div className="flex justify-center space-x-4 text-xs">
-                    <Link
-                      to="/find-id"
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                    >
-                      아이디 찾기
-                    </Link>
-                    <span className="text-gray-400 dark:text-gray-600">|</span>
-                    <Link
-                      to="/reset-password"
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                    >
-                      비밀번호 재설정
-                    </Link>
-                  </div>
                 </div>
               )}
 
               {isAdminMode && (
                 <div className="text-center">
-                  <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     관리자 계정이 필요하시면 시스템 관리자에게 문의하세요
                   </p>
                   <p className="text-xs text-blue-600 dark:text-blue-400">

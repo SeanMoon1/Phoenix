@@ -119,36 +119,38 @@ jobs:
           node-version: 20.19.0
           cache: "npm"
 
-      - name: Build frontend
-        run: |
-          cd Frontend
-          npm ci
-          npm install --save-dev rollup
-          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
-          echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-          npm run build
-
-      # ✅ 서버 dist 초기화
-      - name: Clean old dist on server
+      # ✅ 서버에서 기존 Frontend 삭제 후 최신 코드 클론
+      - name: Clean & Clone Frontend repo on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            rm -rf /home/ubuntu/apps/Phoenix/Frontend/dist/*
+            echo "✅ 기존 Frontend 삭제"
+            rm -rf /home/ubuntu/apps/Phoenix/Frontend
+            mkdir -p /home/ubuntu/apps/Phoenix
+            cd /home/ubuntu/apps/Phoenix
+            echo "✅ Git clone 실행"
+            git clone -b main https://github.com/${{ github.repository }} Frontend
 
-      # ✅ 새로운 dist 복사
-      - name: Copy dist to server
-        uses: appleboy/scp-action@v0.1.7
+      # ✅ 서버에서 빌드 실행
+      - name: Build frontend on server
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
-          source: "./Frontend/dist/**"
-          strip_components: 2
-          target: "/home/ubuntu/apps/Phoenix/Frontend/dist/"
+          script: |
+            cd /home/ubuntu/apps/Phoenix/Frontend
+            npm ci
+            npm install --save-dev rollup
+            echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
+            echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
+            npm run build
+            echo "✅ 빌드 완료"
 
+      # ✅ Nginx 재시작
       - name: Restart nginx
         uses: appleboy/ssh-action@v1.0.0
         with:

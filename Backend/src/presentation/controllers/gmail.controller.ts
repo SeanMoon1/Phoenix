@@ -33,7 +33,6 @@ export class GetEmailsDto {
 }
 
 @Controller('gmail')
-@UseGuards(JwtAuthGuard, AdminGuard)
 export class GmailController {
   constructor(private readonly gmailService: GmailService) {
     // Gmail 서비스 초기화 확인
@@ -87,6 +86,7 @@ export class GmailController {
    * Gmail OAuth 인증 URL 생성
    */
   @Get('auth-url')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   getAuthUrl(): { authUrl: string } {
     try {
       console.log('🔍 Gmail 인증 URL 생성 요청');
@@ -115,6 +115,7 @@ export class GmailController {
    * OAuth 인증 코드로 토큰 획득
    */
   @Post('auth')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async authenticate(
     @Body() authDto: GmailAuthDto,
   ): Promise<{ success: boolean; message: string }> {
@@ -137,6 +138,7 @@ export class GmailController {
    * 이메일 목록 조회
    */
   @Get('emails')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async getEmails(@Query() query: GetEmailsDto): Promise<EmailListResponse> {
     try {
       const { maxResults = 10, pageToken } = query;
@@ -154,6 +156,7 @@ export class GmailController {
    * 특정 이메일 상세 조회
    */
   @Get('emails/:messageId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async getEmailById(
     @Query('messageId') messageId: string,
   ): Promise<GmailMessage> {
@@ -172,6 +175,7 @@ export class GmailController {
    * 스레드의 모든 메시지 조회
    */
   @Get('threads/:threadId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async getThreadById(@Query('threadId') threadId: string): Promise<any> {
     try {
       return await this.gmailService.getThreadById(threadId);
@@ -188,6 +192,7 @@ export class GmailController {
    * 이메일 답장 전송
    */
   @Post('reply')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async sendReply(
     @Body() replyDto: SendReplyDto,
   ): Promise<{ success: boolean; message: string }> {

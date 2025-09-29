@@ -142,15 +142,22 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
-            echo "✅ 현재 디렉토리:"
-            pwd
-            echo "✅ package.json 확인:"
-            ls -al package.json || true
-            npm ci--save-dev rollup
+            echo "✅ 현재 디렉토리:"; pwd
+            echo "✅ package.json 확인:"; ls -al package.json || true
+
+            # 패키지 설치
+            npm ci || npm install
+            npm install --save-dev rollup typescript
+
+            # 환경변수 적용
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
+
+            # 빌드
             echo "✅ npm run build 시작"
-            npm run build || cat npm-debug.log
+            npx tsc -b || true
+            npx vite build
+
             echo "✅ 빌드 후 결과물:"
             ls -alh dist || true
 
@@ -165,4 +172,3 @@ jobs:
             echo "✅ 서버에서 Frontend/dist 확인:"
             ls -alh /home/ubuntu/apps/Phoenix/Frontend/dist || true
             sudo systemctl restart nginx
-

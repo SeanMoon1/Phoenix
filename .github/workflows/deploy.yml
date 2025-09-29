@@ -72,19 +72,7 @@ jobs:
           MEMORY_AUTH_CLEANUP_INTERVAL=${{ secrets.MEMORY_AUTH_CLEANUP_INTERVAL }}
           EOL
 
-      # ✅ SSH 연결 테스트
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.BACK_HOST }}
-          username: ${{ secrets.BACK_USER }}
-          key: ${{ secrets.BACK_SSH_KEY }}
-          script: |
-            echo "✅ SSH 연결 성공"
-            whoami
-            pwd
-
-      # ✅ 코드 + .env만 서버로 복사
+      # ✅ 코드 + .env 복사
       - name: Copy backend source to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -103,7 +91,6 @@ jobs:
           key: ${{ secrets.BACK_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Backend
-            echo "✅ 서버에서 npm install & build 시작"
             npm install
             npm run build
             pm2 restart phoenix-backend || pm2 start dist/src/main.js --name phoenix-backend
@@ -112,7 +99,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -127,13 +113,11 @@ jobs:
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ 기존 Frontend 삭제"
             rm -rf /home/ubuntu/apps/Phoenix
             cd /home/ubuntu/apps
-            echo "✅ Git clone 실행"
             git clone -b main https://github.com/${{ github.repository }} Phoenix
 
-      # ✅ 서버에서 빌드 실행 (에러 핸들링 강화)
+      # ✅ 서버에서 빌드 실행
       - name: Build frontend on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -142,39 +126,31 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
-            echo "✅ 현재 디렉토리:"; pwd
-            echo "✅ package.json 확인:"; ls -al package.json || true
-
-            # 패키지 설치
             npm ci || npm install
             npm install --save-dev rollup typescript
-
-            # 환경변수 적용
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
+            npx tsc -b || true
+            npx vite build
+            ls -alh dist || true
 
-            # 빌드
-            echo "✅ npm run build 시작"
-            if ! npx tsc -b; then
-              echo "⚠️ tsc 오류 무시 (타입체킹만 실패 가능)"
-            fi
+      # ✅ nginx.conf 배포
+      - name: Deploy nginx config
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.FRONT_HOST }}
+          username: ${{ secrets.FRONT_USER }}
+          key: ${{ secrets.FRONT_SSH_KEY }}
+          source: "nginx.conf"
+          target: "/home/ubuntu/nginx.conf"
 
-            if ! npx vite build; then
-              echo "❌ vite build 실패, 로그 확인 필요"
-              exit 1
-            fi
-
-            echo "✅ 빌드 후 결과물:"
-            ls -alh dist || echo "❌ dist 폴더 없음"
-
-      # ✅ Nginx 재시작
-      - name: Restart nginx
+      - name: Apply nginx config
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ 서버에서 Frontend/dist 확인:"
-            ls -alh /home/ubuntu/apps/Phoenix/Frontend/dist || true
-            sudo systemctl restart nginx
+            sudo cp /home/ubuntu/nginx.conf /etc/nginx/nginx.conf
+            sudo nginx -t && sudo systemctl reload nginx
+            echo "✅ nginx config updated and reloaded"

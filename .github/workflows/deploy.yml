@@ -128,11 +128,10 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             echo "✅ 기존 Frontend 삭제"
-            rm -rf /home/ubuntu/apps/Phoenix/Frontend
-            mkdir -p /home/ubuntu/apps/Phoenix
-            cd /home/ubuntu/apps/Phoenix
+            rm -rf /home/ubuntu/apps/Phoenix/*
+            cd /home/ubuntu/apps
             echo "✅ Git clone 실행"
-            git clone -b main https://github.com/${{ github.repository }} Frontend
+            git clone -b main https://github.com/${{ github.repository }} Phoenix
 
       # ✅ 서버에서 빌드 실행
       - name: Build frontend on server
@@ -161,3 +160,4 @@ jobs:
             echo "✅ 서버에서 Frontend/dist 확인:"
             ls -alh /home/ubuntu/apps/Phoenix/Frontend/dist || true
             sudo systemctl restart nginx
+

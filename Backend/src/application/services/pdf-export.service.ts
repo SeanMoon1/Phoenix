@@ -3,6 +3,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { TrainingResultService } from './training-result.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as fontkit from 'fontkit';
 
 @Injectable()
 export class PdfExportService {
@@ -99,9 +100,13 @@ export class PdfExportService {
         // 빈 PDF 파일 생성
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
+
+        // fontkit 등록
+        (PDFDocument as any).registerFontkit(fontkit);
+
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        page.drawText('팀 훈련 결과가 없습니다.', {
+        page.drawText('No training results found.', {
           x: 50,
           y: 750,
           size: 16,
@@ -116,6 +121,9 @@ export class PdfExportService {
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
       const { width, height } = page.getSize();
+
+      // fontkit 등록
+      (PDFDocument as any).registerFontkit(fontkit);
 
       // 한글 지원 폰트 로드 (시스템 폰트 사용)
       let font,
@@ -346,16 +354,20 @@ export class PdfExportService {
         console.log('에러 발생, 빈 PDF 파일 생성 시도');
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([595.28, 841.89]); // A4 크기
+
+        // fontkit 등록
+        (PDFDocument as any).registerFontkit(fontkit);
+
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        page.drawText('PDF 생성 중 오류가 발생했습니다.', {
+        page.drawText('PDF generation error occurred.', {
           x: 50,
           y: 750,
           size: 16,
           font: font,
         });
 
-        page.drawText(`오류: ${error.message}`, {
+        page.drawText(`Error: ${error.message}`, {
           x: 50,
           y: 720,
           size: 12,

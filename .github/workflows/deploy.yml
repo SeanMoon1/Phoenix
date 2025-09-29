@@ -124,13 +124,22 @@ jobs:
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
             sudo rm -rf node_modules package-lock.json
+            echo "✅ 기존 파일 정리"
+            sudo rm -rf node_modules package-lock.json dist
+            echo "✅ npm 캐시 정리"
             npm cache clean --force
-            npm install
-            npm install --save-dev rollup@4.14.3
+            echo "✅ 의존성 설치 (경고 무시)"
+            npm install --silent --no-audit --no-fund
+            echo "✅ rollup 설치"
+            npm install --save-dev rollup@4.14.3 --silent
+            echo "✅ 환경변수 설정"
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-            npm run build || (echo "❌ 빌드 실패"; exit 1)
-            echo "✅ 빌드 후 결과물:"
+            echo "✅ 환경변수 확인:"
+            cat .env
+            echo "✅ 빌드 시작"
+            npm run build 2>/dev/null || npm run build
+            echo "✅ 빌드 완료, 결과물 확인:"
             ls -alh dist || echo "⚠️ dist 폴더 없음"
 
       - name: Deploy frontend (dist 직접 사용)

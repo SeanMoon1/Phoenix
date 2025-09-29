@@ -71,6 +71,15 @@ const AdminPage: React.FC = () => {
     useState('');
   const [creatingScenario, setCreatingScenario] = useState(false);
 
+  // 훈련 타입 생성 관련 상태
+  const [showCreateTrainingTypeModal, setShowCreateTrainingTypeModal] =
+    useState(false);
+  const [newTrainingTypeName, setNewTrainingTypeName] = useState('');
+  const [newTrainingTypeDescription, setNewTrainingTypeDescription] =
+    useState('');
+  const [newTrainingTypeCategory, setNewTrainingTypeCategory] = useState('');
+  const [creatingTrainingType, setCreatingTrainingType] = useState(false);
+
   // 사용자 관리 관련 상태
   const [users, setUsers] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
@@ -465,6 +474,59 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  // 훈련 타입 생성
+  const createTrainingType = async () => {
+    if (!newTrainingTypeName.trim()) {
+      alert('훈련 타입 이름을 입력해주세요.');
+      return;
+    }
+
+    if (!newTrainingTypeCategory.trim()) {
+      alert('훈련 카테고리를 입력해주세요.');
+      return;
+    }
+
+    setCreatingTrainingType(true);
+    try {
+      // 훈련 타입 코드 자동 생성 (예: TRAIN_20241223_001)
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+      const trainingTypeCode = `TRAIN_${dateStr}_001`;
+
+      // 임시로 로컬 스토리지에 저장 (실제 API 연동 시 수정 필요)
+      const newTrainingType = {
+        id: Date.now(),
+        code: trainingTypeCode,
+        name: newTrainingTypeName,
+        description: newTrainingTypeDescription,
+        category: newTrainingTypeCategory,
+        createdAt: new Date().toISOString(),
+        createdBy: user?.id || 1,
+      };
+
+      // 로컬 스토리지에서 기존 훈련 타입 목록 가져오기
+      const existingTypes = JSON.parse(
+        localStorage.getItem('trainingTypes') || '[]'
+      );
+      existingTypes.push(newTrainingType);
+      localStorage.setItem('trainingTypes', JSON.stringify(existingTypes));
+
+      alert('새로운 훈련 타입이 성공적으로 생성되었습니다!');
+      setShowCreateTrainingTypeModal(false);
+      setNewTrainingTypeName('');
+      setNewTrainingTypeDescription('');
+      setNewTrainingTypeCategory('');
+
+      // 통계 새로고침
+      loadMemberStats();
+    } catch (error) {
+      console.error('훈련 타입 생성 실패:', error);
+      alert('훈련 타입 생성 중 오류가 발생했습니다.');
+    } finally {
+      setCreatingTrainingType(false);
+    }
+  };
+
   // 사용자 관리 함수들
   const loadTeams = async () => {
     try {
@@ -696,11 +758,8 @@ const AdminPage: React.FC = () => {
                     </Button>
 
                     <Button
-                      onClick={() => {
-                        // TODO: 새로운 훈련 타입 생성 모달 열기
-                        alert('새로운 훈련 타입 생성 기능은 개발 중입니다.');
-                      }}
-                      className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      onClick={() => setShowCreateTrainingTypeModal(true)}
+                      className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                     >
                       <FaBullseye className="w-4 h-4 mr-2" />새 훈련 타입 생성
                     </Button>
@@ -1580,6 +1639,80 @@ const AdminPage: React.FC = () => {
                   className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   {creatingScenario ? '생성 중...' : '생성'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 훈련 타입 생성 모달 */}
+        {showCreateTrainingTypeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                새 훈련 타입 생성
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    훈련 타입 이름 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTrainingTypeName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewTrainingTypeName(e.target.value)
+                    }
+                    placeholder="훈련 타입 이름을 입력하세요"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    훈련 설명
+                  </label>
+                  <textarea
+                    value={newTrainingTypeDescription}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setNewTrainingTypeDescription(e.target.value)
+                    }
+                    placeholder="훈련에 대한 설명을 입력하세요 (선택사항)"
+                    rows={3}
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    훈련 카테고리 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTrainingTypeCategory}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewTrainingTypeCategory(e.target.value)
+                    }
+                    placeholder="훈련 카테고리를 직접 입력하세요 (예: 화재 대응, 지진 대응, 응급처치 등)"
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  onClick={() => setShowCreateTrainingTypeModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                >
+                  취소
+                </Button>
+                <Button
+                  onClick={createTrainingType}
+                  disabled={creatingTrainingType}
+                  className="px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                >
+                  {creatingTrainingType ? '생성 중...' : '생성'}
                 </Button>
               </div>
             </div>

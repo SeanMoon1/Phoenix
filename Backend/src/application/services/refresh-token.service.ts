@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MemoryAuthService } from './memory-auth.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RefreshTokenService {
+  private refreshTokens = new Map<
+    number,
+    { token: string; expiresAt: number }
+  >();
+
   constructor(
     private readonly jwtService: JwtService,
-    private readonly memoryAuthService: MemoryAuthService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -28,12 +31,11 @@ export class RefreshTokenService {
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     // 메모리에 Refresh Token 저장 (7일)
-    await this.memoryAuthService.setRefreshToken(
-      userId,
-      refreshToken,
-      loginId,
-      7 * 24 * 60 * 60, // 7일
-    );
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7일 후
+    this.refreshTokens.set(userId, { token: refreshToken, expiresAt });
+
+    // 만료된 토큰 정리
+    this.cleanExpiredTokens();
 
     console.log(`🔄 Refresh Token 생성: ${userId}`);
     return refreshToken;
@@ -90,10 +92,14 @@ export class RefreshTokenService {
       }
 
       // 메모리에서 Refresh Token 확인
-      const storedToken = await this.memoryAuthService.getRefreshToken(
-        decoded.sub,
-      );
-      if (!storedToken || storedToken !== refreshToken) {
+      const storedTokenData = this.refreshTokens.get(decoded.sub);
+      if (!storedTokenData || storedTokenData.token !== refreshToken) {
+        return { valid: false };
+      }
+
+      // 만료 시간 확인
+      if (Date.now() > storedTokenData.expiresAt) {
+        this.refreshTokens.delete(decoded.sub);
         return { valid: false };
       }
 
@@ -114,7 +120,7 @@ export class RefreshTokenService {
    */
   async invalidateRefreshToken(userId: number): Promise<void> {
     try {
-      await this.memoryAuthService.deleteRefreshToken(userId);
+      this.refreshTokens.delete(userId);
       console.log(`🚫 Refresh Token 무효화: ${userId}`);
     } catch (error) {
       console.error('❌ Refresh Token 무효화 실패:', error);
@@ -156,5 +162,17 @@ export class RefreshTokenService {
       refreshToken,
       expiresIn: 15 * 60, // 15분 (초 단위)
     };
+  }
+
+  /**
+   * 만료된 토큰 정리
+   */
+  private cleanExpiredTokens(): void {
+    const now = Date.now();
+    for (const [userId, tokenData] of this.refreshTokens.entries()) {
+      if (now > tokenData.expiresAt) {
+        this.refreshTokens.delete(userId);
+      }
+    }
   }
 }

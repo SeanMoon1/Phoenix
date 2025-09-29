@@ -110,7 +110,7 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             echo "✅ 기존 Frontend 삭제"
-            rm -rf /home/ubuntu/apps/Phoenix
+            sudo rm -rf /home/ubuntu/apps/Phoenix
             cd /home/ubuntu/apps
             echo "✅ Git clone 실행"
             git clone -b main https://github.com/${{ github.repository }} Phoenix
@@ -123,20 +123,22 @@ jobs:
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
             cd /home/ubuntu/apps/Phoenix/Frontend
+            sudo rm -rf node_modules package-lock.json
+            npm cache clean --force
             npm install
+            npm install --save-dev rollup@4.14.3
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" > .env
             echo "VITE_SCENARIO_DATA_SOURCE=${{ secrets.VITE_SCENARIO_DATA_SOURCE }}" >> .env
-            npm run build
+            npm run build || (echo "❌ 빌드 실패"; exit 1)
             echo "✅ 빌드 후 결과물:"
-            ls -alh dist || true
+            ls -alh dist || echo "⚠️ dist 폴더 없음"
 
-      # ✅ Nginx reload (phoenix-frontend.conf는 dist를 root로 사용)
-      - name: Reload nginx
+      - name: Deploy frontend (dist 직접 사용)
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FRONT_HOST }}
           username: ${{ secrets.FRONT_USER }}
           key: ${{ secrets.FRONT_SSH_KEY }}
           script: |
-            echo "✅ Nginx reload"
+            echo "✅ Nginx reload (dist 직접 사용)"
             sudo systemctl reload nginx
